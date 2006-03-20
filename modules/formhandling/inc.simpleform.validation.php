@@ -1,0 +1,100 @@
+<?php
+	/*
+	*	Project: SWISDK 2
+	*	Author: Matthias Kestenholz < mk@irregular.ch >
+	*	Copyright (c) 2005, ProjectPflanzschulstrasse
+	*	Distributed under the GNU Lesser General Public License.
+	*	Read the entire license text here: http://www.gnu.org/licenses/lgpl.html
+	*/
+
+	class Swisdk_SimpleForm_Validation {
+		public static function create($rule)
+		{
+			if(isset(Swisdk_SimpleForm_Validation::$rules[$rule])) {
+				return new Swisdk_SimpleForm_Validation::$rules[$rule];
+			}
+			
+			die('Swisdk_SimpleForm_Validation: "' . $rule . '" rule unknown');
+			return null;
+		}
+		
+		protected static $rules = array(
+			'required' => 'Swisdk_SimpleForm_Validation_RequiredRule',
+			'numeric' => 'Swisdk_SimpleForm_Validation_NumericRule',
+			'maxlength' => 'Swisdk_SimpleForm_Validation_MaxLengthRule',
+			'minlength' => 'Swisdk_SimpleForm_Validation_MinLengthRule',
+			'regex' => 'Swisdk_SimpleForm_Validation_RegexRule',
+			'email' => 'Swisdk_SimpleForm_Validation_EmailRule',
+			'callback' => 'Swisdk_SimpleForm_Validation_CallbackRule'
+		);
+	}
+
+	interface Swisdk_SimpleForm_Validation_Rule {
+		public function is_valid(Swisdk_SimpleForm_Entry &$entry, &$args=null);
+	}
+	
+	class Swisdk_SimpleForm_Validation_RequiredRule implements Swisdk_SimpleForm_Validation_Rule {
+		public function is_valid(Swisdk_SimpleForm_Entry &$entry, &$args=null)
+		{
+			/*unused*/$args;
+			return $entry->get_entry()->get_value()!='';
+		}
+	}
+	
+	class Swisdk_SimpleForm_Validation_NumericRule implements Swisdk_SimpleForm_Validation_Rule {
+		public function is_valid(Swisdk_SimpleForm_Entry &$entry, &$args=null)
+		{
+			/*unused*/$args;
+			return is_numeric($entry->get_entry()->get_value());
+		}
+	}
+	
+	class Swisdk_SimpleForm_Validation_MaxLengthRule implements Swisdk_SimpleForm_Validation_Rule {
+		public function is_valid(Swisdk_SimpleForm_Entry &$entry, &$args=null)
+		{
+			return strlen($entry->get_entry()->get_value())<=$args;
+		}
+	}
+	
+	class Swisdk_SimpleForm_Validation_MinLengthRule implements Swisdk_SimpleForm_Validation_Rule {
+		public function is_valid(Swisdk_SimpleForm_Entry &$entry, &$args=null)
+		{
+			return strlen($entry->get_entry()->get_value())>=$args;
+		}
+	}
+	
+	class Swisdk_SimpleForm_Validation_RegexRule implements Swisdk_SimpleForm_Validation_Rule {
+		public function is_valid(Swisdk_SimpleForm_Entry &$entry, &$args=null)
+		{
+			return preg_match($args, $entry->get_entry()->get_value())!=0;
+		}
+	}
+	
+	class Swisdk_SimpleForm_Validation_EmailRule implements Swisdk_SimpleForm_Validation_Rule {
+		public function is_valid(Swisdk_SimpleForm_Entry &$entry, &$args=null)
+		{
+			/*unused*/$args;
+			
+			// uh...  copied from QuickForm email validation rule
+			$regex = '/^((\"[^\"\f\n\r\t\v\b]+\")|([\w\!\#\$\%\&\'\*\+\-\~\/\^\`\|\{\}]+(\.'
+					. '[\w\!\#\$\%\&\'\*\+\-\~\/\^\`\|\{\}]+)*))@((\[(((25[0-5])|(2[0-4][0-9])'
+					. '|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.'
+					. '((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])'
+					. '|([0-1]?[0-9]?[0-9])))\])|(((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))'
+					. '\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])'
+					. '|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9])))|'
+					. '((([A-Za-z0-9\-])+\.)+[A-Za-z\-]+))$/';
+			//$regex = '/.*@.*\..*/';
+
+			return preg_match($regex, $entry->get_entry()->get_value())!=0;
+		}
+	}
+	
+	class Swisdk_SimpleForm_Validation_CallbackRule implements Swisdk_SimpleForm_Validation_Rule {
+		public function is_valid(Swisdk_SimpleForm_Entry &$entry, &$args=null)
+		{
+			return $args($entry->get_entry()->get_value());
+		}
+	}
+	
+?>
