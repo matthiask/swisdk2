@@ -14,6 +14,7 @@
 			$this->types = array(
 				'hidden' => 'Swisdk_SimpleForm_HiddenEntry',
 				'text' => 'Swisdk_SimpleForm_TextEntry',
+				'textarea' => 'Swisdk_SimpleForm_TextareaEntry',
 				'password' => 'Swisdk_SimpleForm_PasswordEntry',
 				'checkbox' => 'Swisdk_SimpleForm_CheckBox',
 				'combobox' => 'Swisdk_SimpleForm_ComboBox',

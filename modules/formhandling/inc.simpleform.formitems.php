@@ -97,6 +97,15 @@
 			$this->add_grid_default();
 		}
 	}
+
+	class Swisdk_SimpleForm_TextareaEntry extends Swisdk_SimpleForm_Entry {
+		public function __construct(&$grid, $name, $label, $value/*, $args*/)
+		{
+			$this->entry = new Swisdk_Form_TextareaEntry($name, $value);
+			parent::__construct($grid, $name, $label);
+			$this->add_grid_default();
+		}
+	}
 	
 	class Swisdk_SimpleForm_PasswordEntry extends Swisdk_SimpleForm_Entry {
 		public function __construct(&$grid, $name, $label, $value/*, $args*/)

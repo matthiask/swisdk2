@@ -90,6 +90,13 @@
 			return parent::helper_get_html('text');
 		}
 	}
+
+	class Swisdk_Form_TextareaEntry extends Swisdk_Form_InputEntry {
+		public function get_html()
+		{
+			return '<textarea id="' . $this->get_name() . '" name="' . $this->get_name() . '">' . $this->get_value() . '</textarea>';
+		}
+	}
 	
 	class Swisdk_Form_HiddenEntry extends Swisdk_Form_InputEntry {
 		public function get_html()
