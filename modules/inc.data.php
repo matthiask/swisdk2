@@ -595,6 +595,9 @@
 		protected $limit = '';
 		protected $joins = '';
 
+		protected $fulltext_fields = null;
+		protected $fulltext_search = null;
+
 		public function &object() { return $this->obj; }
 
 		/**
@@ -647,7 +650,8 @@
 		{
 			$dbh = DBObject::db();
 			$sql = 'SELECT * FROM ' . $this->obj->table() . $this->joins . $this->clause_sql
-				. ' ' . implode(',', $this->order_columns) . $this->limit;
+				. $this->_get_fulltext_clause()
+				. implode(',', $this->order_columns) . $this->limit;
 			$result = $dbh->query($sql);
 			if($dbh->errno)
 				SwisdkError::handle(new DBError("Database error: " . $dbh->error, $sql));
@@ -718,6 +722,36 @@
 		public function add_join($table, $clause)
 		{
 			$this->joins .= ' LEFT JOIN ' . $table . ' ON ' . $clause;
+		}
+
+		/**
+		 * Set fulltext search clause
+		 */
+		public function set_fulltext($clause=null)
+		{
+			$this->fulltext_search = $clause;
+			if($this->fulltext_fields===null) {
+				$this->fulltext_fields = array();
+				$rows = DBObject::db_get_array('SHOW COLUMNS FROM '.$this->obj->table());
+				foreach($rows as &$row) {
+					if(stripos($row['Type'], 'char')!==false
+						|| stripos($row['Type'], 'text')!==false)
+						$this->fulltext_fields[] = $row['Field'];
+				}
+			}
+		}
+
+		protected function _get_fulltext_clause()
+		{
+			if($this->fulltext_search && count($this->fulltext_fields)) {
+				
+				$sql = ' AND (';
+				$search = DBObject::db_escape($this->fulltext_search);
+				$sql .= implode(' LIKE \'%' . $search . '%\' OR ', $this->fulltext_fields);
+				$sql .= ' LIKE \'%' . $search . '%\')';
+				return $sql;
+			}
+			return ' ';
 		}
 
 		/**
