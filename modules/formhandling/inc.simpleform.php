@@ -18,6 +18,7 @@
 				'password' => 'Swisdk_SimpleForm_PasswordEntry',
 				'checkbox' => 'Swisdk_SimpleForm_CheckBox',
 				'combobox' => 'Swisdk_SimpleForm_ComboBox',
+				'multiselect' => 'Swisdk_SimpleForm_Multiselect',
 				'submit' => 'Swisdk_SimpleForm_SubmitButton'
 			);
 			
@@ -111,6 +112,9 @@
 		
 		public function is_valid()
 		{
+			// TODO really need something better here...
+			if(!count($_POST))
+				return false;
 			$valid = true;
 			foreach($this->container as &$item) {
 				if(!$item->is_valid()) {

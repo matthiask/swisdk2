@@ -133,6 +133,15 @@
 			$this->add_grid_default();
 		}
 	}
+
+	class Swisdk_SimpleForm_Multiselect extends Swisdk_SimpleForm_Entry {
+		public function __construct(&$grid, $name, $label, $value, $args)
+		{
+			$this->entry = new Swisdk_Form_Multiselect($name, $value, $args);
+			parent::__construct($grid, $name, $label);
+			$this->add_grid_default();
+		}
+	}
 	
 	class Swisdk_SimpleForm_SubmitButton extends Swisdk_SimpleForm_Entry {
 		public function __construct(&$grid, $name, $label, $value/*, $args*/)

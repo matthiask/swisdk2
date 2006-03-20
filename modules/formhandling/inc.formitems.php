@@ -136,6 +136,23 @@
 			return $html . '</select>';
 		}
 	}
+
+	class Swisdk_Form_Multiselect extends Swisdk_Form_ChoiceValue implements Swisdk_Layout_Item {
+		public function get_html()
+		{
+			$html = '<select multiple="multiple" id="' . $this->get_name() . '" name="' . $this->get_name() . '">';
+			if(count($this->choices)) {
+				$value_ = $this->get_value();
+				foreach($this->choices as $value => &$description) {
+					$html .= '<option ';
+					if($value==$value_)
+						$html .= 'selected="selected" ';
+					$html .= 'value="' . $value . '">' . $description . '</option>';
+				}
+			}
+			return $html . '</select>';
+		}
+	}
 	
 	class Swisdk_Form_SubmitButton extends Swisdk_Form_Value implements Swisdk_Layout_Item {
 		public function get_html()
