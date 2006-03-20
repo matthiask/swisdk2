@@ -204,7 +204,12 @@
 		public function name($tok)	{ return $this->prefix . $tok; }
 		public function shortname($tok)	{ return str_replace($this->prefix,'',$tok); }
 		public function _class()	{ return $this->class; }
-		public function _relations()	{ return DBObject::$relations[$this->class]; }
+		public function _relations()
+		{
+			if(isset(DBObject::$relations[$this->class]))
+				return DBObject::$relations[$this->class];
+			return array();
+		}
 
 		/**
 		 * main DB handle (holds the mysqli instance in the current version of DBObject)
@@ -571,6 +576,17 @@
 		public function __set($var, $value)
 		{
 			return ($this->data[$this->name($var)] = $value);
+		}
+
+		public function __isset($var)
+		{
+			// TODO I could also use the field list here
+			return isset($this->data[$this->name($var)]);
+		}
+
+		public function __unset($var)
+		{
+			unset($this->data[$this->name($var)]);
 		}
 
 		/**
