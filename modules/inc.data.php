@@ -18,9 +18,100 @@
 	 *
 	 * Its main functionality does not depend on other SWISDK packages. For now,
 	 * it only uses SwisdkError::handle for error conditions.
-	 *
-	 * There is a long and commented example at the bottom of this file.
 	 */
+
+	/**
+	 * Examples are worth more than thousand words
+	 * 
+	 *
+	
+	minimal example:
+	***********************************************************************
+
+	// CREATE TABLE tbl_news (
+	// 	news_id INT NOT NULL AUTO_INCREMENT,
+	// 	news_title VARCHAR(255),
+	// 	news_text TEXT,
+	// 	PRIMARY KEY(news_id));
+	// 
+
+	// [...]
+
+	//
+	// This is already sufficient to display a news listing with the intro
+	// and a separate view which features the whole news text.
+	// 
+	
+	$id = intval($_GET['id']);
+	if($id && ($do = DBObject::find('News', $id))) {
+		// ID was valid
+		display_news_entry($do->data());
+	} else {
+		$container = DBOContainer::find('News');
+		foreach($container as &$obj) {
+			display_news_entry_listing($obj->data());
+		}
+	}
+
+	function display_news_entry_listing($data)
+	{
+		echo '<h2><a href="?id="' . $data['news_id'] . '">'
+			. $data['news_title'] . '</a></h2>';
+		echo '<p>' . $data['news_intro'] . '</p>';
+	}
+
+	function display_news_entry($data)
+	{
+		echo '<h2>' . $data['news_title'] . '</h2>';
+		echo '<p>' . $data['news_intro'] . '</p>';
+		echo '<p>' . $data['news_text'] . '</p>';
+	}
+
+	// [...]
+
+
+
+	This example demonstrates how you can manipulate the database through
+	the DBObject
+	***********************************************************************
+
+	// get user with ID 2
+	$user = DBObject::find('User', 2);
+	// change email address ...
+	$user->email = 'mk@irregular.ch';
+	// and store the changed record
+	$user->store();
+
+	print_r($user->data());;
+
+	// change the same record using a different DBObject (no locking
+	// of DB records!)
+	$blah = DBObject::find('User', 2);
+	$blah->email = 'matthias@spinlock.ch';
+	$blah->store();
+	
+	// verify that the modification has not changed our original DBObject,
+	// but that we can get the modifications by refresh()ing our first object
+	print_r($user->data());
+	$user->refresh();
+	print_r($user->data());
+
+	// insert a new record into the database
+	$obj = DBObject::create('User');
+	$obj->login = 'alkdjkjhsa';
+	$obj->name = 'suppe';
+	$obj->forename = 'kuerbis';
+	$obj->email = 'kuerbis@example.com';
+	$obj->password = md5('testpassword');
+	$obj->insert();
+
+
+
+	You should also have a look at the relations example below!
+	***********************************************************************
+
+	*/
+
 
 	class DBObject implements Iterator {
 
@@ -64,11 +155,127 @@
 		protected static $dbhandle = null;
 
 		/**
-		 * This array describes the relations with other tables
-		 *
-		 * TODO: add description of relation table
+		 * Static relations table
 		 */
-		protected $relations = array();
+		private static $relations = array();
+
+		/**
+		 * Use the following three functions to define the relations between your
+		 * DBObjects
+		 *
+		 * Examples for an image collection:
+		 *
+		 * Every picture has exactly one author, but the author might have made
+		 * multiple pictures. The following two statements express the described
+		 * relation (Note: you only need to use one possibility)
+		 *
+		 * DBObject::belongs_to('Picture', 'Author');
+		 * DBObject::has_many('Author', 'Picture');
+		 *
+		 * The corresponding CREATE TABLE commands for MySQL would be:
+		 * 
+		 * CREATE TABLE tbl_author (
+		 * 	author_id INT NOT NULL AUTO_INCREMENT,
+		 * 	author_name VARCHAR(255),
+		 * 	PRIMARY KEY(author_id));
+		 *
+		 * CREATE TABLE tbl_picture (
+		 * 	picture_id INT NOT NULL AUTO_INCREMENT,
+		 * 	picture_author_id INT,
+		 * 	picture_filename VARCHAR(255)
+		 * 	PRIMARY KEY(picture_id));
+		 *
+		 * There are multiple categories (People, Events, Places...). Every picture
+		 * may have 0-n categories:
+		 *
+		 * DBObject::n_to_m('Picture', 'Category');
+		 *
+		 * CREATE TABLE tbl_category (
+		 * 	category_id INT NOT NULL AUTO_INCREMENT,
+		 * 	category_title VARCHAR(255)
+		 * 	PRIMARY KEY(category_id));
+		 *
+		 * CREATE TABLE tbl_picture_to_category (
+		 * 	picture_id INT,
+		 * 	category_id INT);
+		 *
+		 * You must pass the two classes to DBObject::n_to_m() in the same order as
+		 * in the table name.
+		 *
+		 * Complete code example (That's right, you don't need to explicitly derive
+		 * the Author, Picture and Category classes):
+		 *
+		 * DBObject::belongs_to('Picture', 'Author');
+		 * DBObject::n_to_m('Picture', 'Category');
+		 *
+		 * // get author ID 42 from database
+		 * $author = DBObject::create('Author', 42);
+		 *
+		 * // get all pictures that he made
+		 * $pictures = $author->get_related('Picture');
+		 *
+		 * // loop over all pictures and get their categories
+		 * foreach($pictures as &$picture) {
+		 * 	$categories = $picture->get_related('Category');
+		 * 	// [...] do something with it, display a gallery or whatever
+		 * }
+		 * 
+		 */
+		public static function belongs_to($c1, $c2, $options = array())
+		{
+			$o1 = DBObject::create($c1);
+			$o2 = DBObject::create($c2);
+			$key = $o1->name($o2->name('id'));
+
+			DBObject::$relations[$c1][$c2] =
+				array('type' => DB_REL_SINGLE, 'foreign_id_key' => $key);
+			DBObject::$relations[$c2][$c1] =
+				array('type' => DB_REL_MANY, 'foreign_id_key' => $key);
+		}
+
+		public static function has_many($c1, $c2, $options = array())
+		{
+			DBObject::belongs_to($c2, $c1, $options);
+		}
+
+		public static function n_to_m($c1, $c2, $options = array())
+		{
+			$o1 = DBObject::create($c1);
+			$o2 = DBObject::create($c2);
+
+			$table = 'tbl_'.$o1->name('to_'.$o2->name(''));
+			$table = substr($table, 0, strlen($table)-1);
+
+			DBObject::$relations[$c1][$c2] = array(
+				'type' => DB_REL_MANYTOMANY, 'link' => $table,
+				'join' => $o2->table().'.'.$o2->primary().'='.$table.'.'.$o2->primary()
+			);
+			DBObject::$relations[$c2][$c1] = array(
+				'type' => DB_REL_MANYTOMANY, 'link' => $table,
+				'join' => $o1->table().'.'.$o1->primary().'='.$table.'.'.$o1->primary()
+			);
+		}
+
+		public function get_related($class)
+		{
+			$rel =& DBObject::$relations[$this->class][$class];
+			switch($rel['type']) {
+				case DB_REL_SINGLE:
+					return DBObject::find($class, $this->data[$rel['foreign_id_key']]);
+				case DB_REL_MANY:
+					$container = DBOContainer::create($class);
+					$container->add_clause($rel['foreign_id_key'].'=',
+						$this->id());
+					$container->init();
+					return $container;
+				case DB_REL_MANYTOMANY:
+					$container = DBOContainer::create($class);
+					$container->add_join($rel['link'], $rel['join']);
+					$container->add_clause($rel['link'].'.'.$this->primary().'=', $this->id());
+					$container->init();
+					return $container;
+			}
+		}
 
 		/**
 		 * This would be the only important variable: All others are simply here to
@@ -125,10 +332,10 @@
 		 * 
 		 * Use this function or DBObject::find
 		 *
-		 * If you have no special needs (relations, DB not implementing
-		 * my naming scheme) you don't even need to explicitly derive your
-		 * own class from DBObject, instead you can simply pass the class
-		 * name to this function.
+		 * If you have no special needs (DB not implementing my naming scheme,
+		 * data validation and/or manipulation inside DBObject) you don't even
+		 * need to explicitly derive your own class from DBObject, instead you
+		 * can simply pass the class name to this function.
 		 */
 		public static function create($class)
 		{
@@ -359,131 +566,6 @@
 		}
 
 		/**
-		 * DB relations. The only part that's really hard to understand and
-		 * also the only part that is absolutely undocumented right now.
-		 *
-		 * TODO: add documentation. No, really!
-		 *
-		 * See also the long example at the bottom of this file
-		 */
-		public function &get_related($key, $reltype=DB_REL_UNSPECIFIED)
-		{
-			switch($reltype) {
-				case DB_REL_SINGLE:
-					return get_related_object($key);
-				case DB_REL_MANY:
-					return get_related_container($key);
-				case DB_REL_MANYTOMANY:
-					return get_related_container_many_to_many($key);
-				default:
-					die('DBObject::get_related: relation type unknown');
-			}
-		}
-
-		/**
-		 * helper function for all get_related_* functions. Finds the entry in
-		 * the relations table which describes how to fetch related objects
-		 * or containers.
-		 */
-		protected function find_rel_entry($key, $reltype=DB_REL_UNSPECIFIED)
-		{
-			if($reltype && ($rel =& $this->relations[$reltype])) {
-				if(array_key_exists($key, $rel)) {
-					return array($rel[$key], $key);
-				} else if(($k = array_search($key, $rel))!==false){
-					return array($key, $k);
-				}
-			} else {
-				foreach($this->relations as $reltype => &$rel) {
-					if(array_key_exists($key, $rel)) {
-						return array($rel[$key], $key);
-					} else if(($k = array_search($key, $rel))!==false){
-						return array($key, $k);
-					}
-				}
-			}
-
-			return array(null,null);
-		}
-
-		/**
-		 * Normally, you would use get_related(), not these helper functions. They are
-		 * publicly accessible anyway, if you know exactly what you need to do.
-		 */
-
-		/**
-		 * Return a single related object. This is mostly used on the N side of a
-		 * 1-N relation.
-		 *
-		 * Example:
-		 * Every pen in a classroom belongs to a pupil. If you have a Pen DBObject,
-		 * you would use this function to get its owner.
-		 *
-		 * $pen = DBObject::find('Pen', 42); // 42 being the unique ID of the key
-		 * $owner = $pen->get_related_object('Pupil');
-		 *
-		 * In terms of SQL fields, the relation would probably be expressed as follows:
-		 * tbl_pen:   (pen_id, pen_pupil_id, ... [further attributes of this pen])
-		 * tbl_pupil: (pupil_id, ... [further attributes of the pupil])
-		 */
-		public function &get_related_object($key)
-		{
-			list($class, $key) = $this->find_rel_entry($key, DB_REL_SINGLE);
-			if($class) {
-				return DBObject::find($class, $this->$key);
-			}
-			return null;
-		}
-
-		/**
-		 * Return a related container. This function may be seen as the opposite of
-		 * get_related_object()
-		 *
-		 * To use the pen-and-pupil-example again:
-		 *
-		 * $pupil = DBObject::find('Pupil', 13);
-		 * $pens = $pupil->get_related_container('Pen');
-		 *
-		 * $pens is now a DBOContainer holding all Pens that this Pupil owns.
-		 */
-		public function &get_related_container($key)
-		{
-			list($class, $key) = $this->find_rel_entry($key, DB_REL_MANY);
-			if($class) {
-				$obj = DBObject::create($class);
-				list(,$relkey) = $obj->find_rel_entry($this->class, DB_REL_SINGLE);
-
-				return DBOContainer::find($obj, array($relkey => $this->id()));
-			}
-		}
-
-		/**
-		 * Return the other side of a N-to-M relation.
-		 *
-		 * Example:
-		 * There are many different music styles and many different listeners. Every
-		 * music style is listened by 0-X people, and everyone listens to 0-Y music
-		 * styles.
-		 *
-		 * tbl_music_style: (music_style_id, music_style_name, ...)
-		 * tbl_listener:    (listener_id, listener_name, ...)
-		 * tbl_listener_to_music_style: (music_style_id, listener_id)
-		 *
-		 * It is not too nice that the user of the DBObject classes has to know whether
-		 * it is a N-to-M relation or a 1-to-N relation. He just wants to get a container
-		 * of related objects.
-		 * TODO: think about these last two sentences.
-		 */
-		public function &get_related_container_many_to_many($key)
-		{
-			list($class, $key) = $this->find_rel_entry($key, DB_REL_MANYTOMANY);
-			if($class) {
-				$obj = DBObject::create($class);
-				return DBOContainer::find_many_to_many($this, $class, array($key => $this->id()));
-			}
-		}
-		
-		/**
 		 * Iterator implementation (see PHP Object Iteration)
 		 */
 		public function rewind() { reset($this->data); }
@@ -516,6 +598,8 @@
 		protected $order_columns = array();
 		protected $limit = '';
 		protected $joins = '';
+
+		public function &object() { return $this->obj; }
 
 		/**
 		 * Use the code, luke!
@@ -556,26 +640,6 @@
 				$p = each($params);
 				$container->add_clause($container->obj->name($p[0]), $p[1]);
 			}
-			$container->init();
-			return $container;
-		}
-
-		/**
-		 * See DBObject::get_related_container_many_to_many()
-		 */
-		public static function &find_many_to_many($sourceobj, $class, $params)
-		{
-			$container = null;
-			$p = each($params);
-
-			if(is_string($class)) {
-				$container = new DBOContainer(DBObject::create($class));
-			} else {
-				$container = new DBOContainer($class);
-			}
-			$key = $container->obj->primary();
-			$container->add_join($p[0], $p[0] . '.' . $key . '=' . $container->obj->table() . '.' . $key);
-			$container->add_clause($p[0] . '.' . $sourceobj->primary() . '=', $p[1]);
 			$container->init();
 			return $container;
 		}
@@ -716,148 +780,5 @@
 		$str = '\''.$dbh->escape_string($str).'\'';
 	}
 
-	/*
-	 * Examples are worth more than thousand words:
-	 * 
-	 
-
-	minimal example:
-
-	// you do not even need to write out the News class
-	// for the example below. It is just a simple
-	// demonstration how you can automatize things
-	// by overriding member functions
-	//
-	// CREATE TABLE tbl_news (
-	// 	news_id INT NOT NULL AUTO_INCREMENT,
-	// 	news_title VARCHAR(255),
-	// 	news_text TEXT,
-	// 	PRIMARY KEY(news_id));
-	// 
-
-	// Class declaration
-	class News extends DBObject {
-		protected $class = __CLASS__; // necessary boilerplate if you override the class
-		public function insert()
-		{
-			$this->creation_dttm = time();
-			return parent::insert();
-		}
-	}
-
-	// Example usage
-
-	// [...]
-
-	$id = intval($_GET['id']);
-	if($id && ($do = DBObject::find('News', $id))) {
-		// ID was valid
-		display_news_entry($do->data());
-	} else {
-		$container = DBOContainer::find('News');
-		foreach($container as &$obj) {
-			display_news_entry($obj->data());
-		}
-	}
-
-	function display_news_entry($data)
-	{
-		echo '<h2>' . $data['news_title'] . '</h2>';
-		echo '<p>' . $data['news_text'] . '</p>';
-	}
-
-	// [...]
-
-
-
-
-
-	a somewhat longer and more extensive example:
-
-	class User extends DBObject {
-		protected $class = __CLASS__;
-		protected $table = 'tbl_users'; // naming scheme not consistent with DBObject rules
-	}
-
-	class Customer extends DBObject {
-		protected $class = __CLASS__;
-		
-		protected $relations = array(
-			DB_REL_SINGLE => array(
-				'seller' => 'User'
-			),
-			DB_REL_MANY => array(
-				'CustomerContact'
-			),
-			DB_REL_MANYTOMANY => array(
-				'tbl_customer_to_user' => 'User'
-			)
-		);
-	}
-
-	class CustomerContact extends DBObject {
-		protected $class = __CLASS__;
-
-		protected $relations = array(
-			DB_REL_SINGLE => array(
-				'customer_id' => 'Customer' // this sucks totally. Why do I have to write everything two times (for both objects)
-			)
-		);
-	}
-
-	// get customer contact with ID 40
-	$cc = DBObject::find('CustomerContact', 40);
-
-	// get customer
-	$customer = $cc->get_related_object('Customer');
-	
-	// get a list of all customer contacts. The customer with the ID 40
-	// is part of the list we got back.
-	$container = $customer->get_related_container('CustomerContact');
-
-	// now, get all consultants for this customer
-	$c2 = $customer->get_related_container_many_to_many('User');
-	echo "Kunde:\n";
-	print_r($customer->data());
-	echo "\nKontakte:\n";
-	print_r($c2->data());
-
-	// we have done no modifications, but do update() every DBObject anyway
-	// (see __call() for more informations about how this works)
-	$container->update();
-
-	// get user with ID 2
-	$user = DBObject::find('User', 2);
-
-	// change email address ...
-	$user->email = 'mk@irregular.ch';
-
-	// and store the changed record
-	$user->store();
-
-	print_r($user->data());;
-
-	// change the same record using a different DBObject (no locking
-	// of DB records!)
-	$blah = DBObject::find('User', 2);
-	$blah->email = 'matthias@spinlock.ch';
-	$blah->store();
-	
-	// verify that the modification has not changed our original DBObject,
-	// but that we can get the modifications by refresh()ing our first object
-	print_r($user->data());
-	$user->refresh();
-	print_r($user->data());
-
-	// insert a new record into the database
-	$obj = new User();
-
-	$obj->login = 'alkdjkjhsa';
-	$obj->name = 'suppe';
-	$obj->forename = 'kuerbis';
-	$obj->email = 'kuerbis@example.com';
-	$obj->insert();
-
-	*/
 
 ?>
