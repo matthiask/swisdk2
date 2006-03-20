@@ -217,80 +217,6 @@
 		protected static $dbhandle = null;
 
 		/**
-		 * Static relations table
-		 */
-		private static $relations = array();
-
-		/**
-		 * relation definition functions
-		 */
-		public static function belongs_to($c1, $c2, $options = array())
-		{
-			$o1 = DBObject::create($c1);
-			$o2 = DBObject::create($c2);
-			$key = $o2->name('id');
-			// avoid names such as item_item_priority_id
-			if(strpos($key, $o1->prefix)!==0)
-				$key = $o1->name($key);
-
-			DBObject::$relations[$c1][$c2] =
-				array('type' => DB_REL_SINGLE, 'field' => $key,
-					'class' => $c2);
-			DBObject::$relations[$c2][$c1] =
-				array('type' => DB_REL_MANY, 'field' => $key,
-					'class' => $c2);
-		}
-
-		public static function has_many($c1, $c2, $options = array())
-		{
-			DBObject::belongs_to($c2, $c1, $options);
-		}
-
-		public static function has_a($c1, $c2, $options = array())
-		{
-			DBObject::belongs_to($c1, $c2, $options);
-		}
-
-		public static function n_to_m($c1, $c2, $options = array())
-		{
-			$o1 = DBObject::create($c1);
-			$o2 = DBObject::create($c2);
-
-			$table = 'tbl_'.$o1->name('to_'.$o2->name(''));
-			$table = substr($table, 0, strlen($table)-1);
-
-			DBObject::$relations[$c1][$c2] = array(
-				'type' => DB_REL_MANYTOMANY, 'link' => $table,
-				'join' => $o2->table().'.'.$o2->primary().'='.$table.'.'.$o2->primary()
-			);
-			DBObject::$relations[$c2][$c1] = array(
-				'type' => DB_REL_MANYTOMANY, 'link' => $table,
-				'join' => $o1->table().'.'.$o1->primary().'='.$table.'.'.$o1->primary()
-			);
-		}
-
-		public function get_related($class)
-		{
-			$rel =& DBObject::$relations[$this->class][$class];
-			switch($rel['type']) {
-				case DB_REL_SINGLE:
-					return DBObject::find($class, $this->data[$rel['field']]);
-				case DB_REL_MANY:
-					$container = DBOContainer::create($class);
-					$container->add_clause($rel['field'].'=',
-						$this->id());
-					$container->init();
-					return $container;
-				case DB_REL_MANYTOMANY:
-					$container = DBOContainer::create($class);
-					$container->add_join($rel['link'], $rel['join']);
-					$container->add_clause($rel['link'].'.'.$this->primary().'=', $this->id());
-					$container->init();
-					return $container;
-			}
-		}
-
-		/**
 		 * This would be the only important variable: All others are simply here to
 		 * serve the data!
 		 */
@@ -456,6 +382,80 @@
 		}
 
 		/**
+		 * Static relations table
+		 */
+		private static $relations = array();
+
+		/**
+		 * relation definition functions
+		 */
+		public static function belongs_to($c1, $c2, $options = array())
+		{
+			$o1 = DBObject::create($c1);
+			$o2 = DBObject::create($c2);
+			$key = $o2->name('id');
+			// avoid names such as item_item_priority_id
+			if(strpos($key, $o1->prefix)!==0)
+				$key = $o1->name($key);
+
+			DBObject::$relations[$c1][$c2] =
+				array('type' => DB_REL_SINGLE, 'field' => $key,
+					'class' => $c2);
+			DBObject::$relations[$c2][$c1] =
+				array('type' => DB_REL_MANY, 'field' => $key,
+					'class' => $c2);
+		}
+
+		public static function has_many($c1, $c2, $options = array())
+		{
+			DBObject::belongs_to($c2, $c1, $options);
+		}
+
+		public static function has_a($c1, $c2, $options = array())
+		{
+			DBObject::belongs_to($c1, $c2, $options);
+		}
+
+		public static function n_to_m($c1, $c2, $options = array())
+		{
+			$o1 = DBObject::create($c1);
+			$o2 = DBObject::create($c2);
+
+			$table = 'tbl_'.$o1->name('to_'.$o2->name(''));
+			$table = substr($table, 0, strlen($table)-1);
+
+			DBObject::$relations[$c1][$c2] = array(
+				'type' => DB_REL_MANYTOMANY, 'link' => $table,
+				'join' => $o2->table().'.'.$o2->primary().'='.$table.'.'.$o2->primary()
+			);
+			DBObject::$relations[$c2][$c1] = array(
+				'type' => DB_REL_MANYTOMANY, 'link' => $table,
+				'join' => $o1->table().'.'.$o1->primary().'='.$table.'.'.$o1->primary()
+			);
+		}
+
+		public function get_related($class)
+		{
+			$rel =& DBObject::$relations[$this->class][$class];
+			switch($rel['type']) {
+				case DB_REL_SINGLE:
+					return DBObject::find($class, $this->data[$rel['field']]);
+				case DB_REL_MANY:
+					$container = DBOContainer::create($class);
+					$container->add_clause($rel['field'].'=',
+						$this->id());
+					$container->init();
+					return $container;
+				case DB_REL_MANYTOMANY:
+					$container = DBOContainer::create($class);
+					$container->add_join($rel['link'], $rel['join']);
+					$container->add_clause($rel['link'].'.'.$this->primary().'=', $this->id());
+					$container->init();
+					return $container;
+			}
+		}
+
+		/**
 		 * Use the following functions if you need raw DB access or if the DBObject
 		 * interface would be to cumbersome to do what you need to do.
 		 */
@@ -587,6 +587,19 @@
 		public function __unset($var)
 		{
 			unset($this->data[$this->name($var)]);
+		}
+
+		/**
+		 * if you really want to use the long names...
+		 */
+		public function get($var)
+		{
+			return $this->data[$var];
+		}
+
+		public function set($var, $value)
+		{
+			$this->data[$var] = $value;
 		}
 
 		/**
