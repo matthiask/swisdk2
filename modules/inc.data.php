@@ -202,7 +202,9 @@
 		public function table()		{ return $this->table; }
 		public function primary()	{ return $this->primary; }
 		public function name($tok)	{ return $this->prefix . $tok; }
+		public function shortname($tok)	{ return str_replace($this->prefix,'',$tok); }
 		public function _class()	{ return $this->class; }
+		public function _relations()	{ return DBObject::$relations[$this->class]; }
 
 		/**
 		 * main DB handle (holds the mysqli instance in the current version of DBObject)
@@ -221,17 +223,27 @@
 		{
 			$o1 = DBObject::create($c1);
 			$o2 = DBObject::create($c2);
-			$key = $o1->name($o2->name('id'));
+			$key = $o2->name('id');
+			// avoid names such as item_item_priority_id
+			if(strpos($key, $o1->prefix)!==0)
+				$key = $o1->name($key);
 
 			DBObject::$relations[$c1][$c2] =
-				array('type' => DB_REL_SINGLE, 'foreign_id_key' => $key);
+				array('type' => DB_REL_SINGLE, 'field' => $key,
+					'class' => $c2);
 			DBObject::$relations[$c2][$c1] =
-				array('type' => DB_REL_MANY, 'foreign_id_key' => $key);
+				array('type' => DB_REL_MANY, 'field' => $key,
+					'class' => $c2);
 		}
 
 		public static function has_many($c1, $c2, $options = array())
 		{
 			DBObject::belongs_to($c2, $c1, $options);
+		}
+
+		public static function has_a($c1, $c2, $options = array())
+		{
+			DBObject::belongs_to($c1, $c2, $options);
 		}
 
 		public static function n_to_m($c1, $c2, $options = array())
@@ -257,10 +269,10 @@
 			$rel =& DBObject::$relations[$this->class][$class];
 			switch($rel['type']) {
 				case DB_REL_SINGLE:
-					return DBObject::find($class, $this->data[$rel['foreign_id_key']]);
+					return DBObject::find($class, $this->data[$rel['field']]);
 				case DB_REL_MANY:
 					$container = DBOContainer::create($class);
-					$container->add_clause($rel['foreign_id_key'].'=',
+					$container->add_clause($rel['field'].'=',
 						$this->id());
 					$container->init();
 					return $container;
@@ -400,7 +412,7 @@
 		public function update()
 		{
 			DBObject::db_query('UPDATE ' . $this->table . ' SET '
-				. $this->_get_vals_sql() . ' WHERE '
+				. $this->_vals_sql() . ' WHERE '
 				. $this->primary . '=' . $this->id());
 		}
 
@@ -411,7 +423,7 @@
 		{
 			unset($this->data[$this->primary]);
 			DBObject::db_query('INSERT INTO ' . $this->table
-				. ' SET ' . $this->_get_vals_sql());
+				. ' SET ' . $this->_vals_sql());
 		}
 
 		/**
@@ -419,7 +431,7 @@
 		 * of SQL injections by properly escaping every string that hits the
 		 * database.
 		 */
-		private function _get_vals_sql()
+		private function _vals_sql()
 		{
 			$dbh = DBObject::db();
 			$vals = array();
@@ -569,6 +581,37 @@
 		public function key() { return key($this->data); }
 		public function next() { return next($this->data); }
 		public function valid() { return $this->current() !== false; }
+
+		/**
+		 * Various helpers
+		 */
+
+		protected static $fulltext_fields = array();
+		protected static $field_list = array();
+
+		public function &_fulltext_fields()
+		{
+			if(!isset(DBObject::$fulltext_fields[$this->class])) {
+				DBObject::$fulltext_fields[$this->class] = array();
+				$rows = $this->_field_list();
+				foreach($rows as &$row) {
+					if(stripos($row['Type'], 'char')!==false
+						|| stripos($row['Type'], 'text')!==false)
+						DBObject::$fulltext_fields[$this->class][] =
+							$row['Field'];
+				}
+			}
+			return DBObject::$fulltext_fields[$this->class];
+		}
+		
+		public function &_field_list()
+		{
+			if(!isset(DBObject::$field_list[$this->class])) {
+				$rows = DBObject::db_get_array('SHOW COLUMNS FROM '.$this->table());
+				DBObject::$field_list[$this->class] = $rows;
+			}
+			return DBObject::$field_list[$this->class];
+		}
 	}
 
 	class DBOContainer implements Iterator,ArrayAccess {
@@ -595,7 +638,6 @@
 		protected $limit = '';
 		protected $joins = '';
 
-		protected $fulltext_fields = null;
 		protected $fulltext_search = null;
 
 		public function &object() { return $this->obj; }
@@ -650,7 +692,7 @@
 		{
 			$dbh = DBObject::db();
 			$sql = 'SELECT * FROM ' . $this->obj->table() . $this->joins . $this->clause_sql
-				. $this->_get_fulltext_clause()
+				. $this->_fulltext_clause()
 				. implode(',', $this->order_columns) . $this->limit;
 			$result = $dbh->query($sql);
 			if($dbh->errno)
@@ -730,24 +772,16 @@
 		public function set_fulltext($clause=null)
 		{
 			$this->fulltext_search = $clause;
-			if($this->fulltext_fields===null) {
-				$this->fulltext_fields = array();
-				$rows = DBObject::db_get_array('SHOW COLUMNS FROM '.$this->obj->table());
-				foreach($rows as &$row) {
-					if(stripos($row['Type'], 'char')!==false
-						|| stripos($row['Type'], 'text')!==false)
-						$this->fulltext_fields[] = $row['Field'];
-				}
-			}
 		}
 
-		protected function _get_fulltext_clause()
+		protected function _fulltext_clause()
 		{
-			if($this->fulltext_search && count($this->fulltext_fields)) {
+			if($this->fulltext_search
+				&& count($fields = $this->obj->_fulltext_fields())) {
 				
 				$sql = ' AND (';
 				$search = DBObject::db_escape($this->fulltext_search);
-				$sql .= implode(' LIKE \'%' . $search . '%\' OR ', $this->fulltext_fields);
+				$sql .= implode(' LIKE \'%' . $search . '%\' OR ', $fields);
 				$sql .= ' LIKE \'%' . $search . '%\')';
 				return $sql;
 			}
