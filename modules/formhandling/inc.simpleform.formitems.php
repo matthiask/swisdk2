@@ -6,7 +6,7 @@
 	*/
 
 	abstract class Swisdk_SimpleForm_Entry {
-		public function __construct(&$grid, $name, $label, $error=null)
+		public function __construct($name, $label, $error=null)
 		{
 			if($label instanceof Swisdk_Layout_Item) {
 				$this->label = $label;
@@ -19,31 +19,29 @@
 			} else {
 				$this->error = new Swisdk_Form_Label($error);
 			}
-			
-			$this->grid = $grid;
 		}
 		
-		public function &get_label()
+		public function &label()
 		{
 			return $this->label;
 		}
 		
-		public function &get_entry()
+		public function &entry()
 		{
 			return $this->entry;
 		}
 		
-		public function &get_error()
+		public function &error()
 		{
 			return $this->error;
 		}
 		
-		protected function add_grid_default()
+		public function render(&$grid)
 		{
-			$y = $this->grid->get_height();
-			$this->grid->add_item(0, $y, $this->label);
-			$this->grid->add_item(1, $y, $this->entry);
-			$this->grid->add_item(2, $y, $this->error);
+			$y = $grid->height();
+			$grid->add_item(0, $y, $this->label);
+			$grid->add_item(1, $y, $this->entry);
+			$grid->add_item(2, $y, $this->error);
 		}
 		
 		public function add_rule($rule, $failmessage, $args=null)
@@ -74,82 +72,76 @@
 		protected $label;
 		protected $entry;
 		protected $error;
-		protected $grid;
 		
 		protected $rules = array();
 	}
 	
 	class Swisdk_SimpleForm_HiddenEntry extends Swisdk_SimpleForm_Entry {
-		public function __construct(&$grid, $name, $label, $value/*, $args*/)
+		public function __construct($name, $label, $value/*, $args*/)
 		{
 			$this->entry = new Swisdk_Form_HiddenEntry($name, $value);
-			/*unused*/$grid;
-			/*unused*/$label;
-			//parent::__construct($grid, $name, $label);
 		}
 	}
 	
 	class Swisdk_SimpleForm_TextEntry extends Swisdk_SimpleForm_Entry {
-		public function __construct(&$grid, $name, $label, $value/*, $args*/)
+		public function __construct($name, $label, $value/*, $args*/)
 		{
 			$this->entry = new Swisdk_Form_TextEntry($name, $value);
-			parent::__construct($grid, $name, $label);
-			$this->add_grid_default();
+			parent::__construct($name, $label);
 		}
 	}
 
 	class Swisdk_SimpleForm_TextareaEntry extends Swisdk_SimpleForm_Entry {
-		public function __construct(&$grid, $name, $label, $value/*, $args*/)
+		public function __construct($name, $label, $value/*, $args*/)
 		{
 			$this->entry = new Swisdk_Form_TextareaEntry($name, $value);
-			parent::__construct($grid, $name, $label);
-			$this->add_grid_default();
+			parent::__construct($name, $label);
 		}
 	}
 	
 	class Swisdk_SimpleForm_PasswordEntry extends Swisdk_SimpleForm_Entry {
-		public function __construct(&$grid, $name, $label, $value/*, $args*/)
+		public function __construct($name, $label, $value/*, $args*/)
 		{
 			$this->entry = new Swisdk_Form_PasswordEntry($name, $value);
-			parent::__construct($grid, $name, $label);
-			$this->add_grid_default();
+			parent::__construct($name, $label);
 		}
 	}
 	
 	class Swisdk_SimpleForm_CheckBox extends Swisdk_SimpleForm_Entry {
-		public function __construct(&$grid, $name, $label, $value/*, $args*/)
+		public function __construct($name, $label, $value/*, $args*/)
 		{
 			$this->entry = new Swisdk_Form_CheckBoxEntry($name, $value);
-			parent::__construct($grid, $name, $label);
-			$this->add_grid_default();
+			parent::__construct($name, $label);
 		}
 	}
 	
 	class Swisdk_SimpleForm_ComboBox extends Swisdk_SimpleForm_Entry {
-		public function __construct(&$grid, $name, $label, $value, $args)
+		public function __construct($name, $label, $value, $args)
 		{
 			$this->entry = new Swisdk_Form_ComboBoxEntry($name, $value, $args);
-			parent::__construct($grid, $name, $label);
-			$this->add_grid_default();
+			parent::__construct($name, $label);
 		}
 	}
 
 	class Swisdk_SimpleForm_Multiselect extends Swisdk_SimpleForm_Entry {
-		public function __construct(&$grid, $name, $label, $value, $args)
+		public function __construct($name, $label, $value, $args)
 		{
 			$this->entry = new Swisdk_Form_Multiselect($name, $value, $args);
-			parent::__construct($grid, $name, $label);
-			$this->add_grid_default();
+			parent::__construct($name, $label);
 		}
 	}
 	
 	class Swisdk_SimpleForm_SubmitButton extends Swisdk_SimpleForm_Entry {
-		public function __construct(&$grid, $name, $label, $value/*, $args*/)
+		public function __construct($name, $label, $value/*, $args*/)
 		{
 			$this->entry = new Swisdk_Form_SubmitButton($name, $value);
-			parent::__construct($grid, $name, $label);
-			$y = $this->grid->get_height();
-			$this->grid->add_item(0, $y, $this->entry, 3);
+			parent::__construct($name, $label);
+		}
+
+		public function render(&$grid)
+		{
+			$y = $grid->height();
+			$grid->add_item(0, $y, $this->entry(), 3);
 		}
 	}
 	

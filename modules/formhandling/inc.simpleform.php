@@ -43,7 +43,8 @@
 				$class = $this->types[$type];
 				$tmp = func_get_args();
 				$tmp = array_slice($tmp, 4);
-				$item = new $class($this->grid, $name, $label, $value, isset($tmp[0])?$tmp[0]:null);
+				$item = new $class($name, $label, $value, isset($tmp[0])?$tmp[0]:null);
+				$item->render($this->grid);
 				$this->container[$name] =& $item;
 				
 				// special treatment for the 'hidden' type
@@ -63,49 +64,49 @@
 			$this->types[$typename] = $class;
 		}
 		
-		public function get_html()
+		public function html()
 		{
 			$html = '<form id="' . $this->name . '" id="' . $this->name
 					. '" method="' . $this->method . '" action="'
 					. $this->action . '">';
 			if(count($this->container_hidden)) {
 				foreach($this->container_hidden as &$item) {
-					$html .= $item->get_entry()->get_html();
+					$html .= $item->entry()->html();
 				}
 			}
 			
-			$html .= $this->grid->get_html();
+			$html .= $this->grid->html();
 			
 			return $html . '</form>';
 		}
 		
-		public function &get_values()
+		public function &data()
 		{
-			$values = array();
+			$data = array();
 			foreach($this->container as &$item) {
-				$entry =& $item->get_entry();
-				if($entry->get_name())
-					$values[ $entry->get_name() ] = $entry->get_value();
+				$entry =& $item->entry();
+				if($entry->name())
+					$data[ $entry->name() ] = $entry->value();
 			}
-			return $values;
+			return $data;
 		}
 
-		public function set_values($values)
+		public function set_data($data)
 		{
 			foreach($this->container as &$item) {
-				$entry =& $item->get_entry();
-				if($val =& $values[$entry->get_name()]) {
+				$entry =& $item->entry();
+				if($val =& $data[$entry->name()]) {
 					$entry->set_value($val);
 				}
 			}
 		}
 		
-		public function &get_element($name)
+		public function &element($name)
 		{
 			return $this->container[$name];
 		}
 		
-		public function &get_grid()
+		public function &grid()
 		{
 			return $this->grid;
 		}

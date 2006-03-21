@@ -21,7 +21,7 @@
 			}
 		}
 		
-		public function get_name()
+		public function name()
 		{
 			return $this->name;
 		}
@@ -31,7 +31,7 @@
 			$this->name = $name;
 		}
 
-		public function get_value()
+		public function value()
 		{
 			return $this->value;
 		}
@@ -46,7 +46,7 @@
 	}
 	
 	abstract class Swisdk_Form_BoolValue extends Swisdk_Form_Value {
-		public function get_value()
+		public function value()
 		{
 			if($this->value) {
 				return true;
@@ -62,7 +62,7 @@
 			$this->set_choices($choices);
 		}
 		
-		public function get_choices()
+		public function choices()
 		{
 			return $this->choices;
 		}
@@ -77,55 +77,55 @@
 	
 	// this class is not intended for direct use
 	abstract class Swisdk_Form_InputEntry extends Swisdk_Form_Value implements Swisdk_Layout_Item {
-		public function helper_get_html($type)
+		public function helper_html($type)
 		{
-			return '<input type="' . $type . '" id="' . $this->get_name() . '" name="' . $this->get_name()
-					. '" value="' . (string)$this->get_value() . '" />';
+			return '<input type="' . $type . '" id="' . $this->name() . '" name="' . $this->name()
+					. '" value="' . (string)$this->value() . '" />';
 		}
 	}
 	
 	class Swisdk_Form_TextEntry extends Swisdk_Form_InputEntry {
-		public function get_html()
+		public function html()
 		{
-			return parent::helper_get_html('text');
+			return parent::helper_html('text');
 		}
 	}
 
 	class Swisdk_Form_TextareaEntry extends Swisdk_Form_InputEntry {
-		public function get_html()
+		public function html()
 		{
-			return '<textarea id="' . $this->get_name() . '" name="' . $this->get_name() . '">' . $this->get_value() . '</textarea>';
+			return '<textarea id="' . $this->name() . '" name="' . $this->name() . '">' . $this->value() . '</textarea>';
 		}
 	}
 	
 	class Swisdk_Form_HiddenEntry extends Swisdk_Form_InputEntry {
-		public function get_html()
+		public function html()
 		{
-			return parent::helper_get_html('hidden');
+			return parent::helper_html('hidden');
 		}
 	}
 	
 	class Swisdk_Form_PasswordEntry extends Swisdk_Form_InputEntry {
-		public function get_html()
+		public function html()
 		{
-			return parent::helper_get_html('password');
+			return parent::helper_html('password');
 		}
 	}
 	
 	class Swisdk_Form_CheckBoxEntry extends Swisdk_Form_BoolValue implements Swisdk_Layout_Item {
-		public function get_html()
+		public function html()
 		{
-			return '<input type="checkbox" id="' . $this->get_name() . '" name="' . $this->get_name()
-					. '"' . ($this->get_value()?' checked="checked"':'') . '" />';
+			return '<input type="checkbox" id="' . $this->name() . '" name="' . $this->name()
+					. '"' . ($this->value()?' checked="checked"':'') . '" />';
 		}
 	}
 	
 	class Swisdk_Form_ComboBoxEntry extends Swisdk_Form_ChoiceValue implements Swisdk_Layout_Item {
-		public function get_html()
+		public function html()
 		{
-			$html = '<select id="' . $this->get_name() . '" name="' . $this->get_name() . '">';
+			$html = '<select id="' . $this->name() . '" name="' . $this->name() . '">';
 			if(count($this->choices)) {
-				$value_ = $this->get_value();
+				$value_ = $this->value();
 				foreach($this->choices as $value => &$description) {
 					$html .= '<option ';
 					if($value==$value_)
@@ -138,11 +138,11 @@
 	}
 
 	class Swisdk_Form_Multiselect extends Swisdk_Form_ChoiceValue implements Swisdk_Layout_Item {
-		public function get_html()
+		public function html()
 		{
-			$html = '<select multiple="multiple" id="' . $this->get_name() . '" name="' . $this->get_name() . '">';
+			$html = '<select multiple="multiple" id="' . $this->name() . '" name="' . $this->name() . '">';
 			if(count($this->choices)) {
-				$value_ = $this->get_value();
+				$value_ = $this->value();
 				foreach($this->choices as $value => &$description) {
 					$html .= '<option ';
 					if($value==$value_)
@@ -155,12 +155,12 @@
 	}
 	
 	class Swisdk_Form_SubmitButton extends Swisdk_Form_Value implements Swisdk_Layout_Item {
-		public function get_html()
+		public function html()
 		{
-			if($value = $this->get_value()) {
+			if($value = $this->value()) {
 				$value = ' value="' . $value . '"';
 			}
-			if($name = $this->get_name()) {
+			if($name = $this->name()) {
 				$name = ' name="' . $name . '" id="' . $name . '"';
 			}
 			return '<input type="submit"' . $name . $value . ' />';
@@ -173,7 +173,7 @@
 			$this->text = $text;
 		}
 		
-		public function get_text()
+		public function text()
 		{
 			return $this->text;
 		}
@@ -183,7 +183,7 @@
 			$this->text = $text;
 		}
 		
-		public function get_html()
+		public function html()
 		{
 			return $this->text;
 		}

@@ -35,7 +35,7 @@
 		public function is_valid(Swisdk_SimpleForm_Entry &$entry, &$args=null)
 		{
 			/*unused*/$args;
-			return $entry->get_entry()->get_value()!='';
+			return $entry->entry()->value()!='';
 		}
 	}
 	
@@ -43,28 +43,28 @@
 		public function is_valid(Swisdk_SimpleForm_Entry &$entry, &$args=null)
 		{
 			/*unused*/$args;
-			return is_numeric($entry->get_entry()->get_value());
+			return is_numeric($entry->entry()->value());
 		}
 	}
 	
 	class Swisdk_SimpleForm_Validation_MaxLengthRule implements Swisdk_SimpleForm_Validation_Rule {
 		public function is_valid(Swisdk_SimpleForm_Entry &$entry, &$args=null)
 		{
-			return strlen($entry->get_entry()->get_value())<=$args;
+			return strlen($entry->entry()->value())<=$args;
 		}
 	}
 	
 	class Swisdk_SimpleForm_Validation_MinLengthRule implements Swisdk_SimpleForm_Validation_Rule {
 		public function is_valid(Swisdk_SimpleForm_Entry &$entry, &$args=null)
 		{
-			return strlen($entry->get_entry()->get_value())>=$args;
+			return strlen($entry->entry()->value())>=$args;
 		}
 	}
 	
 	class Swisdk_SimpleForm_Validation_RegexRule implements Swisdk_SimpleForm_Validation_Rule {
 		public function is_valid(Swisdk_SimpleForm_Entry &$entry, &$args=null)
 		{
-			return preg_match($args, $entry->get_entry()->get_value())!=0;
+			return preg_match($args, $entry->entry()->value())!=0;
 		}
 	}
 	
@@ -84,14 +84,14 @@
 					. '((([A-Za-z0-9\-])+\.)+[A-Za-z\-]+))$/';
 			//$regex = '/.*@.*\..*/';
 
-			return preg_match($regex, $entry->get_entry()->get_value())!=0;
+			return preg_match($regex, $entry->entry()->value())!=0;
 		}
 	}
 	
 	class Swisdk_SimpleForm_Validation_CallbackRule implements Swisdk_SimpleForm_Validation_Rule {
 		public function is_valid(Swisdk_SimpleForm_Entry &$entry, &$args=null)
 		{
-			return $args($entry->get_entry()->get_value());
+			return $args($entry->entry()->value());
 		}
 	}
 	

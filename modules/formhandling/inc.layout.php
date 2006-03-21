@@ -8,7 +8,7 @@
 	// layout classes: vertical and horizontal boxes and a grid implementation
 	
 	interface Swisdk_Layout_Item {
-		public function get_html();
+		public function html();
 	}
 	
 	// bah... enums
@@ -30,12 +30,12 @@
 			array_push($this->items, $item);
 		}
 		
-		public function get_html()
+		public function html()
 		{
 			if($this->orientation==SL_HORIZONTAL) {
 				$html = '<table><tr>';
 				foreach($this->items as &$item) {
-					$html .= '<td>' . $item->get_html() . '</td>';
+					$html .= '<td>' . $item->html() . '</td>';
 				}
 				return $html . '</tr></table>';
 			}
@@ -43,7 +43,7 @@
 			// vertical
 			$html = '<table>';
 			foreach($this->items as &$item) {
-				$html .= '<tr><td>' . $item->get_html() . '</td></tr>';
+				$html .= '<tr><td>' . $item->html() . '</td></tr>';
 			}
 			return $html . '</table>';
 		}
@@ -83,7 +83,7 @@
 		
 		// will get called multiple times if either
 		// width or height is different from 1
-		public function get_html($columnclass='')
+		public function html($columnclass='')
 		{
 			if($this->called===true) {
 				return '';
@@ -100,7 +100,13 @@
 			if($this->h!=1) {
 				$html .= ' rowspan="' . $this->h . '"';
 			}
-			return $html . '>' . $this->item->get_html() . '</td>';
+			$html .= '>';
+			if($this->item instanceof Swisdk_Layout_Item)
+				$html .= $this->item->html();
+			else
+				$html .= $this->item;
+			$html .= '</td>';
+			return $html;
 		}
 		
 		protected $x,$y,$item,$w,$h;
@@ -112,7 +118,7 @@
 		public function __construct()
 		{}
 		
-		public function get_html($columnclass='')
+		public function html($columnclass='')
 		{
 			if($columnclass) {
 				return '<td class="' . $columnclass . '">&nbsp;</td>';
@@ -128,7 +134,7 @@
 			$this->w = 0;
 		}
 		
-		public function add_item($x, $y, Swisdk_Layout_Item &$item, $w=1, $h=1)
+		public function add_item($x, $y, $item, $w=1, $h=1)
 		{
 			$this->w = max($this->w, $x+$w);
 			$this->h = max($this->h, $y+$h);
@@ -141,7 +147,7 @@
 			}
 		}
 		
-		public function get_html()
+		public function html()
 		{
 			$empty = new Swisdk_Layout_EmptyGridItem();
 			$html = '<table>';
@@ -153,9 +159,9 @@
 						$item =& $empty;
 					}
 					if(isset($this->columnclass[$i])) {
-						$html .= $item->get_html($this->columnclass[$i]);
+						$html .= $item->html($this->columnclass[$i]);
 					} else {
-						$html .= $item->get_html();
+						$html .= $item->html();
 					}
 				}
 				$html .= "</tr>\n";
@@ -169,12 +175,12 @@
 			$this->w = max($this->w, $column);
 		}
 		
-		public function get_width()
+		public function width()
 		{
 			return $this->w;
 		}
 		
-		public function get_height()
+		public function height()
 		{
 			return $this->h;
 		}
