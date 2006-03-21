@@ -576,6 +576,19 @@
 		}
 
 		/**
+		 * @return: Value used in selectors. Default value is the title
+		 */
+		public function title()
+		{
+			return $this->title;
+		}
+
+		public function shorttitle()
+		{
+			return $this->title;
+		}
+
+		/**
 		 * @return: DBObject data as an associative array
 		 */
 		public function &data()
