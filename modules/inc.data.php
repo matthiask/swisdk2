@@ -157,11 +157,11 @@
 	 * $author = DBObject::create('Author', 42);
 	 *
 	 * // get all pictures that he made
-	 * $pictures = $author->get_related('Picture');
+	 * $pictures = $author->related('Picture');
 	 *
 	 * // loop over all pictures and get their categories
 	 * foreach($pictures as &$picture) {
-	 * 	$categories = $picture->get_related('Category');
+	 * 	$categories = $picture->related('Category');
 	 * 	// [...] do something with it, display a gallery or whatever
 	 * }
 	 * 
@@ -388,35 +388,75 @@
 
 		/**
 		 * relation definition functions
+		 *
+		 * Inside this function happens some black magic juggling of
+		 * values to provide the following syntax to the user:
+		 *
+		 * Example:
+		 * 
+		 * An event has both an author and a contact person. They are both
+		 * stored in tbl_user. We cannot use event_user_id because we have
+		 * two referred users for every record.
+		 *
+		 * DBObject::belongs_to('Event', 'User', 'event_author_id');
+		 * DBObject::belongs_to('Event', 'User', 'event_contact_id');
+		 *
+		 * Now you may use:
+		 *
+		 * $event = DBObject::find('Event', 42);
+		 * $author = $event->related('event_author_id');
+		 * $author = $event->related('event_contact_id');
+		 * 
+		 * Note! See how you are passing the field name instead of a DBObject
+		 * class name now.
+		 *
+		 * If you want to get all events that some user authored you have
+		 * to do it differently:
+		 *
+		 * $events = DBOContainer::create('Event');
+		 * $events->add_clause('event_author_id=', 13);
+		 * $events->init();
+		 *
+		 * TODO: add funky DBOContainer::find()-syntax for this case
 		 */
-		public static function belongs_to($c1, $c2, $options = array())
+		public static function belongs_to($c1, $c2, $options = null)
 		{
 			$o1 = DBObject::create($c1);
 			$o2 = DBObject::create($c2);
-			$key = $o2->name('id');
-			// avoid names such as item_item_priority_id
-			if(strpos($key, $o1->prefix)!==0)
-				$key = $o1->name($key);
+			$field = $options;
+			$class = $c2;
+			if(!$field) {
+				$field = $o2->name('id');
+				// avoid names such as item_item_priority_id
+				if(strpos($field, $o1->prefix)!==0)
+					$field = $o1->name($field);
+			}
+			if($options)
+				$c2 = $field;
 
 			DBObject::$relations[$c1][$c2] =
-				array('type' => DB_REL_SINGLE, 'field' => $key,
-					'class' => $c2);
+				array('type' => DB_REL_SINGLE, 'field' => $field,
+					'class' => $class);
+			// do not set reverse mapping if user passed an explicit field
+			// specification
+			if(!$options)
+				return;
 			DBObject::$relations[$c2][$c1] =
-				array('type' => DB_REL_MANY, 'field' => $key,
-					'class' => $c2);
+				array('type' => DB_REL_MANY, 'field' => $field,
+					'class' => $class);
 		}
 
-		public static function has_many($c1, $c2, $options = array())
+		public static function has_many($c1, $c2, $options = null)
 		{
 			DBObject::belongs_to($c2, $c1, $options);
 		}
 
-		public static function has_a($c1, $c2, $options = array())
+		public static function has_a($c1, $c2, $options = null)
 		{
 			DBObject::belongs_to($c1, $c2, $options);
 		}
 
-		public static function n_to_m($c1, $c2, $options = array())
+		public static function n_to_m($c1, $c2, $options = null)
 		{
 			$o1 = DBObject::create($c1);
 			$o2 = DBObject::create($c2);
@@ -426,28 +466,26 @@
 
 			DBObject::$relations[$c1][$c2] = array(
 				'type' => DB_REL_MANYTOMANY, 'link' => $table,
-				'join' => $o2->table().'.'.$o2->primary().'='.$table.'.'.$o2->primary()
-			);
+				'join' => $o2->table().'.'.$o2->primary().'='.$table.'.'.$o2->primary());
 			DBObject::$relations[$c2][$c1] = array(
 				'type' => DB_REL_MANYTOMANY, 'link' => $table,
-				'join' => $o1->table().'.'.$o1->primary().'='.$table.'.'.$o1->primary()
-			);
+				'join' => $o1->table().'.'.$o1->primary().'='.$table.'.'.$o1->primary());
 		}
 
-		public function get_related($class)
+		public function related($class)
 		{
 			$rel =& DBObject::$relations[$this->class][$class];
 			switch($rel['type']) {
 				case DB_REL_SINGLE:
-					return DBObject::find($class, $this->data[$rel['field']]);
+					return DBObject::find($rel['class'], $this->data[$rel['field']]);
 				case DB_REL_MANY:
-					$container = DBOContainer::create($class);
+					$container = DBOContainer::create($rel['class']);
 					$container->add_clause($rel['field'].'=',
 						$this->id());
 					$container->init();
 					return $container;
 				case DB_REL_MANYTOMANY:
-					$container = DBOContainer::create($class);
+					$container = DBOContainer::create($rel['class']);
 					$container->add_join($rel['link'], $rel['join']);
 					$container->add_clause($rel['link'].'.'.$this->primary().'=', $this->id());
 					$container->init();
