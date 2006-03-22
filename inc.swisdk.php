@@ -6,6 +6,8 @@
 	*	Distributed under the GNU Lesser General Public License.
 	*	Read the entire license text here: http://www.gnu.org/licenses/lgpl.html
 	*/
+
+	date_default_timezone_set('Europe/Zurich');
 	
 	class Swisdk {
 		
