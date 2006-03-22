@@ -204,7 +204,7 @@
 		public function name($tok)	{ return $this->prefix . $tok; }
 		public function shortname($tok)	{ return str_replace($this->prefix,'',$tok); }
 		public function _class()	{ return $this->class; }
-		public function _relations()
+		public function relations()
 		{
 			if(isset(DBObject::$relations[$this->class]))
 				return DBObject::$relations[$this->class];
@@ -674,7 +674,7 @@
 		{
 			if(!isset(DBObject::$fulltext_fields[$this->class])) {
 				DBObject::$fulltext_fields[$this->class] = array();
-				$rows = $this->_field_list();
+				$rows = $this->field_list();
 				foreach($rows as &$row) {
 					if(stripos($row['Type'], 'char')!==false
 						|| stripos($row['Type'], 'text')!==false)
@@ -685,7 +685,7 @@
 			return DBObject::$fulltext_fields[$this->class];
 		}
 		
-		public function &_field_list()
+		public function &field_list()
 		{
 			if(!isset(DBObject::$field_list[$this->class])) {
 				$rows = DBObject::db_get_array('SHOW COLUMNS FROM '.$this->table());

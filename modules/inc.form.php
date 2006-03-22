@@ -68,7 +68,7 @@
 
 		protected function add_dbobj_ref($title, $refspec)
 		{
-			$relations = $this->dbobj()->_relations();
+			$relations = $this->dbobj()->relations();
 			print_r($relations[$refspec]);
 		}
 
@@ -124,8 +124,8 @@
 
 		public function autogenerate()
 		{
-			$fields = $this->dbobj->_field_list();
-			$relations_ = $this->dbobj->_relations();
+			$fields = $this->dbobj->field_list();
+			$relations_ = $this->dbobj->relations();
 
 			$relations = array();
 			foreach($relations_ as $class => &$r) {
