@@ -342,9 +342,12 @@
 		 */
 		public function update()
 		{
+			DBObject::db_start_transaction();
 			DBObject::db_query('UPDATE ' . $this->table . ' SET '
 				. $this->_vals_sql() . ' WHERE '
 				. $this->primary . '=' . $this->id());
+			$this->_update_relations();
+			DBObject::db_commit();
 		}
 
 		/**
@@ -352,9 +355,29 @@
 		 */
 		public function insert()
 		{
+			DBObject::db_start_transaction();
 			unset($this->data[$this->primary]);
 			DBObject::db_query('INSERT INTO ' . $this->table
 				. ' SET ' . $this->_vals_sql());
+			$this->_update_relations();
+			DBObject::db_commit();
+		}
+
+		private function _update_relations()
+		{
+			foreach(DBObject::$relations[$this->class] as &$rel) {
+				if($rel['type']==DB_REL_MANYTOMANY) {
+					DBObject::db_query('DELETE FROM '.$rel['link'].' WHERE '
+						.$this->primary.'='.$this->id());
+					if(count($this->data[$rel['field']])) {
+						$sql = 'INSERT INTO '.$rel['link'].' ('.$this->primary;
+						$sql .= ','.$rel['foreign'].') VALUES ('.$this->id().',';
+						$sql .= implode('),('.$this->id().',', $this->data[$rel['field']]);
+						$sql .= ')';
+						DBObject::db_query($sql);
+					}
+				}
+			}
 		}
 
 		/**
@@ -367,7 +390,10 @@
 			$dbh = DBObject::db();
 			$vals = array();
 			foreach($this->data as $k => &$v) {
-				$vals[] = $k . '=\'' . $dbh->escape_string($v) . '\'';
+				// do not include n-to-m relations in query!
+				// TODO better algorithm
+				if(strpos($k,$this->prefix)===0)
+					$vals[] = $k . '=\'' . $dbh->escape_string($v) . '\'';
 			}
 			return implode(',', $vals);
 		}
@@ -439,7 +465,7 @@
 					'class' => $class);
 			// do not set reverse mapping if user passed an explicit field
 			// specification
-			if(!$options)
+			if($options)
 				return;
 			DBObject::$relations[$c2][$c1] =
 				array('type' => DB_REL_MANY, 'field' => $field,
@@ -461,15 +487,24 @@
 			$o1 = DBObject::create($c1);
 			$o2 = DBObject::create($c2);
 
+			$rel1 = $c1;
+			$rel2 = $c2;
+
+			if($options!==null) {
+				$rel1 = $rel2 = $options;
+			}
+
 			$table = 'tbl_'.$o1->name('to_'.$o2->name(''));
 			$table = substr($table, 0, strlen($table)-1);
 
-			DBObject::$relations[$c1][$c2] = array(
+			DBObject::$relations[$c1][$rel2] = array(
 				'type' => DB_REL_MANYTOMANY, 'link' => $table,
-				'join' => $o2->table().'.'.$o2->primary().'='.$table.'.'.$o2->primary());
-			DBObject::$relations[$c2][$c1] = array(
+				'join' => $o2->table().'.'.$o2->primary().'='.$table.'.'.$o2->primary(),
+				'field' => $options, 'class' => $c2, 'foreign' => $o2->primary());
+			DBObject::$relations[$c2][$rel1] = array(
 				'type' => DB_REL_MANYTOMANY, 'link' => $table,
-				'join' => $o1->table().'.'.$o1->primary().'='.$table.'.'.$o1->primary());
+				'join' => $o1->table().'.'.$o1->primary().'='.$table.'.'.$o1->primary(),
+				'field' => $options, 'class' => $c1, 'foreign' => $o1->primary());
 		}
 
 		public function related($class)
@@ -568,6 +603,28 @@
 		}
 
 		/**
+		 * Wrap DB transaction functions
+		 */
+		public static function db_start_transaction()
+		{
+			DBObject::db()->autocommit(false);
+		}
+
+		public static function db_commit()
+		{
+			$dbh = DBObject::db();
+			$dbh->commit();
+			$dbh->autocommit(true);
+		}
+
+		public static function db_rollback()
+		{
+			$dbh = DBObject::db();
+			$dbh->rollback();
+			$dbh->autocommit(true);
+		}
+
+		/**
 		 * @return: the value of the primary key
 		 */
 		public function id()
@@ -643,10 +700,18 @@
 		/**
 		 * if you really want to use the long names...
 		 */
-		public function get($var)
+		public function get($var, $default=null)
 		{
-			if(isset($this->data[$var]))
+			if(isset($this->data[$var])) {
 				return $this->data[$var];
+			}
+
+			$relations = $this->relations();
+
+			if(isset($relations[$var])) {
+				$this->data[$var] = $this->related($var)->ids();
+				return $this->data[$var];
+			}
 		}
 
 		public function set($var, $value)
@@ -879,6 +944,14 @@
 				$array[$key] = $obj->data();
 			}
 			return $array;
+		}
+
+		/**
+		 * return an array of ids
+		 */
+		public function ids()
+		{
+			return array_keys($this->data);
 		}
 
 		/**
