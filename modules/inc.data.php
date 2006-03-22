@@ -645,7 +645,8 @@
 		 */
 		public function get($var)
 		{
-			return $this->data[$var];
+			if(isset($this->data[$var]))
+				return $this->data[$var];
 		}
 
 		public function set($var, $value)
