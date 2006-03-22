@@ -33,7 +33,7 @@
 
 			if(count($args)<2) {
 				if($args[0] instanceof FormItem) {
-					return $this->add_obj(null, $args[0]);
+					return $this->add_initialized_obj($args[0]);
 				} else {
 					return $this->add_obj($args[0],
 						new TextInput());
@@ -47,6 +47,13 @@
 					array(&$this, 'add_dbobj_ref'),
 					$args);
 			}
+		}
+
+		protected function add_initialized_obj($obj)
+		{
+			$obj->init_value($this->dbobj());
+			$this->items[$obj->name()] =& $obj;
+			return $obj;
 		}
 
 		protected function add_obj($title, $obj, $field=null)
@@ -66,19 +73,58 @@
 			return $obj;
 		}
 
-		protected function add_dbobj_ref($title, $refspec)
+		protected function add_dbobj_ref($title, $relspec)
 		{
 			$relations = $this->dbobj()->relations();
-			print_r($relations[$refspec]);
+			if(isset($relations[$relspec])) {
+				switch($relations[$relspec]['type']) {
+					case DB_REL_SINGLE:
+						$f = $this->add_obj($title, new DropdownInput(), $relations[$relspec]['field']);
+						$dc = DBOContainer::find($relations[$relspec]['class']);
+						$choices = array();
+						foreach($dc as $o) {
+							$items[$o->id()] = $o->title();
+						}
+						$f->set_items($items);
+						break;
+					/* // TODO this makes no sense
+					case DB_REL_MANY:
+						$f = $this->add($sn, new Multiselect(), $relations[$relspec]['field']);
+						$dc = DBOContainer::find($relations[$relspec]['class']);
+						$items = array();
+						foreach($dc as $o) {
+							$items[$o->id()] = $o->title();
+						}
+						$f->set_items($items);
+						break;
+					*/
+					case DB_REL_MANYTOMANY:
+						$f = $this->add_obj($title, new Multiselect(), $relations[$relspec]['field']);
+						$dc = DBOContainer::find($relations[$relspec]['class']);
+						$items = array();
+						foreach($dc as $o) {
+							$items[$o->id()] = $o->title();
+						}
+						$f->set_items($items);
+						break;
+				}
+			}
 		}
 
-		public function render(&$grid)
+		public function html()
 		{
+			$grid = new Layout_Grid();
+			$hidden_html = '';
+
 			if($this->title)
 				$grid->add_item(0, $grid->height(), $this->title, 3, 1);
 			foreach($this->items as &$item) {
-				$item->render($grid);
+				if($item instanceof HiddenInput)
+					$hidden_html .= $item->html();
+				else
+					$item->render($grid);
 			}
+			return $hidden_html . $grid->html();
 		}
 	}
 
@@ -113,11 +159,8 @@
 
 		public function html()
 		{
-			$grid = new Layout_Grid();
-			$this->render($grid);
-
 			$html = '<form method="post">';
-			$html .= $grid->html();
+			$html .= parent::html();
 			$html .= '</form>';
 			return $html;
 		}
@@ -150,18 +193,15 @@
 							}
 							$f->set_items($items);
 							break;
-						/*
 						case DB_REL_MANY:
-							$f = $form->add('multiselect', $fname,
-								$this->dbobj->shortname($fname));
+							$f = $form->add($sn, new Multiselect(), $fname);
 							$dc = DBOContainer::find($relations[$fname]['class']);
-							$choices = array();
+							$items = array();
 							foreach($dc as $o) {
-								$choices[$o->id()] = $o->title();
+								$items[$o->id()] = $o->title();
 							}
-							$f->entry()->set_choices($choices);
+							$f->set_items($items);
 							break;
-						*/
 					}
 				} else if(strpos($fname,'dttm')!==false) {
 					$this->add($sn, new DateInput(), $fname);
@@ -252,9 +292,16 @@
 	class HiddenInput extends TextInput {
 		protected $type = 'hidden';
 
+		/*
 		public function render(&$grid)
 		{
 			// do nothing
+		}
+		*/
+
+		public function html()
+		{
+			return $this->field_html();
 		}
 	}
 
@@ -270,23 +317,55 @@
 		}
 	}
 
-	class DropdownInput extends FormItem {
-		protected function field_html()
-		{
-			$html = '<select name="'.$this->name().'" id="'.$this->name().'">';
-			foreach($this->items as $k => $v) {
-				$html .= '<option value="'.$k.'">'.$v.'</option>';
-			}
-			$html .= '</select>';
-			return $html;
-		}
-
+	class SelectionFormItem extends FormItem {
 		public function set_items($items)
 		{
 			$this->items = $items;
 		}
 
 		protected $items=array();
+	}
+
+	class DropdownInput extends SelectionFormItem {
+		protected function field_html()
+		{
+			$html = '<select name="'.$this->name().'" id="'.$this->name().'">';
+			$value = $this->value();
+			foreach($this->items as $k => $v) {
+				$html .= '<option ';
+				if($value==$k)
+					$html .= 'selected="selected" ';
+				$html .= 'value="'.$k.'">'.$v.'</option>';
+			}
+			$html .= '</select>';
+			return $html;
+		}
+	}
+
+	class Multiselect extends SelectionFormItem {
+		protected function field_html()
+		{
+			$html = '<select name="'.$this->name().'[]" id="'.$this->name().'" multiple="multiple">';
+			$value = $this->value();
+			if(!$value)
+				$value = array();
+			foreach($this->items as $k => $v) {
+				$html .= '<option ';
+				if(in_array($k,$value))
+					$html .= 'selected="selected" ';
+				$html .= 'value="'.$k.'">'.$v.'</option>';
+			}
+			$html .= '</select>';
+			return $html;
+		}
+
+		public function value()
+		{
+			$val = parent::value();
+			if(!$val)
+				return array();
+			return $val;
+		}
 	}
 
 	class FormBar extends FormItem {
