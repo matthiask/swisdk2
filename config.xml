@@ -32,6 +32,9 @@
 	</config>
 	<swisdk>
 		<modules>
+			<module name="Form">
+				<includefile>inc.form.php</includefile>
+			</module>
 			<module name="DB">
 				<includefile>inc.db.php</includefile>
 			</module>
