@@ -273,8 +273,8 @@
 		{
 			$name = $this->name();
 
-			if($val = getInput($name))
-				$dbobj->set($name, $val);
+			if(isset($_POST[$name]))
+				$dbobj->set($name, stripslashes($_POST[$name]));
 
 			$this->set_value($dbobj->get($name));
 		}
@@ -312,7 +312,7 @@
 	class Textarea extends FormItem {
 		protected function field_html()
 		{
-			return '<textarea name="'.$this->name().'" id="'.$this->name().'">'
+			return '<textarea rows="20" cols="60" name="'.$this->name().'" id="'.$this->name().'">'
 				.$this->value().'</textarea>';
 		}
 	}
