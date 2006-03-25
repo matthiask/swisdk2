@@ -363,6 +363,11 @@
 			DBObject::db_commit();
 		}
 
+		/**
+		 * this helper should always be executed inside a transaction (that
+		 * is actually the case when you use update() or insert(), the only
+		 * place where this helper is used right now)
+		 */
 		private function _update_relations()
 		{
 			foreach(DBObject::$relations[$this->class] as &$rel) {
