@@ -159,7 +159,7 @@
 
 		public function html()
 		{
-			$html = '<form method="post">';
+			$html = '<form method="post" action="'.$_SERVER['REQUEST_URI'].'">';
 			$html .= parent::html();
 			$html .= '</form>';
 			return $html;
