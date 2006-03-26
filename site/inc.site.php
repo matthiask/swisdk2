@@ -5,16 +5,48 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
-	class Site {
-		protected $arguments;
-
+	abstract class Site {
 		public function __construct()
 		{
+			// nothing to do
 		}
 		
-		public function setArguments( $arguments )
+		abstract public function run();
+	}
+
+	class ComponentRunnerSite extends Site {
+		public function __construct($component=null)
 		{
-			$this->arguments = $arguments;
+			if(is_object($component))
+				$this->component = $component;
+			else if($component)
+				$this->component = new $component;
+			else
+				$this->component = new $this->class;
+			parent::__construct();
+		}
+
+		protected $component;
+		protected $class;
+		
+		public function run()
+		{
+			$this->component->run();
+			$handler = new HtmlTemplateOutputHandler();
+			$handler->handle($this->component);
 		}
 	}
+
+	abstract class OutputHandler {
+		abstract public function handle(&$component);
+	}
+
+	class HtmlTemplateOutputHandler extends OutputHandler {
+		public function handle(&$component)
+		{
+			$tmpl = file_get_contents(CONTENT_ROOT.'template.tpl');
+			print str_replace('__CONTENT__', $component->html(), $tmpl);
+		}
+	}
+
 ?>

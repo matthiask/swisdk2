@@ -6,13 +6,13 @@
 	*/
 
 	abstract class SiteHandler {
-		abstract public function handle( $includeFile );
+		abstract public function handle($file);
 	}
 	
 	class DynamicSiteHandler extends SiteHandler {
-		public function handle( $includeFile )
+		public function handle( $file )
 		{
-			Swisdk::loadSiteController( $includeFile );
+			require_once $file;
 			$class = Swisdk::config_value('runtime.controller');
 			
 			if(!class_exists($class)) {
@@ -20,15 +20,22 @@
 			}
 			
 			$ctrl = new $class;
-			$ctrl->set_arguments(SwisdkResolver::arguments());
-			$ctrl->run();
+			if($ctrl instanceof Site) {
+				$ctrl->run();
+			} else if($ctrl instanceof IComponent) {
+				require_once SWISDK_ROOT . 'site/inc.site.php';
+				$site = new ComponentRunnerSite($ctrl);
+				$site->run();
+			} else {
+				echo 'Oops';
+			}
 		}
 	}
 	
 	class TemplateSiteHandler extends SiteHandler {
-		public function handle($includeFile)
+		public function handle($file)
 		{
-			echo file_get_contents($includeFile);
+			echo file_get_contents($file);
 		}
 	}
 

@@ -9,31 +9,31 @@
 		
 		protected static $arguments;
 		
-		public static function run( $uri )
+		public static function run($uri)
 		{
-			$tmp = explode( '?', $uri );
+			$tmp = explode('?', $uri);
 			$urifragment = $tmp[0];
-			$registry = SwisdkRegistry::getInstance();
-
-			$resolverModules = $registry->getValue( '/config/resolver/module', true );
+			$modules = array(
+				'DomainResolver',
+				'WebsiteResolver',
+				'FilesystemResolver'
+			);
 
 			$resolved = false;
-			foreach( $resolverModules as $moduleClass ) {
-				$module = new $moduleClass;
-				if( $module->process( $urifragment ) ) {
+			foreach($modules as $class) {
+				$module = new $class;
+				if($module->process($urifragment)) {
 					// controller found - do not proceed further
-					
-					SwisdkResolver::$arguments = $module->getArguments();
-					
+					SwisdkResolver::$arguments = $module->arguments();
 					return true;
 				}
-				$urifragment = $module->getURIFragment();
+				$urifragment = $module->get_uri_fragment();
 			}
 
 			return false;
 		}
 		
-		public static function getArguments()
+		public static function arguments()
 		{
 			return SwisdkResolver::$arguments;
 		}
@@ -60,7 +60,7 @@
 		/**
 		*	@returns uri fragment for further processing (if necessary)
 		*/
-		public function getURIFragment()
+		public function get_uri_fragment()
 		{
 			return $this->urifragment;
 		}
@@ -68,7 +68,7 @@
 		/**
 		*	@returns arguments for the site controller
 		*/
-		public function getArguments()
+		public function arguments()
 		{
 			return $this->arguments;
 		}
@@ -78,16 +78,17 @@
 		public function process( $urifragment )
 		{
 			// strip and ignore domain
-			$this->urifragment = preg_replace( '/http(s?):\/\/[^\/]*(.*)/', '$1', $urifragment );
+			$this->urifragment = preg_replace('/http(s?):\/\/[^\/]*(.*)/', '$1', $urifragment);
 		}
 	}
 
 	class WebsiteResolver extends SwisdkResolverModule {
-		public function process( $urifragment )
+		/* don't do anything
+		public function process($urifragment)
 		{
 			// if url begins with admin, set admin mode (very secure :-)
-			$tokens = explode( '/', substr( $urifragment, 1 ) );
-			if( in_array( array_shift( $tokens ), array( 'admin' ) ) ) {
+			$tokens = explode('/', substr($urifragment, 1));
+			if(in_array(array_shift($tokens), array('admin'))) {
 				SwisdkRegistry::getInstance()->setValue( '/runtime/admin', 1 );
 				$this->urifragment = implode( '/', $tokens );
 			} else {
@@ -95,39 +96,28 @@
 				$this->urifragment = $urifragment;
 			}
 		}
-	}
-	
-	class DBSitekeyResolver extends SwisdkResolverModule {
-		public function process( $urifragment )
-		{
-			// for now, do no db resolving. I could as well disactivate
-			// this module in the configuration...
-			$this->urifragment = $urifragment;
-			return false;
-		}
+		*/
 	}
 	
 	class FilesystemResolver extends SwisdkResolverModule {
-		public function process( $urifragment )
+		public function process($urifragment)
 		{
-			$registry = SwisdkRegistry::getInstance();
-
 			$matches = array();
-			$tokens = explode( '/', substr( $urifragment, 1 ) );
+			$tokens = explode('/', substr($urifragment,1));
 			$tokens[] = 'Index';	// default controller name
 			
-			while( ( !count( $matches = glob( CONTENT_ROOT . implode( '/', $tokens ) . '_*' ) )
+			while (!count($matches = glob(CONTENT_ROOT.implode('/', $tokens).'_*'))
 									// continue while no matches were found at all
-				&& ( count( $tokens ) >= 2 ) )		// and while token count is still greater than 1
+				&& (count($tokens)>=2)			// and while token count is still greater than 1
 									// (otherwise we glob for CONTENT_ROOT . '.*' )
-				&& ( count( $matches ) == 0 || !is_file( $matches[0] ) ) ) {	// or the path is not a file
+				&& (count($matches)==0 || !is_file($matches[0]))) {	// or the path is not a file
 				// remove the last array element
-				array_pop( $tokens );
+				array_pop($tokens);
 			}
 			
-			if( isset( $matches[0] ) && $matches[0] ) {
-				$registry->setValue( '/runtime/includefile', $matches[0] );
-				$this->arguments = array_slice( explode( '/', substr( $urifragment, 1 ) ) , count( $tokens ) );
+			if(isset($matches[0]) && $matches[0]) {
+				Swisdk::set_config_value('runtime.includefile', $matches[0]);
+				$this->arguments = array_slice(explode('/', substr($urifragment,1)), count($tokens));
 				return true;
 			} else {
 				return false;
