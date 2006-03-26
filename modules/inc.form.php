@@ -87,17 +87,6 @@
 						}
 						$f->set_items($items);
 						break;
-					/* // TODO this makes no sense
-					case DB_REL_MANY:
-						$f = $this->add($sn, new Multiselect(), $relations[$relspec]['field']);
-						$dc = DBOContainer::find($relations[$relspec]['class']);
-						$items = array();
-						foreach($dc as $o) {
-							$items[$o->id()] = $o->title();
-						}
-						$f->set_items($items);
-						break;
-					*/
 					case DB_REL_MANYTOMANY:
 						$f = $this->add_obj($title, new Multiselect(), $relations[$relspec]['field']);
 						$dc = DBOContainer::find($relations[$relspec]['class']);
@@ -107,6 +96,11 @@
 						}
 						$f->set_items($items);
 						break;
+					case DB_REL_MANY:
+						//TODO better error handling (warning)
+						echo 'Cannot edit relation of type DB_REL_MANY.';
+					default:	// also includes DB_REL_MANY
+						echo 'Oops. Unknown relation type.';
 				}
 			}
 		}
