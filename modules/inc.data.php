@@ -295,6 +295,8 @@
 		 *
 		 * This function returns a DBObject of type $class if the entry
 		 * $id exists in the database.
+		 *
+		 * TODO add possibility to initialize on other fields (not only primary key)
 		 */
 		public static function &find($class, $id)
 		{
@@ -313,19 +315,15 @@
 		public function refresh()
 		{
 			$dbh = DBObject::db();
-			if($res = $dbh->query('SELECT * FROM '.$this->table.' WHERE '.$this->primary.'='.$this->id())) {
-				if($this->data = $res->fetch_assoc())
-					return true;
-			}
+			$this->data = DBObject::db_get_row('SELECT * FROM '.$this->table.' WHERE '.$this->primary.'='.$this->id());
+			if($this->data && count($this->data))
+				return true;
 			return false;
-			// TODO SwisdkError::handle() ? should probably not be a fatal error
 		}
 
 		/**
 		 * Store the DBObject. Automatically determines if it should create
 		 * a new record or if it should update an existing one.
-		 *
-		 * TODO: use INSERT ... ON DUPLICATE KEY UPDATE ? need to read more...
 		 */
 		public function store()
 		{
@@ -372,10 +370,10 @@
 		{
 			foreach(DBObject::$relations[$this->class] as &$rel) {
 				if($rel['type']==DB_REL_MANYTOMANY) {
-					DBObject::db_query('DELETE FROM '.$rel['link'].' WHERE '
+					DBObject::db_query('DELETE FROM '.$rel['table'].' WHERE '
 						.$this->primary.'='.$this->id());
 					if(count($this->data[$rel['field']])) {
-						$sql = 'INSERT INTO '.$rel['link'].' ('.$this->primary;
+						$sql = 'INSERT INTO '.$rel['table'].' ('.$this->primary;
 						$sql .= ','.$rel['foreign'].') VALUES ('.$this->id().',';
 						$sql .= implode('),('.$this->id().',', $this->data[$rel['field']]);
 						$sql .= ')';
@@ -396,7 +394,8 @@
 			$vals = array();
 			foreach($this->data as $k => &$v) {
 				// do not include n-to-m relations in query!
-				// TODO better algorithm
+				// TODO better detection whether field came from this
+				// table or not
 				if(strpos($k,$this->prefix)===0)
 					$vals[] = $k . '=\'' . $dbh->escape_string($v) . '\'';
 			}
@@ -467,14 +466,16 @@
 
 			DBObject::$relations[$c1][$c2] =
 				array('type' => DB_REL_SINGLE, 'field' => $field,
-					'class' => $class);
+					'class' => $class, 'table' => $o2->table(),
+					'foreign_key' => $o2->primary());
 			// do not set reverse mapping if user passed an explicit field
 			// specification
 			if($options)
 				return;
 			DBObject::$relations[$c2][$c1] =
 				array('type' => DB_REL_MANY, 'field' => $field,
-					'class' => $class);
+					'class' => $c1, 'table' => $o1->table(),
+					'foreign_key' => $o1->primary());
 		}
 
 		public static function has_many($c1, $c2, $options = null)
@@ -503,11 +504,11 @@
 			$table = substr($table, 0, strlen($table)-1);
 
 			DBObject::$relations[$c1][$rel2] = array(
-				'type' => DB_REL_MANYTOMANY, 'link' => $table,
+				'type' => DB_REL_MANYTOMANY, 'table' => $table,
 				'join' => $o2->table().'.'.$o2->primary().'='.$table.'.'.$o2->primary(),
 				'field' => $options, 'class' => $c2, 'foreign' => $o2->primary());
 			DBObject::$relations[$c2][$rel1] = array(
-				'type' => DB_REL_MANYTOMANY, 'link' => $table,
+				'type' => DB_REL_MANYTOMANY, 'table' => $table,
 				'join' => $o1->table().'.'.$o1->primary().'='.$table.'.'.$o1->primary(),
 				'field' => $options, 'class' => $c1, 'foreign' => $o1->primary());
 		}
@@ -519,18 +520,53 @@
 				case DB_REL_SINGLE:
 					return DBObject::find($rel['class'], $this->data[$rel['field']]);
 				case DB_REL_MANY:
-					$container = DBOContainer::create($rel['class']);
-					$container->add_clause($rel['field'].'=',
-						$this->id());
-					$container->init();
-					return $container;
+					return $this->related_many($rel);
 				case DB_REL_MANYTOMANY:
-					$container = DBOContainer::create($rel['class']);
-					$container->add_join($rel['link'], $rel['join']);
-					$container->add_clause($rel['link'].'.'.$this->primary().'=', $this->id());
-					$container->init();
-					return $container;
+					return $this->related_many_to_many($rel);
 			}
+		}
+
+		protected function related_many(&$rel)
+		{
+			$container = DBOContainer::create($rel['class']);
+			$container->add_clause($rel['field'].'=',
+				$this->id());
+			$container->init();
+			return $container;
+		}
+
+		protected function related_many_to_many(&$rel)
+		{
+			$container = DBOContainer::create($rel['class']);
+			$container->add_join($rel['table'], $rel['join']);
+			$container->add_clause($rel['table'].'.'.$this->primary().'=', $this->id());
+			$container->init();
+			return $container;
+		}
+
+		public function all_related()
+		{
+			$data = array();
+			$rels =& DBObject::$relations[$this->class];
+			foreach($rels as $class => &$rel) {
+				switch($rel['type']) {
+					case DB_REL_SINGLE:
+						$data = array_merge($data, $this->related($class)->data());
+						break;
+					case DB_REL_MANY:
+						$data[$class] = $this->related_many($rel)->data();
+						break;
+					case DB_REL_MANYTOMANY:
+						$data[$class] = $this->related_many_to_many($rel)->data();
+						break;
+				}
+			}
+			return $data;
+		}
+
+		public function all_data()
+		{
+			return array_merge($this->data(), $this->all_related());
 		}
 
 		/**
@@ -819,6 +855,8 @@
 		 * Example:
 		 *
 		 * DBOContainer::find('News', array('news_active!=0', 'news_start_dttm>', time()));
+		 *
+		 * TODO params parsing does not really work yet. The example is totally bogus
 		 */
 		public static function &find($class, $params=null)
 		{
@@ -841,13 +879,10 @@
 		 */
 		public function init()
 		{
-			$dbh = DBObject::db();
 			$sql = 'SELECT * FROM ' . $this->obj->table() . $this->joins . $this->clause_sql
 				. $this->_fulltext_clause()
 				. implode(',', $this->order_columns) . $this->limit;
-			$result = $dbh->query($sql);
-			if($dbh->errno)
-				SwisdkError::handle(new DBError("Database error: " . $dbh->error, $sql));
+			$result = DBObject::db_query($sql);
 			while($row = $result->fetch_assoc()) {
 				$obj = DBObject::create($this->class);
 				$obj->set_data($row);
@@ -870,7 +905,7 @@
 				$matches = array();
 				preg_match_all('/\{([A-Za-z_0-9]+)}/', $clause, $matches, PREG_PATTERN_ORDER);
 				if(isset($matches[1])) {
-					array_walk_recursive($data, '_escape_string');
+					array_walk_recursive($data, '_dbocontainer_escape_string');
 					$p = array();
 					$q = array();
 					foreach($matches[1] as $v) {
@@ -961,11 +996,14 @@
 
 		/**
 		 * TODO: this is not really thought over...
+		 *
+		 * can be used to call delete, store etc. on the contained
+		 * DBObjects
 		 */
 		public function __call($method, $args)
 		{
 			foreach($this->data as &$obj) {
-				call_user_func_array(array($obj,$method), $args);
+				call_user_func_array(array(&$obj,$method), $args);
 			}
 		}
 
@@ -995,7 +1033,7 @@
 		public function offsetUnset($offset) { unset($this->data[$offset]); }
 	}
 
-	function _escape_string(&$str)
+	function _dbocontainer_escape_string(&$str)
 	{
 		static $dbh = null;
 		if($dbh===null)
