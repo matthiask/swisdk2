@@ -32,7 +32,7 @@
 		public function run()
 		{
 			$this->component->run();
-			$handler = new HtmlTemplateOutputHandler();
+			$handler = new HtmlOutputHandler();
 			$handler->handle($this->component);
 		}
 	}
@@ -41,7 +41,14 @@
 		abstract public function handle(&$component);
 	}
 
-	class HtmlTemplateOutputHandler extends OutputHandler {
+	class HtmlOutputHandler extends OutputHandler {
+		public function handle(&$component)
+		{
+			echo $component->html();
+		}
+	}
+
+	class HtmlTemplateOutputHandler extends HtmlOutputHandler {
 		public function handle(&$component)
 		{
 			$tmpl = file_get_contents(CONTENT_ROOT.'template.tpl');
