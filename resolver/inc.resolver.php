@@ -114,7 +114,9 @@
 				// remove the last array element
 				array_pop($tokens);
 			}
-			
+
+			Swisdk::set_config_value('runtime.controller.url', '/'.implode('/', $tokens).'/');
+
 			if(isset($matches[0]) && $matches[0]) {
 				Swisdk::set_config_value('runtime.includefile', $matches[0]);
 				$this->arguments = array_slice(explode('/', substr($urifragment,1)), count($tokens));
