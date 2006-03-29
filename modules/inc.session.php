@@ -5,95 +5,46 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
-	class UserSessionHandler {
-		
-		protected $username;
-		protected $password;
-		
+	require_once MODULE_ROOT . 'inc.data.php';
+
+	class SessionHandler {
 		protected function __construct()
 		{
 			if( !session_id() ) {
 				session_start();
 			}
 			
-			$registry = SwisdkRegistry::getInstance();
-			
-			if( $this->getLoginCredentials() ) {
-				
-				$login = false;
-			
-				$authModules = $registry->getValue( '/swisdk/session/authentification/module', true );
-				foreach( $authModules as $class ) {
-					$module = new $class;
-					if( $module->checkLogin( $this->username, $this->password ) ) {
-						$login = true;
-						break;
-					}
-				}
-				
-				if( $login ) {
-					$_SESSION[ 'swisdk2_authentificated' ] = true;
+			if(isset($_REQUEST['login_username'])
+					&& isset($_REQUEST['login_password'])) {
+				$user = DBObject::find('User', array(
+					'user_login=' => $_REQUEST['login_username'],
+					'user_password=' => md5($_REQUEST['login_password'])));
+				if($user) {
+					$_SESSION['user_id'] = $user->id;
+					$_SESSION['authenticated'] = true;
 				}
 			}
-			
-			if( getInput( 'logout' ) ) {
+
+			// TODO might also check if IP is still the same to prevent session stealing
+			if(getInput('logout')) {
 				session_destroy();
-				redirect( '/' );
+				redirect('/');
 			}
 		}
-		
-		public static function getInstance()
+
+		public static function instance()
 		{
 			static $instance = null;
 			if( $instance === null ) {
-				$instance = new UserSessionHandler();
+				$instance = new SessionHandler();
 			}
 			
 			return $instance;
 		}
 		
-		public static function isUserLoggedIn()
+		public static function authenticated()
 		{
-			return true == $_SESSION[ 'swisdk2_authentificated' ];
-		}
-		
-		protected function getLoginCredentials()
-		{
-			if( isset( $_REQUEST[ 'login_username' ] ) ) {
-				$this->username = $_REQUEST[ 'login_username' ];
-			}
-			if( isset( $_REQUEST[ 'login_password' ] ) ) {
-				$this->password = $_REQUEST[ 'login_password' ];
-			}
-		}
-	}
-
-	abstract class SwisdkAuthModule {
-		public function checkLogin( $login, $password )
-		{}
-	}
-	
-	class SinglePasswordAuthModule extends SwisdkAuthModule {
-		public function checkLogin( $login, $password )
-		{
-			if( $login == 'admin' && $password == 'dc71ab14bc5b8f02ed878df90dd7e7af' /* suppe */ ) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-	}
-	
-	class DatabaseAuthModule extends SwisdkAuthModule {
-		public function checkLogin( $login, $password )
-		{
-			Swisdk::loadModule( 'DB' );
-			$result = SwisdkDB::getRow( "SELECT user_id FROM tbl_users WHERE user_login='" . SwisdkDB::escapeString( $login ) . "' AND user_password='" . md5( $password ) . "'" );
-			if( $result !== null ) {
-				return $result[ 'user_id' ];
-			} else {
-				return false;
-			}
+			return true == $_SESSION[ 'swisdk2_authenticated' ];
 		}
 	}
 
