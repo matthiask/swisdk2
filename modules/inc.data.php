@@ -298,15 +298,26 @@
 		 *
 		 * TODO add possibility to initialize on other fields (not only primary key)
 		 */
-		public static function &find($class, $id)
+		public static function &find($class, $params)
 		{
 			$obj = DBObject::create($class);
-			$obj->id = $id;
-			if($obj->refresh()) {
-				return $obj;
-			}
-			$null = null;
-			return $null;
+			if(is_array($params)) {
+				$where = array(' WHERE 1 ');
+				foreach($params as $k=>$v)
+					$where[] = $k.'\''.DBObject::db_escape($v).'\' ';
+				$obj->data = DBObject::db_get_row('SELECT * FROM '
+					.$obj->table.implode(' AND ',$where));
+				if($obj->data && count($obj->data))
+					return $obj;
+				$null = null;
+				return $null;
+			} else {
+				$obj->id = $params;
+				if($obj->refresh())
+					return $obj;
+				$null = null;
+				return $null;
+			} 
 		}
 
 		/**
@@ -314,11 +325,8 @@
 		 */
 		public function refresh()
 		{
-			$dbh = DBObject::db();
 			$this->data = DBObject::db_get_row('SELECT * FROM '.$this->table.' WHERE '.$this->primary.'='.$this->id());
-			if($this->data && count($this->data))
-				return true;
-			return false;
+			return ($this->data && count($this->data));
 		}
 
 		/**
