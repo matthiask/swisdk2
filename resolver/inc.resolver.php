@@ -102,27 +102,25 @@
 	class FilesystemResolver extends SwisdkResolverModule {
 		public function process($urifragment)
 		{
-			$matches = array();
 			$tokens = explode('/', substr($urifragment,1));
-			$tokens[] = 'Index';	// default controller name
-			
-			while (!count($matches = glob(CONTENT_ROOT.implode('/', $tokens).'_*'))
-									// continue while no matches were found at all
-				&& (count($tokens)>=2)			// and while token count is still greater than 1
-									// (otherwise we glob for CONTENT_ROOT . '.*' )
-				&& (count($matches)==0 || !is_file($matches[0]))) {	// or the path is not a file
-				// remove the last array element
+
+			while(true) {
+				$path = CONTENT_ROOT.implode('/', $tokens);
+				if(count($matches=glob($path.'/Index_*'))
+					|| count($matches=glob($path.'_*'))) {
+					if(is_file($matches[0])) {
+						Swisdk::set_config_value('runtime.controller.url',
+							'/'.implode('/',$tokens).'/');
+						Swisdk::set_config_value('runtime.includefile', $matches[0]);
+						$this->arguments = array_slice(
+							explode('/', substr($urifragment,1)),
+							count($tokens));
+						return true;
+					}
+				}
 				array_pop($tokens);
-			}
-
-			Swisdk::set_config_value('runtime.controller.url', '/'.implode('/', $tokens).'/');
-
-			if(isset($matches[0]) && $matches[0]) {
-				Swisdk::set_config_value('runtime.includefile', $matches[0]);
-				$this->arguments = array_slice(explode('/', substr($urifragment,1)), count($tokens));
-				return true;
-			} else {
-				return false;
+				if(!count($tokens))
+					return false;
 			}
 		}
 	}
