@@ -56,4 +56,25 @@
 		}
 	}
 
+	class SmartyOutputHandler extends HtmlOutputHandler {
+		public function handle(&$component)
+		{
+			$er = error_reporting(E_ALL); // be sure not to report E_STRICT
+			require_once SWISDK_ROOT . 'lib/smarty/libs/Smarty.class.php';
+			$smarty = new Smarty();
+			$smarty->compile_dir = SWISDK_ROOT . 'lib/smarty/templates_c';
+			$smarty->cache_dir = SWISDK_ROOT . 'lib/smarty/cache';
+			$smarty->template_dir = CONTENT_ROOT;
+
+			//$this->config_dir
+			
+			$this->caching = false;
+			$this->security = false;
+
+			$smarty->assign('content', $component->html());
+			$smarty->display('templates/main.tpl.html');
+			error_reporting($er);
+		}
+	}
+
 ?>
