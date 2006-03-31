@@ -35,6 +35,7 @@
 	
 	class BasicSwisdkError {
 		protected $message;
+		protected $noerror = false;
 		
 		public function __construct( $message = null )
 		{
@@ -43,6 +44,8 @@
 		
 		public function run()
 		{
+			if($this->noerror)
+				return;
 			echo '<div style="background:#f88;padding:10px;border:2px solid black;">'.$this->message.'<br/><br/><strong>backtrace:</strong><br/><pre>';
 			debug_print_backtrace();
 			echo '</pre></div>';
@@ -74,6 +77,8 @@
 	class PHPError extends BasicSwisdkError {
 		public function __construct( $errno, $errstr, $file, $line, $context )
 		{
+			if(!($errno&ini_get('error_reporting')))
+				$this->noerror = true;
 			$this->message = "Error: $errno ( $errstr ) in $file at line $line";
 			$this->run();
 		}
