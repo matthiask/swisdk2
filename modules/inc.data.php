@@ -373,6 +373,8 @@
 		 */
 		private function _update_relations()
 		{
+			if(!isset(DBObject::$relations[$this->class]))
+				return;
 			foreach(DBObject::$relations[$this->class] as &$rel) {
 				if($rel['type']==DB_REL_MANYTOMANY) {
 					DBObject::db_query('DELETE FROM '.$rel['table'].' WHERE '
