@@ -286,8 +286,23 @@
 		 */
 		public function is_valid()
 		{
-			return isset($_REQUEST[$this->form_id]) && parent::is_valid();
+			// has this form been submitted (or was it another form on the same page)
+			if(!isset($_REQUEST[$this->form_id]))
+				return false;
+			// loop over FormRules
+			foreach($this->rules as &$rule)
+				if(!$rule->is_valid(&$this))
+					return false;
+			// loop over each items own validation rules
+			return parent::is_valid();
 		}
+
+		public function add_rule(FormRule $rule)
+		{
+			$this->rules[] = $rule;
+		}
+
+		protected $rules = array();
 
 		protected $form_id;
 
@@ -297,7 +312,8 @@
 			//that way, we can add multiple forms of the same type on one site
 			//
 			//e.g. "__swisdk_form_tbl_item_1[item_id]" instead of "item_id" alone
-			$this->form_id = '__swisdk_form_'.$this->dbobj->table().'_'.$this->dbobj->id();
+			$id = $this->dbobj->id();
+			$this->form_id = '__swisdk_form_'.$this->dbobj->table().'_'.($id?$id:0);
 		}
 
 		/**
@@ -639,6 +655,26 @@ Calendar.setup({
 EOD;
 			return $html;
 		}
+	}
+
+	abstract class FormRule {
+		abstract public function is_valid(Form &$form);
+	}
+
+	class EqualFieldsRule extends FormRule {
+		public function __construct($field1, $field2)
+		{
+			$this->field1 = $field1;
+			$this->field2 = $field2;
+		}
+		public function is_valid(Form &$form)
+		{
+			$dbobj = $form->dbobj();
+			return $dbobj->get($this->field1) == $dbobj->get($this->field2);
+		}
+
+		protected $field1;
+		protected $field2;
 	}
 
 
