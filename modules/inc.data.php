@@ -223,23 +223,6 @@
 		protected $data = array();
 
 		/**
-		 * @access: private
-		 * @return: the DB handle
-		 *
-		 * This function would be private if PHP knew friend classes
-		 */
-		public static function &db()
-		{
-			if(is_null(DBObject::$dbhandle)) {
-				DBObject::$dbhandle = new mysqli('localhost', 'root', 'bl4b', 'bugs');
-				if(mysqli_connect_errno())
-					SwisdkError::handle(new DBError("Connect failed: " . mysqli_connect_error()));
-			}
-
-			return DBObject::$dbhandle;
-		}
-		
-		/**
 		 * @param $setup_dbvars: Should the DB vars be determined or should we wait
 		 * until later (See DBObject::create)
 		 */
@@ -578,6 +561,21 @@
 		}
 
 		/**
+		 * @return: the DB handle
+		 */
+		protected static function &db()
+		{
+			if(is_null(DBObject::$dbhandle)) {
+				//FIXME do not hardcode connection params
+				DBObject::$dbhandle = new mysqli('localhost', 'root', 'bl4b', 'bugs');
+				if(mysqli_connect_errno())
+					SwisdkError::handle(new DBError("Connect failed: " . mysqli_connect_error()));
+			}
+
+			return DBObject::$dbhandle;
+		}
+
+		/**
 		 * Use the following functions if you need raw DB access or if the DBObject
 		 * interface would be to cumbersome to do what you need to do.
 		 */
@@ -649,6 +647,11 @@
 		public static function db_escape($str)
 		{
 			return DBObject::db()->escape_string($str);
+		}
+
+		public static function db_escape_ref(&$str)
+		{
+			$str = DBObject::db()->escape_string($str);
 		}
 
 		/**
@@ -913,7 +916,7 @@
 				$matches = array();
 				preg_match_all('/\{([A-Za-z_0-9]+)}/', $clause, $matches, PREG_PATTERN_ORDER);
 				if(isset($matches[1])) {
-					array_walk_recursive($data, '_dbocontainer_escape_string');
+					array_walk_recursive($data, array('DBObject', 'db_escape_ref'));
 					$p = array();
 					$q = array();
 					foreach($matches[1] as $v) {
@@ -1040,14 +1043,5 @@
 		}
 		public function offsetUnset($offset) { unset($this->data[$offset]); }
 	}
-
-	function _dbocontainer_escape_string(&$str)
-	{
-		static $dbh = null;
-		if($dbh===null)
-			$dbh = DBObject::db();
-		$str = '\''.$dbh->escape_string($str).'\'';
-	}
-
 
 ?>
