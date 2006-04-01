@@ -41,8 +41,8 @@
 	 *
 	 * $form->dbobj()->store();
 	 *
-	 * The Form automatically writes its values into the provided
-	 * DBObject.
+	 * The Form automatically writes its values into the bound DBObject.
+	 *
 	 *
 	 *
 	 * example without database
@@ -152,7 +152,6 @@
 
 			$obj->set_title($title);
 			$obj->set_name($field);
-			$obj->set_message('blah?');
 			$obj->init_value($this->dbobj());
 
 			$this->items[$field] = $obj;
@@ -217,10 +216,11 @@
 		 */
 		public function is_valid()
 		{
+			$valid = true;
 			foreach($this->items as &$item)
 				if(!$item->is_valid())
-					return false;
-			return true;
+					$valid = false;
+			return $valid;
 		}
 	}
 
@@ -277,8 +277,21 @@
 
 			$html = '<form method="post" action="'.$_SERVER['REQUEST_URI'].'">';
 			$html .= parent::html();
+			if($this->message)
+				$html .= '<p>'.$this->message.'</p>';
 			$html .= '</form>';
 			return $html;
+		}
+
+		protected $message;
+		public function message()		{ return $this->message; }
+		public function set_message($message)	{ $this->message = $message; }
+		public function add_message($message)
+		{
+			if($this->message)
+				$this->message .= "\n<br />".$message;
+			else
+				$this->message = $message;
 		}
 
 		/**
@@ -289,12 +302,14 @@
 			// has this form been submitted (or was it another form on the same page)
 			if(!isset($_REQUEST[$this->form_id]))
 				return false;
+
+			$valid = true;
 			// loop over FormRules
 			foreach($this->rules as &$rule)
 				if(!$rule->is_valid(&$this))
-					return false;
+					$valid = false;
 			// loop over each items own validation rules
-			return parent::is_valid();
+			return parent::is_valid() && $valid;
 		}
 
 		public function add_rule(FormRule $rule)
@@ -434,6 +449,13 @@
 		public function set_title($title)	{ $this->title = $title; } 
 		public function message()		{ return $this->message; }
 		public function set_message($message)	{ $this->message = $message; }
+		public function add_message($message)
+		{
+			if($this->message)
+				$this->message .= "\n<br />".$message;
+			else
+				$this->message = $message;
+		}
 
 		public function set_attributes($attributes)
 		{
@@ -496,8 +518,12 @@
 		{
 			$name = $this->name();
 
-			if(isset($_POST[$name]))
-				$dbobj->set($name, stripslashes($_POST[$name]));
+			if(isset($_POST[$name])) {
+				if(is_array($_POST[$name]))
+					$dbobj->set($name, $_POST[$name]);
+				else
+					$dbobj->set($name, stripslashes($_POST[$name]));
+			}
 
 			$this->set_value($dbobj->get($name));
 		}
@@ -509,10 +535,11 @@
 
 		public function is_valid()
 		{
+			$valid = true;
 			foreach($this->rules as &$rule)
 				if(!$rule->is_valid(&$this))
-					return false;
-			return true;
+					$valid = false;
+			return $valid;
 		}
 	}
 
@@ -689,16 +716,39 @@ EOD;
 	}
 
 	abstract class FormRule {
-		abstract public function is_valid(Form &$form);
+		public function __construct($message=null)
+		{
+			if($message)
+				$this->message = $message;
+		}
+
+		public function is_valid(Form &$form)
+		{
+			if($this->is_valid_impl($form))
+				return true;
+			$form->add_message($this->message);
+			return false;
+		}
+
+		protected function is_valid_impl(Form &$form)
+		{
+			return false;
+		}
+
+		protected $message;
 	}
 
 	class EqualFieldsRule extends FormRule {
-		public function __construct($field1, $field2)
+		protected $message = 'The two related fields are not equal';
+
+		public function __construct($field1, $field2, $message = null)
 		{
 			$this->field1 = $field1;
 			$this->field2 = $field2;
+			parent::__construct($message);
 		}
-		public function is_valid(Form &$form)
+
+		protected function is_valid_impl(Form &$form)
 		{
 			$dbobj = $form->dbobj();
 			return $dbobj->get($this->field1) == $dbobj->get($this->field2);
@@ -710,30 +760,56 @@ EOD;
 
 
 	abstract class FormItemRule {
-		abstract public function is_valid(FormItem &$item);
+		public function __construct($message=null)
+		{
+			if($message)
+				$this->message = $message;
+		}
+
+		public function is_valid(FormItem &$item)
+		{
+			if($this->is_valid_impl($item))
+				return true;
+			$item->add_message($this->message);
+			return false;
+		}
+
+		protected function is_valid_impl(FormItem &$item)
+		{
+			return false;
+		}
+
+		protected $message;
 	}
 
 	class RequiredRule extends FormItemRule {
-		public function is_valid(FormItem &$item)
+		protected $message = 'Value required';
+
+		protected function is_valid_impl(FormItem &$item)
 		{
 			return $item->value()!='';
 		}
 	}
 
 	class NumericRule extends FormItemRule {
-		public function is_valid(FormItem &$item)
+		protected $message = 'Value must be numeric';
+
+		protected function is_valid_impl(FormItem &$item)
 		{
 			return is_numeric($item->value());
 		}
 	}
 
 	class RegexRule extends FormItemRule {
-		public function __construct($regex)
+		protected $message = 'Value does not validate';
+
+		public function __construct($regex, $message = null)
 		{
 			$this->regex = $regex;
+			parent::__construct($message);
 		}
 		
-		public function is_valid(FormItem &$item)
+		protected function is_valid_impl(FormItem &$item)
 		{
 			return preg_match($this->regex, $item->value());
 		}
@@ -742,26 +818,29 @@ EOD;
 	}
 
 	class EmailRule extends RegexRule {
-		public function __construct()
+		public function __construct($message = null)
 		{
-			$this->regex = '/^((\"[^\"\f\n\r\t\v\b]+\")|([\w\!\#\$\%\&\'\*\+\-\~\/\^\`\|\{\}]+(\.'
+			parent::__construct(
+				'/^((\"[^\"\f\n\r\t\v\b]+\")|([\w\!\#\$\%\&\'\*\+\-\~\/\^\`\|\{\}]+(\.'
 				. '[\w\!\#\$\%\&\'\*\+\-\~\/\^\`\|\{\}]+)*))@((\[(((25[0-5])|(2[0-4][0-9])'
 				. '|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.'
 				. '((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])'
 				. '|([0-1]?[0-9]?[0-9])))\])|(((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))'
 				. '\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])'
 				. '|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9])))|'
-				. '((([A-Za-z0-9\-])+\.)+[A-Za-z\-]+))$/';
+				. '((([A-Za-z0-9\-])+\.)+[A-Za-z\-]+))$/',
+				$message);
 		}
 	}
 
 	class CallbackRule extends FormItemRule {
-		public function __construct($callback)
+		public function __construct($callback, $message = null)
 		{
 			$this->callback = $callback;
+			parent::__construct($message);
 		}
 
-		public function is_valid(FormItem &$item)
+		protected function is_valid_impl(FormItem &$item)
 		{
 			return call_user_func($this->callback, $item);
 		}
