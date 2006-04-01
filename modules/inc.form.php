@@ -208,6 +208,17 @@
 			}
 			return $hidden_html . $grid->html();
 		}
+
+		/**
+		 * validate the form
+		 */
+		public function is_valid()
+		{
+			foreach($this->items as &$item)
+				if(!$item->is_valid())
+					return false;
+			return true;
+		}
 	}
 
 	class Form extends FormBox {
@@ -241,6 +252,7 @@
 			$this->dbobj = $dbobj;
 			if($autogenerate)
 				$this->autogenerate();
+			$this->generate_form_id();
 		}
 
 		public function bind_ref(&$dbobj, $autogenerate=false)
@@ -248,6 +260,7 @@
 			$this->dbobj = $dbobj;
 			if($autogenerate)
 				$this->autogenerate();
+			$this->generate_form_id();
 		}
 
 		/**
@@ -255,10 +268,33 @@
 		 */
 		public function html()
 		{
+			$id = $this->add(new HiddenInput());
+			$id->set_name($this->form_id);
+			$id->set_value(1);
+
 			$html = '<form method="post" action="'.$_SERVER['REQUEST_URI'].'">';
 			$html .= parent::html();
 			$html .= '</form>';
 			return $html;
+		}
+
+		/**
+		 * validate the form
+		 */
+		public function is_valid()
+		{
+			return isset($_REQUEST[$this->form_id]) && parent::is_valid();
+		}
+
+		protected $form_id;
+
+		public function generate_form_id()
+		{
+			//TODO use form_id as name of array for all values in the form!
+			//that way, we can add multiple forms of the same type on one site
+			//
+			//e.g. "__swisdk_form_tbl_item_1[item_id]" instead of "item_id" alone
+			$this->form_id = '__swisdk_form_'.$this->dbobj->table().'_'.$this->dbobj->id();
 		}
 
 		/**
@@ -339,6 +375,11 @@
 		protected $value;
 
 		/**
+		 * validation rule objects
+		 */
+		protected $rules;
+
+		/**
 		 * helper for Form::add_obj()
 		 *
 		 * TODO: documentation for the field naming rules
@@ -415,6 +456,19 @@
 				$dbobj->set($name, stripslashes($_POST[$name]));
 
 			$this->set_value($dbobj->get($name));
+		}
+
+		public function add_rule(FormItemRule $rule)
+		{
+			$this->rules[] = $rule;
+		}
+
+		public function is_valid()
+		{
+			foreach($this->rules as &$rule)
+				if(!$rule->is_valid(&$this))
+					return false;
+			return true;
 		}
 	}
 
@@ -582,6 +636,67 @@ Calendar.setup({
 EOD;
 			return $html;
 		}
+	}
+
+
+	abstract class FormItemRule {
+		abstract public function is_valid(FormItem &$item);
+	}
+
+	class RequiredRule extends FormItemRule {
+		public function is_valid(FormItem &$item)
+		{
+			return $item->value()!='';
+		}
+	}
+
+	class NumericRule extends FormItemRule {
+		public function is_valid(FormItem &$item)
+		{
+			return is_numeric($item->value());
+		}
+	}
+
+	class RegexRule extends FormItemRule {
+		public function __construct($regex)
+		{
+			$this->regex = $regex;
+		}
+		
+		public function is_valid(FormItem &$item)
+		{
+			return preg_match($this->regex, $item->value());
+		}
+
+		protected $regex;
+	}
+
+	class EmailRule extends RegexRule {
+		public function __construct()
+		{
+			$this->regex = '/^((\"[^\"\f\n\r\t\v\b]+\")|([\w\!\#\$\%\&\'\*\+\-\~\/\^\`\|\{\}]+(\.'
+				. '[\w\!\#\$\%\&\'\*\+\-\~\/\^\`\|\{\}]+)*))@((\[(((25[0-5])|(2[0-4][0-9])'
+				. '|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.'
+				. '((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])'
+				. '|([0-1]?[0-9]?[0-9])))\])|(((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))'
+				. '\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])'
+				. '|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9])))|'
+				. '((([A-Za-z0-9\-])+\.)+[A-Za-z\-]+))$/';
+		}
+	}
+
+	class CallbackRule extends FormItemRule {
+		public function __construct($callback)
+		{
+			$this->callback = $callback;
+		}
+
+		public function is_valid(FormItem &$item)
+		{
+			return call_user_func($this->callback, $item);
+		}
+
+		protected $callback;
 	}
 
 ?>
