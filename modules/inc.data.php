@@ -197,6 +197,15 @@
 		protected $primary = null;
 
 		/**
+		 * Bookkeeping variables
+		 */
+
+		/**
+		 * Does the data in this DBObject differ from the database?
+		 */
+		protected $dirty = false;
+
+		/**
 		 * various helpers and variable accessors (these variables are not mutable)
 		 */
 		public function table()		{ return $this->table; }
@@ -222,23 +231,6 @@
 		 */
 		protected $data = array();
 
-		/**
-		 * @access: private
-		 * @return: the DB handle
-		 *
-		 * This function would be private if PHP knew friend classes
-		 */
-		public static function &db()
-		{
-			if(is_null(DBObject::$dbhandle)) {
-				DBObject::$dbhandle = new mysqli('localhost', 'root', 'bl4b', 'bugs');
-				if(mysqli_connect_errno())
-					SwisdkError::handle(new DBError("Connect failed: " . mysqli_connect_error()));
-			}
-
-			return DBObject::$dbhandle;
-		}
-		
 		/**
 		 * @param $setup_dbvars: Should the DB vars be determined or should we wait
 		 * until later (See DBObject::create)
@@ -326,6 +318,7 @@
 		public function refresh()
 		{
 			$this->data = DBObject::db_get_row('SELECT * FROM '.$this->table.' WHERE '.$this->primary.'='.$this->id());
+			$this->dirty = false;
 			return ($this->data && count($this->data));
 		}
 
@@ -335,7 +328,9 @@
 		 */
 		public function store()
 		{
-			if(isset($this->data[$this->primary])) {
+			if(!$this->dirty)
+				return true;
+			if(isset($this->data[$this->primary]) && $this->data[$this->primary]) {
 				return $this->update();
 			} else {
 				return $this->insert();
@@ -354,6 +349,7 @@
 				. $this->primary . '=' . $this->id());
 			$this->_update_relations();
 			DBObject::db_commit();
+			$this->dirty = false;
 		}
 
 		/**
@@ -367,6 +363,7 @@
 				. ' SET ' . $this->_vals_sql());
 			$this->_update_relations();
 			DBObject::db_commit();
+			$this->dirty = false;
 		}
 
 		/**
@@ -417,6 +414,7 @@
 		{
 			DBObject::db_query('DELETE FROM ' . $this->table
 				. ' WHERE ' . $this->primary . '=' . $this->id());
+			//TODO: $this->data = array(); ?
 		}
 
 		/**
@@ -578,6 +576,21 @@
 		}
 
 		/**
+		 * @return: the DB handle
+		 */
+		protected static function &db()
+		{
+			if(is_null(DBObject::$dbhandle)) {
+				//FIXME do not hardcode connection params
+				DBObject::$dbhandle = new mysqli('localhost', 'root', 'bl4b', 'bugs');
+				if(mysqli_connect_errno())
+					SwisdkError::handle(new DBError("Connect failed: " . mysqli_connect_error()));
+			}
+
+			return DBObject::$dbhandle;
+		}
+
+		/**
 		 * Use the following functions if you need raw DB access or if the DBObject
 		 * interface would be to cumbersome to do what you need to do.
 		 */
@@ -651,6 +664,11 @@
 			return DBObject::db()->escape_string($str);
 		}
 
+		public static function db_escape_ref(&$str)
+		{
+			$str = DBObject::db()->escape_string($str);
+		}
+
 		/**
 		 * Wrap DB transaction functions
 		 */
@@ -708,6 +726,7 @@
 		 */
 		public function set_data($data)
 		{
+			$this->dirty = true;
 			$this->data = array_merge($this->data, $data);
 		}
 
@@ -716,6 +735,7 @@
 		 */
 		public function clear()
 		{
+			$this->dirty = false;
 			$this->data = array();
 		}
 
@@ -732,6 +752,7 @@
 
 		public function __set($var, $value)
 		{
+			$this->dirty = true;
 			return ($this->data[$this->name($var)] = $value);
 		}
 
@@ -765,6 +786,7 @@
 
 		public function set($var, $value)
 		{
+			$this->dirty = true;
 			$this->data[$var] = $value;
 		}
 
@@ -913,7 +935,7 @@
 				$matches = array();
 				preg_match_all('/\{([A-Za-z_0-9]+)}/', $clause, $matches, PREG_PATTERN_ORDER);
 				if(isset($matches[1])) {
-					array_walk_recursive($data, '_dbocontainer_escape_string');
+					array_walk_recursive($data, array('DBObject', 'db_escape_ref'));
 					$p = array();
 					$q = array();
 					foreach($matches[1] as $v) {
@@ -1040,14 +1062,5 @@
 		}
 		public function offsetUnset($offset) { unset($this->data[$offset]); }
 	}
-
-	function _dbocontainer_escape_string(&$str)
-	{
-		static $dbh = null;
-		if($dbh===null)
-			$dbh = DBObject::db();
-		$str = '\''.$dbh->escape_string($str).'\'';
-	}
-
 
 ?>

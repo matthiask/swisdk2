@@ -5,15 +5,90 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
+	/**
+	 * Form
+	 *
+	 * Object-oriented form building package
+	 *
+	 * Form strongly depends on DBObject for its inner workings
+	 */
+
+	/**
+	 * Examples
+	 *
+	 *
+	 * minimal example
+	 * ***************
+	 *
+	 * DBObject::belongs_to('Item', 'Project');
+	 * DBObject::has_a('Item', 'ItemSeverity');
+	 * DBObject::has_a('Item', 'ItemState');
+	 * DBObject::has_a('Item', 'ItemItemPriority');
+	 *
+	 * $item = DBObject::find('Item', 42);
+	 * $form = new Form();
+	 * $form->bind_ref($item, true); // autogenerate form
+	 * $form->set_title('Edit Item');
+	 * $form->add(new SubmitButton());
+	 *
+	 * echo $form->html();
+	 *
+	 * // after form submission and validation, simply do:
+	 *
+	 * $item->store();
+	 *
+	 * or
+	 *
+	 * $form->dbobj()->store();
+	 *
+	 * The Form automatically writes its values into the provided
+	 * DBObject.
+	 *
+	 *
+	 * example without database
+	 * ************************
+	 *
+	 * $form = new Form();
+	 * $form->bind(DBObject::create('ContactForm')); // cannot autogenerate (obviously!)
+	 * $form->set_title('contact form');
+	 * $form->add('Sender'); // default FormItem is TextInput; use it
+	 * $form->add('Title');
+	 * $form->add('Text', new Textarea());
+	 * $form->add(new SubmitButton());
+	 *
+	 * // now, to get the values, use:
+	 *
+	 * $values = $form->dbobj()->data();
+	 *
+	 * You should now have an associative array of the form
+	 * array(
+	 * 	'contact_form_sender' => '...',
+	 * 	'contact_form_title' => '...',
+	 * 	'contact_form_text' => '...'
+	 * );
+	 * 
+	 */
+
+	/**
+	 * The FormBox is the basic grouping block of a Form
+	 *
+	 * There may be 1-n FormBoxes in one Form
+	 */
 	class FormBox {
 		protected $items;
 		protected $title;
 
+		/**
+		 * @param $dbobj: the DBObject bound to the Form
+		 */
 		public function __construct(&$dbobj)
 		{
 			$this->dbobj = $dbobj;
 		}
 
+		/**
+		 * set the (optional) title of a FormBox
+		 */
 		public function set_title($title=null)
 		{
 			$this->title = $title;
@@ -22,10 +97,16 @@
 		/**
 		 * This function has (at least) three overloads:
 		 *
-		 * add(FormItem)
 		 * add(Title, FormItem)
 		 * add(Title, RelSpec) // See DBObject for the relation specs
+		 * add(FormItem)
 		 *
+		 * Examples:
+		 *
+		 * $form->add('Title', new TextInput());
+		 * $form->add('Creation', new DateInput());
+		 * $form->add('Priority', 'ItemPriority');
+		 * $form->add(new SubmitButton());
 		 */
 		public function add()
 		{
@@ -99,12 +180,15 @@
 					case DB_REL_MANY:
 						//TODO better error handling (warning)
 						echo 'Cannot edit relation of type DB_REL_MANY.';
-					default:	// also includes DB_REL_MANY
+					default:
 						echo 'Oops. Unknown relation type.';
 				}
 			}
 		}
 
+		/**
+		 * @return html portion of form
+		 */
 		public function html()
 		{
 			$grid = new Layout_Grid();
@@ -113,6 +197,7 @@
 			if($this->title)
 				$grid->add_item(0, $grid->height(), $this->title, 3, 1);
 			foreach($this->items as &$item) {
+				// special treatment of HiddenInput fields
 				if($item instanceof HiddenInput)
 					$hidden_html .= $item->html();
 				else
@@ -127,8 +212,14 @@
 		{
 		}
 
+		/**
+		 * holds the DBObject bound to this Form
+		 */
 		protected $dbobj;
 
+		/**
+		 * @return the bound DBObject
+		 */
 		public function &dbobj()
 		{
 			if(!$this->dbobj)
@@ -137,6 +228,11 @@
 			return $this->dbobj;
 		}
 
+		/**
+		 * @param dbobj: a DBObject
+		 * @param autogenerate: automatically generate Form from relations
+		 * 	and field names of the DBObject
+		 */
 		public function bind($dbobj, $autogenerate=false)
 		{
 			$this->dbobj = $dbobj;
@@ -151,6 +247,9 @@
 				$this->autogenerate();
 		}
 
+		/**
+		 * @return the Form html
+		 */
 		public function html()
 		{
 			$html = '<form method="post" action="'.$_SERVER['REQUEST_URI'].'">';
@@ -159,6 +258,9 @@
 			return $html;
 		}
 
+		/**
+		 * Use the DBObject's field list and the relations to build a Form
+		 */
 		public function autogenerate()
 		{
 			$fields = $this->dbobj->field_list();
@@ -208,16 +310,41 @@
 		}
 	}
 
+	/**
+	 * base class of all form items
+	 */
 	class FormItem {
 
+		/**
+		 * the name (DBObject field name)
+		 */
 		protected $name;
+
+		/**
+		 * user-readable title
+		 */
 		protected $title;
+
+		/**
+		 * message (f.e. validation errors)
+		 */
 		protected $message;
 
+		/**
+		 * the value (ooh!)
+		 */
 		protected $value;
 
 		/**
 		 * helper for Form::add_obj()
+		 *
+		 * TODO: documentation for the field naming rules
+		 *
+		 * Examples for a DBObject of class 'Item':
+		 *
+		 * TextInput with title 'Title' will be item_title
+		 * Textarea with title 'Description' will be item_description
+		 * DateInput with title 'Creation' will be item_creation_dttm
 		 */
 		public function field_name($title)	{ return strtolower($title); } 
 
@@ -233,6 +360,10 @@
 		public function message()		{ return $this->message; }
 		public function set_message($message)	{ $this->message = $message; }
 
+		/**
+		 * the y position of this formitem (used while rendering with the
+		 * default FormItem::render() and FormItem::render_*() methods)
+		 */
 		protected $render_y;
 
 		public function render(&$grid)
@@ -245,19 +376,29 @@
 
 		protected function render_title(&$grid)
 		{
+			// put the title into the first column
 			$grid->add_item(0, $this->render_y, $this->title());
 		}
 
 		protected function render_field(&$grid)
 		{
+			// put the form item into the second column
 			$grid->add_item(1, $this->render_y, $this->field_html());
 		}
 
 		protected function render_message(&$grid)
 		{
+			// put the message into the third column
 			$grid->add_item(2, $this->render_y, $this->message());
 		}
 
+		/**
+		 * this is the function you should override if you want to use the
+		 * default rendering mechanism for FormItems.
+		 *
+		 * This function is not abstract because I do not want to force
+		 * everybody into using the default renderer (see SubmitButton)
+		 */
 		protected function field_html()
 		{
 			return '#OVERRIDE';
@@ -283,15 +424,14 @@
 		}
 	}
 
+	/**
+	 * hidden fields get special treatment (see also FormBox::html())
+	 *
+	 * re-use TextInput::field_html() (not clean, but I was too lazy to write the
+	 * html construction code twice)
+	 */
 	class HiddenInput extends TextInput {
 		protected $type = 'hidden';
-
-		/*
-		public function render(&$grid)
-		{
-			// do nothing
-		}
-		*/
 
 		public function html()
 		{
@@ -306,11 +446,15 @@
 	class Textarea extends FormItem {
 		protected function field_html()
 		{
+			//TODO make size configurable (user should be able to pass attributes anyway)
 			return '<textarea rows="20" cols="60" name="'.$this->name().'" id="'.$this->name().'">'
 				.$this->value().'</textarea>';
 		}
 	}
 
+	/**
+	 * base class for all FormItems which offer a choice between several items
+	 */
 	class SelectionFormItem extends FormItem {
 		public function set_items($items)
 		{
@@ -362,6 +506,9 @@
 		}
 	}
 
+	/**
+	 * base class for all FormItems which want to occupy a whole line (no title, no message)
+	 */
 	class FormBar extends FormItem {
 		public function render(&$grid)
 		{
@@ -382,8 +529,13 @@
 	}
 
 	class DateInput extends FormItem {
-		public function field_name($title) { return strtolower($title) . '_dttm'; }
-		//public function title() { return $this->title . '-Date'; }
+		/**
+		 * see also comment at FormItem::field_name()
+		 */
+		public function field_name($title)
+		{
+			return strtolower($title) . '_dttm';
+		}
 
 		protected function field_html()
 		{
