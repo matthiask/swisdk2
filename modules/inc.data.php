@@ -715,7 +715,7 @@
 		{
 			if(isset($this->data[$this->primary]))
 				return intval($this->data[$this->primary]);
-			return 0;
+			return null;
 		}
 
 		/**
