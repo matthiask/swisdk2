@@ -197,6 +197,15 @@
 		protected $primary = null;
 
 		/**
+		 * Bookkeeping variables
+		 */
+
+		/**
+		 * Does the data in this DBObject differ from the database?
+		 */
+		protected $dirty = false;
+
+		/**
 		 * various helpers and variable accessors (these variables are not mutable)
 		 */
 		public function table()		{ return $this->table; }
@@ -309,6 +318,7 @@
 		public function refresh()
 		{
 			$this->data = DBObject::db_get_row('SELECT * FROM '.$this->table.' WHERE '.$this->primary.'='.$this->id());
+			$this->dirty = false;
 			return ($this->data && count($this->data));
 		}
 
@@ -318,6 +328,8 @@
 		 */
 		public function store()
 		{
+			if(!$this->dirty)
+				return true;
 			if(isset($this->data[$this->primary]) && $this->data[$this->primary]) {
 				return $this->update();
 			} else {
@@ -337,6 +349,7 @@
 				. $this->primary . '=' . $this->id());
 			$this->_update_relations();
 			DBObject::db_commit();
+			$this->dirty = false;
 		}
 
 		/**
@@ -350,6 +363,7 @@
 				. ' SET ' . $this->_vals_sql());
 			$this->_update_relations();
 			DBObject::db_commit();
+			$this->dirty = false;
 		}
 
 		/**
@@ -400,6 +414,7 @@
 		{
 			DBObject::db_query('DELETE FROM ' . $this->table
 				. ' WHERE ' . $this->primary . '=' . $this->id());
+			//TODO: $this->data = array(); ?
 		}
 
 		/**
@@ -711,6 +726,7 @@
 		 */
 		public function set_data($data)
 		{
+			$this->dirty = true;
 			$this->data = array_merge($this->data, $data);
 		}
 
@@ -719,6 +735,7 @@
 		 */
 		public function clear()
 		{
+			$this->dirty = false;
 			$this->data = array();
 		}
 
@@ -735,6 +752,7 @@
 
 		public function __set($var, $value)
 		{
+			$this->dirty = true;
 			return ($this->data[$this->name($var)] = $value);
 		}
 
@@ -768,6 +786,7 @@
 
 		public function set($var, $value)
 		{
+			$this->dirty = true;
 			$this->data[$var] = $value;
 		}
 
