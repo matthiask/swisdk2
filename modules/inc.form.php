@@ -136,7 +136,10 @@
 		protected function add_initialized_obj($obj)
 		{
 			$obj->init_value($this->dbobj());
-			$this->items[$obj->name()] =& $obj;
+			if($obj->name())
+				$this->items[$obj->name()] =& $obj;
+			else
+				$this->items[] =& $obj;
 			return $obj;
 		}
 
@@ -377,7 +380,7 @@
 		/**
 		 * validation rule objects
 		 */
-		protected $rules;
+		protected $rules = array();
 
 		/**
 		 * helper for Form::add_obj()

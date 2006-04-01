@@ -524,7 +524,10 @@
 			$rel =& DBObject::$relations[$this->class][$class];
 			switch($rel['type']) {
 				case DB_REL_SINGLE:
-					return DBObject::find($rel['class'], $this->data[$rel['field']]);
+					if(isset($this->data[$rel['field']]))
+						return DBObject::find($rel['class'], $this->data[$rel['field']]);
+					else
+						return DBOContainer::create($rel['class']);
 				case DB_REL_MANY:
 					return $this->related_many($rel);
 				case DB_REL_MANYTOMANY:
@@ -696,7 +699,9 @@
 		 */
 		public function id()
 		{
-			return intval($this->data[$this->primary]);
+			if(isset($this->data[$this->primary]))
+				return intval($this->data[$this->primary]);
+			return 0;
 		}
 
 		/**
