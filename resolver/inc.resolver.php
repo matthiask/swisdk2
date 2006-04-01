@@ -110,7 +110,7 @@
 					|| count($matches=glob($path.'_*'))) {
 					if(is_file($matches[0])) {
 						Swisdk::set_config_value('runtime.controller.url',
-							'/'.implode('/',$tokens).'/');
+							preg_replace('/[\/]+/', '/', '/'.implode('/',$tokens).'/'));
 						Swisdk::set_config_value('runtime.includefile', $matches[0]);
 						$this->arguments = array_slice(
 							explode('/', substr($urifragment,1)),
@@ -118,9 +118,9 @@
 						return true;
 					}
 				}
-				array_pop($tokens);
 				if(!count($tokens))
 					return false;
+				array_pop($tokens);
 			}
 		}
 	}
