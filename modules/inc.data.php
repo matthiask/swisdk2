@@ -519,36 +519,50 @@
 				'field' => $options, 'class' => $c1, 'foreign' => $o1->primary());
 		}
 
-		public function related($class)
+		/**
+		 * get related DBObject or DBOContainer (depending on relation type)
+		 *
+		 * @param class: class of related object OR name given to the relation (n-to-m)
+		 * @param params: additional params for related_many and related_many_to_many
+		 * 		Is currently NOT used for DB_REL_SINGLE  (TODO: any sane thing I
+		 * 		could do with it?)
+		 */
+		public function related($class, $params=null)
 		{
 			$rel =& DBObject::$relations[$this->class][$class];
 			switch($rel['type']) {
 				case DB_REL_SINGLE:
+					// FIXME this is seriously broken... gah
+					// see also DBObject::get() (around line 790)
 					if(isset($this->data[$rel['field']]))
 						return DBObject::find($rel['class'], $this->data[$rel['field']]);
 					else
 						return DBOContainer::create($rel['class']);
 				case DB_REL_MANY:
-					return $this->related_many($rel);
+					return $this->related_many($rel, $params);
 				case DB_REL_MANYTOMANY:
-					return $this->related_many_to_many($rel);
+					return $this->related_many_to_many($rel, $params);
 			}
 		}
 
-		protected function related_many(&$rel)
+		protected function related_many(&$rel, $params=null)
 		{
 			$container = DBOContainer::create($rel['class']);
 			$container->add_clause($rel['field'].'=',
 				$this->id());
+			if(is_array($params))
+				$container->add_clause_array($params);
 			$container->init();
 			return $container;
 		}
 
-		protected function related_many_to_many(&$rel)
+		protected function related_many_to_many(&$rel, $params=null)
 		{
 			$container = DBOContainer::create($rel['class']);
 			$container->add_join($rel['table'], $rel['join']);
 			$container->add_clause($rel['table'].'.'.$this->primary().'=', $this->id());
+			if(is_array($params))
+				$container->add_clause_array($params);
 			$container->init();
 			return $container;
 		}
@@ -784,6 +798,8 @@
 			$relations = $this->relations();
 
 			if(isset($relations[$var])) {
+				// FIXME It seems that I assumed that I'll always get a DBOContainer
+				// back from DBObject::related(). That is NOT always the case. (DB_REL_SINGLE)
 				$this->data[$var] = $this->related($var)->ids();
 				return $this->data[$var];
 			}
@@ -901,10 +917,8 @@
 			} else {
 				$container = new DBOContainer($class);
 			}
-			if($params) {
-				$p = each($params);
-				$container->add_clause($container->obj->name($p[0]), $p[1]);
-			}
+			if(is_array($params))
+				$this->add_clause_array($params);
 			$container->init();
 			return $container;
 		}
@@ -956,6 +970,12 @@
 			} else {
 				$this->clause_sql .= $binding.' '.$clause . DBObject::db_escape($data);
 			}
+		}
+
+		public function add_clause_array($params)
+		{
+			foreach($params as $k => $v)
+				$this->add_clause($k, $v);
 		}
 
 		/**
