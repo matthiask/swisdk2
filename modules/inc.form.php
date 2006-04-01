@@ -69,6 +69,9 @@
 	 * 
 	 */
 
+	require_once MODULE_ROOT . 'inc.data.php';
+	require_once MODULE_ROOT . 'inc.layout.php';
+
 	/**
 	 * The FormBox is the basic grouping block of a Form
 	 *
