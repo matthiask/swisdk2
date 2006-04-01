@@ -366,6 +366,12 @@
 				}
 			}
 		}
+
+		public function &item($name)
+		{
+			if(isset($this->items[$name]))
+				return $this->items[$name];
+		}
 	}
 
 	/**
@@ -399,15 +405,21 @@
 		protected $rules = array();
 
 		/**
+		 * additional html attributes
+		 */
+		protected $attributes = array();
+
+		/**
 		 * helper for Form::add_obj()
-		 *
-		 * TODO: documentation for the field naming rules
 		 *
 		 * Examples for a DBObject of class 'Item':
 		 *
 		 * TextInput with title 'Title' will be item_title
 		 * Textarea with title 'Description' will be item_description
 		 * DateInput with title 'Creation' will be item_creation_dttm
+		 *
+		 * This function must not add the prefix (item_), because that will
+		 * be added later. It should add _dttm for DateInput, however.
 		 */
 		public function field_name($title)	{ return strtolower($title); } 
 
@@ -422,6 +434,19 @@
 		public function set_title($title)	{ $this->title = $title; } 
 		public function message()		{ return $this->message; }
 		public function set_message($message)	{ $this->message = $message; }
+
+		public function set_attributes($attributes)
+		{
+			$this->attributes = array_merge($this->attributes, $attributes); 
+		}
+
+		protected function attribute_html()
+		{
+			$html = ' ';
+			foreach($this->attributes as $k => $v)
+				$html .= $k.'="'.$v.'" ';
+			return $html;
+		}
 
 		/**
 		 * the y position of this formitem (used while rendering with the
@@ -496,7 +521,8 @@
 		protected function field_html()
 		{
 			return '<input type="'.$this->type.'" name="'.$this->name().'" id="'
-				.$this->name().'"  value="'.$this->value().'"/>';
+				.$this->name().'"  value="'.$this->value().'" '
+				.$this->attribute_html().'/>';
 		}
 	}
 
@@ -520,10 +546,13 @@
 	}
 
 	class Textarea extends FormItem {
+		protected $attributes = array('rows' => 20, 'cols' => 60);
+
 		protected function field_html()
 		{
 			//TODO make size configurable (user should be able to pass attributes anyway)
-			return '<textarea rows="20" cols="60" name="'.$this->name().'" id="'.$this->name().'">'
+			return '<textarea name="'.$this->name().'" id="'.$this->name().'"'
+				.$this->attribute_html().'>'
 				.$this->value().'</textarea>';
 		}
 	}
@@ -543,7 +572,8 @@
 	class DropdownInput extends SelectionFormItem {
 		protected function field_html()
 		{
-			$html = '<select name="'.$this->name().'" id="'.$this->name().'">';
+			$html = '<select name="'.$this->name().'" id="'.$this->name().'"'
+				.$this->attribute_html().'>';
 			$value = $this->value();
 			foreach($this->items as $k => $v) {
 				$html .= '<option ';
@@ -559,7 +589,8 @@
 	class Multiselect extends SelectionFormItem {
 		protected function field_html()
 		{
-			$html = '<select name="'.$this->name().'[]" id="'.$this->name().'" multiple="multiple">';
+			$html = '<select name="'.$this->name().'[]" id="'.$this->name()
+				.'" multiple="multiple"'.$this->attribute_html().'>';
 			$value = $this->value();
 			if(!$value)
 				$value = array();
@@ -595,7 +626,7 @@
 	class SubmitButton extends FormBar {
 		protected function field_html()
 		{
-			return '<input type="submit" />';
+			return '<input type="submit" '.$this->attribute_html().'/>';
 		}
 
 		public function init_value($dbobj)
