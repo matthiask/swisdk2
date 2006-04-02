@@ -10,7 +10,7 @@
 	class SessionHandler {
 		protected function __construct()
 		{
-			if( !session_id() ) {
+			if(!session_id()) {
 				session_start();
 			}
 			
@@ -26,13 +26,14 @@
 			}
 
 			// TODO might also check if IP is still the same to prevent session stealing
-			if(getInput('logout')) {
+			if(isset($_REQUEST['logout'])) {
+				// XXX maybe only unset SessionHandler variables?
 				session_destroy();
 				redirect('/');
 			}
 		}
 
-		public static function instance()
+		public static function &instance()
 		{
 			static $instance = null;
 			if( $instance === null ) {
@@ -44,7 +45,15 @@
 		
 		public static function authenticated()
 		{
-			return true == $_SESSION[ 'swisdk2_authenticated' ];
+			return isset($_SESSION['authenticated'])
+				&& $_SESSION['authenticated'];
+		}
+
+		public function user_id()
+		{
+			if(SessionHandler::authenticated() && isset($_SESSION['user_id']))
+				return $_SESSION['user_id'];
+			return null;
 		}
 	}
 
