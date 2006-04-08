@@ -601,7 +601,7 @@
 		{
 			if(is_null(DBObject::$dbhandle)) {
 				//FIXME do not hardcode connection params
-				DBObject::$dbhandle = new mysqli('localhost', 'root', 'bl4b', 'bugs');
+				DBObject::$dbhandle = new mysqli('localhost', 'root', '5h9tiSLosax', 'jungegru_stopoffroader');
 				if(mysqli_connect_errno())
 					SwisdkError::handle(new DBError("Connect failed: " . mysqli_connect_error()));
 			}
