@@ -34,6 +34,9 @@
 				session_destroy();
 				redirect('/');
 			}
+			
+			if($_SESSION['user_id'] && !$this->user)
+				$this->user = DBObject::find('User', $_SESSION['user_id']);
 		}
 
 		public static function &instance()
@@ -61,7 +64,7 @@
 
 		public function user_data()
 		{
-			if(SessionHandler::authenticated() && isset($_SESSION['user_id']))
+			if(SessionHandler::authenticated() && $this->user)
 				return $this->user->data();
 			return null;
 		}
