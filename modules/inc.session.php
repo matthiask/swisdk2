@@ -34,7 +34,7 @@
 				session_destroy();
 				redirect('/');
 			}
-			
+
 			if($_SESSION['user_id'] && !$this->user)
 				$this->user = DBObject::find('User', $_SESSION['user_id']);
 		}
