@@ -8,6 +8,8 @@
 	require_once MODULE_ROOT . 'inc.data.php';
 
 	class SessionHandler {
+		protected $user;
+
 		protected function __construct()
 		{
 			if(!session_id()) {
@@ -22,6 +24,7 @@
 				if($user) {
 					$_SESSION['user_id'] = $user->id;
 					$_SESSION['authenticated'] = true;
+					$this->user = $user;
 				}
 			}
 
@@ -53,6 +56,13 @@
 		{
 			if(SessionHandler::authenticated() && isset($_SESSION['user_id']))
 				return $_SESSION['user_id'];
+			return null;
+		}
+
+		public function user_data()
+		{
+			if(SessionHandler::authenticated() && isset($_SESSION['user_id']))
+				return $this->user->data();
 			return null;
 		}
 	}
