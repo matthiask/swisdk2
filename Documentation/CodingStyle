@@ -1,0 +1,70 @@
+This is not a real coding style guideline yet, just a pile of assorted
+guidelines that I mostly try to adhere to.
+
+
+Use the three "standard" comments TODO, FIXME and XXX:
+
+TODO:	something that has not yet been implemented; eventually also things
+	that would be nice to have
+
+FIXME:	code that is broken, bogus or just not as extensible as it should be.
+	FIXMEs should be fairly easy to fix
+
+XXX:	bigger changes, brokenness in design; XXXs are generally hard to fix
+	or require some thought. Not all XXXs are as important as the FIXMEs,
+	however.
+
+
+Use CamelCase for class names, but under_scores for method names. The following
+scheme should be used for accessors and mutators:
+
+	Swisdk::config_value() (NOT Swisdk::get_config_value())
+	Swisdk::set_config_value()
+
+	FormItem::value()
+	FormItem::set_value()
+
+
+Do not use too much whitespace. Screen estate is precious. I want to see
+as much code as possible, not whitespace. Take the following function as
+example (DBObject::create()):
+
+	public static function create($class)
+	{
+		if(class_exists($class))
+			return new $class();
+
+		$obj = new DBObject(false);
+		$obj->class = $class;
+		$obj->_setup_dbvars();
+		return $obj;
+	}
+
+Write code that is easy to read for a fellow developer, not for a
+computer.
+
+Code should be self-explaining. Where it is not, provide a commented
+example in the method description.
+
+You may also use javadoc-style function descriptions if you want to.
+
+Example comment for DBObject::db_get_array():
+
+	/**
+	 * Return multiple rows as a nested array.
+	 *
+	 * If you pass a string as second argument, this functions tries to use it
+	 * as the key of the returned array.
+	 * You may also pass an array with two elements, they will be used to return
+	 * key-value pairs.
+	 *
+	 * Example usage:
+	 *
+	 * $titles = DBObject::db_get_array('SELECT * FROM table');
+	 * $titles = DBObject::db_get_array('SELECT * FROM table', 'id');
+	 * $titles = DBObject::db_get_array('SELECT id,title FROM table',array('id','title'));
+	 */
+	public static function db_get_array($sql, $result_key=null)
+	{
+		[...]
+

@@ -370,6 +370,10 @@
 		 * this helper should always be executed inside a transaction (that
 		 * is actually the case when you use update() or insert(), the only
 		 * place where this helper is used right now)
+		 *
+		 * XXX oops, a transaction does not really help here. I should lock
+		 * the table while the user is editing data, but that's not easily
+		 * doable (not at all without a big performance hit)
 		 */
 		private function _update_relations()
 		{
