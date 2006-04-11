@@ -695,23 +695,36 @@
 		/**
 		 * Wrap DB transaction functions
 		 */
+
+		protected static $in_transaction = 0;
+
 		public static function db_start_transaction()
 		{
-			DBObject::db()->autocommit(false);
+			if(DBObject::$in_transaction==0)
+				DBObject::db()->autocommit(false);
+			DBObject::$in_transaction++;
 		}
 
 		public static function db_commit()
 		{
-			$dbh = DBObject::db();
-			$dbh->commit();
-			$dbh->autocommit(true);
+			DBObject::$in_transaction--;
+			if(DBObject::$in_transaction<=0) {
+				$dbh = DBObject::db();
+				$dbh->commit();
+				$dbh->autocommit(true);
+				DBObject::$in_transaction = 0;
+			}
 		}
 
 		public static function db_rollback()
 		{
-			$dbh = DBObject::db();
-			$dbh->rollback();
-			$dbh->autocommit(true);
+			DBObject::$in_transaction--;
+			if(DBObject::$in_transaction<=0) {
+				$dbh = DBObject::db();
+				$dbh->rollback();
+				$dbh->autocommit(true);
+				DBObject::$in_transaction = 0;
+			}
 		}
 
 		/**
