@@ -67,19 +67,63 @@
 	 * 	'contact_form_text' => '...'
 	 * );
 	 * 
+	 *
+	 * 
+	 * micro-example for language aware forms
+	 * **************************************
+	 *
+	 * $form = new FormML();
+	 * $form->bind(DBObjectML::find('News', 1));
+	 * $form->autogenerate(); // might also pass true as second parameter to bind()
+	 * $form->add(new SubmitButton());
+	 * if($form->is_valid()) {
+	 * 	echo 'valid!';
+	 * 	$form->dbobj()->store();
+	 * } else {
+	 * 	echo $form->html();
+	 * }
+	 *
+	 * DBObject-conforming tables need to be created for 'News', 'NewsContent' and
+	 * 'Language' DBObjects for this snippet to work
 	 */
 
 	require_once MODULE_ROOT . 'inc.data.php';
 	require_once MODULE_ROOT . 'inc.layout.php';
 
 	/**
+	 * this specialization of Layout_Grid allows the form code to add
+	 * html fragments before the Grid table.
+	 *
+	 * This is mostly used for hidden input fields and other bookkeeping
+	 * information. It might also be used for javascript etc. later on.
+	 */
+	class Form_Grid extends Layout_Grid {
+		protected $html = '';
+
+		public function add_html($html)
+		{
+			$this->html .= $html;
+		}
+
+		public function html()
+		{
+			return $this->html . parent::html();
+		}
+	}
+
+	/**
 	 * The FormBox is the basic grouping block of a Form
 	 *
 	 * There may be 1-n FormBoxes in one Form
 	 */
-	class FormBox {
+	class FormBox implements Iterator {
 		protected $items;
 		protected $title;
+
+		/**
+		 * holds the DBObject bound to this FormBox
+		 */
+		protected $dbobj;
 
 		/**
 		 * @param $dbobj: the DBObject bound to the Form
@@ -87,6 +131,14 @@
 		public function __construct(&$dbobj)
 		{
 			$this->dbobj = $dbobj;
+		}
+
+		/**
+		 * @return the bound DBObject
+		 */
+		public function &dbobj()
+		{
+			return $this->dbobj;
 		}
 
 		/**
@@ -116,7 +168,9 @@
 			$args = func_get_args();
 
 			if(count($args)<2) {
-				if($args[0] instanceof FormItem) {
+				if($args[0] instanceof FormBox) {
+					$this->items[] = $args[0];
+				} else if($args[0] instanceof FormItem) {
 					return $this->add_initialized_obj($args[0]);
 				} else {
 					return $this->add_obj($args[0],
@@ -192,23 +246,111 @@
 		}
 
 		/**
+		 * Use the DBObject's field list and the relations to build a Form
+		 */
+		protected function fname($name)
+		{
+			return $name;
+		}
+
+		/**
+		 * Inspect the field_list of the bound DBObject and automatically
+		 * build a form with most fields in the field_list
+		 */
+		public function autogenerate($fields=null)
+		{
+			if(!is_array($fields))
+				$fields = $this->dbobj->field_list();
+			$relations_ = $this->dbobj->relations();
+
+			$relations = array();
+			foreach($relations_ as $class => &$r) {
+				$relations[$r['field']] = $r;
+			}
+
+			foreach($fields as &$field) {
+				// field name
+				$fname = $this->fname($field['Field']);
+				// short name (prefix removed)
+				$sn = $this->dbobj->shortname($fname);
+				// hide the id field
+				$regex = '^id$';
+				if($this->dbobj instanceof DBObjectML_T) {
+					// also hide the language id and the owning DBObject
+					// reference fields
+					$regex .= '|^__language([0-9]+)_id$|_language_id$';
+					$regex .= '|_'.$this->dbobj->owner_primary().'$';
+				}
+
+				if(preg_match('/('.$regex.')/', strtolower($sn))) {
+					// should I hide the current field?
+					$this->add($sn, new HiddenInput(), $fname);
+				} else if(isset($relations[$fname])) {
+					// use relations to determine how to display
+					// the FormItem?
+					switch($relations[$fname]['type']) {
+						case DB_REL_SINGLE:
+							$f = $this->add($sn, new DropdownInput(), $fname);
+							$dc = DBOContainer::find($relations[$fname]['class']);
+							$choices = array();
+							foreach($dc as $o) {
+								$items[$o->id()] = $o->title();
+							}
+							$f->set_items($items);
+							break;
+						case DB_REL_MANY:
+							$f = $form->add($sn, new Multiselect(), $fname);
+							$dc = DBOContainer::find($relations[$fname]['class']);
+							$items = array();
+							foreach($dc as $o) {
+								$items[$o->id()] = $o->title();
+							}
+							$f->set_items($items);
+							break;
+					}
+				} else if(strpos($fname,'dttm')!==false) {
+					// display datepicker? (dttm ~= date time)
+					$this->add($sn, new DateInput(), $fname);
+				} else if(strpos($field['Type'], 'text')!==false) {
+					// textarea for field of 'text' type
+					$this->add($sn, new Textarea(), $fname);
+				} else if($field['Type']=='tinyint(1)') {
+					// mysql suckage. It does not really know
+					// a bool type, only tinyint(1)
+					$this->add($sn, new CheckboxInput(), $fname);
+				} else {
+					// no other rules matched, just use a
+					// textinput for this field
+					$this->add($sn, new TextInput(), $fname);
+				}
+			}
+		}
+
+		/**
 		 * @return html portion of form
 		 */
 		public function html()
 		{
-			$grid = new Layout_Grid();
-			$hidden_html = '';
+			$grid = new Form_Grid();
+			$this->render($grid);
+			return $grid->html();
+		}
 
+		/**
+		 * render the contained FormItems and the nested FormBoxes onto
+		 * the layout grid
+		 */
+		public function render($grid)
+		{
 			if($this->title)
 				$grid->add_item(0, $grid->height(), $this->title, 3, 1);
 			foreach($this->items as &$item) {
 				// special treatment of HiddenInput fields
 				if($item instanceof HiddenInput)
-					$hidden_html .= $item->html();
+					$grid->add_html($item->html());
 				else
 					$item->render($grid);
 			}
-			return $hidden_html . $grid->html();
 		}
 
 		/**
@@ -222,27 +364,32 @@
 					$valid = false;
 			return $valid;
 		}
+		
+		/**
+		 * @return the formitem with name $name
+		 *
+		 * TODO: should also descend into nested FormBoxes
+		 */
+		public function &item($name)
+		{
+			if(isset($this->items[$name]))
+				return $this->items[$name];
+		}
+
+		/**
+		 * Iterator implementation (see PHP Object Iteration)
+		 */
+
+		public function rewind()	{ return reset($this->items); }
+		public function current()	{ return current($this->items); }
+		public function key()		{ return key($this->items); }
+		public function next()		{ return next($this->items); }
+		public function valid()		{ return $this->current() !== false; }
 	}
 
 	class Form extends FormBox {
 		public function __construct()
 		{
-		}
-
-		/**
-		 * holds the DBObject bound to this Form
-		 */
-		protected $dbobj;
-
-		/**
-		 * @return the bound DBObject
-		 */
-		public function &dbobj()
-		{
-			if(!$this->dbobj)
-				SwisdkError::handle(new BasicSwisdkError(
-					'No DBObject bound to form!'));
-			return $this->dbobj;
 		}
 
 		/**
@@ -283,6 +430,9 @@
 			return $html;
 		}
 
+		/**
+		 * add a validation message to the form
+		 */
 		protected $message;
 		public function message()		{ return $this->message; }
 		public function set_message($message)	{ $this->message = $message; }
@@ -317,75 +467,81 @@
 			$this->rules[] = $rule;
 		}
 
+		/**
+		 * array of all FormRules
+		 *
+		 * Note! The FormItems do store their FormItemRules themselves
+		 */
 		protected $rules = array();
 
 		protected $form_id;
 
+		/**
+		 * generate an id for this form
+		 *
+		 * the id is used to track which form has been submitted if there
+		 * were multiple forms on one page. See also is_valid()
+		 */
 		public function generate_form_id()
 		{
-			//TODO use form_id as name of array for all values in the form!
-			//that way, we can add multiple forms of the same type on one site
-			//
-			//e.g. "__swisdk_form_tbl_item_1[item_id]" instead of "item_id" alone
 			$id = $this->dbobj->id();
 			$this->form_id = '__swisdk_form_'.$this->dbobj->table().'_'.($id?$id:0);
 		}
+	}
 
-		/**
-		 * Use the DBObject's field list and the relations to build a Form
-		 */
-		public function autogenerate()
+	/**
+	 * FormML and DBObjectML are even more tightly coupled to each other.
+	 * For now, there is no possibility to use multilanguage forms without
+	 * a backing database.
+	 *
+	 * FIXME: multi-language forms without DB should be possible
+	 */
+
+	/**
+	 * The FormMLBox does some additional name munging to make it possible
+	 * to display FormItems for the same fields for multiple languages
+	 * at the same time.
+	 */
+	class FormMLBox extends FormBox {
+		protected function fname($name)
 		{
-			$fields = $this->dbobj->field_list();
-			$relations_ = $this->dbobj->relations();
+			if($this->language)
+				return '__language'.$this->language.'_'.$name;
+			return $name;
+		}
 
-			$relations = array();
-			foreach($relations_ as $class => &$r) {
-				$relations[$r['field']] = $r;
-			}
+		public $language;
+	}
 
-			foreach($fields as &$field) {
-				$fname = $field['Field'];
-				$sn = $this->dbobj->shortname($fname);
-				if($fname==$this->dbobj->primary()) {
-					$this->add('ID', new HiddenInput());
-					continue;
+	class FormML extends Form {
+		protected $dbobjml = null;
+
+		public function autogenerate($fields=null)
+		{
+			parent::autogenerate($fields);
+			$dbobj = $this->dbobj->dbobj();
+			if($dbobj instanceof DBOContainer) {
+				foreach($dbobj as &$obj) {
+					$box = new FormMLBox($obj);
+					$box->language = $obj->language_id;
+					$box->autogenerate();
+					$box->set_title('Language: '.$obj->language_id);
+					$this->add($box);
 				}
-				if(isset($relations[$fname])) {
-					switch($relations[$fname]['type']) {
-						case DB_REL_SINGLE:
-							$f = $this->add($sn, new DropdownInput(), $fname);
-							$dc = DBOContainer::find($relations[$fname]['class']);
-							$choices = array();
-							foreach($dc as $o) {
-								$items[$o->id()] = $o->title();
-							}
-							$f->set_items($items);
-							break;
-						case DB_REL_MANY:
-							$f = $form->add($sn, new Multiselect(), $fname);
-							$dc = DBOContainer::find($relations[$fname]['class']);
-							$items = array();
-							foreach($dc as $o) {
-								$items[$o->id()] = $o->title();
-							}
-							$f->set_items($items);
-							break;
-					}
-				} else if(strpos($fname,'dttm')!==false) {
-					$this->add($sn, new DateInput(), $fname);
-				} else if(strpos($field['Type'], 'text')!==false) {
-					$this->add($sn, new Textarea(), $fname);
-				} else {
-					$this->add($sn, new TextInput(), $fname);
-				}
+			} else {
+				$box = new FormMLBox($dbobj);
+				$box->language = $dbobj->language_id;
+				$box->autogenerate();
+				$box->set_title('Language: '.$dbobj->language_id);
+				$this->add($box);
 			}
 		}
 
-		public function &item($name)
+		public function &dbobj()
 		{
-			if(isset($this->items[$name]))
-				return $this->items[$name];
+			if($this->dbobjml)
+				return $this->dbobjml;
+			return $this->dbobj;
 		}
 	}
 
@@ -445,7 +601,7 @@
 		public function set_value($value)	{ $this->value = $value; } 
 		public function name()			{ return $this->name; }
 		public function set_name($name)		{ $this->name = $name; } 
-		public function title()			{ return $this->title; }
+		public function title()			{ return $this->_stripit($this->title); }
 		public function set_title($title)	{ $this->title = $title; } 
 		public function message()		{ return $this->message; }
 		public function set_message($message)	{ $this->message = $message; }
@@ -457,16 +613,43 @@
 				$this->message = $message;
 		}
 
+		/**
+		 * XXX UGLY :-(
+		 *
+		 * internal hack, implementation detail of MLForm that found its
+		 * way into the standard form code... I hate it. But it works.
+		 * And the user does not havel to care.
+		 *
+		 * This strips the part of the FormItem name that makes it possible
+		 * to display multiple FormItems of the same fields in the same form.
+		 */
+		protected function _stripit($str)
+		{
+			return preg_replace('/__language([0-9]+)_/', '', $str);
+		}
+
+		/**
+		 * get an array of html attributes
+		 */
+		public function attributes()
+		{
+			return $this->attributes;
+		}
+
 		public function set_attributes($attributes)
 		{
 			$this->attributes = array_merge($this->attributes, $attributes); 
 		}
 
+		/**
+		 * helper function which composes a html-compatible attribute
+		 * string
+		 */
 		protected function attribute_html()
 		{
 			$html = ' ';
 			foreach($this->attributes as $k => $v)
-				$html .= $k.'="'.$v.'" ';
+				$html .= $k.'="'.htmlspecialchars($v).'" ';
 			return $html;
 		}
 
@@ -517,15 +700,16 @@
 		public function init_value($dbobj)
 		{
 			$name = $this->name();
+			$sname = $this->_stripit($name);
 
 			if(isset($_POST[$name])) {
 				if(is_array($_POST[$name]))
-					$dbobj->set($name, $_POST[$name]);
+					$dbobj->set($sname, $_POST[$name]);
 				else
-					$dbobj->set($name, stripslashes($_POST[$name]));
+					$dbobj->set($sname, stripslashes($_POST[$name]));
 			}
 
-			$this->set_value($dbobj->get($name));
+			$this->set_value($dbobj->get($sname));
 		}
 
 		public function add_rule(FormItemRule $rule)
@@ -543,8 +727,8 @@
 		}
 	}
 
-	class TextInput extends FormItem {
-		protected $type = 'text';
+	abstract class SimpleInput extends FormItem {
+		protected $type = '#INVALID';
 		protected function field_html()
 		{
 			return '<input type="'.$this->type.'" name="'.$this->name().'" id="'
@@ -553,11 +737,13 @@
 		}
 	}
 
+	class TextInput extends SimpleInput {
+		protected $type = 'text';
+		protected $attributes = array('size' => 60);
+	}
+
 	/**
 	 * hidden fields get special treatment (see also FormBox::html())
-	 *
-	 * re-use TextInput::field_html() (not clean, but I was too lazy to write the
-	 * html construction code twice)
 	 */
 	class HiddenInput extends TextInput {
 		protected $type = 'hidden';
@@ -568,16 +754,42 @@
 		}
 	}
 
-	class PasswordInput extends TextInput {
+	class PasswordInput extends SimpleInput {
 		protected $type = 'password';
 	}
 
-	class Textarea extends FormItem {
-		protected $attributes = array('rows' => 20, 'cols' => 60);
+	class CheckboxInput extends FormItem {
+		protected $type = 'checkbox';
+
+		public function init_value($dbobj)
+		{
+			$name = $this->name();
+			$sname = $this->_stripit($name);
+
+			if(isset($_POST['__check_'.$name])) {
+				if(isset($_POST[$name]) && $_POST[$name])
+					$dbobj->set($sname, 1);
+				else
+					$dbobj->set($sname, 0);
+			}
+
+			$this->set_value($dbobj->get($sname));
+		}
 
 		protected function field_html()
 		{
-			//TODO make size configurable (user should be able to pass attributes anyway)
+			return '<input type="checkbox" name="'.$this->name().'" id="'
+				.$this->name().'"  '.($this->value()?'checked="checked"':'')
+				.$this->attribute_html().'/><input type="hidden" '
+				.'name="__check_'.$this->name().'" value="1" />';
+		}
+	}
+
+	class Textarea extends FormItem {
+		protected $attributes = array('rows' => 12, 'cols' => 60);
+
+		protected function field_html()
+		{
 			return '<textarea name="'.$this->name().'" id="'.$this->name().'"'
 				.$this->attribute_html().'>'
 				.$this->value().'</textarea>';

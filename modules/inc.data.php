@@ -213,6 +213,7 @@
 		public function name($tok)	{ return $this->prefix . $tok; }
 		public function shortname($tok)	{ return str_replace($this->prefix,'',$tok); }
 		public function _class()	{ return $this->class; }
+		public function _prefix()	{ return $this->prefix; }
 		public function relations()
 		{
 			if(isset(DBObject::$relations[$this->class]))
@@ -244,7 +245,7 @@
 		/**
 		 * private helper function that implements my DB naming scheme
 		 */
-		private function _setup_dbvars()
+		protected function _setup_dbvars()
 		{
 			$tok = strtolower(preg_replace(
 				'/([A-Z])/', '_\1', $this->class));
@@ -287,28 +288,30 @@
 		 *
 		 * This function returns a DBObject of type $class if the entry
 		 * $id exists in the database.
-		 *
-		 * TODO add possibility to initialize on other fields (not only primary key)
 		 */
 		public static function &find($class, $params)
 		{
 			$obj = DBObject::create($class);
+			if($obj->_find($params))
+				return $obj;
+			$null = null;
+			return $null;
+		}
+
+		protected function _find($params)
+		{
 			if(is_array($params)) {
 				$where = array(' WHERE 1 ');
 				foreach($params as $k=>$v)
 					$where[] = $k.'\''.DBObject::db_escape($v).'\' ';
-				$obj->data = DBObject::db_get_row('SELECT * FROM '
-					.$obj->table.implode(' AND ',$where));
-				if($obj->data && count($obj->data))
-					return $obj;
-				$null = null;
-				return $null;
+				$this->data = DBObject::db_get_row('SELECT * FROM '
+					.$this->table.implode(' AND ',$where));
+				if($this->data && count($this->data))
+					return true;
 			} else {
-				$obj->id = $params;
-				if($obj->refresh())
-					return $obj;
-				$null = null;
-				return $null;
+				$this->id = $params;
+				if($this->refresh())
+					return true;
 			} 
 		}
 
@@ -317,7 +320,9 @@
 		 */
 		public function refresh()
 		{
-			$this->data = DBObject::db_get_row('SELECT * FROM '.$this->table.' WHERE '.$this->primary.'='.$this->id());
+			if($this->id())
+				$this->data = DBObject::db_get_row('SELECT * FROM '
+					.$this->table.' WHERE '.$this->primary.'='.$this->id());
 			$this->dirty = false;
 			return ($this->data && count($this->data));
 		}
@@ -358,7 +363,7 @@
 		public function insert()
 		{
 			DBObject::db_start_transaction();
-			unset($this->data[$this->primary]);
+			$this->unset_primary();
 			DBObject::db_query('INSERT INTO ' . $this->table
 				. ' SET ' . $this->_vals_sql());
 			$this->_update_relations();
@@ -372,10 +377,9 @@
 		 * place where this helper is used right now)
 		 *
 		 * XXX oops, a transaction does not really help here. I should lock
-		 * the table while the user is editing data, but that's not easily
-		 * doable (not at all without a big performance hit)
+		 * the table while the user is editing data
 		 */
-		private function _update_relations()
+		protected function _update_relations()
 		{
 			if(!isset(DBObject::$relations[$this->class]))
 				return;
@@ -399,7 +403,7 @@
 		 * of SQL injections by properly escaping every string that hits the
 		 * database.
 		 */
-		private function _vals_sql()
+		protected function _vals_sql()
 		{
 			$dbh = DBObject::db();
 			$vals = array();
@@ -458,8 +462,6 @@
 		 * $events = DBOContainer::create('Event');
 		 * $events->add_clause('event_author_id=', 13);
 		 * $events->init();
-		 *
-		 * TODO: add funky DBOContainer::find()-syntax for this case
 		 */
 		public static function belongs_to($c1, $c2, $options = null)
 		{
@@ -753,7 +755,7 @@
 		/**
 		 * @return: DBObject data as an associative array
 		 */
-		public function &data()
+		public function data()
 		{
 			return $this->data;
 		}
@@ -775,6 +777,11 @@
 		{
 			$this->dirty = false;
 			$this->data = array();
+		}
+
+		public function unset_primary()
+		{
+			unset($this->data[$this->primary]);
 		}
 
 		/**
@@ -897,7 +904,7 @@
 
 		protected $fulltext_search = null;
 
-		public function &object() { return $this->obj; }
+		public function &dbobj() { return $this->obj; }
 
 		/**
 		 * Use the code, luke!
@@ -925,8 +932,6 @@
 		 * Example:
 		 *
 		 * DBOContainer::find('News', array('news_active!=0', 'news_start_dttm>', time()));
-		 *
-		 * TODO params parsing does not really work yet. The example is totally bogus
 		 */
 		public static function &find($class, $params=null)
 		{
@@ -937,7 +942,7 @@
 				$container = new DBOContainer($class);
 			}
 			if(is_array($params))
-				$this->add_clause_array($params);
+				$container->add_clause_array($params);
 			$container->init();
 			return $container;
 		}
@@ -952,7 +957,7 @@
 				. implode(',', $this->order_columns) . $this->limit;
 			$result = DBObject::db_query($sql);
 			while($row = $result->fetch_assoc()) {
-				$obj = DBObject::create($this->class);
+				$obj = clone $this->obj;
 				$obj->set_data($row);
 				$this->data[$obj->id()] = $obj;
 			}
@@ -1081,11 +1086,37 @@
 			}
 		}
 
+		public function add($param)
+		{
+			if($param instanceof DBObject)
+				$this->data[$param->id()] = $param;
+			else {
+				$obj = clone $this->obj;
+				$obj->set_data($param);
+				$this->data[$obj->id()] = $obj;
+			}
+		}
+
+
+		public function __get($var)
+		{
+			$array = array();
+			foreach($this->data as &$obj)
+				$array[$obj->id()] = $obj->$var;
+			return $array;
+		}
+
+		public function __set($var, $value)
+		{
+			foreach($this->data as &$obj)
+				$obj->$var = $value;
+		}
+
 		/**
 		 * Iterator implementation (see PHP Object Iteration)
 		 */
 
-		public function rewind() { reset($this->data); }
+		public function rewind() { return reset($this->data); }
 		public function current() { return current($this->data); }
 		public function key() { return key($this->data); }
 		public function next() { return next($this->data); }
@@ -1105,6 +1136,251 @@
 				$this->data[$offset] = $value;
 		}
 		public function offsetUnset($offset) { unset($this->data[$offset]); }
+	}
+
+	/**
+	 * The Form code uses this class for some autogeneration black
+	 * magic. It is used for the representation of translations inside
+	 * language-aware DBObjects
+	 */
+	class DBObjectML_T extends DBObject {
+		public static function create($class)
+		{
+			if(class_exists($class))
+				return new $class;
+
+			$obj = new DBObjectML_T(false);
+			$obj->class = $class;
+			$obj->_setup_dbvars();
+			$obj->owner_primary = DBObjectML::create(
+				preg_replace('/Content$/', '', $class))->primary();
+			return $obj;
+		}
+
+		public static function &find($class, $params)
+		{
+			$obj = DBObjectML_T::create($class);
+			if($obj->_find($params))
+				return $obj;
+			$null = null;
+			return $null;
+		}
+
+		/**
+		 * return the primary key of the owning DBObject
+		 *
+		 * Example:
+		 *
+		 * If this DBObject has type NewsContent, the owning DBObject
+		 * has type News and therefore its primary key would be
+		 * news_id. The tbl_news.news_id field is referenced by
+		 * tbl_news_content.news_content_news_id
+		 */
+		public function owner_primary() { return $this->owner_primary; }
+		protected $owner_primary;
+	}
+
+	/**
+	 * language-aware DBObject
+	 *
+	 * this is tightly coupled with FormML (language aware Forms)
+	 */
+	class DBObjectML extends DBObject {
+
+		/**
+		 * DBOContainer of DBObjectML_T OR a single DBObjectML_T
+		 * depending on the value of $language
+		 */
+		protected $obj = null;
+
+		/**
+		 * this DBObjectML's language or null if no specific language
+		 * was choosen (=all languages)
+		 */
+		protected $language = null;
+
+		/**
+		 * Class of translation DBObject
+		 */
+		protected $mlclass = null;
+
+		public function language() { return $this->language; } 
+		public function set_language($language = null) { $this->language = $language; }
+
+		protected function _setup_dbvars()
+		{
+			parent::_setup_dbvars();
+			if(is_null($this->mlclass))
+				$this->mlclass = $this->class.'Content';
+		}
+
+		public static function create($class)
+		{
+			if(class_exists($class))
+				return new $class;
+
+			$obj = new DBObjectML(false);
+			$obj->class = $class;
+			$obj->_setup_dbvars();
+			return $obj;
+		}
+
+		/**
+		 * FIXME: if $language is set, $params must be an integer (the ID)
+		 */
+		public static function &find($class, $params, $language=null)
+		{
+			if($language) {
+				$obj = DBObjectML::create($class);
+				$obj->language = $language;
+				$obj->id = $params;
+				$obj->refresh();
+				return $obj;
+			} else {
+				$obj = DBObjectML::create($class);
+				if($obj->_find($params))
+					return $obj;
+				$null = null;
+				return $null;
+			}
+		}
+
+		public function refresh()
+		{
+			parent::refresh();
+			$obj = $this->dbobjml();
+			if($this->language)
+				$this->obj = DBObjectML_T::find($this->mlclass, array(
+					$obj->name($this->primary()).'=' => $this->id(),
+					$obj->name('language_id').'=' => $this->language
+				));
+			else
+				$this->obj = DBOContainer::find(DBObjectML_T::create($this->mlclass), array(
+					$obj->name($this->primary()).'=' => $this->id()));
+			return ($this->data && $this->obj && count($this->data));
+		}
+
+		public function update()
+		{
+			DBObject::db_start_transaction();
+			parent::update();
+			$this->obj->update();
+			DBObject::db_commit();
+		}
+
+		public function insert()
+		{
+			DBObject::db_start_transaction();
+			parent::insert();
+			$primary = $this->primary();
+			$id = $this->id();
+
+			// it does not matter whether $this->obj is a
+			// DBObject or a DBOContainer. It Just Works (tm)
+			$this->obj->unset_primary();
+			$this->obj->$primary = $id;
+			$this->obj->language_id = $this->language;
+			$this->obj->insert();
+			DBObject::db_commit();
+		}
+
+		/**
+		 * humm...
+		 */
+		public function dbobjml($language = null)
+		{
+			return DBObjectML_T::create($this->mlclass);
+		}
+
+		/**
+		 * return the DBObjectML_T DBOContainer
+		 */
+		public function &dbobj()
+		{
+			return $this->obj;
+		}
+
+		/**
+		 * get teh data!
+		 *
+		 * the returned array has the following structure:
+		 *
+		 * if $language is null:
+		 * array(
+		 * 	'news_id' => ...,
+		 * 	'news_author' => ...,
+		 * 	'translations' => array(
+		 * 		1 => array(
+		 * 			'news_content_id' => ...,
+		 * 			'news_content_language_id' => ...,
+		 * 			'news_content_title' => ...
+		 * 		),
+		 * 		2 => array(
+		 * 			...
+		 * 		)
+		 * 	)
+		 * )
+		 *
+		 * otherwise:
+		 * array(
+		 * 	'news_id' => ...,
+		 * 	'news_author' => ...,
+		 * 	'news_content_id' => ...,
+		 * 	'news_content_language_id' => ...,
+		 * 	'news_content_title' => ...
+		 * )
+		 */
+		public function data($language = null)
+		{
+			$data = parent::data();
+			if($this->language)
+				return array_merge($data, $this->obj->data());
+
+			if($language && isset($this->obj[$language]))
+				$data = array_merge($data, $this->obj[$language]->data());
+			else
+				foreach($this->obj as &$dbobj)
+					$data['translations'][$dbobj->language_id] = $dbobj->data();
+
+			return $data;
+		}
+
+		/**
+		 * this function accepts the same data structures as data() above
+		 * returns
+		 */
+		public function set_data($data)
+		{
+			$lidkey = $this->dbobjml()->name('language_id');
+			if(isset($data['translations'])) {
+				if(!($this->obj instanceof DBOContainer))
+					$this->obj = DBOContainer::create(
+						DBObjectML_T::create($this->mlclass));
+				foreach($data['translations'] as &$translation) {
+					$lid = $translation[$lidkey];
+					if(isset($this->obj[$lid]))
+						$this->obj[$lid]->set_data($translation);
+					else {
+						$obj = DBObjectML_T::create($this->mlclass);
+						$obj->set_data($translation);
+						$this->obj[$lid] = $obj;
+					}
+				}
+				unset($data['translation']);
+				parent::set_data($data);
+				return;
+			}
+
+			$dbobjml = $this->dbobjml($data[$lidkey]);
+			$mlprefix = $dbobjml->_prefix();
+			$this->set_language($data[$lidkey]);
+			foreach($data as $k => $v) {
+				if(strpos($k, $mlprefix)===0)
+					$dbobjml->set($k, $v);
+				else if(strpos($k, $this->prefix)===0)
+					$this->set($k, $v);
+			}
+		}
 	}
 
 ?>
