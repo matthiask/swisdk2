@@ -796,6 +796,29 @@
 		}
 	}
 
+	class RichTextarea extends FormItem {
+		protected $attributes = array('style' => 'width:800px;height:300px;');
+		protected function field_html()
+		{
+			$name = $this->name();
+			$value = $this->value();
+			$attributes = $this->attribute_html();
+			$html = <<<EOD
+<textarea name="$name" id="$name" $attributes>$value</textarea>
+<script type="text/javascript" src="/scripts/fckeditor/fckeditor.js"></script>
+<script type="text/javascript">
+var oFCKeditor = new FCKeditor('$name');
+oFCKeditor.BasePath = '/scripts/fckeditor/';
+oFCKeditor.Height = 400;
+oFCKeditor.Width = 900;
+oFCKeditor.Value = '$value';
+oFCKeditor.ReplaceTextarea();
+</script>
+EOD;
+			return $html;
+		}
+	}
+
 	/**
 	 * base class for all FormItems which offer a choice between several items
 	 */
