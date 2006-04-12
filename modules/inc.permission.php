@@ -28,6 +28,24 @@
 
 		public static function check($role=null, $url=null)
 		{
+			if($group = PermissionManager::group_for_url($url)) {
+				//
+				// determine the minimally needed role (URI (=Group)
+				// role and content role (parameter))
+				//
+				$needed_role = max($role, $group['group_role_id']);
+
+				if(PermissionManager::check_group_role(
+						$group['group_id'], $needed_role))
+					return true;
+			}
+			if(SessionHandler::authenticated())
+				PermissionManager::access_denied();
+			PermissionManager::login_form();
+		}
+
+		public static function group_for_url($url=null)
+		{
 			if(is_null($url))
 				$url = Swisdk::config_value('request.uri');
 			if($url{0}=='/')
@@ -36,26 +54,28 @@
 			//
 			// find best matching group
 			//
+			// If the URI is /a/b/c, the group table will be searched for
+			// a/b/c, a/b, a and finally the empty string (root group)
+			//
 			$tokens = explode('/', $url);
-			$sql = 'SELECT group_id,group_role_id FROM tbl_group WHERE ';
 			$clauses = array();
 			while(count($tokens)) {
 				$clauses[] = implode('/', $tokens);
 				array_pop($tokens);
 			}
-			$sql .= '(group_url=\''.implode('\' OR group_url=\'', $clauses)
-				.'\' OR group_url=\'\') ORDER BY group_url DESC LIMIT 1';
-			$group = DBObject::db_get_row($sql);
+			return DBObject::db_get_row(
+				'SELECT group_id,group_role_id FROM tbl_group WHERE '
+				.'(group_url=\''.implode('\' OR group_url=\'', $clauses)
+				.'\' OR group_url=\'\') ORDER BY group_url DESC LIMIT 1');
+		}
 
-			//
-			// determine the minimally needed role (URI (=Group) role and
-			// content role (parameter))
-			//
-			$needed_role = max($role, $group['group_role_id']);
-			$uid = SessionHandler::instance()->user_id();
+		public static function check_group_role($group, $role, $uid=null)
+		{
+			if(is_null($uid))
+				$uid = SessionHandler::user_id();
 			$perms = DBObject::db_get_row('SELECT permission_role_id '
 				.'FROM tbl_permission WHERE permission_user_id='.$uid
-				.' AND permission_group_id='.$group['group_id']);
+				.' AND permission_group_id='.$group);
 
 			//
 			// the user must have an entry in the permission table, even
@@ -66,20 +86,16 @@
 			// the amount of data which will be necessary once you have some
 			// groups in the system. (Roughly #users * #groups)
 			//
-			if($perms && $perms['permission_role_id']>=$needed_role)
-				return true;
-			if(SessionHandler::authenticated())
-				PermissionManager::instance()->access_denied();
-			PermissionManager::instance()->login_form();
+			return ($perms && $perms['permission_role_id']>=$role);
 		}
 
-		public function access_denied()
+		public static function access_denied()
 		{
 			header('HTTP/1.0 401 Unauthorized');
 			die('Access denied');
 		}
 
-		public function login_form()
+		public static function login_form()
 		{
 			require_once MODULE_ROOT . 'inc.form.php';
 			$form = new Form();

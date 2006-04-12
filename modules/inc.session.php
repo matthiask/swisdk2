@@ -53,21 +53,23 @@
 		
 		public static function authenticated()
 		{
+			SessionHandler::instance();
 			return isset($_SESSION['authenticated'])
 				&& $_SESSION['authenticated'];
 		}
 
-		public function user_id()
+		public static function user_id()
 		{
 			if(SessionHandler::authenticated() && isset($_SESSION['user_id']))
 				return $_SESSION['user_id'];
 			return VISITOR;
 		}
 
-		public function user_data()
+		public static function user_data()
 		{
-			if(SessionHandler::authenticated() && $this->user)
-				return $this->user->data();
+			$sh = SessionHandler::instance();
+			if(SessionHandler::authenticated() && $sh->user)
+				return $sh->user->data();
 			return null;
 		}
 	}
