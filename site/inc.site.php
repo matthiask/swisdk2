@@ -59,16 +59,8 @@
 	class SmartyOutputHandler extends HtmlOutputHandler {
 		public function __construct()
 		{
-			$er = error_reporting(E_ALL); // be sure not to report E_STRICT
-			require_once SWISDK_ROOT . 'lib/smarty/libs/Smarty.class.php';
-			$this->smarty = new Smarty();
-			$this->smarty->compile_dir = SWISDK_ROOT . 'lib/smarty/templates_c';
-			$this->smarty->cache_dir = SWISDK_ROOT . 'lib/smarty/cache';
-			$this->smarty->template_dir = CONTENT_ROOT;
-			//$this->config_dir
-			$this->caching = false;
-			$this->security = false;
-			error_reporting($er);
+			require_once MODULE_ROOT.'inc.smarty.php';
+			$this->smarty = new SwisdkSmarty();
 		}
 
 		public function smarty()
@@ -78,10 +70,8 @@
 
 		public function handle(&$component)
 		{
-			$er = error_reporting(E_ALL);
 			$this->smarty->assign('content', $component->html());
 			$this->smarty->display('templates/main.tpl.html');
-			error_reporting($er);
 		}
 
 		protected $smarty;
