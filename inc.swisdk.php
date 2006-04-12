@@ -26,7 +26,7 @@
 			require_once SWISDK_ROOT . 'site/inc.handlers.php';
 			
 			// FIXME this url is not fully correct
-			Swisdk::run(array('REQUEST_URI' =>  'http://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']));
+			Swisdk::run(array('REQUEST_URI' => 'http://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']));
 		}
 		
 		public static function runFromCommandLine() 
@@ -59,11 +59,11 @@
 			Swisdk::run( array( 'REQUEST_URI' => $requestUri  ) );
 		}
 		
-		public static function run( $arguments ) 
+		public static function run($arguments) 
 		{
 			Swisdk::read_configfile();
 			SwisdkError::setup();
-			SwisdkResolver::run( $arguments[ 'REQUEST_URI' ] );
+			SwisdkResolver::run($arguments['REQUEST_URI']);
 
 			$file = Swisdk::config_value('runtime.includefile');
 			if(!$file)
@@ -108,6 +108,27 @@
 			if(isset(Swisdk::$config[$key]))
 				return Swisdk::$config[$key];
 			return null;
+		}
+
+		public static function language($key=null)
+		{
+			if($key) {
+				$l = DBObject::db_get_array('SELECT * FROM tbl_language',
+					array('language_key', 'language_id'));
+				if(isset($l[$key]))
+					return $l[$key];
+			}
+
+			if($val = Swisdk::config_value('runtime.language_id'))
+				return $val;
+			else if($val = Swisdk::config_value('runtime.language')) {
+				$l = DBObject::db_get_array('SELECT * FROM tbl_language',
+					array('language_key', 'language_id'));
+				if(isset($l[$val]) && ($val = $l[$val])) {
+					Swisdk::set_config_value('runtime.language_id', $val);
+					return $val;
+				}
+			}
 		}
 
 		protected $arguments;
