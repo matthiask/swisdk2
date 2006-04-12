@@ -271,13 +271,28 @@
 		 */
 		public static function create($class)
 		{
-			if(class_exists($class)) {
+			if(class_exists($class))
 				return new $class();
-			}
 
 			$obj = new DBObject(false);
 			$obj->class = $class;
 			$obj->_setup_dbvars();
+			return $obj;
+		}
+
+		public static function create_with_data($class, $data)
+		{
+			$obj = null;
+			if(class_exists($class))
+				$obj = new $class();
+			else {
+				$obj = new DBObject(false);
+				$obj->class = $class;
+				$obj->_setup_dbvars();
+			}
+
+			foreach($data as $k => $v)
+				$obj->$k = $v;
 			return $obj;
 		}
 
@@ -796,7 +811,10 @@
 		 */
 		public function __get($var)
 		{
-			return $this->data[$this->name($var)];
+			$name = $this->name($var);
+			if(isset($this->data[$name]))
+				return $this->data[$name];
+			return null;
 		}
 
 		public function __set($var, $value)
@@ -929,7 +947,10 @@
 		 */
 		public static function create($class)
 		{
-			return new DBOContainer(DBObject::create($class));
+			if(is_string($class))
+				return new DBOContainer(DBObject::create($class));
+			else
+				return new DBOContainer($class);
 		}
 
 		/**
@@ -940,11 +961,11 @@
 		public static function &find($class, $params=null)
 		{
 			$container = null;
-			if(is_string($class)) {
+			if(is_string($class))
 				$container = new DBOContainer(DBObject::create($class));
-			} else {
+			else
 				$container = new DBOContainer($class);
-			}
+
 			if(is_array($params))
 				$container->add_clause_array($params);
 			$container->init();
@@ -1156,8 +1177,22 @@
 			$obj = new DBObjectML_T(false);
 			$obj->class = $class;
 			$obj->_setup_dbvars();
-			$obj->owner_primary = DBObjectML::create(
-				preg_replace('/Content$/', '', $class))->primary();
+			return $obj;
+		}
+
+		public static function create_with_data($class, $data)
+		{
+			$obj = null;
+			if(class_exists($class))
+				$obj = new $class();
+			else {
+				$obj = new DBObjectML_T(false);
+				$obj->class = $class;
+				$obj->_setup_dbvars();
+			}
+
+			foreach($data as $k => $v)
+				$obj->$k = $v;
 			return $obj;
 		}
 
@@ -1168,6 +1203,15 @@
 				return $obj;
 			$null = null;
 			return $null;
+		}
+
+		protected function _setup_dbvars()
+		{
+			parent::_setup_dbvars();
+			$this->owner_primary = strtolower(
+				preg_replace('/(.)([A-Z])/', '\1_\2',
+					preg_replace('/Content$/', '',
+						$this->class)).'_id');
 		}
 
 		/**
@@ -1218,15 +1262,39 @@
 				$this->mlclass = $this->class.'Content';
 		}
 
-		public static function create($class)
+		public static function create($class, $language=null)
 		{
+			$obj = null;
 			if(class_exists($class))
-				return new $class;
+				$obj = new $class();
+			else {
+				$obj = new DBObjectML(false);
+				$obj->class = $class;
+				$obj->_setup_dbvars();
+			}
 
-			$obj = new DBObjectML(false);
-			$obj->class = $class;
-			$obj->_setup_dbvars();
+			if($language)
+				$obj->set_language($language);
+			$obj->_create_translation_object();
 			return $obj;
+		}
+
+		private function _create_translation_object()
+		{
+			if($this->language)
+				$this->obj = DBObjectML_T::create_with_data(
+					$this->mlclass,
+					array('language_id' => $this->language));
+			else {
+				$this->obj = DBOContainer::create(DBObjectML_T::create($this->mlclass));
+				$languages = DBOContainer::find('Language');
+				foreach($languages as &$language) {
+					$obj = DBObjectML_T::create_with_data(
+						$this->mlclass,
+						array('language_id' => $language->id()));
+					$this->obj[$language->id()] = $obj;
+				}
+			}
 		}
 
 		/**

@@ -268,20 +268,20 @@
 				$relations[$r['field']] = $r;
 			}
 
+			$regex = '^id$';
+			if($this->dbobj instanceof DBObjectML_T) {
+				// also hide the language id and the owning DBObject
+				// reference fields
+				$regex .= '|^__language([0-9]+)_id$|_language_id$';
+				$regex .= '|_'.$this->dbobj->owner_primary().'$';
+			}
+
 			foreach($fields as &$field) {
 				// field name
 				$fname = $this->fname($field['Field']);
 				// short name (prefix removed)
 				$sn = $this->dbobj->shortname($fname);
 				// hide the id field
-				$regex = '^id$';
-				if($this->dbobj instanceof DBObjectML_T) {
-					// also hide the language id and the owning DBObject
-					// reference fields
-					$regex .= '|^__language([0-9]+)_id$|_language_id$';
-					$regex .= '|_'.$this->dbobj->owner_primary().'$';
-				}
-
 				if(preg_match('/('.$regex.')/', strtolower($sn))) {
 					// should I hide the current field?
 					$this->add($sn, new HiddenInput(), $fname);
