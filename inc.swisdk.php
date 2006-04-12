@@ -26,7 +26,8 @@
 			require_once SWISDK_ROOT . 'resolver/inc.resolver.php';
 			require_once SWISDK_ROOT . 'site/inc.handlers.php';
 			
-			Swisdk::run(array('REQUEST_URI' =>  $_SERVER['REQUEST_URI']));
+			// FIXME this url is not fully correct
+			Swisdk::run(array('REQUEST_URI' =>  'http://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']));
 		}
 		
 		public static function runFromCommandLine() 
@@ -85,7 +86,8 @@
 			$obj->handle($file);
 		}
 
-		protected static $config;
+		// TODO make @access protected again
+		public static $config;
 
 		public static function read_configfile()
 		{
@@ -118,7 +120,7 @@
 
 		public static function register($class)
 		{
-			Swisdk::set_config_value('runtime.controller', $class);
+			Swisdk::set_config_value('runtime.controller.class', $class);
 		}
 	}
 

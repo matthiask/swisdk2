@@ -13,7 +13,7 @@
 		public function handle( $file )
 		{
 			require_once $file;
-			$class = Swisdk::config_value('runtime.controller');
+			$class = Swisdk::config_value('runtime.controller.class');
 			
 			if(!class_exists($class)) {
 				SwisdkError::handle(new BasicSwisdkError("SiteController $class could not be found"));

@@ -77,8 +77,11 @@
 	class DomainResolver extends SwisdkResolverModule {
 		public function process( $urifragment )
 		{
-			// strip and ignore domain
-			$this->urifragment = preg_replace('/http(s?):\/\/[^\/]*(.*)/', '$1', $urifragment);
+			$matches = array();
+			$this->urifragment = preg_match('/http(s?):\/\/([^\/]*)(:[0-9]+)?(.*)/', $urifragment, $matches);
+			$this->urifragment = $matches[4];
+			Swisdk::set_config_value('request.host', $matches[2]);
+			Swisdk::set_config_value('request.uri', $matches[4]);
 		}
 	}
 
