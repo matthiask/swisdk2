@@ -606,8 +606,12 @@
 		protected static function &db()
 		{
 			if(is_null(DBObject::$dbhandle)) {
-				//FIXME do not hardcode connection params
-				DBObject::$dbhandle = new mysqli('localhost', 'root', '5h9tiSLosax', 'jungegru_stopoffroader');
+				DBObject::$dbhandle = new mysqli(
+					Swisdk::config_value('db.host'),
+					Swisdk::config_value('db.username'),
+					Swisdk::config_value('db.password'),
+					Swisdk::config_value('db.database')
+				);
 				if(mysqli_connect_errno())
 					SwisdkError::handle(new DBError("Connect failed: " . mysqli_connect_error()));
 			}

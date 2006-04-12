@@ -61,6 +61,7 @@
 		
 		public static function run( $arguments ) 
 		{
+			Swisdk::read_configfile();
 			SwisdkError::setup();
 			SwisdkResolver::run( $arguments[ 'REQUEST_URI' ] );
 
@@ -85,6 +86,16 @@
 		}
 
 		protected static $config;
+
+		public static function read_configfile()
+		{
+			if(file_exists(SWISDK_ROOT.'config.ini')) {
+				$cfg = parse_ini_file(SWISDK_ROOT.'config.ini', true);
+				foreach($cfg as $section => $array)
+					foreach($array as $key => $value)
+						Swisdk::$config[$section.'.'.$key] = $value;
+			}
+		}
 
 		public static function set_config_value($key, $value)
 		{
