@@ -16,13 +16,12 @@
 			define('APP_ROOT', $_SERVER['DOCUMENT_ROOT'] . '/../');
 			define('HTDOCS_ROOT', APP_ROOT . 'htdocs/');
 			define('SWISDK_ROOT', APP_ROOT . 'swisdk/');
-			//define('SMARTY_ROOT', SWISDK_ROOT . 'lib/smarty/');
+			define('SMARTY_ROOT', SWISDK_ROOT . 'lib/smarty/');
 			define('MODULE_ROOT', SWISDK_ROOT . 'modules/');
 			define('CONTENT_ROOT' , APP_ROOT . 'content/');
 				
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
-			//require_once SWISDK_ROOT . 'registry/inc.registry.php';
 			require_once SWISDK_ROOT . 'resolver/inc.resolver.php';
 			require_once SWISDK_ROOT . 'site/inc.handlers.php';
 			
@@ -49,8 +48,8 @@
 				
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
-			require_once SWISDK_ROOT . 'registry/inc.registry.php';
 			require_once SWISDK_ROOT . 'resolver/inc.resolver.php';
+			require_once SWISDK_ROOT . 'site/inc.handlers.php';
 			
 			$requestUri = '';
 			if( isset( $_SERVER['argv'][1]) ) {
