@@ -898,6 +898,11 @@
 			}
 			return DBObject::$field_list[$this->class];
 		}
+
+		public function _select_sql($joins)
+		{
+			return 'SELECT * FROM '.$this->table.$joins.' WHERE 1';
+		}
 	}
 
 	class DBOContainer implements Iterator,ArrayAccess {
@@ -919,7 +924,7 @@
 		/**
 		 * SQL builder variables. see add_clause(), add_join(), init() and friends
 		 */
-		protected $clause_sql = ' WHERE 1 ';
+		protected $clause_sql = ' ';
 		protected $order_columns = array();
 		protected $limit = '';
 		protected $joins = '';
@@ -977,8 +982,10 @@
 		 */
 		public function init()
 		{
-			$sql = 'SELECT * FROM ' . $this->obj->table() . $this->joins . $this->clause_sql
-				. $this->_fulltext_clause()
+			$args = func_get_args();
+			array_unshift($args, $this->joins);
+			$sql = call_user_func_array(array(&$this->obj, '_select_sql'), $args)
+				. $this->clause_sql . $this->_fulltext_clause()
 				. implode(',', $this->order_columns) . $this->limit;
 			$result = DBObject::db_query($sql);
 			while($row = $result->fetch_assoc()) {
@@ -1443,7 +1450,12 @@
 				return;
 			}
 
-			$dbobjml = $this->dbobjml($data[$lidkey]);
+			if(!isset($data[$lidkey])) {
+				parent::set_data($data);
+				return;
+			}
+
+			$dbobjml = DBObjectML_T::create($this->mlclass);
 			$mlprefix = $dbobjml->_prefix();
 			$this->set_language($data[$lidkey]);
 			foreach($data as $k => $v) {
@@ -1452,6 +1464,21 @@
 				else if(strpos($k, $this->prefix)===0)
 					$this->set($k, $v);
 			}
+			$this->obj = $dbobjml;
+		}
+
+		public function _select_sql($joins, $language=null)
+		{
+			if($language) {
+				$this->set_language($language);
+				$dbobjml = $this->dbobjml();
+				return 'SELECT * FROM '.$this->table.' LEFT JOIN '.$dbobjml->table()
+					.' ON '.$this->table.'.'.$this->primary.'='.$dbobjml->table()
+					.'.'.$dbobjml->name($this->primary).$joins.' WHERE '
+					.$dbobjml->name('language_id').'='.$language;
+			}
+
+			return 'SELECT * FROM '.$this->table;
 		}
 	}
 
