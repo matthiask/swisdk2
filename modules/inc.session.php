@@ -7,6 +7,8 @@
 
 	require_once MODULE_ROOT . 'inc.data.php';
 
+	define('VISITOR', 1);
+
 	class SessionHandler {
 		protected $user;
 
@@ -59,7 +61,7 @@
 		{
 			if(SessionHandler::authenticated() && isset($_SESSION['user_id']))
 				return $_SESSION['user_id'];
-			return null;
+			return VISITOR;
 		}
 
 		public function user_data()

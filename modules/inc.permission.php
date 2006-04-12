@@ -7,48 +7,70 @@
 
 	require_once MODULE_ROOT . 'inc.session.php';
 
-	// XXX make actions configurable?
-	define('OP_VIEW', 1);
-	define('OP_NEW', 2);
-	define('OP_EDIT', 4);
-	define('OP_DELETE', 8);
-	define('OP_PUBLISH', 16);
-	define('OP_PERMISSION', 32);
+	// see also tbl_role !!!
+	define('ROLE_VISITOR', 1);		// view
+	define('ROLE_AUTHENTICATED', 2);	// view, comment
+	define('ROLE_MEMBER', 3);		// view, comment
+	define('ROLE_MANAGER', 4);		// view, comment, create, edit, delete
+	define('ROLE_ADMINISTRATOR', 5);	// view, comment, create, edit, delete,
+						// permissions
+	define('ROLE_SITEADMIN', 6);		// everything!
 
 	class PermissionManager {
-		protected function __construct()
-		{
-			if(($id = SessionHandler::instance()->user_id())
-					&& $this->user = DBObject::find('User', $id)) {
-				$this->access_level = $this->user->access_level;
-			} else
-				$this->access_level = 1;
-		}
-
 		public static function &instance()
 		{
 			static $instance = null;
-			if( $instance === null ) {
+			if( $instance === null )
 				$instance = new PermissionManager();
-			}
 			
 			return $instance;
 		}
 
-		public static function check($access_level, $operation=OP_VIEW)
+		public static function check($role=null, $url=null)
 		{
-			$pm = PermissionManager::instance();
-			// TODO do not simply bomb out wenn access is denied
+			if(is_null($url))
+				$url = Swisdk::config_value('request.uri');
+			if($url{0}=='/')
+				$url = substr($url, 1);
 
-			if($operation==OP_VIEW && $access_level<=$pm->access_level)
-				return true;
-
-			if(SessionHandler::authenticated()) {
-				if($access_level<=$pm->access_level)
-					return true;
-				$pm->access_denied();
+			//
+			// find best matching group
+			//
+			$tokens = explode('/', $url);
+			$sql = 'SELECT group_id,group_role_id FROM tbl_group WHERE ';
+			$clauses = array();
+			while(count($tokens)) {
+				$clauses[] = implode('/', $tokens);
+				array_pop($tokens);
 			}
-			$pm->login_form();
+			$sql .= '(group_url=\''.implode('\' OR group_url=\'', $clauses)
+				.'\' OR group_url=\'\') ORDER BY group_url DESC LIMIT 1';
+			$group = DBObject::db_get_row($sql);
+
+			//
+			// determine the minimally needed role (URI (=Group) role and
+			// content role (parameter))
+			//
+			$needed_role = max($role, $group['group_role_id']);
+			$uid = SessionHandler::instance()->user_id();
+			$perms = DBObject::db_get_row('SELECT permission_role_id '
+				.'FROM tbl_permission WHERE permission_user_id='.$uid
+				.' AND permission_group_id='.$group['group_id']);
+
+			//
+			// the user must have an entry in the permission table, even
+			// for simple viewing otherwise, access is denied.
+			//
+			// Roles are not inherited across groups. This simplifies the
+			// code and it is easier to understand. The only drawback is
+			// the amount of data which will be necessary once you have some
+			// groups in the system. (Roughly #users * #groups)
+			//
+			if($perms && $perms['permission_role_id']>=$needed_role)
+				return true;
+			if(SessionHandler::authenticated())
+				PermissionManager::instance()->access_denied();
+			PermissionManager::instance()->login_form();
 		}
 
 		public function access_denied()
@@ -69,9 +91,6 @@
 			echo $form->html();
 			exit();
 		}
-		
-		protected $user;
-		protected $access_level;
 	}
 
 ?>
