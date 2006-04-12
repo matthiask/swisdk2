@@ -803,16 +803,20 @@
 			$name = $this->name();
 			$value = $this->value();
 			$attributes = $this->attribute_html();
+			// FIXME execute FCK code after window has been fully loaded
 			$html = <<<EOD
 <textarea name="$name" id="$name" $attributes>$value</textarea>
+<script type="text/javascript" src="/scripts/util.js"></script>
 <script type="text/javascript" src="/scripts/fckeditor/fckeditor.js"></script>
 <script type="text/javascript">
+function load_editor_$name(){
 var oFCKeditor = new FCKeditor('$name');
 oFCKeditor.BasePath = '/scripts/fckeditor/';
-oFCKeditor.Height = 400;
-oFCKeditor.Width = 900;
-oFCKeditor.Value = '$value';
+oFCKeditor.Height = 450;
+oFCKeditor.Width = 750;
 oFCKeditor.ReplaceTextarea();
+}
+add_event(window,'load',load_editor_$name);
 </script>
 EOD;
 			return $html;
