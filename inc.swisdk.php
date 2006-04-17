@@ -65,6 +65,8 @@
 			SwisdkError::setup();
 			SwisdkResolver::run($arguments['REQUEST_URI']);
 
+			Swisdk::$arguments = SwisdkResolver::arguments();
+
 			$file = Swisdk::config_value('runtime.includefile');
 			if(!$file)
 				SwisdkError::handle(new SiteNotFoundError());
@@ -80,7 +82,7 @@
 					$handler = 'DynamicSiteHandler';
 					break;
 			}
-			
+
 			$obj = new $handler;
 			$obj->handle($file);
 		}
@@ -90,8 +92,8 @@
 
 		public static function read_configfile()
 		{
-			if(file_exists(SWISDK_ROOT.'config.ini')) {
-				$cfg = parse_ini_file(SWISDK_ROOT.'config.ini', true);
+			if(file_exists(CONTENT_ROOT.'config.ini')) {
+				$cfg = parse_ini_file(CONTENT_ROOT.'config.ini', true);
 				foreach($cfg as $section => $array)
 					foreach($array as $key => $value)
 						Swisdk::$config[$section.'.'.$key] = $value;
@@ -131,7 +133,7 @@
 			}
 		}
 
-		protected $arguments;
+		protected static $arguments;
 
 		public static function arguments()
 		{
