@@ -124,7 +124,7 @@
 					$this->export_list[] = $m;
 				}
 			}
-			
+
 			if($remote_uri==null) {
 				$this->remote_uri = $_SERVER['REQUEST_URI'];
 			} else {
@@ -179,31 +179,25 @@ EOD;
 // remote scripting library
 // (c) copyright 2005 modernmethod, inc
 var sajax_debug_mode = {$debug_mode_bool};
-
 function sajax_debug(text){if (sajax_debug_mode)alert("RSD: " + text);}
-
 function sajax_init_object() {
 	sajax_debug("sajax_init_object() called..")
 	var A;
 	try{A=new ActiveXObject("Msxml2.XMLHTTP");}catch (e){try{A=new ActiveXObject("Microsoft.XMLHTTP");
 	}catch(oc){A=null;}}
-	if(!A && typeof XMLHttpRequest!='undefined')A=new XMLHttpRequest();
+	if(!A)if(typeof XMLHttpRequest!='undefined')A=new XMLHttpRequest();
 	if(!A)sajax_debug("Could not create connection object.");
 	return A;
 }
-
 function sajax_do_call(func_name, args) {
 	var i,x,n,uri,post_data;
-
 	uri='{$this->remote_uri}';
 	post_data="rs="+escape(func_name);
 	for(i=0;i<args.length-1;++i){post_data=post_data+"&rsargs[]="+escape(args[i]);}
-	
 	x = sajax_init_object();
 	x.open('POST', uri, true);
 	x.setRequestHeader("Method", "POST "+uri+" HTTP/1.1");
 	x.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
 	x.onreadystatechange = function() {
 		if (x.readyState != 4)return;
 		sajax_debug("received " + x.responseText);
