@@ -756,6 +756,7 @@
 
 	class PasswordInput extends SimpleInput {
 		protected $type = 'password';
+		protected $attributes = array('size' => 60);
 	}
 
 	class CheckboxInput extends FormItem {
@@ -934,7 +935,7 @@ EOD;
 			$html.=<<<EOD
 <input type="hidden" name="$name" id="$name" value="$value" />
 <span id="$span_name">$display_value</span> <img src="/scripts/calendar/img.gif" id="$trigger_name"
-	style="cursor: pointer; border: 1px solidred;" title="Date selector"
+	style="cursor: pointer; border: 1px solid red;" title="Date selector"
 	onmouseover="this.style.background='red';" onmouseout="this.style.background=''" />
 <script type="text/javascript">
 Calendar.setup({
