@@ -893,7 +893,8 @@
 		public function &field_list()
 		{
 			if(!isset(DBObject::$field_list[$this->class])) {
-				$rows = DBObject::db_get_array('SHOW COLUMNS FROM '.$this->table());
+				$rows = DBObject::db_get_array('SHOW COLUMNS FROM '.$this->table(),
+					'Field');
 				DBObject::$field_list[$this->class] = $rows;
 			}
 			return DBObject::$field_list[$this->class];
@@ -902,6 +903,16 @@
 		public function _select_sql($joins)
 		{
 			return 'SELECT * FROM '.$this->table.$joins.' WHERE 1';
+		}
+
+		public static function dump()
+		{
+			echo '<pre>';
+			echo "<b>field list</b>\n";
+			print_r(DBObject::$field_list);
+			echo "<b>relations</b>\n";
+			print_r(DBObject::$relations);
+			echo '</pre>';
 		}
 	}
 
@@ -1103,6 +1114,14 @@
 		public function ids()
 		{
 			return array_keys($this->data);
+		}
+		
+		public function collect($key, $value)
+		{
+			$array = array();
+			foreach($this->data as &$dbobj)
+				$array[$dbobj->$key] = $dbobj->$value;
+			return $array;
 		}
 
 		/**
@@ -1466,6 +1485,24 @@
 			}
 			$this->obj = $dbobjml;
 		}
+
+		public function __get($var)
+		{
+			$name = $this->name($var);
+			if(in_array($name, array_keys($this->field_list()))) {
+				if(isset($this->data[$name]))
+					return $this->data[$name];
+				return null;
+			}
+
+			if($this->obj instanceof DBOContainer)
+				//FIXME return something here! use Swisdk::language()
+				return null;
+			else
+				return $this->obj->$var;
+		}
+
+		//FIXME __set function?
 
 		public function _select_sql($joins, $language=null)
 		{
