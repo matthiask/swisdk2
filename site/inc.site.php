@@ -5,13 +5,43 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
-	abstract class Site {
+	require_once MODULE_ROOT.'inc.component.php';
+
+	abstract class Site implements IComponent {
 		public function __construct()
 		{
 			// nothing to do
 		}
-		
-		abstract public function run();
+	}
+
+	abstract class CommandSite extends Site implements IHtmlComponent {
+		protected $base_url = null;
+		protected $_html;
+
+		public function run()
+		{
+			$args = Swisdk::arguments();
+			if(count($args) && $cmd = array_shift($args)) {
+				$method = 'cmd_' . $cmd;
+				if(method_exists($this, $method)) {
+					$this->_html = $this->$method();
+					return;
+				}
+			}
+			$this->_html = $this->cmd_index();
+		}
+
+		public function html()
+		{
+			return $this->_html;
+		}
+
+		public function goto($cmd)
+		{
+			header('Location: '.$this->base_url.$cmd);
+		}
+
+		abstract public function cmd_index();
 	}
 
 	class ComponentRunnerSite extends Site {
@@ -32,6 +62,10 @@
 		public function run()
 		{
 			$this->component->run();
+			/*
+			if($this->component instanceof IPermissionComponent)
+				...
+			*/
 			$handler = new HtmlOutputHandler();
 			$handler->handle($this->component);
 		}
@@ -71,6 +105,8 @@
 		public function handle(&$component)
 		{
 			$this->smarty->assign('content', $component->html());
+			if($component instanceof ISmartyAware)
+				$component->set_smarty_variables($this->smarty);
 			$this->smarty->display('templates/main.tpl.html');
 		}
 
