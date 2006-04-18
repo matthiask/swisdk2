@@ -117,8 +117,9 @@
 	 * There may be 1-n FormBoxes in one Form
 	 */
 	class FormBox implements Iterator {
-		protected $items;
 		protected $title;
+		protected $items = array();
+		protected $boxrefs = array();
 
 		/**
 		 * holds the DBObject bound to this FormBox
@@ -170,6 +171,7 @@
 			if(count($args)<2) {
 				if($args[0] instanceof FormBox) {
 					$this->items[] = $args[0];
+					$this->boxrefs[] = $args[0];
 				} else if($args[0] instanceof FormItem) {
 					return $this->add_initialized_obj($args[0]);
 				} else {
@@ -374,6 +376,10 @@
 		{
 			if(isset($this->items[$name]))
 				return $this->items[$name];
+			foreach($this->boxrefs as &$box)
+				if($item =& $box->item($name))
+					return $item;
+			return null;
 		}
 
 		/**
