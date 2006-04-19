@@ -7,10 +7,12 @@
 
 	require_once MODULE_ROOT . 'inc.data.php';
 
-	define('VISITOR', 1);
+	define('SWISDK2_VISITOR', 1);
+
+	DBObject::n_to_m('User', 'UserGroup');
 
 	class SessionHandler {
-		protected $user;
+		protected $user = null;
 
 		protected function __construct()
 		{
@@ -24,8 +26,7 @@
 					'user_login=' => $_REQUEST['login_username'],
 					'user_password=' => md5($_REQUEST['login_password'])));
 				if($user) {
-					$_SESSION['user_id'] = $user->id;
-					$_SESSION['authenticated'] = true;
+					$_SESSION['swisdk2']['user_id'] = $user->id;
 					$this->user = $user;
 				}
 			}
@@ -37,8 +38,11 @@
 				redirect('/');
 			}
 
-			if(isset($_SESSION['user_id']) && !$this->user)
-				$this->user = DBObject::find('User', $_SESSION['user_id']);
+			if(isset($_SESSION['swisdk2']['user_id']) && !$this->user)
+				$this->user = DBObject::find('User', $_SESSION['swisdk2']['user_id']);
+
+			if(!$this->user)
+				$this->user = DBObject::find('User', SWISDK2_VISITOR);
 		}
 
 		public static function &instance()
@@ -53,24 +57,12 @@
 		
 		public static function authenticated()
 		{
-			SessionHandler::instance();
-			return isset($_SESSION['authenticated'])
-				&& $_SESSION['authenticated'];
+			return SessionHandler::instance()->user->id()!=SWISDK2_VISITOR;
 		}
 
-		public static function user_id()
+		public static function &user()
 		{
-			if(SessionHandler::authenticated() && isset($_SESSION['user_id']))
-				return $_SESSION['user_id'];
-			return VISITOR;
-		}
-
-		public static function user_data()
-		{
-			$sh = SessionHandler::instance();
-			if(SessionHandler::authenticated() && $sh->user)
-				return $sh->user->data();
-			return null;
+			return SessionHandler::instance()->user;
 		}
 	}
 
