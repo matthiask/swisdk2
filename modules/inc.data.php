@@ -381,6 +381,7 @@
 			$this->unset_primary();
 			DBObject::db_query('INSERT INTO ' . $this->table
 				. ' SET ' . $this->_vals_sql());
+			$this->data[$this->primary] = DBObject::db_insert_id();
 			$this->_update_relations();
 			DBObject::db_commit();
 			$this->dirty = false;
@@ -713,6 +714,17 @@
 			$str = DBObject::db()->escape_string($str);
 		}
 
+		/**
+		*	Wraps the mysqli_insert_id of mysqli. 
+		*   "Returns the auto generated id used in the last query"
+		*	@see http://www.php.net/manual-lookup.php?pattern=mysqli_insert_id
+		*/
+		public static function db_insert_id() 
+		{
+			$dbh = DBObject::db();
+			return $dbh->insert_id;
+		}
+		
 		/**
 		 * Wrap DB transaction functions
 		 */
