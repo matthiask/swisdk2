@@ -41,7 +41,7 @@
 	 * // This is already sufficient to display a news listing with the intro
 	 * // and a separate view which features the whole news text.
 	 * // 
-	 * 
+	 *
 	 * $id = intval($_GET['id']);
 	 * if($id && ($do = DBObject::find('News', $id))) {
 	 * 	// ID was valid
@@ -69,6 +69,24 @@
 	 *
 	 * // [...]
 	 *
+	 *
+	 * Instead of relying on the automatic rules for DBObject creation you
+	 * might like to override its behavior in a derived class. If you inherit
+	 * from DBObject, you always have to include one line of boilerplate
+	 * code:
+	 *
+	 * class News {
+	 * 	// this is necessary:
+	 * 	protected $class = __CLASS__;
+	 *
+	 *	// here, you might add your own methods or override the behavior
+	 *	// of existant methods, for example:
+	 *	public function insert()
+	 *	{
+	 *		$this->creation_dttm = time();
+	 *		return parent::insert();
+	 *	}
+	 * }
 	 *
 	 * 
 	 * This example demonstrates how you can manipulate the database through
