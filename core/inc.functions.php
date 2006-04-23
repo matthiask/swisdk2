@@ -27,5 +27,18 @@
 			$value = $_GET[$var];
 		return $value;
 	}
-
+	
+	/**
+	*	Generates a string of random numbers and characters. 
+	*/
+	function randomKeys($length)
+  	{
+		$pattern = "1234567890abcdefghijklmnopqrstuvwxyz";
+		for($i=0;$i<$length;$i++)
+   		{
+		     $key .= $pattern{rand(0,35)};
+	   	}
+		return $key;
+	}
+		
 ?>
