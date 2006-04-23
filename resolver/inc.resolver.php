@@ -86,20 +86,42 @@
 	}
 
 	class WebsiteResolver extends SwisdkResolverModule {
-		/* don't do anything
+
 		public function process($urifragment)
 		{
+			// read the website config value
+			$websites = explode( "," , Swisdk::config_value("runtime.websites") );
+			
+			$website = "default";
+			if( count( $websites ) ) 
+			{
+				foreach( $websites as $webs )
+				{
+					if( strpos ( $urifragment , "/$webs" , 0 ) === 0 )
+					{
+						$website = $webs;
+						break;
+					}
+
+				}
+			} 			
+			
+			Swisdk::set_config_value("runtime.website", $website );
+			
+			$this->urifragment = $urifragment;
+			return false;
+			
 			// if url begins with admin, set admin mode (very secure :-)
-			$tokens = explode('/', substr($urifragment, 1));
+			/*$tokens = explode('/', substr($urifragment, 1));
 			if(in_array(array_shift($tokens), array('admin'))) {
 				SwisdkRegistry::getInstance()->setValue( '/runtime/admin', 1 );
 				$this->urifragment = implode( '/', $tokens );
 			} else {
 				SwisdkRegistry::getInstance()->setValue( '/runtime/admin', 0 );
 				$this->urifragment = $urifragment;
-			}
+			}*/
 		}
-		*/
+		
 	}
 	
 	class FilesystemResolver extends SwisdkResolverModule {
