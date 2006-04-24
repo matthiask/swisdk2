@@ -372,7 +372,7 @@
 		 *
 		 * TODO: should also descend into nested FormBoxes
 		 */
-		public function &item($name)
+		public function item($name)
 		{
 			if(isset($this->items[$name]))
 				return $this->items[$name];
@@ -419,6 +419,11 @@
 			$this->generate_form_id();
 		}
 
+		public function id()
+		{
+			return $this->form_id;
+		}
+
 		/**
 		 * @return the Form html
 		 */
@@ -428,7 +433,7 @@
 			$id->set_name($this->form_id);
 			$id->set_value(1);
 
-			$html = '<form method="post" action="'.$_SERVER['REQUEST_URI'].'">';
+			$html = '<form method="post" action="'.$_SERVER['REQUEST_URI'].'" name="'.$this->form_id."\">\n";
 			$html .= parent::html();
 			if($this->message)
 				$html .= '<p>'.$this->message.'</p>';
@@ -490,8 +495,16 @@
 		 */
 		public function generate_form_id()
 		{
-			$id = $this->dbobj->id();
-			$this->form_id = '__swisdk_form_'.$this->dbobj->table().'_'.($id?$id:0);
+			$this->form_id = Form::to_form_id($this->dbobj());
+		}
+
+		public static function to_form_id($tok, $id=0)
+		{
+			if($tok instanceof DBObject) {
+				$id = $tok->id();
+				return '__swisdk_form_'.$tok->table().'_'.($id?$id:0);
+			}
+			return '__swisdk_form_'.$tok.'_'.($id?$id:0);
 		}
 	}
 
@@ -599,6 +612,12 @@
 		 * be added later. It should add _dttm for DateInput, however.
 		 */
 		public function field_name($title)	{ return strtolower($title); } 
+
+		public function __construct($name=null)
+		{
+			if($name)
+				$this->name = $name;
+		}
 
 		/**
 		 * accessors and mutators
@@ -708,11 +727,11 @@
 			$name = $this->name();
 			$sname = $this->_stripit($name);
 
-			if(isset($_POST[$name])) {
-				if(is_array($_POST[$name]))
-					$dbobj->set($sname, $_POST[$name]);
+			if($val = getInput($name)) {
+				if(is_array($val))
+					$dbobj->set($sname, $val);
 				else
-					$dbobj->set($sname, stripslashes($_POST[$name]));
+					$dbobj->set($sname, stripslashes($val));
 			}
 
 			$this->set_value($dbobj->get($sname));
@@ -739,7 +758,7 @@
 		{
 			return '<input type="'.$this->type.'" name="'.$this->name().'" id="'
 				.$this->name().'"  value="'.$this->value().'" '
-				.$this->attribute_html().'/>';
+				.$this->attribute_html()."/>\n";
 		}
 	}
 
