@@ -41,7 +41,7 @@
 	 * // This is already sufficient to display a news listing with the intro
 	 * // and a separate view which features the whole news text.
 	 * // 
-	 * 
+	 *
 	 * $id = intval($_GET['id']);
 	 * if($id && ($do = DBObject::find('News', $id))) {
 	 * 	// ID was valid
@@ -69,6 +69,24 @@
 	 *
 	 * // [...]
 	 *
+	 *
+	 * Instead of relying on the automatic rules for DBObject creation you
+	 * might like to override its behavior in a derived class. If you inherit
+	 * from DBObject, you always have to include one line of boilerplate
+	 * code:
+	 *
+	 * class News {
+	 * 	// this is necessary:
+	 * 	protected $class = __CLASS__;
+	 *
+	 *	// here, you might add your own methods or override the behavior
+	 *	// of existant methods, for example:
+	 *	public function insert()
+	 *	{
+	 *		$this->creation_dttm = time();
+	 *		return parent::insert();
+	 *	}
+	 * }
 	 *
 	 * 
 	 * This example demonstrates how you can manipulate the database through
@@ -233,6 +251,30 @@
 		protected $data = array();
 
 		/**
+		 * automatically pass on all errors to SwisdkError::handle
+		 */
+		protected static $handle_error = true;
+
+		/**
+		 * this variable holds the error object if
+		 * handle_error was false and an error occurred
+		 */
+		protected static $error_obj=null;
+
+		/**
+		 * automatically handle DB errors?
+		 */
+		public static function handle_error($handle = true)
+		{
+			DBObject::$handle_error = $handle;
+		}
+
+		public static function error()
+		{
+			return DBObject::$error_obj;
+		}
+
+		/**
 		 * @param $setup_dbvars: Should the DB vars be determined or should we wait
 		 * until later (See DBObject::create)
 		 */
@@ -304,13 +346,12 @@
 		 * This function returns a DBObject of type $class if the entry
 		 * $id exists in the database.
 		 */
-		public static function &find($class, $params)
+		public static function find($class, $params)
 		{
 			$obj = DBObject::create($class);
 			if($obj->_find($params))
 				return $obj;
-			$null = null;
-			return $null;
+			return false;
 		}
 
 		protected function _find($params)
@@ -350,11 +391,10 @@
 		{
 			if(!$this->dirty)
 				return true;
-			if(isset($this->data[$this->primary]) && $this->data[$this->primary]) {
+			if(isset($this->data[$this->primary]) && $this->data[$this->primary])
 				return $this->update();
-			} else {
+			else
 				return $this->insert();
-			}
 		}
 
 		/**
@@ -364,12 +404,16 @@
 		public function update()
 		{
 			DBObject::db_start_transaction();
-			DBObject::db_query('UPDATE ' . $this->table . ' SET '
+			$res = DBObject::db_query('UPDATE ' . $this->table . ' SET '
 				. $this->_vals_sql() . ' WHERE '
 				. $this->primary . '=' . $this->id());
-			$this->_update_relations();
+			if($res===false || !$this->_update_relations()) {
+				DBObject::db_rollback();
+				return false;
+			}
 			DBObject::db_commit();
 			$this->dirty = false;
+			return true;
 		}
 
 		/**
@@ -379,12 +423,20 @@
 		{
 			DBObject::db_start_transaction();
 			$this->unset_primary();
-			DBObject::db_query('INSERT INTO ' . $this->table
+			$res = DBObject::db_query('INSERT INTO ' . $this->table
 				. ' SET ' . $this->_vals_sql());
+			if($res===false) {
+				DBObject::db_rollback();
+				return false;
+			}
 			$this->data[$this->primary] = DBObject::db_insert_id();
-			$this->_update_relations();
+			if($this->_update_relations()) {
+				DBObject::db_rollback();
+				return false;
+			}
 			DBObject::db_commit();
 			$this->dirty = false;
+			return true;
 		}
 
 		/**
@@ -401,14 +453,19 @@
 				return;
 			foreach(DBObject::$relations[$this->class] as &$rel) {
 				if($rel['type']==DB_REL_MANYTOMANY) {
-					DBObject::db_query('DELETE FROM '.$rel['table'].' WHERE '
-						.$this->primary.'='.$this->id());
+					$res = DBObject::db_query('DELETE FROM '.$rel['table']
+						.' WHERE '.$this->primary.'='.$this->id());
+					if($res===false)
+						return false;
 					if(count($this->data[$rel['field']])) {
-						$sql = 'INSERT INTO '.$rel['table'].' ('.$this->primary;
-						$sql .= ','.$rel['foreign'].') VALUES ('.$this->id().',';
-						$sql .= implode('),('.$this->id().',', $this->data[$rel['field']]);
-						$sql .= ')';
-						DBObject::db_query($sql);
+						$sql = 'INSERT INTO '.$rel['table']
+							.' ('.$this->primary.','
+							.$rel['foreign'].') VALUES ('
+							.$this->id().','
+							.implode('),('.$this->id().',',
+							$this->data[$rel['field']]).')';
+						if(DBObject::db_query($sql)===false)
+							return false;
 					}
 				}
 			}
@@ -438,7 +495,7 @@
 		 */
 		public function delete()
 		{
-			DBObject::db_query('DELETE FROM ' . $this->table
+			return DBObject::db_query('DELETE FROM ' . $this->table
 				. ' WHERE ' . $this->primary . '=' . $this->id());
 			//TODO: $this->data = array(); ?
 		}
@@ -649,8 +706,15 @@
 		{
 			$dbh = DBObject::db();
 			$result = $dbh->query($sql);
-			if($dbh->errno)
-				SwisdkError::handle(new DBError("Database error: " . $dbh->error, $sql));
+			DBObject::$error_obj = null;
+			if($dbh->errno) {
+				$error = new DBError("Database error: ".$dbh->error, $sql);
+				if(DBObject::$handle_error)
+					SwisdkError::handle($error);
+				else
+					DBObject::$error_obj = $error;
+				return false;
+			}
 			return $result;
 		}
 
@@ -660,7 +724,10 @@
 		 */
 		public static function db_get_row($sql)
 		{
-			return DBObject::db_query($sql)->fetch_assoc();
+			$res = DBObject::db_query($sql);
+			if($res===false)
+				return $res;
+			return $res->fetch_assoc();
 		}
 		
 		/**
@@ -680,6 +747,8 @@
 		public static function db_get_array($sql, $result_key=null)
 		{
 			$res = DBObject::db_query($sql);
+			if($res===false)
+				return $res;
 			$array = array();
 			if($result_key) {
 				if(is_array($result_key) && (($key = $result_key[0]) && ($val = $result_key[1]))) {
@@ -721,8 +790,7 @@
 		*/
 		public static function db_insert_id() 
 		{
-			$dbh = DBObject::db();
-			return $dbh->insert_id;
+			return DBObject::db()->insert_id;
 		}
 		
 		/**
@@ -975,10 +1043,10 @@
 		 */
 		public static function create($class)
 		{
-			if(is_string($class))
-				return new DBOContainer(DBObject::create($class));
-			else
+			if($class instanceof DBObject)
 				return new DBOContainer($class);
+			else
+				return new DBOContainer(DBObject::create($class));
 		}
 
 		/**
@@ -996,7 +1064,8 @@
 
 			if(is_array($params))
 				$container->add_clause_array($params);
-			$container->init();
+			if($container->init()===false)
+				return false;
 			return $container;
 		}
 
@@ -1010,8 +1079,10 @@
 			$sql = call_user_func_array(array(&$this->obj, '_select_sql'), $args)
 				. $this->clause_sql . $this->_fulltext_clause()
 				. implode(',', $this->order_columns) . $this->limit;
-			$result = DBObject::db_query($sql);
-			while($row = $result->fetch_assoc()) {
+			$res = DBObject::db_query($sql);
+			if($res===false)
+				return false;
+			while($row = $res->fetch_assoc()) {
 				$obj = clone $this->obj;
 				$obj->set_data($row);
 				$this->data[$obj->id()] = $obj;
@@ -1144,9 +1215,13 @@
 		 */
 		public function __call($method, $args)
 		{
-			foreach($this->data as &$obj) {
+			if(in_array($method, array('update','insert','store','delete')))
+				foreach($this->data as &$dbobj)
+					if(call_user_func_array(array(&$obj,$method), $args)===false)
+						// TODO not sure if this is sane behavior
+						return false;
+			foreach($this->data as &$obj)
 				call_user_func_array(array(&$obj,$method), $args);
-			}
 		}
 
 		public function add($param)
@@ -1234,13 +1309,12 @@
 			return $obj;
 		}
 
-		public static function &find($class, $params)
+		public static function find($class, $params)
 		{
 			$obj = DBObjectML_T::create($class);
 			if($obj->_find($params))
 				return $obj;
-			$null = null;
-			return $null;
+			return false;
 		}
 
 		protected function _setup_dbvars()
@@ -1338,50 +1412,62 @@
 		/**
 		 * FIXME: if $language is set, $params must be an integer (the ID)
 		 */
-		public static function &find($class, $params, $language=null)
+		public static function find($class, $params, $language=null)
 		{
 			if($language) {
 				$obj = DBObjectML::create($class);
 				$obj->language = $language;
 				$obj->id = $params;
-				$obj->refresh();
+				if($obj->refresh()===false)
+					return false;
 				return $obj;
 			} else {
 				$obj = DBObjectML::create($class);
 				if($obj->_find($params))
 					return $obj;
-				$null = null;
-				return $null;
+				return false;
 			}
 		}
 
 		public function refresh()
 		{
-			parent::refresh();
+			if(parent::refresh()===false)
+				return false;
 			$obj = $this->dbobjml();
-			if($this->language)
-				$this->obj = DBObjectML_T::find($this->mlclass, array(
+			if($this->language) {
+				$res = DBObjectML_T::find($this->mlclass, array(
 					$obj->name($this->primary()).'=' => $this->id(),
-					$obj->name('language_id').'=' => $this->language
-				));
-			else
-				$this->obj = DBOContainer::find(DBObjectML_T::create($this->mlclass), array(
+					$obj->name('language_id').'=' => $this->language));
+				if($res===false)
+					return false;
+				$this->obj = $res;
+			} else {
+				$res = DBOContainer::find(DBObjectML_T::create($this->mlclass), array(
 					$obj->name($this->primary()).'=' => $this->id()));
+				if($res===false)
+					return false;
+				$this->obj = $res;
+			}
 			return ($this->data && $this->obj && count($this->data));
 		}
 
 		public function update()
 		{
 			DBObject::db_start_transaction();
-			parent::update();
-			$this->obj->update();
+			if(parent::update()===false || $this->obj->update()) {
+				DBObject::db_rollback();
+				return false;
+			}
 			DBObject::db_commit();
 		}
 
 		public function insert()
 		{
 			DBObject::db_start_transaction();
-			parent::insert();
+			if(parent::insert()===false) {
+				DBObject::db_rollback();
+				return false;
+			}
 			$primary = $this->primary();
 			$id = $this->id();
 
@@ -1390,7 +1476,10 @@
 			$this->obj->unset_primary();
 			$this->obj->$primary = $id;
 			$this->obj->language_id = $this->language;
-			$this->obj->insert();
+			if($this->obj->insert()===false) {
+				DBObject::db_rollback();
+				return false;
+			}
 			DBObject::db_commit();
 		}
 

@@ -71,11 +71,15 @@
 
 		public static function check_group_role($group, $role, $uid=null)
 		{
+			$user = null;
 			if(is_null($uid))
-				$uid = SessionHandler::user_id();
-			$perms = DBObject::db_get_row('SELECT permission_role_id '
-				.'FROM tbl_permission WHERE permission_user_id='.$uid
-				.' AND permission_group_id='.$group);
+				$user = SessionHandler::user();
+			else
+				$user = DBObject::find('User', $uid);
+
+			$perms = DBObject::db_get_row('SELECT user_permission_role_id '
+				.'FROM tbl_user_permission WHERE user_permission_user_id='
+				.$user->id().' AND user_permission_group_id='.$group);
 
 			//
 			// the user must have an entry in the permission table, even
@@ -86,7 +90,29 @@
 			// the amount of data which will be necessary once you have some
 			// groups in the system. (Roughly #users * #groups)
 			//
-			return ($perms && $perms['permission_role_id']>=$role);
+			if($perms && $perms['user_permission_role_id']>=$role)
+				return true;
+
+			//
+			// check user's groups for sufficient permissions
+			//
+			$groups = $user->related('UserGroup')->ids();
+			if(!count($groups))
+				return false;
+
+			$perms = DBObject::db_get_array('SELECT user_group_permission_role_id '
+				.'FROM tbl_user_group_permission '
+				.'WHERE user_group_permission_user_group_id IN ('
+				.implode(',', $groups).') AND user_group_permission_group_id='
+				.$group);
+			foreach($perms as &$p)
+				if($p['user_group_permission_role_id']>=$role)
+					return true;
+
+			//
+			// insufficient roles everywhere... check failed!
+			//
+			return false;
 		}
 
 		public static function access_denied()
