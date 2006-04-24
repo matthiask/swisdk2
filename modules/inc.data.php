@@ -1078,7 +1078,10 @@
 			array_unshift($args, $this->joins);
 			$sql = call_user_func_array(array(&$this->obj, '_select_sql'), $args)
 				. $this->clause_sql . $this->_fulltext_clause()
-				. implode(',', $this->order_columns) . $this->limit;
+				. (count($this->order_columns)
+					?' ORDER BY '.implode(',', $this->order_columns)
+					:'')
+				. $this->limit;
 			$res = DBObject::db_query($sql);
 			if($res===false)
 				return false;
@@ -1142,6 +1145,8 @@
 		 */
 		public function set_limit($p1, $p2=null)
 		{
+			if($p1<0)
+				$p1=0;
 			if(is_null($p2)) {
 				$this->limit = ' LIMIT ' . $p1;
 			} else {
