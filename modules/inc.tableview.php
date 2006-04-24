@@ -79,6 +79,11 @@
 			return $this->title;
 		}
 
+		public function column()
+		{
+			return $this->column;
+		}
+
 		protected $title;
 		protected $column;
 	}
