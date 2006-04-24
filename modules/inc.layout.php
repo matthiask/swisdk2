@@ -30,6 +30,8 @@
 		
 		public function html()
 		{
+			if(!count($this->items))
+				return null;
 			if($this->orientation==SL_HORIZONTAL) {
 				$html = '<table><tr>';
 				foreach($this->items as &$item) {
@@ -144,8 +146,10 @@
 		
 		public function html()
 		{
+			if(!$this->w && !$this->h)
+				return null;
 			$empty = new Layout_EmptyGridItem();
-			$html = '<table border="1">';
+			$html = '<table>';
 			for($j=0; $j<$this->h; ++$j) {
 				$html .= '<tr>';
 				for($i=0; $i<$this->w; ++$i) {
