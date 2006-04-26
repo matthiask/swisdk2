@@ -229,6 +229,22 @@
 		public function table()		{ return $this->table; }
 		public function primary()	{ return $this->primary; }
 		public function name($tok)	{ return $this->prefix . $tok; }
+		public function unname($tok)
+		{
+			return preg_replace('/^'.$this->prefix.'/', '', $tok);
+		}
+
+		public function pretty($field)
+		{
+			if($field == $this->primary)
+				return 'ID';
+			return ucwords(str_replace('_', ' ', preg_replace(
+				'/('.$this->prefix.')?(.*?)(_id|_dttm)?/',
+				'\2',
+				$field
+			)));
+		}
+
 		public function shortname($tok)	{ return str_replace($this->prefix,'',$tok); }
 		public function _class()	{ return $this->class; }
 		public function _prefix()	{ return $this->prefix; }
@@ -928,7 +944,11 @@
 			if(isset($relations[$var])) {
 				// FIXME It seems that I assumed that I'll always get a DBOContainer
 				// back from DBObject::related(). That is NOT always the case. (DB_REL_SINGLE)
-				$this->data[$var] = $this->related($var)->ids();
+				$obj = $this->related($var);
+				if($obj instanceof DBObject)
+					$this->data[$var] = $obj->id();
+				else
+					$this->data[$var] = $obj->ids();
 				return $this->data[$var];
 			}
 		}
@@ -1092,6 +1112,25 @@
 			}
 		}
 
+		public function count()
+		{
+			return count($this->data);
+		}
+
+		public function total_count()
+		{
+			$sql = call_user_func_array(array(&$this->obj, '_select_sql'), $this->joins)
+				. $this->clause_sql . $this->_fulltext_clause()
+				. (count($this->order_columns)
+					?' ORDER BY '.implode(',', $this->order_columns)
+					:'');
+			$sql = str_replace('SELECT *', 'SELECT COUNT(*) AS count', $sql);
+			$res = DBObject::db_get_row($sql);
+			if($res===false)
+				return false;
+			return $res['count'];
+		}
+
 		/**
 		 * here you can pass SQL fragments. The data will be automatically escaped so you can pass
 		 * anything you like.
@@ -1145,13 +1184,17 @@
 		 */
 		public function set_limit($p1, $p2=null)
 		{
+			$p1 = intval($p1);
+			if($p2!==null)
+				$p2 = intval($p2);
+			if((!$p1&&$p2===null)||(!$p1&&!$p2))
+				return;
 			if($p1<0)
 				$p1=0;
-			if(is_null($p2)) {
+			if(is_null($p2))
 				$this->limit = ' LIMIT ' . $p1;
-			} else {
+			else
 				$this->limit = ' LIMIT ' . $p1 . ',' . $p2;
-			}
 		}
 
 		/**
