@@ -13,7 +13,7 @@
 
 		public function html()
 		{
-			return '<table border="1">'
+			return '<table>'
 				. $this->render_head()
 				. $this->render_body()
 				. $this->render_foot()
@@ -41,9 +41,10 @@
 
 		protected function render_body()
 		{
-			$html = '';
+			$html = '<tbody>';
 			foreach($this->data as &$row)
 				$html .= $this->render_row($row);
+			$html .= "</tbody>\n";
 			return $html;
 		}
 
@@ -137,7 +138,7 @@
 		public function html(&$data)
 		{
 			$method = $this->column;
-			return $method($data);
+			return call_user_func($method, $data);
 		}
 	}
 
