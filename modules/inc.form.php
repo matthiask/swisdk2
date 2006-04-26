@@ -270,11 +270,12 @@
 				$relations[$r['field']] = $r;
 			}
 
-			$regex = '^id$';
+			$p = $this->dbobj->_prefix();
+			$regex = '^'.$p.'id$';
 			if($this->dbobj instanceof DBObjectML_T) {
 				// also hide the language id and the owning DBObject
 				// reference fields
-				$regex .= '|^__language([0-9]+)_id$|_language_id$';
+				$regex .= '|^__language([0-9]+)_'.$p.'id$|_'.$p.'language_id$';
 				$regex .= '|_'.$this->dbobj->owner_primary().'$';
 			}
 
@@ -282,17 +283,17 @@
 				// field name
 				$fname = $this->fname($field['Field']);
 				// short name (prefix removed)
-				$sn = $this->dbobj->shortname($fname);
+				$pretty = $this->dbobj->pretty($field['Field']);
 				// hide the id field
-				if(preg_match('/('.$regex.')/', strtolower($sn))) {
+				if(preg_match('/('.$regex.')/', strtolower($fname))) {
 					// should I hide the current field?
-					$this->add($sn, new HiddenInput(), $fname);
+					$this->add($pretty, new HiddenInput(), $fname);
 				} else if(isset($relations[$fname])) {
 					// use relations to determine how to display
 					// the FormItem?
 					switch($relations[$fname]['type']) {
 						case DB_REL_SINGLE:
-							$f = $this->add($sn, new DropdownInput(), $fname);
+							$f = $this->add($pretty, new DropdownInput(), $fname);
 							$dc = DBOContainer::find($relations[$fname]['class']);
 							$choices = array();
 							foreach($dc as $o) {
@@ -301,7 +302,7 @@
 							$f->set_items($items);
 							break;
 						case DB_REL_MANY:
-							$f = $form->add($sn, new Multiselect(), $fname);
+							$f = $form->add($pretty, new Multiselect(), $fname);
 							$dc = DBOContainer::find($relations[$fname]['class']);
 							$items = array();
 							foreach($dc as $o) {
@@ -312,18 +313,18 @@
 					}
 				} else if(strpos($fname,'dttm')!==false) {
 					// display datepicker? (dttm ~= date time)
-					$this->add($sn, new DateInput(), $fname);
+					$this->add($pretty, new DateInput(), $fname);
 				} else if(strpos($field['Type'], 'text')!==false) {
 					// textarea for field of 'text' type
-					$this->add($sn, new Textarea(), $fname);
+					$this->add($pretty, new Textarea(), $fname);
 				} else if($field['Type']=='tinyint(1)') {
 					// mysql suckage. It does not really know
 					// a bool type, only tinyint(1)
-					$this->add($sn, new CheckboxInput(), $fname);
+					$this->add($pretty, new CheckboxInput(), $fname);
 				} else {
 					// no other rules matched, just use a
 					// textinput for this field
-					$this->add($sn, new TextInput(), $fname);
+					$this->add($pretty, new TextInput(), $fname);
 				}
 			}
 		}
