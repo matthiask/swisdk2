@@ -690,6 +690,42 @@
 		}
 
 		/**
+		 * functions to bind objects to each other without setting relations data
+		 */
+
+		/**
+		 * $content = DBObject::create('NewsContent');
+		 * $owner = DBObject::create('News');
+		 * // ...
+		 * $owner->store();
+		 * $content->set_owner($owner);
+		 * $content->store();
+		 */
+		public function set_owner(DBObject $obj)
+		{
+			$this->{$obj->primary()} = $obj->id();
+		}
+
+		/**
+		 * $content = DBOConteiner::create('NewsContent');
+		 * $owner = DBObject::create('News');
+		 * // ...
+		 * $content->add(obj1);
+		 * $content->add(obj2);
+		 * $content->add(obj3);
+		 * // ...
+		 * $owner->store();
+		 * $owner->set_owned($content);
+		 * $content->store();
+		 *
+		 * @param obj: DBObject or DBOContainer
+		 */
+		public function set_owned($obj)
+		{
+			$obj->{$this->primary()} = $this->id();
+		}
+
+		/**
 		 * @return: the DB handle
 		 */
 		protected static function &db()
@@ -1140,8 +1176,9 @@
 		 */
 		public function add_clause($clause, $data=null, $binding = 'AND')
 		{
+			$binding = ' '.$binding.' ';
 			if(is_null($data)) {
-				$this->clause_sql .= $binding.' '.$clause.' ';
+				$this->clause_sql .= $binding.$clause;
 			} else if(is_array($data)) {
 				$matches = array();
 				preg_match_all('/\{([A-Za-z_0-9]+)}/', $clause, $matches, PREG_PATTERN_ORDER);
@@ -1157,10 +1194,10 @@
 							$q[] = $data[$v];
 						}
 					}
-					$this->clause_sql .= $binding .' '.preg_replace($p, $q, $clause);
+					$this->clause_sql .= $binding.preg_replace($p, $q, $clause);
 				}
 			} else {
-				$this->clause_sql .= $binding.' '.$clause . DBObject::db_escape($data);
+				$this->clause_sql .= $binding.$clause.DBObject::db_escape($data);
 			}
 		}
 
