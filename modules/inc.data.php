@@ -1067,6 +1067,12 @@
 		 * DBObject array
 		 */
 		protected $data = array();
+/**
+		/**
+		 * if this variable is non-null, it is used to assign the keys for
+		 * the DBObject array in init()
+		 */
+		protected $init_index = null;
 
 		/**
 		 * SQL builder variables. see add_clause(), add_join(), init() and friends
@@ -1141,10 +1147,19 @@
 			$res = DBObject::db_query($sql);
 			if($res===false)
 				return false;
-			while($row = $res->fetch_assoc()) {
-				$obj = clone $this->obj;
-				$obj->set_data($row);
-				$this->data[$obj->id()] = $obj;
+
+			if($this->init_index!==null) {
+				while($row = $res->fetch_assoc()) {
+					$obj = clone $this->obj;
+					$obj->set_data($row);
+					$this->data[$obj->{$this->init_index}] = $obj;
+				}
+			} else {
+				while($row = $res->fetch_assoc()) {
+					$obj = clone $this->obj;
+					$obj->set_data($row);
+					$this->data[$obj->id()] = $obj;
+				}
 			}
 		}
 
@@ -1176,6 +1191,24 @@
 		 */
 		public function add_clause($clause, $data=null, $binding = 'AND')
 		{
+			if($clause{0}==':') {
+				switch($clause) {
+					case ':order':
+						call_user_func_array(array(
+							$this, 'add_order_column'),
+							$data);
+					case ':limit':
+						call_user_func_array(array(
+							$this, 'set_limit'),
+							$data);
+					case ':index':
+						call_user_func_array(array(
+							$this, 'set_index'),
+							$data);
+				}
+				return;
+			}
+
 			$binding = ' '.$binding.' ';
 			if(is_null($data)) {
 				$this->clause_sql .= $binding.$clause;
@@ -1232,6 +1265,14 @@
 				$this->limit = ' LIMIT ' . $p1;
 			else
 				$this->limit = ' LIMIT ' . $p1 . ',' . $p2;
+		}
+
+		/**
+		 * $doc->set_index('language_id');
+		 */
+		public function set_index($index)
+		{
+			$this->init_index = $index;
 		}
 
 		/**
