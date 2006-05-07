@@ -26,7 +26,7 @@
 			return $instance;
 		}
 
-		public static function check($role=null, $url=null)
+		public static function check($role=null, $url=null, $abort = true)
 		{
 			if($group = PermissionManager::group_for_url($url)) {
 				//
@@ -39,6 +39,10 @@
 						$group['group_id'], $needed_role))
 					return true;
 			}
+
+			if(!$abort)
+				return false;
+
 			if(SessionHandler::authenticated())
 				PermissionManager::access_denied();
 			PermissionManager::login_form();
