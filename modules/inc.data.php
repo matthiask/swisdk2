@@ -374,8 +374,14 @@
 		{
 			if(is_array($params)) {
 				$where = array(' WHERE 1 ');
-				foreach($params as $k=>$v)
-					$where[] = $k.'\''.DBObject::db_escape($v).'\' ';
+				$p = $this->prefix;
+				$regex = '/^([:\(]|'.$p.')/';
+
+				foreach($params as $k => $v)
+					if(preg_match($regex, $k))
+						$where[] = $k.'\''.DBObject::db_escape($v).'\' ';
+					else
+						$where[] = $p.$k.'\''.DBObject::db_escape($v).'\' ';
 				$this->data = DBObject::db_get_row('SELECT * FROM '
 					.$this->table.implode(' AND ',$where));
 				if($this->data && count($this->data))
@@ -1236,8 +1242,14 @@
 
 		public function add_clause_array($params)
 		{
+			$p = $this->dbobj()->_prefix();
+			$regex = '/^([:\(]|'.$p.')/';
+			
 			foreach($params as $k => $v)
-				$this->add_clause($k, $v);
+				if(preg_match($regex, $k))
+					$this->add_clause($k, $v);
+				else
+					$this->add_clause($p.$k, $v);
 		}
 
 		/**
