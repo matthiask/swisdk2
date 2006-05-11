@@ -255,6 +255,8 @@
 			return array();
 		}
 
+		public function dirty()		{ return $this->dirty; }
+
 		/**
 		 * main DB handle (holds the mysqli instance in the current version of DBObject)
 		 */
@@ -1353,7 +1355,7 @@
 		 */
 		public function __call($method, $args)
 		{
-			if(in_array($method, array('update','insert','store','delete')))
+			if(in_array($method, array('update','insert','store','delete', 'dirty')))
 				foreach($this->data as &$dbobj)
 					if(call_user_func_array(array(&$obj,$method), $args)===false)
 						// TODO not sure if this is sane behavior
