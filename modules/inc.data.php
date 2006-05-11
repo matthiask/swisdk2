@@ -10,6 +10,9 @@
 	define('DB_REL_MANY', 2);
 	define('DB_REL_MANYTOMANY', 3);
 
+	define('LANGUAGE_DEFAULT', -1);
+	define('LANGUAGE_ALL', -2);
+
 	/**
 	 * DBObject
 	 *
@@ -1367,11 +1370,17 @@
 		public function add($param)
 		{
 			if($param instanceof DBObject)
-				$this->data[$param->id()] = $param;
+				if($this->init_index!==null)
+					$this->data[$param->{$this->init_index}] = $param;
+				else
+					$this->data[$param->id()] = $param;
 			else {
 				$obj = clone $this->obj;
 				$obj->set_data($param);
-				$this->data[$obj->id()] = $obj;
+				if($this->init_index!==null)
+					$this->data[$obj->{$this->init_index}] = $obj;
+				else
+					$this->data[$obj->id()] = $obj;
 			}
 		}
 
@@ -1416,189 +1425,126 @@
 		public function offsetUnset($offset) { unset($this->data[$offset]); }
 	}
 
-	/**
-	 * The Form code uses this class for some autogeneration black
-	 * magic. It is used for the representation of translations inside
-	 * language-aware DBObjects
-	 */
-	class DBObjectML_T extends DBObject {
-		public static function create($class)
+	class DBObjectML extends DBObject {
+		protected $class = __CLASS__;
+
+		/**
+		 * translation object class
+		 */
+		protected $tclass = null;
+
+		/**
+		 * DBObject or DBOContainer with translation objects
+		 */
+		protected $obj;
+
+		/**
+		 * the language id of this DBObjectML or one of the
+		 * LANGUAGE_* constants
+		 */
+		protected $language;
+
+		public function language() { return $this->language; }
+
+		/**
+		 * @return a DBObject or a DBOContainer depending on the value
+		 * of $language above
+		 *
+		 * Creates and initializes the object if it does not exist already
+		 */
+		public function dbobj()
+		{
+			if(!$this->obj) {
+				if($this->language == LANGUAGE_ALL)
+					if($id = $this->id())
+						$this->obj = DBOContainer::find($this->tclass, array(
+							$this->primary.'=' => $id,
+							':index' => 'language_id'));
+					else
+						$this->obj = DBOContainer::create($this->tclass);
+				else {
+					$language = $this->language;
+					if($language == LANGUAGE_DEFAULT)
+						$language = Swisdk::language();
+
+					if($id = $this->id())
+						$this->obj = DBObject::find($this->tclass, array(
+							$this->primary.'=' => $id,
+							'language_id=' => $language
+						));
+					else {
+						$this->obj = DBObject::create($this->tclass);
+						$this->obj->language_id = $this->language;
+					}
+				}
+			}
+			return $this->obj;
+		}
+
+		protected function _setup_dbvars()
+		{
+			parent::_setup_dbvars();
+			if($this->tclass===null)
+				$this->tclass = $this->class.'Content';
+			DBObject::has_many($this->class, $this->tclass);
+			DBObject::has_a($this->tclass, 'Language');
+		}
+
+		public static function create($class, $language = LANGUAGE_DEFAULT)
 		{
 			if(class_exists($class))
-				return new $class;
+				return new $class();
 
-			$obj = new DBObjectML_T(false);
+			$obj = new DBObjectML(false);
 			$obj->class = $class;
 			$obj->_setup_dbvars();
+			$obj->language = $language;
 			return $obj;
 		}
 
-		public static function create_with_data($class, $data)
+		public static function find($class, $params, $language = LANGUAGE_DEFAULT)
 		{
-			$obj = null;
-			if(class_exists($class))
-				$obj = new $class();
-			else {
-				$obj = new DBObjectML_T(false);
-				$obj->class = $class;
-				$obj->_setup_dbvars();
-			}
-
-			foreach($data as $k => $v)
-				$obj->$k = $v;
-			return $obj;
-		}
-
-		public static function find($class, $params)
-		{
-			$obj = DBObjectML_T::create($class);
+			$obj = DBObjectML::create($class, $language);
 			if($obj->_find($params))
 				return $obj;
 			return false;
 		}
 
-		protected function _setup_dbvars()
+		protected function _find($params)
 		{
-			parent::_setup_dbvars();
-			$this->owner_primary = strtolower(
-				preg_replace('/(.)([A-Z])/', '\1_\2',
-					preg_replace('/Content$/', '',
-						$this->class)).'_id');
-		}
-
-		/**
-		 * return the primary key of the owning DBObject
-		 *
-		 * Example:
-		 *
-		 * If this DBObject has type NewsContent, the owning DBObject
-		 * has type News and therefore its primary key would be
-		 * news_id. The tbl_news.news_id field is referenced by
-		 * tbl_news_content.news_content_news_id
-		 */
-		public function owner_primary() { return $this->owner_primary; }
-		protected $owner_primary;
-	}
-
-	/**
-	 * language-aware DBObject
-	 *
-	 * this is tightly coupled with FormML (language aware Forms)
-	 */
-	class DBObjectML extends DBObject {
-
-		/**
-		 * DBOContainer of DBObjectML_T OR a single DBObjectML_T
-		 * depending on the value of $language
-		 */
-		protected $obj = null;
-
-		/**
-		 * this DBObjectML's language or null if no specific language
-		 * was choosen (=all languages)
-		 */
-		protected $language = null;
-
-		/**
-		 * Class of translation DBObject
-		 */
-		protected $mlclass = null;
-
-		public function language() { return $this->language; } 
-		public function set_language($language = null) { $this->language = $language; }
-
-		protected function _setup_dbvars()
-		{
-			parent::_setup_dbvars();
-			if(is_null($this->mlclass))
-				$this->mlclass = $this->class.'Content';
-		}
-
-		public static function create($class, $language=null)
-		{
-			$obj = null;
-			if(class_exists($class))
-				$obj = new $class();
-			else {
-				$obj = new DBObjectML(false);
-				$obj->class = $class;
-				$obj->_setup_dbvars();
-			}
-
-			if($language)
-				$obj->set_language($language);
-			$obj->_create_translation_object();
-			return $obj;
-		}
-
-		private function _create_translation_object()
-		{
-			if($this->language)
-				$this->obj = DBObjectML_T::create_with_data(
-					$this->mlclass,
-					array('language_id' => $this->language));
-			else {
-				$this->obj = DBOContainer::create(DBObjectML_T::create($this->mlclass));
-				$languages = DBOContainer::find('Language');
-				foreach($languages as &$language) {
-					$obj = DBObjectML_T::create_with_data(
-						$this->mlclass,
-						array('language_id' => $language->id()));
-					$this->obj[$language->id()] = $obj;
-				}
-			}
-		}
-
-		/**
-		 * FIXME: if $language is set, $params must be an integer (the ID)
-		 */
-		public static function find($class, $params, $language=null)
-		{
-			if($language) {
-				$obj = DBObjectML::create($class);
-				$obj->language = $language;
-				$obj->id = $params;
-				if($obj->refresh()===false)
-					return false;
-				return $obj;
-			} else {
-				$obj = DBObjectML::create($class);
-				if($obj->_find($params))
-					return $obj;
+			if(!parent::_find($params))
 				return false;
-			}
+			$this->dbobj();
+			return true;
 		}
 
 		public function refresh()
 		{
-			if(parent::refresh()===false)
+			// FIXME probably not correct...
+			if($this->obj)
+				$this->obj->refresh();
+			return parent::refresh();
+		}
+
+		public function store()
+		{
+			if(!$this->dirty()&&!$this->obj->dirty())
 				return false;
-			$obj = $this->dbobjml();
-			if($this->language) {
-				$res = DBObjectML_T::find($this->mlclass, array(
-					$obj->name($this->primary()).'=' => $this->id(),
-					$obj->name('language_id').'=' => $this->language));
-				if($res===false)
-					return false;
-				$this->obj = $res;
-			} else {
-				$res = DBOContainer::find(DBObjectML_T::create($this->mlclass), array(
-					$obj->name($this->primary()).'=' => $this->id()));
-				if($res===false)
-					return false;
-				$this->obj = $res;
-			}
-			return ($this->data && $this->obj && count($this->data));
+			if(isset($this->data[$this->primary]) && $this->data[$this->primary])
+				return $this->update();
+			else
+				return $this->insert();
 		}
 
 		public function update()
 		{
 			DBObject::db_start_transaction();
-			if(parent::update()===false || $this->obj->update()) {
+			if(parent::update()===false||!$this->obj->update()) {
 				DBObject::db_rollback();
 				return false;
 			}
 			DBObject::db_commit();
+			return true;
 		}
 
 		public function insert()
@@ -1608,40 +1554,28 @@
 				DBObject::db_rollback();
 				return false;
 			}
-			$primary = $this->primary();
-			$id = $this->id();
-
-			// it does not matter whether $this->obj is a
-			// DBObject or a DBOContainer. It Just Works (tm)
 			$this->obj->unset_primary();
-			$this->obj->$primary = $id;
-			$this->obj->language_id = $this->language;
+			$this->obj->{$this->primary} = $this->id();
 			if($this->obj->insert()===false) {
 				DBObject::db_rollback();
 				return false;
 			}
 			DBObject::db_commit();
+			return true;
 		}
 
-		/**
-		 * humm...
-		 */
-		public function dbobjml($language = null)
+		public function delete()
 		{
-			return DBObjectML_T::create($this->mlclass);
+			DBObject::db_start_transaction();
+			if($this->obj->delete()===false || parent::delete()===false) {
+				DBObject::db_rollback();
+				return false;
+			}
+			DBObject::db_commit();
+			return true;
 		}
 
 		/**
-		 * return the DBObjectML_T DBOContainer
-		 */
-		public function &dbobj()
-		{
-			return $this->obj;
-		}
-
-		/**
-		 * get teh data!
-		 *
 		 * the returned array has the following structure:
 		 *
 		 * if $language is null:
@@ -1651,8 +1585,10 @@
 		 * 	'translations' => array(
 		 * 		1 => array(
 		 * 			'news_content_id' => ...,
-		 * 			'news_content_language_id' => ...,
-		 * 			'news_content_title' => ...
+		 * 			'news_content_language_id' => 1,
+		 * 			'news_content_title' => ...,
+		 * 			'news_content_news_id' => ...,
+		 * 			...
 		 * 		),
 		 * 		2 => array(
 		 * 			...
@@ -1669,62 +1605,48 @@
 		 * 	'news_content_title' => ...
 		 * )
 		 */
-		public function data($language = null)
+		public function data()
 		{
-			$data = parent::data();
-			if($this->language)
-				return array_merge($data, $this->obj->data());
-
-			if($language && isset($this->obj[$language]))
-				$data = array_merge($data, $this->obj[$language]->data());
+			if($this->language == LANGUAGE_ALL)
+				return array_merge(parent::data(),
+					array('translations' => $this->dbobj()->data()));
 			else
-				foreach($this->obj as &$dbobj)
-					$data['translations'][$dbobj->language_id] = $dbobj->data();
-
-			return $data;
+				return array_merge(parent::data(), $this->dbobj()->data());
 		}
 
-		/**
-		 * this function accepts the same data structures as data() above
-		 * returns
-		 */
 		public function set_data($data)
 		{
-			$lidkey = $this->dbobjml()->name('language_id');
+			$p = $dbobj->dbobj()->_prefix();
+			$lkey = $p.'language_id';
 			if(isset($data['translations'])) {
-				if(!($this->obj instanceof DBOContainer))
-					$this->obj = DBOContainer::create(
-						DBObjectML_T::create($this->mlclass));
-				foreach($data['translations'] as &$translation) {
-					$lid = $translation[$lidkey];
-					if(isset($this->obj[$lid]))
-						$this->obj[$lid]->set_data($translation);
-					else {
-						$obj = DBObjectML_T::create($this->mlclass);
-						$obj->set_data($translation);
-						$this->obj[$lid] = $obj;
-					}
+				$this->language = LANGUAGE_ALL;
+				$translations = $data['translations'];
+				unset($data['translations']);
+				parent::set_data($data);
+				$dbobj =& $this->dbobj();
+				foreach($translations as &$t) {
+					$lid = $t[$lkey];
+					if(isset($dbobj[$lid]))
+						$dbobj[$lid]->set_data($t);
+					else
+						$dbobj->add($t);
 				}
-				unset($data['translation']);
+				return;
+			}
+
+			if(!isset($data[$lkey])) {
 				parent::set_data($data);
 				return;
 			}
 
-			if(!isset($data[$lidkey])) {
-				parent::set_data($data);
-				return;
-			}
-
-			$dbobjml = DBObjectML_T::create($this->mlclass);
-			$mlprefix = $dbobjml->_prefix();
-			$this->set_language($data[$lidkey]);
+			$this->language = $data[$lkey];
+			$dbobj =& $this->dbobj();
 			foreach($data as $k => $v) {
-				if(strpos($k, $mlprefix)===0)
-					$dbobjml->set($k, $v);
-				else if(strpos($k, $this->prefix)===0)
+				if(strpos($k, $p)===0)
+					$dbobj->set($k, $v);
+				else
 					$this->set($k, $v);
 			}
-			$this->obj = $dbobjml;
 		}
 
 		public function __get($var)
@@ -1736,28 +1658,10 @@
 				return null;
 			}
 
-			if($this->obj instanceof DBOContainer)
-				//FIXME return something here! use Swisdk::language()
-				return null;
-			else
-				return $this->obj->$var;
+			return $this->dbobj()->$var;
 		}
 
-		//FIXME __set function?
-
-		public function _select_sql($joins, $language=null)
-		{
-			if($language) {
-				$this->set_language($language);
-				$dbobjml = $this->dbobjml();
-				return 'SELECT * FROM '.$this->table.' LEFT JOIN '.$dbobjml->table()
-					.' ON '.$this->table.'.'.$this->primary.'='.$dbobjml->table()
-					.'.'.$dbobjml->name($this->primary).$joins.' WHERE '
-					.$dbobjml->name('language_id').'='.$language;
-			}
-
-			return 'SELECT * FROM '.$this->table;
-		}
+		// FIXME __set function?
 	}
 
 ?>
