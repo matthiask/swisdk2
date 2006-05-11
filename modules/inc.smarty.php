@@ -12,6 +12,7 @@
 	class SwisdkSmarty {
 		public function __construct()
 		{
+			// make sure E_STRICT is turned off
 			$er = error_reporting(E_ALL);
 			require_once SWISDK_ROOT . 'lib/smarty/libs/Smarty.class.php';
 			$this->smarty = new Smarty();
