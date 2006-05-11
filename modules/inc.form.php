@@ -189,6 +189,60 @@
 			}
 		}
 
+		public function add_auto($field, $pretty=null)
+		{
+			$dbobj = $this->dbobj();
+			$fields = $dbobj->field_list();
+			$relations = $dbobj->relations();
+
+			$obj = null;
+
+			if(isset($relations[$fname=$field])||isset($relations[$fname=$dbobj->name($field)])) {
+				switch($relations[$fname]['type']) {
+					case DB_REL_SINGLE:
+						$obj = new DropdownInput();
+						$dc = DBOContainer::find($relations[$fname]['class']);
+						$choices = array();
+						foreach($dc as $o) {
+							$items[$o->id()] = $o->title();
+						}
+						$obj->set_items($items);
+						break;
+					case DB_REL_MANY:
+						$obj = new Multiselect();
+						$dc = DBOContainer::find($relations[$fname]['class']);
+						$items = array();
+						foreach($dc as $o) {
+							$items[$o->id()] = $o->title();
+						}
+						$obj->set_items($items);
+						break;
+				}
+			} else if(isset($fields[$fname=$field])||isset($fields[$fname=$dbobj->name($field)])) {
+				$finfo = $fields[$fname];
+				if(strpos($fname,'dttm')!==false) {
+					$obj = new DateInput();
+				} else if(strpos($finfo['Type'], 'text')!==false) {
+					$obj = new Textarea();
+				} else if($finfo['Type']=='tinyint(1)') {
+					// mysql suckage. It does not really know
+					// a bool type, only tinyint(1)
+					$obj = new CheckboxInput();
+				} else {
+					$obj = new TextInput();
+				}
+			}
+
+			if($obj)
+				if($pretty!==null)
+					$this->add($pretty, $obj, $fname);
+				else
+					$this->add(ucwords(str_replace('_', ' ',
+						preg_replace('/^('.$dbobj->_prefix().')?(.*?)(_id|_dttm)?$/',
+							'\2', $fname))),
+						$obj, $fname);
+		}
+
 		protected function add_initialized_obj($obj)
 		{
 			$obj->init_value($this->dbobj());
@@ -263,70 +317,8 @@
 		{
 			if(!is_array($fields))
 				$fields = $this->dbobj->field_list();
-			$relations_ = $this->dbobj->relations();
-
-			$relations = array();
-			foreach($relations_ as $class => &$r) {
-				$relations[$r['field']] = $r;
-			}
-
-			$p = $this->dbobj->_prefix();
-			$regex = '^'.$p.'id$';
-			if($this->dbobj instanceof DBObjectML_T) {
-				// also hide the language id and the owning DBObject
-				// reference fields
-				$regex .= '|^__language([0-9]+)_'.$p.'id$|_'.$p.'language_id$';
-				$regex .= '|_'.$this->dbobj->owner_primary().'$';
-			}
-
-			foreach($fields as &$field) {
-				// field name
-				$fname = $this->fname($field['Field']);
-				// short name (prefix removed)
-				$pretty = $this->dbobj->pretty($field['Field']);
-				// hide the id field
-				if(preg_match('/('.$regex.')/', strtolower($fname))) {
-					// should I hide the current field?
-					$this->add($pretty, new HiddenInput(), $fname);
-				} else if(isset($relations[$fname])) {
-					// use relations to determine how to display
-					// the FormItem?
-					switch($relations[$fname]['type']) {
-						case DB_REL_SINGLE:
-							$f = $this->add($pretty, new DropdownInput(), $fname);
-							$dc = DBOContainer::find($relations[$fname]['class']);
-							$choices = array();
-							foreach($dc as $o) {
-								$items[$o->id()] = $o->title();
-							}
-							$f->set_items($items);
-							break;
-						case DB_REL_MANY:
-							$f = $form->add($pretty, new Multiselect(), $fname);
-							$dc = DBOContainer::find($relations[$fname]['class']);
-							$items = array();
-							foreach($dc as $o) {
-								$items[$o->id()] = $o->title();
-							}
-							$f->set_items($items);
-							break;
-					}
-				} else if(strpos($fname,'dttm')!==false) {
-					// display datepicker? (dttm ~= date time)
-					$this->add($pretty, new DateInput(), $fname);
-				} else if(strpos($field['Type'], 'text')!==false) {
-					// textarea for field of 'text' type
-					$this->add($pretty, new Textarea(), $fname);
-				} else if($field['Type']=='tinyint(1)') {
-					// mysql suckage. It does not really know
-					// a bool type, only tinyint(1)
-					$this->add($pretty, new CheckboxInput(), $fname);
-				} else {
-					// no other rules matched, just use a
-					// textinput for this field
-					$this->add($pretty, new TextInput(), $fname);
-				}
-			}
+			foreach(array_keys($fields) as $fname)
+				$this->add_auto($fname);
 		}
 
 		/**
