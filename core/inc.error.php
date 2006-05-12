@@ -62,21 +62,18 @@
 	}
 	
 	class BasicSwisdkError {
-		protected $args;
-		protected $debug_mode;
+		public $args;
+		public $debug_mode;
 		
 		public function __construct( $message = null )
 		{
 			$this->args = func_get_args();
-			$this->debug_mode = (Swisdk::config_value('core.debug_mode') == 'true');
+			$this->debug_mode = Swisdk::config_value('core.debug_mode');
 		}
 		
 		public function run()
 		{
-			// honor modified error_reporting value
-			if(!($errno & ini_get('error_reporting')))
-				return;
-
+			$this->append_log_message('[DEBUG]: '.$this->to_string(true));
 			SwisdkError::call_output_handler($this);
 			die();
 		}
@@ -93,6 +90,14 @@
 		{
 			// FIXME capture output (use debug_backtrace?)
 			return debug_print_backtrace();
+		}
+
+		public function append_log_message($message)
+		{
+			$fname = Swisdk::config_value('core.logfile');
+			$fp = @fopen(LOG_ROOT.$fname, 'a');
+			@fwrite($fp, date(DATE_W3C).' '.$message."\n");
+			@fclose($fp);
 		}
 	}
 	
@@ -130,14 +135,6 @@
 			parent::run();
 		}
 
-		public function append_log_message($message)
-		{
-			$fname = Swisdk::config_value('core.logfile');
-			$fp = @fopen(APP_ROOT.$fname, 'a');
-			@fwrite($fp, date(DATE_W3C).' '.$message."\n");
-			@fclose($fp);
-		}
-
 		public function send_notification($message)
 		{
 			$recipient = Swisdk::config_value('core.admin_email');
@@ -158,11 +155,12 @@
 	 * (terminates script, or not: configurable, as always)
 	 */
 	class PHPError extends BasicSwisdkError {
-
-		protected $args;
-
 		public function run()
 		{
+			// honor modified error_reporting value
+			if(!($this->args[0] & ini_get('error_reporting')))
+				return;
+
 			// see config file, section [core] ignore_error_nrs
 			if(in_array($this->args[0], explode(',',
 					Swisdk::config_value('core.ignore_error_nrs'))))

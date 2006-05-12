@@ -19,6 +19,7 @@
 			define('SMARTY_ROOT', SWISDK_ROOT . 'lib/smarty/');
 			define('MODULE_ROOT', SWISDK_ROOT . 'modules/');
 			define('CONTENT_ROOT' , APP_ROOT . 'content/');
+			define('LOG_ROOT', APP_ROOT.'log/');
 				
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
@@ -45,6 +46,7 @@
 			define( 'SMARTY_ROOT', SWISDK_ROOT . 'lib/smarty/' );
 			define( 'MODULE_ROOT', SWISDK_ROOT . 'modules/' );
 			define( 'CONTENT_ROOT' , APP_ROOT . 'content/' );
+			define('LOG_ROOT', APP_ROOT.'log/');
 				
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
