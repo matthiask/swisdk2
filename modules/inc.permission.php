@@ -131,8 +131,8 @@
 			$form = new Form();
 			$form->bind(DBObject::create('Login'));
 			$form->set_title('Login');
-			$form->add('Username');
-			$form->add('Password', new PasswordInput());
+			$form->add('login_username');
+			$form->add('login_password', new PasswordInput());
 			$form->add(new SubmitButton());
 			echo $form->html();
 			exit();
