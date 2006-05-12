@@ -10,7 +10,8 @@
 	 *
 	 * Object-oriented form building package
 	 *
-	 * Form strongly depends on DBObject for its inner workings
+	 * Form strongly depends on DBObject for its inner workings (you don't
+	 * necessarily need a database table for every form, though!)
 	 */
 
 	/**
@@ -51,9 +52,9 @@
 	 * $form = new Form();
 	 * $form->bind(DBObject::create('ContactForm')); // cannot autogenerate (obviously!)
 	 * $form->set_title('contact form');
-	 * $form->add('Sender'); // default FormItem is TextInput; use it
-	 * $form->add('Title');
-	 * $form->add('Text', new Textarea());
+	 * $form->add('sender'); // default FormItem is TextInput; use it
+	 * $form->add('title');
+	 * $form->add('text', new Textarea());
 	 * $form->add(new SubmitButton());
 	 *
 	 * // now, to get the values, use:
@@ -189,7 +190,18 @@
 			}
 		}
 
-		public function add_auto($field, $pretty=null)
+		/**
+		 * add an element to the form
+		 *
+		 * Usage example (these might "just do the right thing"):
+		 *
+		 * $form->add_auto('start_dttm', 'Publication date');
+		 * $form->add_auto('title');
+		 *
+		 * NOTE! The bound DBObject MUST point to a valid table if
+		 * you want to use this function.
+		 */
+		public function add_auto($field, $title=null)
 		{
 			$dbobj = $this->dbobj();
 			$fields = $dbobj->field_list();
@@ -234,7 +246,7 @@
 			}
 
 			if($obj)
-				$this->add_obj($fname, $obj, $pretty);
+				$this->add_obj($fname, $obj, $title);
 		}
 
 		protected function pretty_title($fname)
@@ -260,10 +272,6 @@
 
 			if($title===null)
 				$title = $this->pretty_title($field);
-
-			$fields = $dbobj->field_list();
-			if(!isset($fields[$field])&&isset($fields[$fname=$dbobj->name($field)]))
-				$field = $fname;
 
 			/*
 			$field = $this->dbobj()->name(
