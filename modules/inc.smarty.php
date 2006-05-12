@@ -13,7 +13,7 @@
 		public function __construct()
 		{
 			// make sure E_STRICT is turned off
-			$er = error_reporting(E_ALL);
+			$er = error_reporting(E_ALL^E_NOTICE);
 			require_once SWISDK_ROOT . 'lib/smarty/libs/Smarty.class.php';
 			$this->smarty = new Smarty();
 			$this->smarty->compile_dir = SWISDK_ROOT . 'lib/smarty/templates_c';
@@ -27,7 +27,7 @@
 
 		public function __call($method, $args)
 		{
-			$er = error_reporting(E_ALL);
+			$er = error_reporting(E_ALL^E_NOTICE);
 			$ret = call_user_func_array(
 				array(&$this->smarty, $method),
 				$args);
@@ -37,7 +37,7 @@
 		
 		public function __get($var)
 		{
-			$er = error_reporting(E_ALL);
+			$er = error_reporting(E_ALL^E_NOTICE);
 			$ret = $this->smarty->$var;
 			error_reporting($er);
 			return $ret;
@@ -45,7 +45,7 @@
 
 		public function __set($var, $value)
 		{
-			$er = error_reporting(E_ALL);
+			$er = error_reporting(E_ALL^E_NOTICE);
 			$ret = ($this->smarty->$var = $value);
 			error_reporting($er);
 			return $ret;
