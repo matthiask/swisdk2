@@ -116,7 +116,7 @@
 		protected function debug_string()
 		{
 			// return the SQL string when debug mode is activated
-			return $this->args[1];
+			return "\n".$this->args[1];
 		}
 	}
 	
