@@ -477,7 +477,7 @@
 		protected function _update_relations()
 		{
 			if(!isset(DBObject::$relations[$this->class]))
-				return;
+				return true;
 			foreach(DBObject::$relations[$this->class] as &$rel) {
 				if($rel['type']==DB_REL_MANYTOMANY) {
 					$res = DBObject::db_query('DELETE FROM '.$rel['table']
@@ -496,6 +496,8 @@
 					}
 				}
 			}
+
+			return true;
 		}
 
 		/**
