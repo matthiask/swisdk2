@@ -61,6 +61,10 @@
 		}
 	}
 	
+	/** 
+	 * - logging to file
+	 * TODO make logging configurable
+	 */
 	class BasicSwisdkError {
 		public $args;
 		public $debug_mode;
@@ -123,14 +127,12 @@
 	/**
 	 * - error output
 	 * - notification by email
-	 * - logging to file
 	 */
 	class NotificationError extends BasicSwisdkError {
 		public function run()
 		{
 			$message = $this->to_string($this->debug_mode);
 			// TODO make notification systems configurable?
-			$this->append_log_message($message);
 			$this->send_notification($message);
 			parent::run();
 		}
