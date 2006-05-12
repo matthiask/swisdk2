@@ -129,7 +129,7 @@
 		/**
 		 * @param $dbobj: the DBObject bound to the Form
 		 */
-		public function __construct(&$dbobj)
+		public function __construct($dbobj)
 		{
 			$this->dbobj = $dbobj;
 		}
@@ -234,13 +234,14 @@
 			}
 
 			if($obj)
-				if($pretty!==null)
-					$this->add($pretty, $obj, $fname);
-				else
-					$this->add(ucwords(str_replace('_', ' ',
-						preg_replace('/^('.$dbobj->_prefix().')?(.*?)(_id|_dttm)?$/',
-							'\2', $fname))),
-						$obj, $fname);
+				$this->add_obj($fname, $obj, $pretty);
+		}
+
+		protected function pretty_title($fname)
+		{
+			return ucwords(str_replace('_', ' ',
+				preg_replace('/^('.$this->dbobj()->_prefix().')?(.*?)(_id|_dttm)?$/',
+					'\2', $fname)));
 		}
 
 		protected function add_initialized_obj($obj)
@@ -253,23 +254,32 @@
 			return $obj;
 		}
 
-		protected function add_obj($title, $obj, $field=null)
+		protected function add_obj($field, $obj, $title=null)
 		{
-			if($field===null) {
-				$field = $this->dbobj()->name(
-					$obj->field_name($title));
-			}
+			$dbobj = $this->dbobj();
+
+			if($title===null)
+				$title = $this->pretty_title($field);
+
+			$fields = $dbobj->field_list();
+			if(!isset($fields[$field])&&isset($fields[$fname=$dbobj->name($field)]))
+				$field = $fname;
+
+			/*
+			$field = $this->dbobj()->name(
+				$obj->field_name($title));
+			*/
 
 			$obj->set_title($title);
 			$obj->set_name($field);
-			$obj->init_value($this->dbobj());
+			$obj->init_value($dbobj);
 
 			$this->items[$field] = $obj;
 
 			return $obj;
 		}
 
-		protected function add_dbobj_ref($title, $relspec)
+		protected function add_dbobj_ref($relspec, $title=null)
 		{
 			$relations = $this->dbobj()->relations();
 			if(isset($relations[$relspec])) {
@@ -688,7 +698,8 @@
 		protected function render_title(&$grid)
 		{
 			// put the title into the first column
-			$grid->add_item(0, $this->render_y, $this->title());
+			$grid->add_item(0, $this->render_y, 
+				sprintf('<label for="%s">%s</label>', $this->name(), $this->title()));
 		}
 
 		protected function render_field(&$grid)
@@ -749,9 +760,9 @@
 		protected $type = '#INVALID';
 		protected function field_html()
 		{
-			return '<input type="'.$this->type.'" name="'.$this->name().'" id="'
-				.$this->name().'"  value="'.$this->value().'" '
-				.$this->attribute_html()."/>\n";
+			return sprintf('<input type="%s" name="%s" id="%s" value="%s" %s />',
+				$this->type, $this->name(), $this->name(),
+				$this->value(), $this->attribute_html());
 		}
 	}
 
@@ -797,10 +808,11 @@
 
 		protected function field_html()
 		{
-			return '<input type="checkbox" name="'.$this->name().'" id="'
-				.$this->name().'"  '.($this->value()?'checked="checked"':'')
-				.$this->attribute_html().'/><input type="hidden" '
-				.'name="__check_'.$this->name().'" value="1" />';
+			$name = $this->name();
+			return sprintf('<input type="checkbox" name="%s" id="%s" %s /><input type="hidden" name="__check_%s" value="1" />',
+				$this->type, $name, $name,
+				($this->value()?'checked="checked" ':' ').$this->attribute_html(),
+				$name);
 		}
 	}
 
@@ -809,9 +821,9 @@
 
 		protected function field_html()
 		{
-			return '<textarea name="'.$this->name().'" id="'.$this->name().'"'
-				.$this->attribute_html().'>'
-				.$this->value().'</textarea>';
+			$name = $this->name();
+			return sprintf('<textarea name="%s" id="%s" %s>%s</textarea>',
+				$name, $name, $this->attribute_html(), $this->value());
 		}
 	}
 
