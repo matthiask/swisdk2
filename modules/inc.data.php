@@ -1459,14 +1459,14 @@
 		public function dbobj()
 		{
 			if(!$this->obj) {
-				if($this->language == LANGUAGE_ALL)
+				if($this->language == LANGUAGE_ALL) {
 					if($id = $this->id())
 						$this->obj = DBOContainer::find($this->tclass, array(
 							$this->primary.'=' => $id,
 							':index' => 'language_id'));
 					else
 						$this->obj = DBOContainer::create($this->tclass);
-				else {
+				} else {
 					$language = $this->language;
 					if($language == LANGUAGE_DEFAULT)
 						$language = Swisdk::language();
@@ -1620,7 +1620,7 @@
 
 		public function set_data($data)
 		{
-			$p = $dbobj->dbobj()->_prefix();
+			$p = DBObject::create($this->tclass)->_prefix();
 			$lkey = $p.'language_id';
 			if(isset($data['translations'])) {
 				$this->language = LANGUAGE_ALL;
