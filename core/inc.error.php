@@ -84,7 +84,7 @@
 
 		public function to_string($debug_mode = false)
 		{
-			if($this->debug_mode)
+			if($debug_mode)
 				return $this->args[0] . $this->debug_string();
 
 			return $this->args[0];
@@ -92,8 +92,18 @@
 
 		protected function debug_string()
 		{
-			// FIXME capture output (use debug_backtrace?)
-			return debug_print_backtrace();
+			$bt = debug_backtrace();
+			$str = "<pre><b>Backtrace:</b>\n";
+			foreach($bt as $frame) {
+				$str .= sprintf("%s() called at [%s]\n",
+					(isset($frame['class'])?
+					$frame['class'].$frame['type']:'').
+					$frame['function'],
+					isset($frame['file'])?$frame['file'].':'
+					.$frame['line']:'');
+			}
+			$str .= '</pre>';
+			return $str;
 		}
 
 		public function append_log_message($message)
