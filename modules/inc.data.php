@@ -1025,6 +1025,7 @@
 
 		protected static $fulltext_fields = array();
 		protected static $field_list = array();
+		protected static $_tables = array();
 
 		public function &_fulltext_fields()
 		{
@@ -1051,6 +1052,13 @@
 			return DBObject::$field_list[$this->class];
 		}
 
+		public static function &tables()
+		{
+			if(DBObject::$_tables===null)
+				DBObject::$_tables = DBObject::db_get_array('SHOW TABLES');
+			return DBObject::$_tables;
+		}
+
 		public function _select_sql($joins)
 		{
 			return 'SELECT * FROM '.$this->table.$joins.' WHERE 1';
@@ -1063,6 +1071,8 @@
 			print_r(DBObject::$field_list);
 			echo "<b>relations</b>\n";
 			print_r(DBObject::$relations);
+			echo "<b>tables</b>\n";
+			print_r(DBObject::$_tables);
 			echo '</pre>';
 		}
 	}
