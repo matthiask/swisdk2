@@ -331,12 +331,16 @@
 		 * Inspect the field_list of the bound DBObject and automatically
 		 * build a form with most fields in the field_list
 		 */
-		public function autogenerate($fields=null)
+		public function autogenerate($fields=null, $ninc_regex=null)
 		{
-			if(!is_array($fields))
-				$fields = $this->dbobj->field_list();
-			foreach(array_keys($fields) as $fname)
-				$this->add_auto($fname);
+			if($fields===null)
+				$fields = array_keys($this->dbobj->field_list());
+			if($ninc_regex===null)
+				$ninc_regex = '/^'.$this->dbobj->_prefix().'(id|creation_dttm)$/';
+			foreach($fields as $fname) {
+				if(!preg_match($ninc_regex, $fname))
+					$this->add_auto($fname);
+			}
 		}
 
 		/**
@@ -422,7 +426,7 @@
 			$this->generate_form_id();
 		}
 
-		public function bind_ref(&$dbobj, $autogenerate=false)
+		public function bind_ref($dbobj, $autogenerate=false)
 		{
 			$this->dbobj = $dbobj;
 			if($autogenerate)
@@ -544,34 +548,28 @@
 	}
 
 	class FormML extends Form {
-		protected $dbobjml = null;
-
-		public function autogenerate($fields=null)
+		public function autogenerate($fields=null, $ninc_regex=null)
 		{
-			parent::autogenerate($fields);
+			parent::autogenerate($fields, null);
 			$dbobj = $this->dbobj->dbobj();
+			if($ninc_regex===null)
+				$ninc_regex = '/^'.$dbobj->_prefix().'((language_|'.$this->dbobj->_prefix().')?id|creation_dttm)$/';
+			var_dump($ninc_regex);
 			if($dbobj instanceof DBOContainer) {
 				foreach($dbobj as &$obj) {
 					$box = new FormMLBox($obj);
 					$box->language = $obj->language_id;
-					$box->autogenerate();
+					$box->autogenerate($fields, $ninc_regex);
 					$box->set_title('Language: '.$obj->language_id);
 					$this->add($box);
 				}
 			} else {
 				$box = new FormMLBox($dbobj);
 				$box->language = $dbobj->language_id;
-				$box->autogenerate();
+				$box->autogenerate($fields, $ninc_regex);
 				$box->set_title('Language: '.$dbobj->language_id);
 				$this->add($box);
 			}
-		}
-
-		public function &dbobj()
-		{
-			if($this->dbobjml)
-				return $this->dbobjml;
-			return $this->dbobj;
 		}
 	}
 
@@ -739,7 +737,7 @@
 			$name = $this->name();
 			$sname = $this->_stripit($name);
 
-			if($val = getInput($name)) {
+			if(($val = getInput($name))!==null) {
 				if(is_array($val))
 					$dbobj->set($sname, $val);
 				else
@@ -817,10 +815,9 @@
 		protected function field_html()
 		{
 			$name = $this->name();
-			return sprintf('<input type="checkbox" name="%s" id="%s" %s /><input type="hidden" name="__check_%s" value="1" />',
+			return sprintf('<input type="checkbox" name="%s" id="%s" %s /><input type="hidden" name="__check_'.$name.'" value="1" />',
 				$this->type, $name, $name,
-				($this->value()?'checked="checked" ':' ').$this->attribute_html(),
-				$name);
+				($this->value()?'checked="checked" ':' ').$this->attribute_html());
 		}
 	}
 
@@ -929,6 +926,7 @@ EOD;
 	}
 
 	class SubmitButton extends FormBar {
+		protected $attributes = array('value' => 'Submit');
 		protected function field_html()
 		{
 			return '<input type="submit" '.$this->attribute_html().'/>';
@@ -967,6 +965,8 @@ EOD;
 			$span_name = $this->name() . '_span';
 			$trigger_name = $this->name() . '_trigger';
 			$value = intval($this->value());
+			if(!$value)
+				$value = time();
 
 			$display_value = strftime("%d. %B %Y : %H:%M", $value);
 
@@ -983,7 +983,6 @@ Calendar.setup({
 	daFormat    : "%d. %B %Y : %H:%M",
 	button      : "$trigger_name",
 	singleClick : true,
-	electric    : false,
 	showsTime   : true,
 	step        : 1
 });
