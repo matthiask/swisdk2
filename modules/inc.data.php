@@ -1448,7 +1448,11 @@
 		 */
 		protected $language;
 
-		public function language() { return $this->language; }
+		public function language() {
+			if($this->language == LANGUAGE_DEFAULT)
+				return Swisdk::language();
+			return $this->language;
+		}
 
 		/**
 		 * @return a DBObject or a DBOContainer depending on the value
