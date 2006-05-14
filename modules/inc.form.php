@@ -311,10 +311,11 @@
 						$f->set_items($items);
 						break;
 					case DB_REL_MANY:
-						//TODO better error handling (warning)
-						echo 'Cannot edit relation of type DB_REL_MANY.';
+						SwisdkError::handle(new BasicSwisdkError(
+							'Cannot edit relation of type DB_REL_MANY! relspec: '.$relspec));
 					default:
-						echo 'Oops. Unknown relation type.';
+						SwisdkError::handle(new BasicSwisdkError(
+							'Oops. Unknown relation type '.$relspec));
 				}
 			}
 		}
@@ -384,8 +385,6 @@
 		
 		/**
 		 * @return the formitem with name $name
-		 *
-		 * TODO: should also descend into nested FormBoxes
 		 */
 		public function item($name)
 		{
@@ -841,7 +840,6 @@
 			$name = $this->name();
 			$value = $this->value();
 			$attributes = $this->attribute_html();
-			// FIXME execute FCK code after window has been fully loaded
 			$html = <<<EOD
 <textarea name="$name" id="$name" $attributes>$value</textarea>
 <script type="text/javascript" src="/scripts/util.js"></script>

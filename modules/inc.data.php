@@ -511,12 +511,12 @@
 		{
 			$dbh = DBObject::db();
 			$vals = array();
-			foreach($this->data as $k => &$v) {
-				// do not include n-to-m relations in query!
-				// TODO better detection whether field came from this
-				// table or not
-				if(strpos($k,$this->prefix)===0)
-					$vals[] = $k . '=\'' . $dbh->escape_string($v) . '\'';
+			$fields = array_keys($this->field_list());
+			foreach($fields as $field) {
+				if(isset($this->data[$field]))
+					$vals[] = $field.'=\''
+						.$dbh->escape_string($this->data[$field])
+						.'\'';
 			}
 			return implode(',', $vals);
 		}
@@ -544,9 +544,10 @@
 		 */
 		public function delete()
 		{
-			return DBObject::db_query('DELETE FROM ' . $this->table
+			$ret = DBObject::db_query('DELETE FROM ' . $this->table
 				. ' WHERE ' . $this->primary . '=' . $this->id());
-			//TODO: $this->data = array(); ?
+			$this->unset_primary();
+			return $ret;
 		}
 
 		/**
@@ -665,7 +666,7 @@
 			switch($rel['type']) {
 				case DB_REL_SINGLE:
 					// FIXME this is seriously broken... gah
-					// see also DBObject::get() (around line 790)
+					// see also DBObject::get() (around line 1000)
 					if(isset($this->data[$rel['field']]))
 						return DBObject::find($rel['class'], $this->data[$rel['field']]);
 					else
@@ -1395,7 +1396,6 @@
 			if(in_array($method, array('update','insert','store','delete', 'dirty')))
 				foreach($this->data as &$dbobj)
 					if(call_user_func_array(array(&$obj,$method), $args)===false)
-						// TODO not sure if this is sane behavior
 						return false;
 			foreach($this->data as &$obj)
 				call_user_func_array(array(&$obj,$method), $args);

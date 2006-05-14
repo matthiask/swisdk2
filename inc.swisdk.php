@@ -26,7 +26,7 @@
 			require_once SWISDK_ROOT . 'resolver/inc.resolver.php';
 			require_once SWISDK_ROOT . 'site/inc.handlers.php';
 			
-			// FIXME this url is not fully correct
+			// FIXME this url might be incomplete (port, procotol etc)
 			Swisdk::run(array('REQUEST_URI' => 'http://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']));
 		}
 		
@@ -89,8 +89,7 @@
 			$obj->handle($file);
 		}
 
-		// TODO make @access protected again
-		public static $config;
+		protected static $config;
 
 		public static function read_configfile()
 		{

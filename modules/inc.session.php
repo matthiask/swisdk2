@@ -27,12 +27,14 @@
 					'user_password=' => md5($_REQUEST['login_password'])));
 				if($user) {
 					$_SESSION['swisdk2']['user_id'] = $user->id;
+					$_SESSION['swisdk2']['user_ip_address'] =
+						$_SERVER['REMOTE_ADDR'];
 					$this->user = $user;
 				}
 			}
 
-			// TODO might also check if IP is still the same to prevent session stealing
-			if(isset($_REQUEST['logout'])) {
+			if(($_SESSION['swisdk2']['user_ip_address'] != $_SERVER['REMOTE_ADDR']) 
+					|| isset($_REQUEST['logout'])) {
 				// XXX maybe only unset SessionHandler variables?
 				session_destroy();
 				redirect('/');

@@ -21,10 +21,12 @@
 		protected $_html;
 		protected $args;
 
-		public function run()
+		public function run($args=null)
 		{
-			// TODO make arguments assignable?
-			$this->args = Swisdk::arguments();
+			if($args===null)
+				$this->args = Swisdk::arguments();
+			else
+				$this->args = $args;
 			if(count($this->args)) {
 				$cmd = $this->args[0];
 				if(($cmd = $this->args[0])
@@ -44,11 +46,15 @@
 
 		public function goto($tok=null)
 		{
-			//FIXME LF attack
-			header('Location: http://'
+			$header = 'Location: http://'
 				.Swisdk::config_value('request.host')
 				.Swisdk::config_value('runtime.controller.url')
-				.$tok);
+				.$tok;
+			if(strpos($header, "\n")===false)
+				redirect($header);
+			else
+				SwisdkError::handle(new FatalError(
+					'Invalid URL for redirection: '.$header));
 		}
 
 		abstract protected function cmd_index();
