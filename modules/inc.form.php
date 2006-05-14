@@ -554,8 +554,10 @@
 			$dbobj = $this->dbobj->dbobj();
 			if($ninc_regex===null)
 				$ninc_regex = '/^'.$dbobj->_prefix().'((language_|'.$this->dbobj->_prefix().')?id|creation_dttm)$/';
-			var_dump($ninc_regex);
 			if($dbobj instanceof DBOContainer) {
+				// FIXME this does not work for a new DBObjectML (the
+				// DBOContainer is empty so the languages cannot be
+				// enumerated)
 				foreach($dbobj as &$obj) {
 					$box = new FormMLBox($obj);
 					$box->language = $obj->language_id;
@@ -567,7 +569,7 @@
 				$box = new FormMLBox($dbobj);
 				$box->language = $dbobj->language_id;
 				$box->autogenerate($fields, $ninc_regex);
-				$box->set_title('Language: '.$dbobj->language_id);
+				$box->set_title('Language: '.$this->dbobj->language());
 				$this->add($box);
 			}
 		}
