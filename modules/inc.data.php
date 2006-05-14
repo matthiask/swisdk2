@@ -457,7 +457,7 @@
 				return false;
 			}
 			$this->data[$this->primary] = DBObject::db_insert_id();
-			if($this->_update_relations()) {
+			if(!$this->_update_relations()) {
 				DBObject::db_rollback();
 				return false;
 			}
