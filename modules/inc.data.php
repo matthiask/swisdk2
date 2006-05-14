@@ -430,6 +430,7 @@
 		 */
 		public function update()
 		{
+			$this->auto_update_fields();
 			DBObject::db_start_transaction();
 			$res = DBObject::db_query('UPDATE ' . $this->table . ' SET '
 				. $this->_vals_sql() . ' WHERE '
@@ -448,6 +449,7 @@
 		 */
 		public function insert()
 		{
+			$this->auto_update_fields();
 			DBObject::db_start_transaction();
 			$this->unset_primary();
 			$res = DBObject::db_query('INSERT INTO ' . $this->table
@@ -517,6 +519,24 @@
 					$vals[] = $k . '=\'' . $dbh->escape_string($v) . '\'';
 			}
 			return implode(',', $vals);
+		}
+
+		/**
+		 * automatically fill up update_dttm, creation_dttm, author_id
+		 * et al.
+		 */
+		protected function auto_update_fields()
+		{
+			$fields = array_keys($this->field_list());
+			$dttm_regex = '/_(creation|update)_dttm$/';
+			$author_regex = '/_author_id$/';
+			foreach($fields as $field) {
+				if(preg_match($dttm_regex, $field))
+					$this->set($field, time());
+				else if(preg_match($author_regex, $field)
+						&&!$this->get($field))
+					$this->set($field, SessionHandler::user()->id());
+			}
 		}
 
 		/**
