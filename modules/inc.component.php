@@ -46,15 +46,15 @@
 
 		public function goto($tok=null)
 		{
-			$header = 'Location: http://'
+			$location = 'http://'
 				.Swisdk::config_value('request.host')
 				.Swisdk::config_value('runtime.controller.url')
 				.$tok;
-			if(strpos($header, "\n")===false)
-				redirect($header);
+			if(strpos($location, "\n")===false)
+				redirect($location);
 			else
 				SwisdkError::handle(new FatalError(
-					'Invalid URL for redirection: '.$header));
+					'Invalid URL for redirection: '.$location));
 		}
 
 		abstract protected function cmd_index();
