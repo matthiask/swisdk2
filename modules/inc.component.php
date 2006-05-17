@@ -27,10 +27,9 @@
 				$this->args = Swisdk::arguments();
 			else
 				$this->args = $args;
-			if(count($this->args)) {
+			if(isset($this->args[0])) {
 				$cmd = $this->args[0];
-				if(($cmd = $this->args[0])
-						&& method_exists($this, 'cmd_'.$cmd)) {
+				if($cmd && method_exists($this, 'cmd_'.$cmd)) {
 					array_shift($this->args);
 					$this->_html = $this->{'cmd_'.$cmd}();
 					return;
