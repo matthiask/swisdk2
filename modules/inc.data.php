@@ -1243,14 +1243,17 @@
 						call_user_func_array(array(
 							$this, 'add_order_column'),
 							$data);
+						break;
 					case ':limit':
 						call_user_func_array(array(
 							$this, 'set_limit'),
 							$data);
+						break;
 					case ':index':
 						call_user_func_array(array(
 							$this, 'set_index'),
 							$data);
+						break;
 				}
 				return;
 			}
