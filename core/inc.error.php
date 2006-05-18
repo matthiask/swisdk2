@@ -45,12 +45,8 @@
 
 		protected static $handler_callback;
 
-		// TODO write handlers for different output methods
-
 		public static function standard_output_handler($obj)
 		{
-			// XXX delayed output?
-			// TODO output brobber hmtl (fuck browsers)
 			echo '<div style="background:#f88;padding:10px;border:2px solid black;">'
 				.$obj->to_string($obj->debug_mode).'</div>';
 		}
@@ -62,8 +58,10 @@
 	}
 	
 	/** 
-	 * - logging to file
-	 * TODO make logging configurable
+	 * - logging to file and email notification (configurable)
+	 *
+	 * see
+	 * error.email_notification and error.logging config values
 	 */
 	class BasicSwisdkError {
 		public $args;
@@ -151,13 +149,12 @@
 	
 	/**
 	 * - error output
-	 * - notification by email
+	 * - notification by email (always, do not honor error.email_notification)
 	 */
 	class NotificationError extends BasicSwisdkError {
 		public function run()
 		{
 			$message = $this->to_string($this->debug_mode);
-			// TODO make notification systems configurable?
 			$this->send_notification($message);
 			parent::run();
 		}
@@ -209,7 +206,6 @@
 		public function __construct($exception)
 		{
 			parent::__construct();
-			// XXX
 			$this->args[0] = "Uncaught exception: " . $exception->getMessage();
 		}
 	}
