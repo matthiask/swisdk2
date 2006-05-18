@@ -246,7 +246,7 @@
 			}
 
 			if($obj)
-				$this->add_obj($fname, $obj, $title);
+				return $this->add_obj($fname, $obj, $title);
 		}
 
 		protected function pretty_title($fname)
@@ -1123,6 +1123,30 @@ EOD;
 		}
 
 		protected $callback;
+	}
+
+	class EqualsRule extends FormItemRule {
+		protected $message = 'Value does not validate';
+
+		public function __construct($compare_value, $message = null)
+		{
+			$this->compare_value = $compare_value;
+			parent::__construct($message);
+		}
+
+		protected function is_valid_impl(FormItem &$item)
+		{
+			return $this->compare_value == $item->value();
+		}
+
+		protected $compare_value;
+	}
+
+	class MD5EqualsRule extends EqualsRule {
+		protected function is_valid_impl(FormItem &$item)
+		{
+			return $this->compare_value == md5($item->value());
+		}
 	}
 
 ?>
