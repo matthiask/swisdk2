@@ -72,12 +72,16 @@
 		public function __construct( $message = null )
 		{
 			$this->args = func_get_args();
-			$this->debug_mode = Swisdk::config_value('core.debug_mode');
+			$this->debug_mode = Swisdk::config_value('error.debug_mode');
 		}
 		
 		public function run()
 		{
-			$this->append_log_message('[DEBUG]: '.$this->to_string(true));
+			$dbgmsg = $this->to_string(true);
+			if(Swisdk::config_value('error.email_notification'))
+				$this->send_notification($dbgmsg);
+			if(Swisdk::config_value('error.logging'))
+				$this->append_log_message($dbgmsg);
 			SwisdkError::call_output_handler($this);
 			die();
 		}
@@ -108,10 +112,17 @@
 
 		public function append_log_message($message)
 		{
-			$fname = Swisdk::config_value('core.logfile');
+			$fname = Swisdk::config_value('error.logfile');
 			$fp = @fopen(LOG_ROOT.$fname, 'a');
 			@fwrite($fp, date(DATE_W3C).' '.$message."\n");
 			@fclose($fp);
+		}
+
+		public function send_notification($message)
+		{
+			$recipient = Swisdk::config_value('core.admin_email');
+			@mail($recipient, 'NotificationError: '.Swisdk::config_value('core.name'),
+				$message, 'From: swisdk-suckage@'.$_SERVER['SERVER_NAME']);
 		}
 	}
 	
@@ -146,13 +157,6 @@
 			$this->send_notification($message);
 			parent::run();
 		}
-
-		public function send_notification($message)
-		{
-			$recipient = Swisdk::config_value('core.admin_email');
-			@mail($recipient, 'NotificationError: '.Swisdk::config_value('core.appname'),
-				$message, 'From: swisdk-suckage@'.$_SERVER['SERVER_NAME']);
-		}
 	}
 
 	/**
@@ -175,7 +179,7 @@
 
 			// see config file, section [core] ignore_error_nrs
 			if(in_array($this->args[0], explode(',',
-					Swisdk::config_value('core.ignore_error_nrs'))))
+					Swisdk::config_value('error.ignore_error_nrs'))))
 				return;
 			parent::run();
 		}
@@ -185,7 +189,7 @@
 			if($debug_mode)
 				return __CLASS__.": {$this->args[0]} ({$this->args[1]}) in {$this->args[2]} at line {$this->args[3]}";
 			
-			return 'An unexpected PHP error occurred.';
+			return 'An unexpected error occurred.';
 		}
 	}
 
