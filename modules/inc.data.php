@@ -1302,8 +1302,10 @@
 		 */
 		public function add_order_column($column, $dir=null)
 		{
-			$this->order_columns[] = $column
-				. ($dir=='DESC'?' DESC':' ASC');
+			// FIXME cannot order on fields of joined tables
+			if(in_array($column, array_keys($this->obj->field_list())))
+				$this->order_columns[] = $column
+					. ($dir=='DESC'?' DESC':' ASC');
 		}
 
 		/**
