@@ -113,6 +113,8 @@
 		public function append_log_message($message)
 		{
 			$fname = Swisdk::config_value('error.logfile');
+			if(!$fname)
+				return;
 			$fp = @fopen(LOG_ROOT.$fname, 'a');
 			@fwrite($fp, date(DATE_W3C).' '.$message."\n");
 			@fclose($fp);
@@ -121,6 +123,8 @@
 		public function send_notification($message)
 		{
 			$recipient = Swisdk::config_value('core.admin_email');
+			if(!$recipient)
+				return;
 			@mail($recipient, 'NotificationError: '.Swisdk::config_value('core.name'),
 				$message, 'From: swisdk-suckage@'.$_SERVER['SERVER_NAME']);
 		}
