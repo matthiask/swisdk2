@@ -46,7 +46,7 @@
 		public function goto($tok=null)
 		{
 			redirect('http://'
-				.Swisdk::config_value('request.host')
+				.Swisdk::config_value('runtime.request.host')
 				.Swisdk::config_value('runtime.controller.url')
 				.$tok);
 		}

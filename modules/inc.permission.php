@@ -51,7 +51,7 @@
 		public static function group_for_url($url=null)
 		{
 			if(is_null($url))
-				$url = Swisdk::config_value('request.uri');
+				$url = Swisdk::config_value('runtime.request.uri');
 			if($url{0}=='/')
 				$url = substr($url, 1);
 

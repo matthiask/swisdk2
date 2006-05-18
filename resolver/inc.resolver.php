@@ -80,8 +80,8 @@
 			$matches = array();
 			$this->urifragment = preg_match('/http(s?):\/\/([^\/]*)(:[0-9]+)?(.*)/', $urifragment, $matches);
 			$this->urifragment = $matches[4];
-			Swisdk::set_config_value('request.host', $matches[2]);
-			Swisdk::set_config_value('request.uri', $matches[4]);
+			Swisdk::set_config_value('runtime.request.host', $matches[2]);
+			Swisdk::set_config_value('runtime.request.uri', $matches[4]);
 		}
 	}
 
