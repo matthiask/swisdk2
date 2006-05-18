@@ -649,8 +649,6 @@
 		}
 
 		/**
-		 * XXX UGLY :-(
-		 *
 		 * internal hack, implementation detail of MLForm that found its
 		 * way into the standard form code... I hate it. But it works.
 		 * And the user does not havel to care.

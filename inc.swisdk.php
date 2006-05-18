@@ -26,8 +26,11 @@
 			require_once SWISDK_ROOT . 'resolver/inc.resolver.php';
 			require_once SWISDK_ROOT . 'site/inc.handlers.php';
 			
-			// FIXME this url might be incomplete (port, procotol etc)
-			Swisdk::run(array('REQUEST_URI' => 'http://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']));
+			Swisdk::run(array('REQUEST_URI' =>
+				((isset($_SERVER['HTTPS'])&&$_SERVER['HTTPS']=='on')?'https://':'http://')
+				.$_SERVER['SERVER_NAME']
+				.(($_SERVER['SERVER_PORT']!=80)?':'.$_SERVER['SERVER_PORT']:'')
+				.$_SERVER['REQUEST_URI']));
 		}
 		
 		public static function runFromCommandLine() 

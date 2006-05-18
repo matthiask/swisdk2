@@ -1393,8 +1393,6 @@
 		}
 
 		/**
-		 * TODO: this is not really thought over...
-		 *
 		 * can be used to call delete, store etc. on the contained
 		 * DBObjects
 		 */
@@ -1565,7 +1563,8 @@
 
 		public function refresh()
 		{
-			// FIXME probably not correct...
+			// XXX have to think about this a bit...
+			// this is used when freshly initializing a DBObjectML
 			if($this->obj)
 				$this->obj->refresh();
 			return parent::refresh();

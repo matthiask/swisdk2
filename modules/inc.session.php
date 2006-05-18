@@ -34,10 +34,9 @@
 			}
 
 			if((isset($_SESSION['swisdk2']['user_ip_address']) 
-				&& $_SESSION['swisdk2']['user_ip_address']!=$_SERVER['REMOTE_ADDR'])
-				|| isset($_REQUEST['logout'])) {
-				// XXX maybe only unset SessionHandler variables?
-				session_destroy();
+					&& $_SESSION['swisdk2']['user_ip_address']!=$_SERVER['REMOTE_ADDR'])
+					|| isset($_REQUEST['logout'])) {
+				unset($_SESSION['swisdk2']);
 				redirect('/');
 			}
 
