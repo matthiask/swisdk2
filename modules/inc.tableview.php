@@ -147,8 +147,8 @@
 		{
 			$id = $data[$this->column];
 			$html =<<<EOD
-<a href="{$this->title}edit/$id">edit</a><br />
-<a href="{$this->title}delete/$id">delete</a>
+<a href="{$this->title}_edit/$id">edit</a><br />
+<a href="{$this->title}_delete/$id">delete</a>
 EOD;
 			return $html;
 		}
