@@ -482,6 +482,8 @@
 				return true;
 			foreach(DBObject::$relations[$this->class] as &$rel) {
 				if($rel['type']==DB_REL_MANYTOMANY) {
+					if(!isset($this->data[$rel['field']]))
+						continue;
 					$res = DBObject::db_query('DELETE FROM '.$rel['table']
 						.' WHERE '.$this->primary.'='.$this->id());
 					if($res===false)
