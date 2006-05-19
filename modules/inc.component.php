@@ -141,13 +141,23 @@
 		
 		public function __construct( $template , $data , $name = "data" )
 		{
-			require_once SWISDK_ROOT . "modules/inc.smarty.php";
 			
-			$this->mSmarty = new SwisdkSmarty();
-			$this->mSmarty->assign( $name , $data );
+			$smarty = $this->getSmartyRef();
+			$smarty->assign( $name , $data );
 			$this->mTemplate = $template;
 			
 			
+		}
+		
+		public function getSmartyRef()
+		{
+			if( $this->mSmarty === null )
+			{
+				require_once SWISDK_ROOT . "modules/inc.smarty.php";		
+				$this->mSmarty = new SwisdkSmarty();
+			}
+			
+			return $this->mSmarty;
 		}
 		
 		public function run()

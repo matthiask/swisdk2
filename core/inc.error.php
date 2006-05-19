@@ -58,6 +58,11 @@
 			echo '</pre></div>';
 			die();
 		}
+		
+		public function to_string()
+		{
+			return $this->message;
+		}
 	}
 	
 	class DBError extends BasicSwisdkError {
