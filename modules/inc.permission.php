@@ -69,7 +69,7 @@
 			$tokens = explode('/', $url);
 			$clauses = array();
 			while(count($tokens)) {
-				$clauses[] = implode('/', $tokens);
+				$clauses[] = DBObject::db_escape(implode('/', $tokens));
 				array_pop($tokens);
 			}
 			return DBObject::db_get_row(
