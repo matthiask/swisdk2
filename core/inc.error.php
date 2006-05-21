@@ -126,11 +126,6 @@
 			@mail($recipient, 'NotificationError: '.Swisdk::config_value('core.name'),
 				$message, 'From: swisdk-suckage@'.$_SERVER['SERVER_NAME']);
 		}
-		
-		public function to_string()
-		{
-			return $this->message;
-		}
 	}
 	
 	/**
@@ -227,5 +222,4 @@
 			exit();
 		}
 	}
-
 ?>
