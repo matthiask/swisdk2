@@ -60,8 +60,7 @@
 	}
 
 
-	class SmartyMaster extends BasicConfigurationComponent
-	{
+	class SmartyMaster {
 		private static $mInstance = null;
 		private $mSmarty = null;
 		private $mHtmlHandlers = array();
