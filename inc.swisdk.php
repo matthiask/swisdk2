@@ -86,6 +86,9 @@
 				case 'ctrl.php':
 					$handler = 'DynamicSiteHandler';
 					break;
+				default:
+					SwisdkError::handle(new FatalError(
+						'Invalid sitehandler: '.$type));
 			}
 
 			$obj = new $handler;
