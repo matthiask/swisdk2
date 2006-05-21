@@ -93,14 +93,15 @@
 		protected $_html;
 		protected $args;
 
-		public function run()
+		public function run($args=null)
 		{
-			// TODO make arguments assignable?
-			$this->args = Swisdk::arguments();
-			if(count($this->args)) {
+			if($args===null)
+				$this->args = Swisdk::arguments();
+			else
+				$this->args = $args;
+			if(isset($this->args[0])) {
 				$cmd = $this->args[0];
-				if(($cmd = $this->args[0])
-						&& method_exists($this, 'cmd_'.$cmd)) {
+				if($cmd && method_exists($this, 'cmd_'.$cmd)) {
 					array_shift($this->args);
 					$this->_html = $this->{'cmd_'.$cmd}();
 					return;
@@ -116,9 +117,8 @@
 
 		public function goto($tok=null)
 		{
-			//FIXME LF attack
-			header('Location: http://'
-				.Swisdk::config_value('request.host')
+			redirect('http://'
+				.Swisdk::config_value('runtime.request.host')
 				.Swisdk::config_value('runtime.controller.url')
 				.$tok);
 		}

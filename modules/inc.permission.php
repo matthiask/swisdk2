@@ -26,7 +26,7 @@
 			return $instance;
 		}
 
-		public static function check($role=null, $url=null)
+		public static function check($role=null, $url=null, $abort = true)
 		{
 			if($group = PermissionManager::group_for_url($url)) {
 				//
@@ -39,6 +39,10 @@
 						$group['group_id'], $needed_role))
 					return true;
 			}
+
+			if(!$abort)
+				return false;
+
 			if(SessionHandler::authenticated())
 				PermissionManager::access_denied();
 			PermissionManager::login_form();
@@ -47,7 +51,7 @@
 		public static function group_for_url($url=null)
 		{
 			if(is_null($url))
-				$url = Swisdk::config_value('request.uri');
+				$url = Swisdk::config_value('runtime.request.uri');
 			if($url{0}=='/')
 				$url = substr($url, 1);
 
@@ -127,8 +131,8 @@
 			$form = new Form();
 			$form->bind(DBObject::create('Login'));
 			$form->set_title('Login');
-			$form->add('Username');
-			$form->add('Password', new PasswordInput());
+			$form->add('login_username');
+			$form->add('login_password', new PasswordInput());
 			$form->add(new SubmitButton());
 			echo $form->html();
 			exit();

@@ -10,7 +10,8 @@
 	 *
 	 * Object-oriented form building package
 	 *
-	 * Form strongly depends on DBObject for its inner workings
+	 * Form strongly depends on DBObject for its inner workings (you don't
+	 * necessarily need a database table for every form, though!)
 	 */
 
 	/**
@@ -51,9 +52,9 @@
 	 * $form = new Form();
 	 * $form->bind(DBObject::create('ContactForm')); // cannot autogenerate (obviously!)
 	 * $form->set_title('contact form');
-	 * $form->add('Sender'); // default FormItem is TextInput; use it
-	 * $form->add('Title');
-	 * $form->add('Text', new Textarea());
+	 * $form->add('sender'); // default FormItem is TextInput; use it
+	 * $form->add('title');
+	 * $form->add('text', new Textarea());
 	 * $form->add(new SubmitButton());
 	 *
 	 * // now, to get the values, use:
@@ -129,7 +130,7 @@
 		/**
 		 * @param $dbobj: the DBObject bound to the Form
 		 */
-		public function __construct(&$dbobj)
+		public function __construct($dbobj)
 		{
 			$this->dbobj = $dbobj;
 		}
@@ -189,6 +190,72 @@
 			}
 		}
 
+		/**
+		 * add an element to the form
+		 *
+		 * Usage example (these might "just do the right thing"):
+		 *
+		 * $form->add_auto('start_dttm', 'Publication date');
+		 * $form->add_auto('title');
+		 *
+		 * NOTE! The bound DBObject MUST point to a valid table if
+		 * you want to use this function.
+		 */
+		public function add_auto($field, $title=null)
+		{
+			$dbobj = $this->dbobj();
+			$fields = $dbobj->field_list();
+			$relations = $dbobj->relations();
+
+			$obj = null;
+
+			if(isset($relations[$fname=$field])||isset($relations[$fname=$dbobj->name($field)])) {
+				switch($relations[$fname]['type']) {
+					case DB_REL_SINGLE:
+						$obj = new DropdownInput();
+						$dc = DBOContainer::find($relations[$fname]['class']);
+						$choices = array();
+						foreach($dc as $o) {
+							$items[$o->id()] = $o->title();
+						}
+						$obj->set_items($items);
+						break;
+					case DB_REL_MANY:
+						$obj = new Multiselect();
+						$dc = DBOContainer::find($relations[$fname]['class']);
+						$items = array();
+						foreach($dc as $o) {
+							$items[$o->id()] = $o->title();
+						}
+						$obj->set_items($items);
+						break;
+				}
+			} else if(isset($fields[$fname=$field])||isset($fields[$fname=$dbobj->name($field)])) {
+				$finfo = $fields[$fname];
+				if(strpos($fname,'dttm')!==false) {
+					$obj = new DateInput();
+				} else if(strpos($finfo['Type'], 'text')!==false) {
+					$obj = new Textarea();
+				} else if($finfo['Type']=='tinyint(1)') {
+					// mysql suckage. It does not really know
+					// a bool type, only tinyint(1)
+					$obj = new CheckboxInput();
+				} else {
+					$obj = new TextInput();
+				}
+			}
+
+			if($obj)
+				return $this->add_obj($fname, $obj, $title);
+		}
+
+		protected function pretty_title($fname)
+		{
+			return ucwords(str_replace('_', ' ',
+				preg_replace('/^('.$this->dbobj()->_prefix().')?(.*?)(_id|_dttm)?$/',
+					'\2', $fname)));
+		}
+
 		protected function add_initialized_obj($obj)
 		{
 			$obj->init_value($this->dbobj());
@@ -199,23 +266,28 @@
 			return $obj;
 		}
 
-		protected function add_obj($title, $obj, $field=null)
+		protected function add_obj($field, $obj, $title=null)
 		{
-			if($field===null) {
-				$field = $this->dbobj()->name(
-					$obj->field_name($title));
-			}
+			$dbobj = $this->dbobj();
+
+			if($title===null)
+				$title = $this->pretty_title($field);
+
+			/*
+			$field = $this->dbobj()->name(
+				$obj->field_name($title));
+			*/
 
 			$obj->set_title($title);
 			$obj->set_name($field);
-			$obj->init_value($this->dbobj());
+			$obj->init_value($dbobj);
 
 			$this->items[$field] = $obj;
 
 			return $obj;
 		}
 
-		protected function add_dbobj_ref($title, $relspec)
+		protected function add_dbobj_ref($relspec, $title=null)
 		{
 			$relations = $this->dbobj()->relations();
 			if(isset($relations[$relspec])) {
@@ -239,10 +311,11 @@
 						$f->set_items($items);
 						break;
 					case DB_REL_MANY:
-						//TODO better error handling (warning)
-						echo 'Cannot edit relation of type DB_REL_MANY.';
+						SwisdkError::handle(new BasicSwisdkError(
+							'Cannot edit relation of type DB_REL_MANY! relspec: '.$relspec));
 					default:
-						echo 'Oops. Unknown relation type.';
+						SwisdkError::handle(new BasicSwisdkError(
+							'Oops. Unknown relation type '.$relspec));
 				}
 			}
 		}
@@ -259,72 +332,15 @@
 		 * Inspect the field_list of the bound DBObject and automatically
 		 * build a form with most fields in the field_list
 		 */
-		public function autogenerate($fields=null)
+		public function autogenerate($fields=null, $ninc_regex=null)
 		{
-			if(!is_array($fields))
-				$fields = $this->dbobj->field_list();
-			$relations_ = $this->dbobj->relations();
-
-			$relations = array();
-			foreach($relations_ as $class => &$r) {
-				$relations[$r['field']] = $r;
-			}
-
-			$regex = '^id$';
-			if($this->dbobj instanceof DBObjectML_T) {
-				// also hide the language id and the owning DBObject
-				// reference fields
-				$regex .= '|^__language([0-9]+)_id$|_language_id$';
-				$regex .= '|_'.$this->dbobj->owner_primary().'$';
-			}
-
-			foreach($fields as &$field) {
-				// field name
-				$fname = $this->fname($field['Field']);
-				// short name (prefix removed)
-				$sn = $this->dbobj->shortname($fname);
-				// hide the id field
-				if(preg_match('/('.$regex.')/', strtolower($sn))) {
-					// should I hide the current field?
-					$this->add($sn, new HiddenInput(), $fname);
-				} else if(isset($relations[$fname])) {
-					// use relations to determine how to display
-					// the FormItem?
-					switch($relations[$fname]['type']) {
-						case DB_REL_SINGLE:
-							$f = $this->add($sn, new DropdownInput(), $fname);
-							$dc = DBOContainer::find($relations[$fname]['class']);
-							$choices = array();
-							foreach($dc as $o) {
-								$items[$o->id()] = $o->title();
-							}
-							$f->set_items($items);
-							break;
-						case DB_REL_MANY:
-							$f = $form->add($sn, new Multiselect(), $fname);
-							$dc = DBOContainer::find($relations[$fname]['class']);
-							$items = array();
-							foreach($dc as $o) {
-								$items[$o->id()] = $o->title();
-							}
-							$f->set_items($items);
-							break;
-					}
-				} else if(strpos($fname,'dttm')!==false) {
-					// display datepicker? (dttm ~= date time)
-					$this->add($sn, new DateInput(), $fname);
-				} else if(strpos($field['Type'], 'text')!==false) {
-					// textarea for field of 'text' type
-					$this->add($sn, new Textarea(), $fname);
-				} else if($field['Type']=='tinyint(1)') {
-					// mysql suckage. It does not really know
-					// a bool type, only tinyint(1)
-					$this->add($sn, new CheckboxInput(), $fname);
-				} else {
-					// no other rules matched, just use a
-					// textinput for this field
-					$this->add($sn, new TextInput(), $fname);
-				}
+			if($fields===null)
+				$fields = array_keys($this->dbobj->field_list());
+			if($ninc_regex===null)
+				$ninc_regex = '/^'.$this->dbobj->_prefix().'(id|creation_dttm)$/';
+			foreach($fields as $fname) {
+				if(!preg_match($ninc_regex, $fname))
+					$this->add_auto($fname);
 			}
 		}
 
@@ -369,10 +385,8 @@
 		
 		/**
 		 * @return the formitem with name $name
-		 *
-		 * TODO: should also descend into nested FormBoxes
 		 */
-		public function &item($name)
+		public function item($name)
 		{
 			if(isset($this->items[$name]))
 				return $this->items[$name];
@@ -411,12 +425,17 @@
 			$this->generate_form_id();
 		}
 
-		public function bind_ref(&$dbobj, $autogenerate=false)
+		public function bind_ref($dbobj, $autogenerate=false)
 		{
 			$this->dbobj = $dbobj;
 			if($autogenerate)
 				$this->autogenerate();
 			$this->generate_form_id();
+		}
+
+		public function id()
+		{
+			return $this->form_id;
 		}
 
 		/**
@@ -428,7 +447,7 @@
 			$id->set_name($this->form_id);
 			$id->set_value(1);
 
-			$html = '<form method="post" action="'.$_SERVER['REQUEST_URI'].'">';
+			$html = '<form method="post" action="'.$_SERVER['REQUEST_URI'].'" name="'.$this->form_id."\">\n";
 			$html .= parent::html();
 			if($this->message)
 				$html .= '<p>'.$this->message.'</p>';
@@ -490,8 +509,16 @@
 		 */
 		public function generate_form_id()
 		{
-			$id = $this->dbobj->id();
-			$this->form_id = '__swisdk_form_'.$this->dbobj->table().'_'.($id?$id:0);
+			$this->form_id = Form::to_form_id($this->dbobj());
+		}
+
+		public static function to_form_id($tok, $id=0)
+		{
+			if($tok instanceof DBObject) {
+				$id = $tok->id();
+				return '__swisdk_form_'.$tok->table().'_'.($id?$id:0);
+			}
+			return '__swisdk_form_'.$tok.'_'.($id?$id:0);
 		}
 	}
 
@@ -520,34 +547,30 @@
 	}
 
 	class FormML extends Form {
-		protected $dbobjml = null;
-
-		public function autogenerate($fields=null)
+		public function autogenerate($fields=null, $ninc_regex=null)
 		{
-			parent::autogenerate($fields);
+			parent::autogenerate($fields, null);
 			$dbobj = $this->dbobj->dbobj();
+			if($ninc_regex===null)
+				$ninc_regex = '/^'.$dbobj->_prefix().'((language_|'.$this->dbobj->_prefix().')?id|creation_dttm)$/';
 			if($dbobj instanceof DBOContainer) {
+				// FIXME this does not work for a new DBObjectML (the
+				// DBOContainer is empty so the languages cannot be
+				// enumerated)
 				foreach($dbobj as &$obj) {
 					$box = new FormMLBox($obj);
 					$box->language = $obj->language_id;
-					$box->autogenerate();
+					$box->autogenerate($fields, $ninc_regex);
 					$box->set_title('Language: '.$obj->language_id);
 					$this->add($box);
 				}
 			} else {
 				$box = new FormMLBox($dbobj);
 				$box->language = $dbobj->language_id;
-				$box->autogenerate();
-				$box->set_title('Language: '.$dbobj->language_id);
+				$box->autogenerate($fields, $ninc_regex);
+				$box->set_title('Language: '.$this->dbobj->language());
 				$this->add($box);
 			}
-		}
-
-		public function &dbobj()
-		{
-			if($this->dbobjml)
-				return $this->dbobjml;
-			return $this->dbobj;
 		}
 	}
 
@@ -600,6 +623,12 @@
 		 */
 		public function field_name($title)	{ return strtolower($title); } 
 
+		public function __construct($name=null)
+		{
+			if($name)
+				$this->name = $name;
+		}
+
 		/**
 		 * accessors and mutators
 		 */
@@ -620,8 +649,6 @@
 		}
 
 		/**
-		 * XXX UGLY :-(
-		 *
 		 * internal hack, implementation detail of MLForm that found its
 		 * way into the standard form code... I hate it. But it works.
 		 * And the user does not havel to care.
@@ -676,7 +703,8 @@
 		protected function render_title(&$grid)
 		{
 			// put the title into the first column
-			$grid->add_item(0, $this->render_y, $this->title());
+			$grid->add_item(0, $this->render_y, 
+				sprintf('<label for="%s">%s</label>', $this->name(), $this->title()));
 		}
 
 		protected function render_field(&$grid)
@@ -708,11 +736,11 @@
 			$name = $this->name();
 			$sname = $this->_stripit($name);
 
-			if(isset($_POST[$name])) {
-				if(is_array($_POST[$name]))
-					$dbobj->set($sname, $_POST[$name]);
+			if(($val = getInput($name))!==null) {
+				if(is_array($val))
+					$dbobj->set($sname, $val);
 				else
-					$dbobj->set($sname, stripslashes($_POST[$name]));
+					$dbobj->set($sname, stripslashes($val));
 			}
 
 			$this->set_value($dbobj->get($sname));
@@ -737,9 +765,9 @@
 		protected $type = '#INVALID';
 		protected function field_html()
 		{
-			return '<input type="'.$this->type.'" name="'.$this->name().'" id="'
-				.$this->name().'"  value="'.$this->value().'" '
-				.$this->attribute_html().'/>';
+			return sprintf('<input type="%s" name="%s" id="%s" value="%s" %s />',
+				$this->type, $this->name(), $this->name(),
+				$this->value(), $this->attribute_html());
 		}
 	}
 
@@ -785,10 +813,10 @@
 
 		protected function field_html()
 		{
-			return '<input type="checkbox" name="'.$this->name().'" id="'
-				.$this->name().'"  '.($this->value()?'checked="checked"':'')
-				.$this->attribute_html().'/><input type="hidden" '
-				.'name="__check_'.$this->name().'" value="1" />';
+			$name = $this->name();
+			return sprintf('<input type="checkbox" name="%s" id="%s" %s /><input type="hidden" name="__check_'.$name.'" value="1" />',
+				$this->type, $name, $name,
+				($this->value()?'checked="checked" ':' ').$this->attribute_html());
 		}
 	}
 
@@ -797,9 +825,9 @@
 
 		protected function field_html()
 		{
-			return '<textarea name="'.$this->name().'" id="'.$this->name().'"'
-				.$this->attribute_html().'>'
-				.$this->value().'</textarea>';
+			$name = $this->name();
+			return sprintf('<textarea name="%s" id="%s" %s>%s</textarea>',
+				$name, $name, $this->attribute_html(), $this->value());
 		}
 	}
 
@@ -810,7 +838,6 @@
 			$name = $this->name();
 			$value = $this->value();
 			$attributes = $this->attribute_html();
-			// FIXME execute FCK code after window has been fully loaded
 			$html = <<<EOD
 <textarea name="$name" id="$name" $attributes>$value</textarea>
 <script type="text/javascript" src="/scripts/util.js"></script>
@@ -897,6 +924,7 @@ EOD;
 	}
 
 	class SubmitButton extends FormBar {
+		protected $attributes = array('value' => 'Submit');
 		protected function field_html()
 		{
 			return '<input type="submit" '.$this->attribute_html().'/>';
@@ -935,6 +963,8 @@ EOD;
 			$span_name = $this->name() . '_span';
 			$trigger_name = $this->name() . '_trigger';
 			$value = intval($this->value());
+			if(!$value)
+				$value = time();
 
 			$display_value = strftime("%d. %B %Y : %H:%M", $value);
 
@@ -951,7 +981,6 @@ Calendar.setup({
 	daFormat    : "%d. %B %Y : %H:%M",
 	button      : "$trigger_name",
 	singleClick : true,
-	electric    : false,
 	showsTime   : true,
 	step        : 1
 });
@@ -1092,6 +1121,30 @@ EOD;
 		}
 
 		protected $callback;
+	}
+
+	class EqualsRule extends FormItemRule {
+		protected $message = 'Value does not validate';
+
+		public function __construct($compare_value, $message = null)
+		{
+			$this->compare_value = $compare_value;
+			parent::__construct($message);
+		}
+
+		protected function is_valid_impl(FormItem &$item)
+		{
+			return $this->compare_value == $item->value();
+		}
+
+		protected $compare_value;
+	}
+
+	class MD5EqualsRule extends EqualsRule {
+		protected function is_valid_impl(FormItem &$item)
+		{
+			return $this->compare_value == md5($item->value());
+		}
 	}
 
 ?>

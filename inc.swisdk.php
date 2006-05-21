@@ -19,14 +19,18 @@
 			define('SMARTY_ROOT', SWISDK_ROOT . 'lib/smarty/');
 			define('MODULE_ROOT', SWISDK_ROOT . 'modules/');
 			define('CONTENT_ROOT' , APP_ROOT . 'content/');
+			define('LOG_ROOT', APP_ROOT.'log/');
 				
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
 			require_once SWISDK_ROOT . 'resolver/inc.resolver.php';
 			require_once SWISDK_ROOT . 'site/inc.handlers.php';
 			
-			// FIXME this url is not fully correct
-			Swisdk::run(array('REQUEST_URI' => 'http://'.$_SERVER['SERVER_NAME'].$_SERVER['REQUEST_URI']));
+			Swisdk::run(array('REQUEST_URI' =>
+				((isset($_SERVER['HTTPS'])&&$_SERVER['HTTPS']=='on')?'https://':'http://')
+				.$_SERVER['SERVER_NAME']
+				.(($_SERVER['SERVER_PORT']!=80)?':'.$_SERVER['SERVER_PORT']:'')
+				.$_SERVER['REQUEST_URI']));
 		}
 		
 		public static function runFromCommandLine() 
@@ -45,6 +49,7 @@
 			define( 'SMARTY_ROOT', SWISDK_ROOT . 'lib/smarty/' );
 			define( 'MODULE_ROOT', SWISDK_ROOT . 'modules/' );
 			define( 'CONTENT_ROOT' , APP_ROOT . 'content/' );
+			define('LOG_ROOT', APP_ROOT.'log/');
 				
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
@@ -87,8 +92,7 @@
 			$obj->handle($file);
 		}
 
-		// TODO make @access protected again
-		public static $config;
+		protected static $config;
 
 		public static function read_configfile()
 		{
