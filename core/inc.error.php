@@ -10,9 +10,7 @@
 	*/
 	function swisdk_php_error_handler( $errno, $errstr, $file, $line, $context )
 	{
-		if( $errno == 1 || $errno == 256 )
-			SwisdkError::handle( new PHPError( $errno, $errstr, $file, $line, $context ) );
-		
+		SwisdkError::handle( new PHPError( $errno, $errstr, $file, $line, $context ) );	
 	}
 	
 	function swisdk_php_exception_handler( $exception )
