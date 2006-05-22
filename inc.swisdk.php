@@ -8,9 +8,9 @@
 	*/
 
 	date_default_timezone_set('Europe/Zurich');
-	
+
 	class Swisdk {
-		
+	
 		public static function runFromHttpRequest()
 		{
 			define('APP_ROOT', $_SERVER['DOCUMENT_ROOT'] . '/../../');
@@ -20,27 +20,27 @@
 			define('MODULE_ROOT', SWISDK_ROOT . 'modules/');
 			define('CONTENT_ROOT' , APP_ROOT . 'webapp/content/');
 			define('LOG_ROOT', APP_ROOT.'log/');
-				
+			
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
-			
+		
 			Swisdk::run(array('REQUEST_URI' =>
 				((isset($_SERVER['HTTPS'])&&$_SERVER['HTTPS']=='on')?'https://':'http://')
 				.$_SERVER['SERVER_NAME']
 				.(($_SERVER['SERVER_PORT']!=80)?':'.$_SERVER['SERVER_PORT']:'')
 				.$_SERVER['REQUEST_URI']));
 		}
-		
-		public static function runFromCommandLine() 
+	
+		public static function runFromCommandLine()
 		{
-			
+		
 			/**
 			 * the $_Server[Document_root] is not set when the call comes from the commandline.
-			 * so we use the SCRIPT_NAME and assume that the file is in APP_ROOT/swisdk/commandline.php 
+			 * so we use the SCRIPT_NAME and assume that the file is in APP_ROOT/swisdk/commandline.php
 			 */
 			$swisdk = substr( __FILE__ ,  0 , strrpos(__FILE__ , "/") );
 			$apppath = substr( $swisdk , 0 ,  strrpos( $swisdk , "/")+1 );
-	
+
 			define( 'APP_ROOT', $apppath );
 			define( 'HTDOCS_ROOT', APP_ROOT . 'webapp/htdocs/' );
 			define( 'SWISDK_ROOT', APP_ROOT . 'swisdk/' );
@@ -48,27 +48,27 @@
 			define( 'MODULE_ROOT', SWISDK_ROOT . 'modules/' );
 			define( 'CONTENT_ROOT' , APP_ROOT . 'webapp/content/' );
 			define('LOG_ROOT', APP_ROOT.'log/');
-				
+			
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
-			
+		
 			$requestUri = '';
 			if( isset( $_SERVER['argv'][1]) ) {
 				$requestUri = $_SERVER['argv'][1];
 			}
-			
+		
 			Swisdk::run( array( 'REQUEST_URI' => $requestUri  ) );
 		}
-		
+	
 		/**
-		*	DO IT! ;) 
+		*	DO IT! ;)
 		*	That means:
 			1. Setup Error handling
 			2. Read config
 			3. Dispatch request
 			4. Instance the controller and execute it
 		*/
-		public static function run($arguments) 
+		public static function run($arguments)
 		{
 			SwisdkError::setup();
 			Swisdk::read_configfile();
@@ -82,11 +82,13 @@
 
 		public static function read_configfile()
 		{
-			if(file_exists(CONTENT_ROOT.'config.ini')) {
-				$cfg = parse_ini_file(CONTENT_ROOT.'config.ini', true);
+			if(file_exists(APP_ROOT.'webapp/config.ini')) {
+				$cfg = parse_ini_file(APP_ROOT.'webapp/config.ini', true);
 				foreach($cfg as $section => $array)
 					foreach($array as $key => $value)
 						Swisdk::$config[$section.'.'.$key] = $value;
+			} else {
+				SwisdkError::handle(new FatalError('No configuration file'));
 			}
 		}
 
@@ -134,10 +136,10 @@
 		{
 			Swisdk::set_config_value('runtime.controller.class', $class);
 		}
-		
-		
+	
+	
 		/**
-		*	Load a "module" (actually a module is just a php-file with a class inside). 
+		*	Load a "module" (actually a module is just a php-file with a class inside).
 		*	A module can exist in the swisdk-dir or the content dir. The parameter
 		*	$dir is the ref path to the file.
 		*/
@@ -147,47 +149,47 @@
 			{
 				if( $instance )
 					return new $class;
-				
+			
 				return true;
 			}
-			
+		
 			$filenotfound = false;
-			
+		
 			// the file name is inc.classname_lowercase.php
 			$file = "inc." . strtolower( $class ) . ".php";
-			
+		
 			// now try to include the file in the dir unter swisdk
 			$swisdkpath = SWISDK_ROOT . $dir . "/" . $file;
-			
+		
 			if( file_exists( $swisdkpath ) )
 			{
 				require_once $swisdkpath;
-				
+			
 				if( $instance )
 					return Swisdk::module_instance( $class );
 				else
 					return true;
-			} 
-			
-			
+			}
+		
+		
 			// now search under content
 			$path = CONTENT_ROOT . $dir . "/" . $file;
 			if( file_exists( $path ) )
 			{
 				require_once $path;
-				
+			
 				if( $instance )
 					return Swisdk::module_instance( $class );
 				else
 					return true;
-			} 
-			
+			}
+		
 			// ok we just didnt find a file in the include path... return
 			// error and say goodbye! :(
-			
+		
 			return new FileNotFoundError( "Could not load the module $class! Could not find the include-file and the class does not exist!", $dir );
 		}
-		
+	
 		public static function module_instance( $class )
 		{
 			if( class_exists( $class ) )
