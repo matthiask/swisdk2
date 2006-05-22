@@ -13,18 +13,16 @@
 		
 		public static function runFromHttpRequest()
 		{
-			define('APP_ROOT', $_SERVER['DOCUMENT_ROOT'] . '/../');
-			define('HTDOCS_ROOT', APP_ROOT . 'htdocs/');
+			define('APP_ROOT', $_SERVER['DOCUMENT_ROOT'] . '/../../');
+			define('HTDOCS_ROOT', APP_ROOT . 'webapp/htdocs/');
 			define('SWISDK_ROOT', APP_ROOT . 'swisdk/');
 			define('SMARTY_ROOT', SWISDK_ROOT . 'lib/smarty/');
 			define('MODULE_ROOT', SWISDK_ROOT . 'modules/');
-			define('CONTENT_ROOT' , APP_ROOT . 'content/');
+			define('CONTENT_ROOT' , APP_ROOT . 'webapp/content/');
 			define('LOG_ROOT', APP_ROOT.'log/');
 				
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
-			require_once SWISDK_ROOT . 'resolver/inc.resolver.php';
-			require_once SWISDK_ROOT . 'site/inc.handlers.php';
 			
 			Swisdk::run(array('REQUEST_URI' =>
 				((isset($_SERVER['HTTPS'])&&$_SERVER['HTTPS']=='on')?'https://':'http://')
@@ -44,17 +42,15 @@
 			$apppath = substr( $swisdk , 0 ,  strrpos( $swisdk , "/")+1 );
 	
 			define( 'APP_ROOT', $apppath );
-			define( 'HTDOCS_ROOT', APP_ROOT . 'htdocs/' );
+			define( 'HTDOCS_ROOT', APP_ROOT . 'webapp/htdocs/' );
 			define( 'SWISDK_ROOT', APP_ROOT . 'swisdk/' );
 			define( 'SMARTY_ROOT', SWISDK_ROOT . 'lib/smarty/' );
 			define( 'MODULE_ROOT', SWISDK_ROOT . 'modules/' );
-			define( 'CONTENT_ROOT' , APP_ROOT . 'content/' );
+			define( 'CONTENT_ROOT' , APP_ROOT . 'webapp/content/' );
 			define('LOG_ROOT', APP_ROOT.'log/');
 				
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
-			require_once SWISDK_ROOT . 'resolver/inc.resolver.php';
-			require_once SWISDK_ROOT . 'site/inc.handlers.php';
 			
 			$requestUri = '';
 			if( isset( $_SERVER['argv'][1]) ) {
@@ -78,6 +74,7 @@
 			Swisdk::read_configfile();
 			require_once SWISDK_ROOT . "dispatcher/inc.dispatcher.php";
 			SwisdkControllerDispatcher::dispatch( $arguments['REQUEST_URI'] );
+			require_once SWISDK_ROOT . 'site/inc.handlers.php';
 			SwisdkSiteHandler::run();
 		}
 
