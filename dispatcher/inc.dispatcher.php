@@ -35,7 +35,7 @@
 						
 					// set the output of the dispatcher to the new input 
 					// of the following dispatcher	
-					$urifragment = $instance->getOutput();
+					$urifragment = $instance->output();
 				}
 				
 			} else {
@@ -55,16 +55,16 @@
 		*	Sets the error with the message and automaticaly with the input
 		*	and the output
 		*/
-		private function setError( $txt )
+		private function set_error( $txt )
 		{
 			$this->mError = new ControllerDispatcherError( $txt , 
-				$this->getInput() , $this->getOutput() );
+				$this->input() , $this->output() );
 		}
 		
 		/**
 		*	Returns the error or null if no error happend
 		*/
-		public function getError()
+		public function error()
 		{
 			return $this->mError;
 		}
@@ -73,38 +73,38 @@
 		*	Sets the input. The input is the uri fragment which the resolver gets
 		*	by argument.
 		*/
-		public function setInput( $input )
+		public function set_input( $input )
 		{
 			$this->mInput = $input;
 		}
 		
-		public function getInput()
+		public function input()
 		{
 			return $this->mInput;
 		}
 		
-		public function setOutput( $output )
+		public function set_output( $output )
 		{
 			$this->mOutput = $output;
 		}
 		
-		public function getOutput()
+		public function output()
 		{
 			return $this->mOutput;
 		}
 		
 		public function run( $urifragment )
 		{
-			$this->setInput( $urifragment );
+			$this->set_input( $urifragment );
 			/*
 				default is output = input change this by calling setOuput 
 				in the dispatcher module
 			*/
-			$this->setOutput( $urifragment ); 
-			$this->collectInformations();
-			return $this->getError();
+			$this->set_output( $urifragment ); 
+			$this->collect_informations();
+			return $this->error();
 		}
 		
-		abstract public function collectInformations();
+		abstract public function collect_informations();
 	}
 ?>

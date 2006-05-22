@@ -7,9 +7,9 @@
 	*/
 
 	class ControllerDispatcher extends ControllerDispatcherModule {
-		public function collectInformations()
+		public function collect_informations()
 		{
-			$tokens = explode('/', substr( $this->getInput(), 1 ) );
+			$tokens = explode('/', substr( $this->input(), 1 ) );
 			$t = $tokens;
 			$matches = array();
 

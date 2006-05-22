@@ -5,23 +5,19 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
-	class WebsiteDispatcher extends ControllerDispatcherModule
-	{
-		public function collectInformations()
+	class WebsiteDispatcher extends ControllerDispatcherModule {
+		public function collect_informations()
 		{
-			$input = $this->getInput();
+			$input = $this->input();
 			$websites = explode( "," , Swisdk::config_value("runtime.websites") );	
 			$website = "default";
-			if( count( $websites ) ) 
-			{
+			if( count( $websites ) ) {
 				foreach( $websites as $webs )
 				{
-					if( strpos ( $input , "/$webs" , 0 ) === 0 )
-					{
+					if( strpos ( $input , "/$webs" , 0 ) === 0 ) {
 						$website = $webs;
 						break;
 					}
-
 				}
 			} 			
 			

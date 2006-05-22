@@ -7,12 +7,11 @@
 
 
 	/* slice away all behind and inclusive the ??? marker... */
-	class GetParameterCarver extends ControllerDispatcherModule
-	{
-		public function collectInformations()
+	class GetParameterCarver extends ControllerDispatcherModule {
+		public function collect_informations()
 		{
-			$tmp = explode('?', $this->getInput() );
-			$this->setOutput( $tmp[0] );
+			$tmp = explode('?', $this->input() );
+			$this->set_output( $tmp[0] );
 		}
 	}
 ?>
