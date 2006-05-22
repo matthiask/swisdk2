@@ -9,8 +9,6 @@
 	{
 		public function collectInformations()
 		{
-			echo "CD: my input is " . $this->getInput() . "<br>";
-			
 			$tokens = explode('/', substr( $this->getInput(), 1 ) );
 
 
@@ -27,7 +25,7 @@
 						Swisdk::set_config_value( 'runtime.includefile', $matches[0] );
 						
 						Swisdk::set_config_value( 'runtime.arguments', array_slice(
-							explode('/', substr($urifragment,1) ),
+							explode('/', substr($this->getInput(),1) ),
 							count($tokens) ) );
 						return;
 					}
