@@ -9,11 +9,8 @@
 	{
 		public function collectInformations()
 		{
-			echo "DD: my input is " . $this->getInput() . "<br>";
-			
 			$matches = array();
 			$match = preg_match('/http(s?):\/\/([^\/]*)(:[0-9]+)?(.*)/', $this->getInput(), $matches);
-			echo "DD output: " . $matches[4] . "<br>";
 			parent::setOutput( $matches[4] );
 			Swisdk::set_config_value('runtime.request.host', $matches[2]);
 			Swisdk::set_config_value('runtime.request.uri', $matches[4]);

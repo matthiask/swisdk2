@@ -9,8 +9,6 @@
 	{
 		public function collectInformations()
 		{
-			echo "DD: my input is " . $this->getInput() . "<br>";
-			
 			$input = $this->getInput();
 			$websites = explode( "," , Swisdk::config_value("runtime.websites") );	
 			$website = "default";
