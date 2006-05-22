@@ -66,10 +66,16 @@
 		private $mSmarty = null;
 		private $mHtmlHandlers = array();
 		
-		private function __construct() {
-			
-		}
+		/** 
+		*	I'm a singleton!
+		*/
+		private function __construct() {}
 		
+		/**
+		*	Use this to get the instance of the SmartyMaster.
+		*	This method calls by the frst time also setup().
+		*	So you don't have to call setup() after retrieving the instance.
+		*/
 		public static function instance() {
 		
 			if( SmartyMaster::$mInstance === null ) {
@@ -80,11 +86,17 @@
 			return SmartyMaster::$mInstance;
 		}
 	
+		/**
+		*	Setups the smarty master. The smarty master needs following config values:
+		*	To know in which config section the template paths are stored the master reads
+		*	the "runtime.website" value. This value is typically written by the 
+		*	dispatcher.
+		*/
 		public function setup( $website = null ) 
 		{
 			
-			// the website ...
-			
+			// the website ... we need that lather to read out the correct section
+			// in the config
 			if( $website === null ) {
 				$website = Swisdk::config_value( "runtime.website" );
 			}	
@@ -99,6 +111,9 @@
 			$this->mTitle = Swisdk::config_value( $cf . "title" );
 		}
 	
+		/**
+		*	Returns the reference to the smarty object of type SwisdkSmarty.
+		*/
 		public function getSmartyRef() 
 		{
 			if( $this->mSmarty === null ) 
@@ -108,6 +123,9 @@
 			return $this->mSmarty;
 		}
 		
+		/**
+		*	Display a template. 
+		*/
 		public function display( $template = "" , $region = STREGION_FULL ) 
 		{
 			if( $template === "" )	
