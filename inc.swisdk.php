@@ -23,7 +23,6 @@
 				
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
-			require_once SWISDK_ROOT . 'resolver/inc.resolver.php';
 			require_once SWISDK_ROOT . 'site/inc.handlers.php';
 			
 			Swisdk::run(array('REQUEST_URI' =>
@@ -53,7 +52,6 @@
 				
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
-			require_once SWISDK_ROOT . 'resolver/inc.resolver.php';
 			require_once SWISDK_ROOT . 'site/inc.handlers.php';
 			
 			$requestUri = '';
