@@ -168,6 +168,14 @@
 	}
 	
 	/**
+	*	TODO add a check if the file which was not found just isnt readable for
+	*	the webserver user... 
+	*/
+	class FileNotFoundError extends NotificationError {
+	}
+	
+	
+	/**
 	 * old school php erro :)
 	 * (terminates script, or not: configurable, as always)
 	 */
