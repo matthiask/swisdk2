@@ -5,6 +5,7 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
+	define( 'STREGION_NONE', -1 );
 	define( 'STREGION_ALL' , 0 );
 	define( 'STREGION_FULL' , 1 );
 	define( 'STREGION_HEADER' , 2 );
@@ -60,151 +61,195 @@
 	}
 
 	class SmartyMaster {
-		private static $mInstance = null;
-		private $mSmarty = null;
+		/**
+		 * The SmartyMaster's Website :-)
+		 */
+		private $mWebsite;
+
+		/**
+		 * array holding the template file paths
+		 */
+		private $mTemplates;
+
+		/**
+		 * what is the title variable for? It does not seem to be used anywhere
+		 */
+		private $mTitle;
+
+		/**
+		 * html fragments which will get assigned to smarty
+		 */
+		private $mHtmlFragments = array();
+
+		/**
+		 * array holding IHtmlComponents
+		 */
 		private $mHtmlHandlers = array();
-	
+
 		/**
-		*	I'm a singleton!
-		*/
-		private function __construct() {}
-	
+		 * SmartyMaster instance
+		 */
+		private static $mInstance = null;
+
 		/**
-		*	Use this to get the instance of the SmartyMaster.
-		*	This method calls by the frst time also setup().
-		*	So you don't have to call setup() after retrieving the instance.
-		*/
-		public static function instance() {
-	
-			if( SmartyMaster::$mInstance === null ) {
-				SmartyMaster::$mInstance = new SmartyMaster();
-				SmartyMaster::$mInstance->setup();
-			}
-		
+		 * SwisdkSmarty instance
+		 */
+		private $mSmarty = null;
+
+		/**
+		 * singleton accessor method
+		 */
+		public static function instance()
+		{
+			if(SmartyMaster::$mInstance===null)
+				SmartyMaster::$mInstance = new SmartyMaster;
+
 			return SmartyMaster::$mInstance;
 		}
 
 		/**
-		*	Setups the smarty master. The smarty master needs following config values:
-		*	To know in which config section the template paths are stored the master reads
-		*	the "runtime.website" value. This value is typically written by the
-		*	dispatcher.
-		*/
-		public function setup( $website = null )
+		 * private constructor because it's a singleton
+		 */
+		private function __construct()
 		{
-		
-			// the website ... we need that lather to read out the correct section
-			// in the config
-			if( $website === null ) {
-				$website = Swisdk::config_value( "runtime.website" );
-			}
-		
-			$this->mWebsite = $website;
-		
-			// check if there is a config section with values
-			$cf = $this->mWebsite . ".";
-			$this->mFullTemplate = Swisdk::config_value( $cf . "fullTemplate" );
-			$this->mHeaderTemplate = Swisdk::config_value( $cf . "header" );
-			$this->mFooterTemplate = Swisdk::config_value( $cf . "footer" );
-			$this->mTitle = Swisdk::config_value( $cf . "title" );
+			$this->mWebsite = Swisdk::config_value('runtime.website');
+			$this->mTemplates = array(
+				'full' => Swisdk::config_value($this->mWebsite.'.fullTemplate'),
+				'header' => Swisdk::config_value($this->mWebsite.'.header'),
+				'footer' => Swisdk::config_value($this->mWebsite.'.footer'));
+			$this->mTitle = Swisdk::config_value($this->mWebsite.'.title');
 		}
 
 		/**
-		*	Returns the reference to the smarty object of type SwisdkSmarty.
-		*/
+		 * @return smarty instance reference
+		 */
 		public function smarty()
 		{
-			if( $this->mSmarty === null ) {
+			if($this->mSmarty===null)
 				$this->mSmarty = new SwisdkSmarty();
-			}
+
 			return $this->mSmarty;
 		}
-	
-		/**
-		*	Display a template.
-		*/
-		public function display( $template = "" , $region = STREGION_FULL )
-		{
-			if( $template === "" ) {
-				$template = $this->mFullTemplate;
-			}
-		
-			$smarty = $this->smarty();
-			if( $smarty->template_exists( $template ) ) {
-			
-				if( $this->generate_handler_output( $region ) ) {
-					$smarty->display($template);
-					return true;
-				} else  {
-					// FIXME handle proper error... content generation error
-					SwisdkError::handle( new FatalError( "" ) );
-					return false;
-				}
-			
-			} else {
-				// FIXME handle proper error... ressource not found error
-				SwisdkError::handle( new FatalError("Template not found! Path: $template") );
-				return false;			
-			}
-		}
-	
-		public function display_header( $region = STREGION_HEADER )
-		{
-			return $this->display( $this->mHeaderTemplate , $region );
-		}
-	
-		public function display_footer( $region = STREGION_FOOTER  )
-		{
-			return $this->display( $this->mFooterTemplate , $region );
-		}
-	
-		public function add_html_handler( IHtmlComponent $component , $region = STREGION_FULL )
-		{
-			if( !is_array($this->mHtmlHandlers[ $region ] ) ) {
-				$this->mHtmlHandlers[ $region ] = array( $component );
-			} else {
-				$this->mHtmlHandlers[ $region ][] = $component;
-			}		
-		}
-	
-		public function generate_handler_output( $region = STREGION_ALL )
-		{		
-			if( $region === STREGION_ALL ) {
-			
-				foreach( $this->mHtmlHandlers as $hGroup )
-				{
-					if( is_array( $hGroup ) ) {
-						if( !$this->make_handler_output( $hGroup ) ) {
-							return false;
-						}
-					}
-				}
-			
-			} else {
 
-				if( is_array( $this->mHtmlHandlers[$region] ) )
-					return $this->make_handler_output( $this->mHtmlHandlers[$region] );
-			}
-		
-			return true;
-		}
-	
-	
-		public function make_handler_output( $hGroup )
+		/**
+		 * display a template. Default is the full page template.
+		 *
+		 * the second parameter controls the IHtmlComponent's HTML
+		 * generation duties
+		 */
+		public function display($template = null, $generate = STREGION_ALL)
 		{
-			foreach( $hGroup as $element )
-			{
-				$smarty = $this->smarty();
-			
-				$content = $element->html();
-				if( SwisdkError::is_error($content) ) {
-					// FIXME return the error up to were generation error is outputed
-					return false;
-				}
-			
-				$smarty->assign( $element->name() , $content );
+			if($template===null)
+				$template = $this->mTemplates['full'];
+
+			$smarty = $this->smarty();
+			if($smarty->template_exists($template)) {
+				if($this->generate_sections($generate))
+					$smarty->display($template);
+			} else {
+				SwisdkError::handle(new FatalError(
+					'Smarty template '.$template.' does not exist'));
 			}
-		
+		}
+
+		/**
+		 * display header template
+		 */
+		public function display_header($generate = STREGION_HEADER)
+		{
+			$this->display($this->mTemplates['header'], $generate);
+		}
+
+		/**
+		 * display footer template
+		 */
+		public function display_footer($generate = STREGION_FOOTER)
+		{
+			$this->display($this->mTemplates['footer'], $generate);
+		}
+
+		/**
+		 * this function has two overloads:
+		 *
+		 * add_html_handler($component, $region = STREGION_FULL)
+		 * add_html_handler($name, $component, $region = STREGION_FULL)
+		 *
+		 * The component needs to have a name() method if you want to use
+		 * the first method
+		 */
+		public function add_html_handler()
+		{
+			$args = func_get_args();
+
+			$name = null;
+			$component = null;
+			$region = STREGION_FULL;
+
+			if($args[0] instanceof IHtmlComponent) {
+				$component = $args[0];
+				$name = $component->name();
+				if(isset($args[1]))
+					$region = $args[1];
+			} else if($args[1] instanceof IHtmlComponent) {
+				$name = $args[0];
+				$component = $args[1];
+				if(isset($args[2]))
+					$region = $args[2];
+			}
+
+			$this->mHtmlHandlers[$region][$name][] = $component;
+		}
+
+		/**
+		 * add HTML fragment. This will be passed on as-is to the smarty instance.
+		 */
+		public function add_html_fragment($name, $fragment)
+		{
+			$this->mHtmlFragments[$name] = $fragment;
+		}
+
+		/**
+		 * assign HTML fragments and output of IHtmlComponent to smarty instance
+		 */
+		private function generate_sections($region = STREGION_ALL)
+		{
+			$smarty = $this->smarty();
+
+			foreach($this->mHtmlFragments as $section => &$html)
+				$smarty->assign($name, $html);
+
+			if($section == STREGION_NONE)
+				return true;
+			else if($section == STREGION_ALL)
+				return $this->generate_section_helper($smarty, STREGION_FULL)
+					&& $this->generate_section_helper($smarty, STREGION_HEADER)
+					&& $this->generate_section_helper($smarty, STREGION_FOOTER);
+			else
+				return $this->generate_section_helper($smarty, $region);
+		}
+
+		/**
+		 * helper doing the real work for generate_sections() above
+		 */
+		private function generate_section_helper(&$smarty, $region)
+		{
+			if(!isset($this->mHtmlHandlers[$region]))
+				return true;
+
+			foreach($this->mHtmlHandlers[$region] as $section => &$handlers) {
+				$output = '';
+
+				foreach($handlers as $handler) {
+					$res = $handler->html();
+					if(SwisdkError::is_error($res))
+						return false;
+
+					$output .= $res;
+				}
+
+				$smarty->assign($section, $output);
+			}
+
 			return true;
 		}
 	}
