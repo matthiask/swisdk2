@@ -115,10 +115,12 @@
 		{
 			$tokens = explode('/', substr($urifragment,1));
 
+
 			while(true) {
 				$path = CONTENT_ROOT.implode('/', $tokens);
-				if(count($matches=glob($path.'/Index_*'))
-					|| count($matches=glob($path.'_*'))) {
+				
+				if(count($matches=glob($path.'_*'))) {
+					
 					if(is_file($matches[0])) {
 						Swisdk::set_config_value('runtime.controller.url',
 							preg_replace('/[\/]+/', '/', '/'.implode('/',$tokens).'/'));

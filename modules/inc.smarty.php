@@ -59,7 +59,6 @@
 		protected $smarty;
 	}
 
-
 	class SmartyMaster {
 		private static $mInstance = null;
 		private $mSmarty = null;
@@ -198,4 +197,5 @@
 			return true;
 		}
 	}
+
 ?>

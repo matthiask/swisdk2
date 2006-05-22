@@ -1,42 +1,83 @@
 <?php
 	/*
-	*	Copyright (c) 2006, Matthias Kestenholz <mk@spinlock.ch>
+	*	Copyright (c) 2006, 
+	*	Matthias Kestenholz <mk@spinlock.ch> 
+	*	Moritz Zumbühl <mail@momoetomo.ch>
 	*	Distributed under the GNU General Public License.
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
-	abstract class SiteHandler {
-		abstract public function handle($file);
+	
+	abstract class SwisdkSiteHandler {
+		
+		/* check if enough information are avaible to instance the controler */
+		/* instance handler and run the party! */
+		
+		public static function run()
+		{		
+			// at least we need the include file of the controller...
+			$includefile = Swisdk::config_value('runtime.includefile');
+			if( !$includefile )
+				SwisdkError::handle( new SiteNotFoundError() );
+			
+			// get the type of the controller and instance it 
+			$type = substr( $includefile, strrpos( $includefile, '_' )+1 );
+			
+			$handler = SwisdkSiteHandler::get_type_handler_instance( $type );
+			if( SwisdkError::is_error( $handler ) )
+				SwisdkError::handle( $handler );
+			
+			return $handler->handle();
+		}
+		
+		public static function get_type_handler_instance( $type )
+		{
+			$classname = Swisdk::config_value( "dispatcher." . $type );
+			if( $classname != null ) {
+				return Swisdk::load_module( $classname , "sitehandlers/" );
+			} else {
+				return new FatalError( "Could not find the config-entry " . "runtime." . $type );
+			}
+		}
+		
+		abstract public function handle();
 	}
 	
-	class DynamicSiteHandler extends SiteHandler {
-		public function handle( $file )
+	
+	class PhpSiteHandler extends SwisdkSiteHandler
+	{
+		public function handle()
 		{
-			require_once $file;
+			$includefile = Swisdk::config_value('runtime.includefile');
+			require_once $includefile;
+		
+			// get the controller class  out of the config , the include file
+			// sets the class name with Swisdk::register()
+			
 			$class = Swisdk::config_value('runtime.controller.class');
 			
-			if(!class_exists($class)) {
-				SwisdkError::handle(new BasicSwisdkError("SiteController $class could not be found"));
+			if( !class_exists( $class) ) {
+				SwisdkError::handle( new FatalError( "SiteController $class could not be found" ) );
 			}
 			
 			$ctrl = new $class;
-			if($ctrl instanceof Site) {
+			if( $ctrl instanceof Site )
+			{
 				$ctrl->run();
-			} else if($ctrl instanceof IComponent) {
-				require_once SWISDK_ROOT . 'site/inc.site.php';
-				$site = new ComponentRunnerSite($ctrl);
-				$site->run();
+				return;
 			} else {
-				echo 'Oops';
+				SwisdkError::handle( new FatalError( "Controller is not subclass of Site!" ) );
 			}
 		}
 	}
-	
-	class TemplateSiteHandler extends SiteHandler {
-		public function handle($file)
+		
+	class XHTMLSiteHandler extends SwisdkSiteHandler {
+		public function handle()
 		{
 			echo file_get_contents($file);
 		}
 	}
 
+
+	
 ?>
