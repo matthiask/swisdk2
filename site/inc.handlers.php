@@ -71,6 +71,10 @@
 		}
 	}
 		
+		
+	/**
+	*	Just send the file to the client... no fun just raw sending...
+	*/
 	class XHTMLSiteHandler extends SwisdkSiteHandler {
 		public function handle()
 		{
@@ -78,6 +82,32 @@
 		}
 	}
 
+	/** 
+	*	Send the file to client using the smarty engine.
+	*/
+	class SmartySiteHandler extends SwisdkSiteHandler
+	{
+		public function handle()
+		{
+			$smartyM = SmartyMaster::instance();
+			$smartyM->display( Swisdk::config_value('runtime.includefile') );
+			return;
+		}
+	}
 
+	/**
+	*	Send first the header template of the website, then the include file and
+	*	in the end the footer template.
+	*/
+	class EmbeddedSmartySiteHandler extends SwisdkSiteHandler	
+	{	
+		public function handle()
+		{
+			$smartyM = SmartyMaster::instance();
+			$smartyM->displayHeader();
+			$smartyM->display( Swisdk::config_value('runtime.includefile') );
+			$smartyM->displayFooter();
+		}
+	}
 	
 ?>
