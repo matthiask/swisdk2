@@ -25,7 +25,7 @@
 							($matches=glob($path.'_*'))) {
 						if(is_file($matches[0]))
 							break;
-						}
+						
 					}
 
 					if(!count($tokens))
