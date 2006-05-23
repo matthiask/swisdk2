@@ -104,9 +104,9 @@
 		public function handle()
 		{
 			$smartyM = SmartyMaster::instance();
-			$smartyM->displayHeader();
+			$smartyM->display_header();
 			$smartyM->display( Swisdk::config_value('runtime.includefile') );
-			$smartyM->displayFooter();
+			$smartyM->display_footer();
 		}
 	}
 	
