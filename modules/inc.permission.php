@@ -28,15 +28,15 @@
 
 		public static function check($role=null, $url=null)
 		{
-			if($group = PermissionManager::group_for_url($url)) {
+			if($realm = PermissionManager::realm_for_url($url)) {
 				//
-				// determine the minimally needed role (URI (=Group)
+				// determine the minimally needed role (URI (=Realm)
 				// role and content role (parameter))
 				//
-				$needed_role = max($role, $group['group_role_id']);
+				$needed_role = max($role, $realm['realm_role_id']);
 
-				if(PermissionManager::check_group_role(
-						$group['group_id'], $needed_role))
+				if(PermissionManager::check_realm_role(
+						$realm['realm_id'], $needed_role))
 					return true;
 			}
 
@@ -53,7 +53,7 @@
 			PermissionManager::login_form();
 		}
 
-		public static function group_for_url($url=null)
+		public static function realm_for_url($url=null)
 		{
 			if(is_null($url))
 				$url = Swisdk::config_value('runtime.request.uri');
@@ -61,10 +61,10 @@
 				$url = substr($url, 1);
 
 			//
-			// find best matching group
+			// find best matching realm
 			//
-			// If the URI is /a/b/c, the group table will be searched for
-			// a/b/c, a/b, a and finally the empty string (root group)
+			// If the URI is /a/b/c, the realm table will be searched for
+			// a/b/c, a/b, a and finally the empty string (root realm)
 			//
 			$tokens = explode('/', $url);
 			$clauses = array();
@@ -73,12 +73,12 @@
 				array_pop($tokens);
 			}
 			return DBObject::db_get_row(
-				'SELECT group_id,group_role_id FROM tbl_group WHERE '
-				.'(group_url=\''.implode('\' OR group_url=\'', $clauses)
-				.'\' OR group_url=\'\') ORDER BY group_url DESC LIMIT 1');
+				'SELECT realm_id,realm_role_id FROM tbl_realm WHERE '
+				.'(realm_url=\''.implode('\' OR realm_url=\'', $clauses)
+				.'\' OR realm_url=\'\') ORDER BY realm_url DESC LIMIT 1');
 		}
 
-		public static function check_group_role($group, $role, $uid=null)
+		public static function check_realm_role($realm, $role, $uid=null)
 		{
 			$user = null;
 			if(is_null($uid))
@@ -88,16 +88,16 @@
 
 			$perms = DBObject::db_get_row('SELECT user_permission_role_id '
 				.'FROM tbl_user_permission WHERE user_permission_user_id='
-				.$user->id().' AND user_permission_group_id='.$group);
+				.$user->id().' AND user_permission_realm_id='.$realm);
 
 			//
 			// the user must have an entry in the permission table, even
 			// for simple viewing otherwise, access is denied.
 			//
-			// Roles are not inherited across groups. This simplifies the
+			// Roles are not inherited across realms. This simplifies the
 			// code and it is easier to understand. The only drawback is
 			// the amount of data which will be necessary once you have some
-			// groups in the system. (Roughly #users * #groups)
+			// realms in the system. (Roughly #users * #realms)
 			//
 			if($perms && $perms['user_permission_role_id']>=$role)
 				return true;
@@ -112,8 +112,8 @@
 			$perms = DBObject::db_get_array('SELECT user_group_permission_role_id '
 				.'FROM tbl_user_group_permission '
 				.'WHERE user_group_permission_user_group_id IN ('
-				.implode(',', $groups).') AND user_group_permission_group_id='
-				.$group);
+				.implode(',', $groups).') AND user_group_permission_realm_id='
+				.$realm);
 			foreach($perms as &$p)
 				if($p['user_group_permission_role_id']>=$role)
 					return true;
