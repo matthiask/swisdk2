@@ -481,7 +481,7 @@
 			$valid = true;
 			// loop over FormRules
 			foreach($this->rules as &$rule)
-				if(!$rule->is_valid(&$this))
+				if(!$rule->is_valid($this))
 					$valid = false;
 			// loop over each items own validation rules
 			return parent::is_valid() && $valid;
