@@ -695,9 +695,9 @@
 		public function render(&$grid)
 		{
 			$this->render_y = $grid->height();
-			$this->render_title(&$grid);
-			$this->render_field(&$grid);
-			$this->render_message(&$grid);
+			$this->render_title($grid);
+			$this->render_field($grid);
+			$this->render_message($grid);
 		}
 
 		protected function render_title(&$grid)
@@ -755,7 +755,7 @@
 		{
 			$valid = true;
 			foreach($this->rules as &$rule)
-				if(!$rule->is_valid(&$this))
+				if(!$rule->is_valid($this))
 					$valid = false;
 			return $valid;
 		}
