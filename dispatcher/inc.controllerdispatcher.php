@@ -18,9 +18,7 @@
 			// try to find an Index_* controller/template only
 			// for the full REQUEST_URI path
 			
-			$includefile = "";
-			$matches = glob($path.'/Index_*');
-			if( count($matches) > 0 ) {
+			if(!($matches = glob($path.'/Index_*'))) {
 
 				while(true) {
 					
@@ -28,7 +26,6 @@
 							($matches = glob($path.'_*')) ) {
 						
 						if( is_file( $matches[0] ) ) {
-							$includefile = $matches[0];
 							break;
 						}
 					}
@@ -39,18 +36,17 @@
 					array_pop($tokens);
 					$path = CONTENT_ROOT.implode('/', $tokens);
 				}
-			} else {
-				$includefile = $matches[0];
 			}
 
 			Swisdk::set_config_value('runtime.controller.url',
 				preg_replace('/[\/]+/', '/', '/'.implode('/',$tokens).'/'));
-			Swisdk::set_config_value('runtime.includefile', $includefile );
+			Swisdk::set_config_value('runtime.includefile', $matches[0] );
 			Swisdk::set_config_value('runtime.arguments', array_slice(
 				$t, count($tokens)));
 
 			return true;
 		}
+		
 	}
 
 ?>
