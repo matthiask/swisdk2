@@ -873,6 +873,17 @@
 		}
 	}
 
+	class UserRequiredRule extends RequiredRule {
+		protected $message = 'User required';
+
+		protected function is_valid_impl(FormItem &$item)
+		{
+			require_once MODULE_ROOT.'inc.session.php';
+			$value = $item->value();
+			return $value!='' && $value!=SWISDK2_VISITOR;
+		}
+	}
+
 	class NumericRule extends FormItemRule {
 		protected $message = 'Value must be numeric';
 
