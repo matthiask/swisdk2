@@ -92,27 +92,6 @@
 	require_once MODULE_ROOT . 'inc.layout.php';
 
 	/**
-	 * this specialization of Layout_Grid allows the form code to add
-	 * html fragments before the Grid table.
-	 *
-	 * This is mostly used for hidden input fields and other bookkeeping
-	 * information. It might also be used for javascript etc. later on.
-	 */
-	class Form_Grid extends Layout_Grid {
-		protected $html = '';
-
-		public function add_html($html)
-		{
-			$this->html .= $html;
-		}
-
-		public function html()
-		{
-			return $this->html . parent::html();
-		}
-	}
-
-	/**
 	 * The FormBox is the basic grouping block of a Form
 	 *
 	 * There may be 1-n FormBoxes in one Form
@@ -149,6 +128,11 @@
 		public function set_title($title=null)
 		{
 			$this->title = $title;
+		}
+
+		public function title()
+		{
+			return $this->title;
 		}
 
 		/**
@@ -344,31 +328,11 @@
 			}
 		}
 
-		/**
-		 * @return html portion of form
-		 */
-		public function html()
+		public function accept($renderer)
 		{
-			$grid = new Form_Grid();
-			$this->render($grid);
-			return $grid->html();
-		}
-
-		/**
-		 * render the contained FormItems and the nested FormBoxes onto
-		 * the layout grid
-		 */
-		public function render($grid)
-		{
-			if($this->title)
-				$grid->add_item(0, $grid->height(), $this->title, 3, 1);
-			foreach($this->items as &$item) {
-				// special treatment of HiddenInput fields
-				if($item instanceof HiddenInput)
-					$grid->add_html($item->html());
-				else
-					$item->render($grid);
-			}
+			$renderer->visit($this);
+			foreach($this->items as &$item)
+				$item->accept($renderer);
 		}
 
 		/**
@@ -441,18 +405,23 @@
 		/**
 		 * @return the Form html
 		 */
-		public function html()
+		public function html($arg = 'FormRenderer')
 		{
 			$id = $this->add(new HiddenInput());
 			$id->set_name($this->form_id);
 			$id->set_value(1);
 
-			$html = '<form method="post" action="'.$_SERVER['REQUEST_URI'].'" name="'.$this->form_id."\">\n";
-			$html .= parent::html();
-			if($this->message)
-				$html .= '<p>'.$this->message.'</p>';
-			$html .= '</form>';
-			return $html;
+			$renderer = null;
+			if($arg instanceof FormRenderer)
+				$renderer = $arg;
+			else if(class_exists($arg))
+				$renderer = new $arg;
+			else
+				SwisdkError::handle(new FatalError(
+					'Invalid renderer specification: '.$arg));
+			$this->accept($renderer);
+
+			return $renderer->html();
 		}
 
 		/**
@@ -678,57 +647,12 @@
 		 * helper function which composes a html-compatible attribute
 		 * string
 		 */
-		protected function attribute_html()
+		public function attribute_html()
 		{
 			$html = ' ';
 			foreach($this->attributes as $k => $v)
 				$html .= $k.'="'.htmlspecialchars($v).'" ';
 			return $html;
-		}
-
-		/**
-		 * the y position of this formitem (used while rendering with the
-		 * default FormItem::render() and FormItem::render_*() methods)
-		 */
-		protected $render_y;
-
-		public function render(&$grid)
-		{
-			$this->render_y = $grid->height();
-			$this->render_title($grid);
-			$this->render_field($grid);
-			$this->render_message($grid);
-		}
-
-		protected function render_title(&$grid)
-		{
-			// put the title into the first column
-			$grid->add_item(0, $this->render_y, 
-				sprintf('<label for="%s">%s</label>', $this->name(), $this->title()));
-		}
-
-		protected function render_field(&$grid)
-		{
-			// put the form item into the second column
-			$grid->add_item(1, $this->render_y, $this->field_html());
-		}
-
-		protected function render_message(&$grid)
-		{
-			// put the message into the third column
-			$grid->add_item(2, $this->render_y, $this->message());
-		}
-
-		/**
-		 * this is the function you should override if you want to use the
-		 * default rendering mechanism for FormItems.
-		 *
-		 * This function is not abstract because I do not want to force
-		 * everybody into using the default renderer (see SubmitButton)
-		 */
-		protected function field_html()
-		{
-			return '#OVERRIDE';
 		}
 
 		public function init_value($dbobj)
@@ -759,15 +683,18 @@
 					$valid = false;
 			return $valid;
 		}
+
+		public function accept($renderer)
+		{
+			$renderer->visit($this);
+		}
 	}
 
 	abstract class SimpleInput extends FormItem {
 		protected $type = '#INVALID';
-		protected function field_html()
+		public function type()
 		{
-			return sprintf('<input type="%s" name="%s" id="%s" value="%s" %s />',
-				$this->type, $this->name(), $this->name(),
-				$this->value(), $this->attribute_html());
+			return $this->type;
 		}
 	}
 
@@ -781,11 +708,6 @@
 	 */
 	class HiddenInput extends TextInput {
 		protected $type = 'hidden';
-
-		public function html()
-		{
-			return $this->field_html();
-		}
 	}
 
 	class PasswordInput extends SimpleInput {
@@ -810,51 +732,14 @@
 
 			$this->set_value($dbobj->get($sname));
 		}
-
-		protected function field_html()
-		{
-			$name = $this->name();
-			return sprintf('<input type="checkbox" name="%s" id="%s" %s /><input type="hidden" name="__check_'.$name.'" value="1" />',
-				$this->type, $name, $name,
-				($this->value()?'checked="checked" ':' ').$this->attribute_html());
-		}
 	}
 
 	class Textarea extends FormItem {
 		protected $attributes = array('rows' => 12, 'cols' => 60);
-
-		protected function field_html()
-		{
-			$name = $this->name();
-			return sprintf('<textarea name="%s" id="%s" %s>%s</textarea>',
-				$name, $name, $this->attribute_html(), $this->value());
-		}
 	}
 
 	class RichTextarea extends FormItem {
 		protected $attributes = array('style' => 'width:800px;height:300px;');
-		protected function field_html()
-		{
-			$name = $this->name();
-			$value = $this->value();
-			$attributes = $this->attribute_html();
-			$html = <<<EOD
-<textarea name="$name" id="$name" $attributes>$value</textarea>
-<script type="text/javascript" src="/scripts/util.js"></script>
-<script type="text/javascript" src="/scripts/fckeditor/fckeditor.js"></script>
-<script type="text/javascript">
-function load_editor_$name(){
-var oFCKeditor = new FCKeditor('$name');
-oFCKeditor.BasePath = '/scripts/fckeditor/';
-oFCKeditor.Height = 450;
-oFCKeditor.Width = 750;
-oFCKeditor.ReplaceTextarea();
-}
-add_event(window,'load',load_editor_$name);
-</script>
-EOD;
-			return $html;
-		}
 	}
 
 	/**
@@ -866,44 +751,18 @@ EOD;
 			$this->items = $items;
 		}
 
+		public function items()
+		{
+			return $this->items;
+		}
+
 		protected $items=array();
 	}
 
 	class DropdownInput extends SelectionFormItem {
-		protected function field_html()
-		{
-			$html = '<select name="'.$this->name().'" id="'.$this->name().'"'
-				.$this->attribute_html().'>';
-			$value = $this->value();
-			foreach($this->items as $k => $v) {
-				$html .= '<option ';
-				if($value==$k)
-					$html .= 'selected="selected" ';
-				$html .= 'value="'.$k.'">'.$v.'</option>';
-			}
-			$html .= '</select>';
-			return $html;
-		}
 	}
 
 	class Multiselect extends SelectionFormItem {
-		protected function field_html()
-		{
-			$html = '<select name="'.$this->name().'[]" id="'.$this->name()
-				.'" multiple="multiple"'.$this->attribute_html().'>';
-			$value = $this->value();
-			if(!$value)
-				$value = array();
-			foreach($this->items as $k => $v) {
-				$html .= '<option ';
-				if(in_array($k,$value))
-					$html .= 'selected="selected" ';
-				$html .= 'value="'.$k.'">'.$v.'</option>';
-			}
-			$html .= '</select>';
-			return $html;
-		}
-
 		public function value()
 		{
 			$val = parent::value();
@@ -917,18 +776,10 @@ EOD;
 	 * base class for all FormItems which want to occupy a whole line (no title, no message)
 	 */
 	class FormBar extends FormItem {
-		public function render(&$grid)
-		{
-			$grid->add_item(0, $grid->height(), $this->field_html(), 3, 1);
-		}
 	}
 
 	class SubmitButton extends FormBar {
 		protected $attributes = array('value' => 'Submit');
-		protected function field_html()
-		{
-			return '<input type="submit" '.$this->attribute_html().'/>';
-		}
 
 		public function init_value($dbobj)
 		{
@@ -943,50 +794,6 @@ EOD;
 		public function field_name($title)
 		{
 			return strtolower($title) . '_dttm';
-		}
-
-		protected function field_html()
-		{
-			$html = '';
-			static $js_sent = false;
-			if(!$js_sent) {
-				$js_sent = true;
-				$html.=<<<EOD
-<link rel="stylesheet" type="text/css" media="all" href="/scripts/calendar/calendar-win2k-1.css" title="win2k-cold-1" />
-<script type="text/javascript" src="/scripts/calendar/calendar.js"></script>
-<script type="text/javascript" src="/scripts/calendar/calendar-en.js"></script>
-<script type="text/javascript" src="/scripts/calendar/calendar-setup.js"></script>
-EOD;
-			}
-
-			$name = $this->name();
-			$span_name = $this->name() . '_span';
-			$trigger_name = $this->name() . '_trigger';
-			$value = intval($this->value());
-			if(!$value)
-				$value = time();
-
-			$display_value = strftime("%d. %B %Y : %H:%M", $value);
-
-			$html.=<<<EOD
-<input type="hidden" name="$name" id="$name" value="$value" />
-<span id="$span_name">$display_value</span> <img src="/scripts/calendar/img.gif" id="$trigger_name"
-	style="cursor: pointer; border: 1px solid red;" title="Date selector"
-	onmouseover="this.style.background='red';" onmouseout="this.style.background=''" />
-<script type="text/javascript">
-Calendar.setup({
-	inputField  : "$name",
-	ifFormat    : "%s",
-	displayArea : "$span_name",
-	daFormat    : "%d. %B %Y : %H:%M",
-	button      : "$trigger_name",
-	singleClick : true,
-	showsTime   : true,
-	step        : 1
-});
-</script>
-EOD;
-			return $html;
 		}
 	}
 
@@ -1144,6 +951,276 @@ EOD;
 		protected function is_valid_impl(FormItem &$item)
 		{
 			return $this->compare_value == md5($item->value());
+		}
+	}
+
+	/**
+	 * this specialization of Layout_Grid allows the form code to add
+	 * html fragments before the Grid table.
+	 *
+	 * This is mostly used for hidden input fields and other bookkeeping
+	 * information. It might also be used for javascript etc. later on.
+	 */
+	class Form_Grid extends Layout_Grid {
+		protected $start = '';
+		protected $end = '';
+		protected $html = '';
+
+		public function add_html($html)
+		{
+			$this->html .= $html;
+		}
+
+		public function add_html_start($html)
+		{
+			$this->start = $html.$this->start;
+		}
+
+		public function add_html_end($html)
+		{
+			$this->end .= $html;
+		}
+
+		public function html()
+		{
+			return $this->start.parent::html().$this->html.$this->end;
+		}
+	}
+
+	class FormRenderer {
+
+		protected $grid;
+
+		public function __construct()
+		{
+			$this->grid = new Form_Grid();
+		}
+
+		public function html()
+		{
+			return $this->grid->html();
+		}
+
+		public function visit($obj)
+		{
+			$class = get_class($obj);
+			if($obj instanceof Form)
+				$class = 'Form';
+			else if($obj instanceof FormBox)
+				$class = 'FormBox';
+
+			call_user_func(array($this, 'visit_'.$class), $obj);
+		}
+
+		public function visit_Form($obj)
+		{
+			$this->grid->add_html_start(
+				'<form method="post" action="'.$_SERVER['REQUEST_URI']
+				.'" name="'.$obj->id()."\">\n");
+			if($message = $obj->message())
+				$this->grid->add_html_end($message);
+			$this->grid->add_html_end('</form>');
+			if($title = $obj->title())
+				$this->_render_bar($obj, $title);
+		}
+
+		public function visit_FormBox($obj)
+		{
+			if($title = $obj->title())
+				$this->_render_bar($obj, $title);
+		}
+
+		public function visit_HiddenInput($obj)
+		{
+			$this->grid->add_html($this->_simpleinput_html($obj));
+		}
+
+		public function visit_SimpleInput($obj)
+		{
+			$this->_render($obj, $this->_simpleinput_html($obj));
+		}
+
+		public function visit_TextInput($obj)
+		{
+			$this->visit_SimpleInput($obj);
+		}
+
+		public function visit_PasswordInput($obj)
+		{
+			$this->visit_SimpleInput($obj);
+		}
+
+		public function visit_CheckboxInput($obj)
+		{
+			$name = $this->name();
+			$this->_render($obj, sprintf(
+				'<input type="checkbox" name="%s" id="%s" %s />'
+				.'<input type="hidden" name="__check_'.$name
+				.'" value="1" />',
+				$obj->type(), $name, $name,
+				($obj->value()?'checked="checked" ':' ')
+				.$obj->attribute_html()));
+		}
+
+		public function visit_Textarea($obj)
+		{
+			$name = $obj->name();
+			$this->_render($obj, sprintf(
+				'<textarea name="%s" id="%s" %s>%s</textarea>',
+				$name, $name, $obj->attribute_html(),
+				$obj->value()));
+		}
+
+		public function visit_RichTextarea($obj)
+		{
+			$name = $obj->name();
+			$value = $obj->value();
+			$attributes = $obj->attribute_html();
+			$html = <<<EOD
+<textarea name="$name" id="$name" $attributes>$value</textarea>
+<script type="text/javascript" src="/scripts/util.js"></script>
+<script type="text/javascript" src="/scripts/fckeditor/fckeditor.js"></script>
+<script type="text/javascript">
+function load_editor_$name(){
+var oFCKeditor = new FCKeditor('$name');
+oFCKeditor.BasePath = '/scripts/fckeditor/';
+oFCKeditor.Height = 450;
+oFCKeditor.Width = 750;
+oFCKeditor.ReplaceTextarea();
+}
+add_event(window,'load',load_editor_$name);
+</script>
+EOD;
+			$this->_render($obj, $html);
+		}
+
+		/**
+		 * public function visit_SelectionFormItem()
+		 *
+		 * no rendering for this item
+		 */
+
+		public function visit_DropdownInput($obj)
+		{
+			$html = '<select name="'.$obj->name().'" id="'.$obj->name().'"'
+				.$obj->attribute_html().'>';
+			$value = $obj->value();
+			$items = $obj->items();
+			foreach($items as $k => $v) {
+				$html .= '<option ';
+				if($value==$k)
+					$html .= 'selected="selected" ';
+				$html .= 'value="'.$k.'">'.$v.'</option>';
+			}
+			$html .= '</select>';
+			$this->_render($obj, $html);
+		}
+
+		public function visit_Multiselect($obj)
+		{
+			$html = '<select name="'.$obj->name().'[]" id="'.$obj->name()
+				.'" multiple="multiple"'.$obj->attribute_html().'>';
+			$value = $obj->value();
+			if(!$value)
+				$value = array();
+			$items = $obj->items();
+			foreach($items as $k => $v) {
+				$html .= '<option ';
+				if(in_array($k,$value))
+					$html .= 'selected="selected" ';
+				$html .= 'value="'.$k.'">'.$v.'</option>';
+			}
+			$html .= '</select>';
+			$this->_render($obj, $html);
+		}
+
+		public function visit_DateInput($obj)
+		{
+			$html = '';
+			static $js_sent = false;
+			if(!$js_sent) {
+				$js_sent = true;
+				$html.=<<<EOD
+<link rel="stylesheet" type="text/css" media="all" href="/scripts/calendar/calendar-win2k-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="/scripts/calendar/calendar.js"></script>
+<script type="text/javascript" src="/scripts/calendar/calendar-en.js"></script>
+<script type="text/javascript" src="/scripts/calendar/calendar-setup.js"></script>
+EOD;
+			}
+
+			$name = $obj->name();
+			$span_name = $obj->name() . '_span';
+			$trigger_name = $obj->name() . '_trigger';
+			$value = intval($obj->value());
+			if(!$value)
+				$value = time();
+
+			$display_value = strftime("%d. %B %Y : %H:%M", $value);
+
+			$html.=<<<EOD
+<input type="hidden" name="$name" id="$name" value="$value" />
+<span id="$span_name">$display_value</span> <img src="/scripts/calendar/img.gif" id="$trigger_name"
+	style="cursor: pointer; border: 1px solid red;" title="Date selector"
+	onmouseover="this.style.background='red';" onmouseout="this.style.background=''" />
+<script type="text/javascript">
+Calendar.setup({
+	inputField  : "$name",
+	ifFormat    : "%s",
+	displayArea : "$span_name",
+	daFormat    : "%d. %B %Y : %H:%M",
+	button      : "$trigger_name",
+	singleClick : true,
+	showsTime   : true,
+	step        : 1
+});
+</script>
+EOD;
+			$this->_render($obj, $html);
+		}
+
+		public function visit_FormBar($obj)
+		{
+			// humm... does nothing?
+			$this->_render_bar($this, 'FormBar');
+		}
+
+		public function visit_SubmitButton($obj)
+		{
+			$this->_render_bar($obj,
+				'<input type="submit" '.$obj->attribute_html().'/>');
+		}
+
+		protected function _render($obj, $field_html)
+		{
+			$y = $this->grid->height();
+			$this->grid->add_item(0, $y, $this->_title_html($obj));
+			$this->grid->add_item(1, $y, $field_html);
+			$this->grid->add_item(2, $y, $this->_message_html($obj));
+		}
+
+		protected function _render_bar($obj, $html)
+		{
+			$this->grid->add_item(0, $this->grid->height(), $html, 3, 1);
+		}
+
+		protected function _title_html($obj)
+		{
+			return '<label for="'.$obj->name().'">'.$obj->title().'</label>';
+		}
+
+		protected function _message_html($obj)
+		{
+			return $obj->message();
+		}
+
+		protected function _simpleinput_html($obj)
+		{
+			$name = $obj->name();
+			return sprintf(
+				'<input type="%s" name="%s" id="%s" value="%s" %s />',
+				$obj->type(), $name, $name, $obj->value(),
+				$obj->attribute_html());
+
 		}
 	}
 
