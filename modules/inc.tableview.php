@@ -96,6 +96,13 @@
 		}
 	}
 
+	class BoolTableViewColumn extends TableViewColumn {
+		public function html(&$data)
+		{
+			return $data[$this->column]?'true':'false';
+		}
+	}
+
 	class TemplateTableViewColumn extends TableViewColumn {
 		public function html(&$data)
 		{
