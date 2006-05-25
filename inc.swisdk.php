@@ -50,6 +50,7 @@
 			define( 'MODULE_ROOT', SWISDK_ROOT . 'modules/' );
 			define( 'CONTENT_ROOT' , APP_ROOT . 'webapp/content/' );
 			define('LOG_ROOT', APP_ROOT.'log/');
+			define('CACHE_ROOT', WEBAPP_ROOT.'cache/');
 			
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
