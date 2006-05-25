@@ -28,7 +28,7 @@
 	 *
 	 * $item = DBObject::find('Item', 42);
 	 * $form = new Form();
-	 * $form->bind_ref($item, true); // autogenerate form
+	 * $form->bind($item, true); // autogenerate form
 	 * $form->set_title('Edit Item');
 	 * $form->add(new SubmitButton());
 	 *
@@ -1097,7 +1097,7 @@
 				.'" name="'.$obj->id()."\">\n");
 			$this->grid->add_html_end('</form>');
 			if($title = $obj->title())
-				$this->_render_bar($obj, $title);
+				$this->_render_bar($obj, '<big><strong>'.$title.'</strong></big>');
 		}
 
 		public function visit_FormBox($obj)
@@ -1105,7 +1105,7 @@
 			if($message = $obj->message())
 				$this->grid->add_html_end($message);
 			if($title = $obj->title())
-				$this->_render_bar($obj, $title);
+				$this->_render_bar($obj, '<strong>'.$title.'</strong>');
 		}
 
 		public function visit_HiddenInput($obj)
@@ -1275,13 +1275,12 @@ EOD;
 		{
 			$y = $this->grid->height();
 			$this->grid->add_item(0, $y, $this->_title_html($obj));
-			$this->grid->add_item(1, $y, $field_html);
-			$this->grid->add_item(2, $y, $this->_message_html($obj));
+			$this->grid->add_item(1, $y, $field_html.$this->_message_html($obj));
 		}
 
 		protected function _render_bar($obj, $html)
 		{
-			$this->grid->add_item(0, $this->grid->height(), $html, 3, 1);
+			$this->grid->add_item(0, $this->grid->height(), $html, 2, 1);
 		}
 
 		protected function _title_html($obj)
@@ -1291,7 +1290,8 @@ EOD;
 
 		protected function _message_html($obj)
 		{
-			return $obj->message();
+			$msg = $obj->message();
+			return $msg?'<br /><span style="color:red">'.$msg.'</span>':'';
 		}
 
 		protected function _simpleinput_html($obj)
