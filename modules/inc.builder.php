@@ -53,7 +53,7 @@
 		public function build(&$form)
 		{
 			$this->form = $form;
-			$dbobj = $this->dbobj();
+			$dbobj = $form->dbobj();
 			$fields = array_keys($dbobj->field_list());
 			$ninc_regex = '/^'.$dbobj->_prefix()
 				.'(id|creation_dttm)$/';
