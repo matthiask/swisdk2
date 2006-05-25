@@ -130,6 +130,14 @@
 			return call_user_func_array(array($this->box(), 'add'), $args);
 		}
 
+		public function item($name)
+		{
+			foreach($this->boxes as &$box)
+				if($item =& $box->item($name))
+					return $item;
+			return null;
+		}
+
 		/**
 		 * @return the Form html
 		 */
