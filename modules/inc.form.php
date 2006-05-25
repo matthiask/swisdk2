@@ -97,8 +97,10 @@
 		protected $title;
 		protected $id = 'suppe';
 
-		public function __construct()
+		public function __construct($dbobj=null, $autogenerate=false)
 		{
+			if($dbobj)
+				$this->bind($dbobj, $autogenerate);
 		}
 
 		public function id() { return $this->id; }
@@ -110,6 +112,22 @@
 			if(!isset($this->boxes[$id]))
 				$this->boxes[$id] = new FormBox();
 			return $this->boxes[$id];
+		}
+
+		public function dbobj()
+		{
+			return $this->box()->dbobj();
+		}
+
+		public function bind($dbobj, $autogenerate=false)
+		{
+			$this->box()->bind($dbobj, $autogenerate);
+		}
+
+		public function add()
+		{
+			$args = func_get_args();
+			return call_user_func_array(array($this->box(), 'add'), $args);
 		}
 
 		/**
