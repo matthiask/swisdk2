@@ -215,7 +215,7 @@
 		{
 			$smarty = $this->smarty();
 
-			foreach($this->mHtmlFragments as $section => &$html)
+			foreach($this->mHtmlFragments as $name => &$html)
 				$smarty->assign($name, $html);
 
 			if($section == STREGION_NONE)
