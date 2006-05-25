@@ -96,6 +96,7 @@
 		protected $boxes = array();
 		protected $title;
 		protected $id = 'suppe';
+		protected $unique = false;
 
 		public function __construct($dbobj=null, $autogenerate=false)
 		{
@@ -109,9 +110,17 @@
 
 		public function &box($id=0)
 		{
-			if(!isset($this->boxes[$id]))
+			if(!isset($this->boxes[$id])) {
 				$this->boxes[$id] = new FormBox();
+				if($this->unique)
+					$this->boxes[$id]->enable_unique();
+			}
 			return $this->boxes[$id];
+		}
+
+		public function enable_unique()
+		{
+			$this->unique = true;
 		}
 
 		public function dbobj()
@@ -203,6 +212,7 @@
 		protected $dbobj;
 		protected $form;
 		protected $form_id;
+		protected $unique = false;
 
 		/**
 		 * @param $dbobj: the DBObject bound to the Form
@@ -257,6 +267,11 @@
 				return '__swisdk_form_'.$tok->table().'_'.($id?$id:0);
 			}
 			return '__swisdk_form_'.$tok.'_'.($id?$id:0);
+		}
+
+		public function enable_unique()
+		{
+			$this->unique = true;
 		}
 
 		/**
@@ -402,6 +417,8 @@
 		protected function add_initialized_obj($obj)
 		{
 			$obj->set_form_box($this);
+			if($this->unique)
+				$obj->enable_unique();
 			$obj->init_value($this->dbobj());
 			if($obj->name())
 				$this->items[$obj->name()] =& $obj;
@@ -425,6 +442,8 @@
 			$obj->set_title($title);
 			$obj->set_name($field);
 			$obj->set_form_box($this);
+			if($this->unique)
+				$obj->enable_unique();
 			$obj->init_value($dbobj);
 
 			$this->items[$field] = $obj;
@@ -446,6 +465,8 @@
 						}
 						$f->set_items($items);
 						$f->set_form_box($this);
+						if($this->unique)
+							$f->enable_unique();
 						break;
 					case DB_REL_MANYTOMANY:
 						$f = $this->add_obj($title, new Multiselect(), $relations[$relspec]['field']);
@@ -456,6 +477,8 @@
 						}
 						$f->set_items($items);
 						$f->set_form_box($this);
+						if($this->unique)
+							$f->enable_unique();
 						break;
 					case DB_REL_MANY:
 						SwisdkError::handle(new BasicSwisdkError(
@@ -663,7 +686,7 @@
 		 */
 		public function value()			{ return $this->value; }
 		public function set_value($value)	{ $this->value = $value; } 
-		public function iname()			{ return $this->box_name.$this->name; }
+		public function iname()			{ return ($this->unique?$this->box_name:'').$this->name; }
 		public function name()			{ return $this->name; }
 		public function set_name($name)		{ $this->name = $name; } 
 		public function title()			{ return $this->_stripit($this->title); }
@@ -681,6 +704,13 @@
 		public function set_form_box(&$box)
 		{
 			$this->box_name = $box->id().'_';
+		}
+
+		protected $unique = false;
+
+		public function enable_unique()
+		{
+			$this->unique = true;
 		}
 
 		/**
@@ -1285,7 +1315,7 @@ EOD;
 
 		protected function _title_html($obj)
 		{
-			return '<label for="'.$obj->name().'">'.$obj->title().'</label>';
+			return '<label for="'.$obj->iname().'">'.$obj->title().'</label>';
 		}
 
 		protected function _message_html($obj)
