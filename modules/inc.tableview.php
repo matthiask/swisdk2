@@ -6,6 +6,10 @@
 	*/
 
 	class TableView {
+		
+		protected $columns = array();
+		protected $data = array();
+		
 		public function append_column(TableViewColumn $column)
 		{
 			$this->columns[] = $column;
@@ -61,9 +65,6 @@
 		{
 			return '';
 		}
-
-		protected $columns = array();
-		protected $data = array();
 	}
 
 	abstract class TableViewColumn {
