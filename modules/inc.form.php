@@ -91,6 +91,76 @@
 	require_once MODULE_ROOT . 'inc.data.php';
 	require_once MODULE_ROOT . 'inc.layout.php';
 
+	class Form implements Iterator {
+
+		protected $boxes = array();
+		protected $title;
+		protected $id = 'suppe';
+
+		public function __construct()
+		{
+		}
+
+		public function id() { return $this->id; }
+		public function title() { return $this->title; }
+		public function set_title($title=null) { $this->title = $title; }
+
+		public function &box($id=0)
+		{
+			if(!isset($this->boxes[$id]))
+				$this->boxes[$id] = new FormBox();
+			return $this->boxes[$id];
+		}
+
+		/**
+		 * @return the Form html
+		 */
+		public function html($arg = 'FormRenderer')
+		{
+			$renderer = null;
+			if($arg instanceof FormRenderer)
+				$renderer = $arg;
+			else if(class_exists($arg))
+				$renderer = new $arg;
+			else
+				SwisdkError::handle(new FatalError(
+					'Invalid renderer specification: '.$arg));
+			$this->accept($renderer);
+
+			return $renderer->html();
+		}
+
+		public function accept($renderer)
+		{
+			$renderer->visit($this);
+			foreach($this->boxes as &$box)
+				$box->accept($renderer);
+		}
+
+		/**
+		 * validate the form
+		 */
+		public function is_valid()
+		{
+			$valid = true;
+			// loop over all FormBox es
+			foreach($this->boxes as &$box)
+				if(!$box->is_valid())
+					$valid = false;
+			return $valid;
+		}
+
+		/**
+		 * Iterator implementation (see PHP Object Iteration)
+		 */
+
+		public function rewind()	{ return reset($this->boxes); }
+		public function current()	{ return current($this->boxes); }
+		public function key()		{ return key($this->boxes); }
+		public function next()		{ return next($this->boxes); }
+		public function valid()		{ return $this->current() !== false; }
+	}
+
 	/**
 	 * The FormBox is the basic grouping block of a Form
 	 *
@@ -106,14 +176,28 @@
 		 */
 		protected $dbobj;
 		protected $form;
+		protected $form_id;
 
 		/**
 		 * @param $dbobj: the DBObject bound to the Form
 		 */
-		public function __construct($form)
+		public function __construct($dbobj=null, $autogenerate=false)
 		{
-			$this->form = $form;
-			$this->dbobj = $form->dbobj();
+			if($dbobj)
+				$this->bind($dbobj, $autogenerate);
+		}
+
+		/**
+		 * @param dbobj: a DBObject
+		 * @param autogenerate: automatically generate Form from relations
+		 * 	and field names of the DBObject
+		 */
+		public function bind($dbobj, $autogenerate=false)
+		{
+			$this->dbobj = $dbobj;
+			if($autogenerate)
+				$this->autogenerate();
+			$this->generate_form_id();
 		}
 
 		/**
@@ -126,7 +210,27 @@
 
 		public function id()
 		{
-			return $this->form->id();
+			return $this->form_id;
+		}
+
+		/**
+		 * generate an id for this form
+		 *
+		 * the id is used to track which form has been submitted if there
+		 * were multiple forms on one page. See also is_valid()
+		 */
+		public function generate_form_id()
+		{
+			$this->form_id = FormBox::to_form_id($this->dbobj());
+		}
+
+		public static function to_form_id($tok, $id=0)
+		{
+			if($tok instanceof DBObject) {
+				$id = $tok->id();
+				return '__swisdk_form_'.$tok->table().'_'.($id?$id:0);
+			}
+			return '__swisdk_form_'.$tok.'_'.($id?$id:0);
 		}
 
 		/**
@@ -141,6 +245,27 @@
 		{
 			return $this->title;
 		}
+
+		/**
+		 * add a validation message to the form
+		 */
+		protected $message;
+		public function message()		{ return $this->message; }
+		public function set_message($message)	{ $this->message = $message; }
+		public function add_message($message)
+		{
+			if($this->message)
+				$this->message .= "\n<br />".$message;
+			else
+				$this->message = $message;
+		}
+
+		public function add_rule(FormRule $rule)
+		{
+			$this->rules[] = $rule;
+		}
+
+		protected $rules = array();
 
 		/**
 		 * This function has (at least) three overloads:
@@ -164,6 +289,7 @@
 				if($args[0] instanceof FormBox) {
 					$this->items[] = $args[0];
 					$this->boxrefs[] = $args[0];
+					return $args[0];
 				} else if($args[0] instanceof FormItem) {
 					return $this->add_initialized_obj($args[0]);
 				} else {
@@ -341,6 +467,8 @@
 
 		public function accept($renderer)
 		{
+			$this->add($this->form_id, new HiddenInput())->set_value(1);
+
 			$renderer->visit($this);
 			foreach($this->items as &$item)
 				$item->accept($renderer);
@@ -351,7 +479,16 @@
 		 */
 		public function is_valid()
 		{
+			// has this form been submitted (or was it another form on the same page)
+			if(!isset($_REQUEST[$this->form_id.'_'.$this->form_id]))
+				return false;
+
 			$valid = true;
+			// loop over FormRules
+			foreach($this->rules as &$rule)
+				if(!$rule->is_valid($this))
+					$valid = false;
+			// loop over all Items
 			foreach($this->items as &$item)
 				if(!$item->is_valid())
 					$valid = false;
@@ -380,121 +517,6 @@
 		public function key()		{ return key($this->items); }
 		public function next()		{ return next($this->items); }
 		public function valid()		{ return $this->current() !== false; }
-	}
-
-	class Form extends FormBox {
-		public function __construct($dbobj = null)
-		{
-			if($dbobj) {
-				$this->bind($dbobj);
-			}
-		}
-
-		/**
-		 * @param dbobj: a DBObject
-		 * @param autogenerate: automatically generate Form from relations
-		 * 	and field names of the DBObject
-		 */
-		public function bind($dbobj, $autogenerate=false)
-		{
-			$this->dbobj = $dbobj;
-			if($autogenerate)
-				$this->autogenerate();
-			$this->generate_form_id();
-		}
-
-		public function id()
-		{
-			return $this->form_id;
-		}
-
-		/**
-		 * @return the Form html
-		 */
-		public function html($arg = 'FormRenderer')
-		{
-			$id = $this->add(new HiddenInput());
-			$id->set_name($this->form_id);
-			$id->set_value(1);
-
-			$renderer = null;
-			if($arg instanceof FormRenderer)
-				$renderer = $arg;
-			else if(class_exists($arg))
-				$renderer = new $arg;
-			else
-				SwisdkError::handle(new FatalError(
-					'Invalid renderer specification: '.$arg));
-			$this->accept($renderer);
-
-			return $renderer->html();
-		}
-
-		/**
-		 * add a validation message to the form
-		 */
-		protected $message;
-		public function message()		{ return $this->message; }
-		public function set_message($message)	{ $this->message = $message; }
-		public function add_message($message)
-		{
-			if($this->message)
-				$this->message .= "\n<br />".$message;
-			else
-				$this->message = $message;
-		}
-
-		/**
-		 * validate the form
-		 */
-		public function is_valid()
-		{
-			// has this form been submitted (or was it another form on the same page)
-			if(!isset($_REQUEST[$this->form_id]))
-				return false;
-
-			$valid = true;
-			// loop over FormRules
-			foreach($this->rules as &$rule)
-				if(!$rule->is_valid($this))
-					$valid = false;
-			// loop over each items own validation rules
-			return parent::is_valid() && $valid;
-		}
-
-		public function add_rule(FormRule $rule)
-		{
-			$this->rules[] = $rule;
-		}
-
-		/**
-		 * array of all FormRules
-		 *
-		 * Note! The FormItems do store their FormItemRules themselves
-		 */
-		protected $rules = array();
-
-		protected $form_id;
-
-		/**
-		 * generate an id for this form
-		 *
-		 * the id is used to track which form has been submitted if there
-		 * were multiple forms on one page. See also is_valid()
-		 */
-		public function generate_form_id()
-		{
-			$this->form_id = Form::to_form_id($this->dbobj());
-		}
-
-		public static function to_form_id($tok, $id=0)
-		{
-			if($tok instanceof DBObject) {
-				$id = $tok->id();
-				return '__swisdk_form_'.$tok->table().'_'.($id?$id:0);
-			}
-			return '__swisdk_form_'.$tok.'_'.($id?$id:0);
-		}
 	}
 
 	/**
@@ -1046,8 +1068,6 @@
 			$this->grid->add_html_start(
 				'<form method="post" action="'.$_SERVER['REQUEST_URI']
 				.'" name="'.$obj->id()."\">\n");
-			if($message = $obj->message())
-				$this->grid->add_html_end($message);
 			$this->grid->add_html_end('</form>');
 			if($title = $obj->title())
 				$this->_render_bar($obj, $title);
@@ -1055,6 +1075,8 @@
 
 		public function visit_FormBox($obj)
 		{
+			if($message = $obj->message())
+				$this->grid->add_html_end($message);
 			if($title = $obj->title())
 				$this->_render_bar($obj, $title);
 		}
