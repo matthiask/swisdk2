@@ -56,6 +56,10 @@
 			
 			$class = Swisdk::config_value('runtime.controller.class');
 			
+			if( !$class ) {
+				SwisdkError::handle( new FatalError( "SiteController class is empty in registry! Be sure that you register your controller!" ) );
+			}
+			
 			if( !class_exists( $class) ) {
 				SwisdkError::handle( new FatalError( "SiteController $class could not be found" ) );
 			}
