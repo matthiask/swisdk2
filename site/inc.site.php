@@ -12,6 +12,11 @@
 		public function __construct()
 		{
 		}
+
+		public function url()
+		{
+			return Swisdk::config_value('runtime.controller.url');
+		}
 	}
 	
 	

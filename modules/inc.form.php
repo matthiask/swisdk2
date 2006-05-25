@@ -105,13 +105,15 @@
 		 * holds the DBObject bound to this FormBox
 		 */
 		protected $dbobj;
+		protected $form;
 
 		/**
 		 * @param $dbobj: the DBObject bound to the Form
 		 */
-		public function __construct($dbobj)
+		public function __construct($form)
 		{
-			$this->dbobj = $dbobj;
+			$this->form = $form;
+			$this->dbobj = $form->dbobj();
 		}
 
 		/**
@@ -120,6 +122,11 @@
 		public function &dbobj()
 		{
 			return $this->dbobj;
+		}
+
+		public function id()
+		{
+			return $this->form->id();
 		}
 
 		/**
@@ -242,6 +249,7 @@
 
 		protected function add_initialized_obj($obj)
 		{
+			$obj->set_form_box($this);
 			$obj->init_value($this->dbobj());
 			if($obj->name())
 				$this->items[$obj->name()] =& $obj;
@@ -264,6 +272,7 @@
 
 			$obj->set_title($title);
 			$obj->set_name($field);
+			$obj->set_form_box($this);
 			$obj->init_value($dbobj);
 
 			$this->items[$field] = $obj;
@@ -284,6 +293,7 @@
 							$items[$o->id()] = $o->title();
 						}
 						$f->set_items($items);
+						$f->set_form_box($this);
 						break;
 					case DB_REL_MANYTOMANY:
 						$f = $this->add_obj($title, new Multiselect(), $relations[$relspec]['field']);
@@ -293,6 +303,7 @@
 							$items[$o->id()] = $o->title();
 						}
 						$f->set_items($items);
+						$f->set_form_box($this);
 						break;
 					case DB_REL_MANY:
 						SwisdkError::handle(new BasicSwisdkError(
@@ -372,8 +383,11 @@
 	}
 
 	class Form extends FormBox {
-		public function __construct()
+		public function __construct($dbobj = null)
 		{
+			if($dbobj) {
+				$this->bind($dbobj);
+			}
 		}
 
 		/**
@@ -382,14 +396,6 @@
 		 * 	and field names of the DBObject
 		 */
 		public function bind($dbobj, $autogenerate=false)
-		{
-			$this->dbobj = $dbobj;
-			if($autogenerate)
-				$this->autogenerate();
-			$this->generate_form_id();
-		}
-
-		public function bind_ref($dbobj, $autogenerate=false)
 		{
 			$this->dbobj = $dbobj;
 			if($autogenerate)
@@ -527,14 +533,14 @@
 				// DBOContainer is empty so the languages cannot be
 				// enumerated)
 				foreach($dbobj as &$obj) {
-					$box = new FormMLBox($obj);
+					$box = new FormMLBox($this);
 					$box->language = $obj->language_id;
 					$box->autogenerate($fields, $ninc_regex);
 					$box->set_title('Language: '.$obj->language_id);
 					$this->add($box);
 				}
 			} else {
-				$box = new FormMLBox($dbobj);
+				$box = new FormMLBox($this);
 				$box->language = $dbobj->language_id;
 				$box->autogenerate($fields, $ninc_regex);
 				$box->set_title('Language: '.$this->dbobj->language());
@@ -579,6 +585,11 @@
 		protected $attributes = array();
 
 		/**
+		 * TODO document this
+		 */
+		protected $box_name = null;
+
+		/**
 		 * helper for Form::add_obj()
 		 *
 		 * Examples for a DBObject of class 'Item':
@@ -603,6 +614,7 @@
 		 */
 		public function value()			{ return $this->value; }
 		public function set_value($value)	{ $this->value = $value; } 
+		public function iname()			{ return $this->box_name.$this->name; }
 		public function name()			{ return $this->name; }
 		public function set_name($name)		{ $this->name = $name; } 
 		public function title()			{ return $this->_stripit($this->title); }
@@ -615,6 +627,11 @@
 				$this->message .= "\n<br />".$message;
 			else
 				$this->message = $message;
+		}
+
+		public function set_form_box(&$box)
+		{
+			$this->box_name = $box->id().'_';
 		}
 
 		/**
@@ -660,7 +677,7 @@
 			$name = $this->name();
 			$sname = $this->_stripit($name);
 
-			if(($val = getInput($name))!==null) {
+			if(($val = getInput($this->box_name.$name))!==null) {
 				if(is_array($val))
 					$dbobj->set($sname, $val);
 				else
@@ -723,8 +740,8 @@
 			$name = $this->name();
 			$sname = $this->_stripit($name);
 
-			if(isset($_POST['__check_'.$name])) {
-				if(isset($_POST[$name]) && $_POST[$name])
+			if(isset($_POST[$this->box_name.'__check_'.$name])) {
+				if(getInput($this->box_name.$name))
 					$dbobj->set($sname, 1);
 				else
 					$dbobj->set($sname, 0);
@@ -965,6 +982,7 @@
 		}
 	}
 
+
 	/**
 	 * this specialization of Layout_Grid allows the form code to add
 	 * html fragments before the Grid table.
@@ -1068,7 +1086,7 @@
 				'<input type="checkbox" name="%s" id="%s" %s />'
 				.'<input type="hidden" name="__check_'.$name
 				.'" value="1" />',
-				$obj->type(), $name, $name,
+				$obj->type(), $this->iname(), $name,
 				($obj->value()?'checked="checked" ':' ')
 				.$obj->attribute_html()));
 		}
@@ -1078,17 +1096,18 @@
 			$name = $obj->name();
 			$this->_render($obj, sprintf(
 				'<textarea name="%s" id="%s" %s>%s</textarea>',
-				$name, $name, $obj->attribute_html(),
+				$obj->iname(), $name, $obj->attribute_html(),
 				$obj->value()));
 		}
 
 		public function visit_RichTextarea($obj)
 		{
 			$name = $obj->name();
+			$iname = $obj->iname();
 			$value = $obj->value();
 			$attributes = $obj->attribute_html();
 			$html = <<<EOD
-<textarea name="$name" id="$name" $attributes>$value</textarea>
+<textarea name="$iname" id="$name" $attributes>$value</textarea>
 <script type="text/javascript" src="/scripts/util.js"></script>
 <script type="text/javascript" src="/scripts/fckeditor/fckeditor.js"></script>
 <script type="text/javascript">
@@ -1113,7 +1132,7 @@ EOD;
 
 		public function visit_DropdownInput($obj)
 		{
-			$html = '<select name="'.$obj->name().'" id="'.$obj->name().'"'
+			$html = '<select name="'.$obj->iname().'" id="'.$obj->name().'"'
 				.$obj->attribute_html().'>';
 			$value = $obj->value();
 			$items = $obj->items();
@@ -1129,7 +1148,7 @@ EOD;
 
 		public function visit_Multiselect($obj)
 		{
-			$html = '<select name="'.$obj->name().'[]" id="'.$obj->name()
+			$html = '<select name="'.$obj->iname().'[]" id="'.$obj->name()
 				.'" multiple="multiple"'.$obj->attribute_html().'>';
 			$value = $obj->value();
 			if(!$value)
@@ -1165,6 +1184,7 @@ EOD;
 			$value = intval($obj->value());
 			if(!$value)
 				$value = time();
+			// TODO use iname
 
 			$display_value = strftime("%d. %B %Y : %H:%M", $value);
 
@@ -1229,10 +1249,9 @@ EOD;
 			$name = $obj->name();
 			return sprintf(
 				'<input type="%s" name="%s" id="%s" value="%s" %s />',
-				$obj->type(), $name, $name, $obj->value(),
+				$obj->type(), $obj->iname(), $name, $obj->value(),
 				$obj->attribute_html());
 
 		}
 	}
-
 ?>
