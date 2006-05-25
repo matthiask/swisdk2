@@ -18,8 +18,10 @@
 			define('SWISDK_ROOT', APP_ROOT . 'swisdk/');
 			define('SMARTY_ROOT', SWISDK_ROOT . 'lib/smarty/');
 			define('MODULE_ROOT', SWISDK_ROOT . 'modules/');
-			define('CONTENT_ROOT' , APP_ROOT . 'webapp/content/');
+			define('WEBAPP_ROOT', APP_ROOT.'webapp/');
 			define('LOG_ROOT', APP_ROOT.'log/');
+			define('CONTENT_ROOT' , WEBAPP_ROOT . 'content/');
+			define('CACHE_ROOT', WEBAPP_ROOT.'cache/');
 			
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
