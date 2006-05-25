@@ -625,7 +625,8 @@
 		protected $attributes = array();
 
 		/**
-		 * TODO document this
+		 * This gets prepended to the name of every FormItem so that
+		 * every FormItem's name is unique on the page.
 		 */
 		protected $box_name = null;
 
@@ -780,7 +781,7 @@
 			$name = $this->name();
 			$sname = $this->_stripit($name);
 
-			if(isset($_POST[$this->box_name.'__check_'.$name])) {
+			if(isset($_POST['__check_'.$this->box_name.$name])) {
 				if(getInput($this->box_name.$name))
 					$dbobj->set($sname, 1);
 				else
@@ -1121,33 +1122,32 @@
 
 		public function visit_CheckboxInput($obj)
 		{
-			$name = $this->name();
+			$name = $this->iname();
 			$this->_render($obj, sprintf(
 				'<input type="checkbox" name="%s" id="%s" %s />'
 				.'<input type="hidden" name="__check_'.$name
 				.'" value="1" />',
-				$obj->type(), $this->iname(), $name,
+				$obj->type(), $name, $name,
 				($obj->value()?'checked="checked" ':' ')
 				.$obj->attribute_html()));
 		}
 
 		public function visit_Textarea($obj)
 		{
-			$name = $obj->name();
+			$name = $obj->iname();
 			$this->_render($obj, sprintf(
 				'<textarea name="%s" id="%s" %s>%s</textarea>',
-				$obj->iname(), $name, $obj->attribute_html(),
+				$name, $name, $obj->attribute_html(),
 				$obj->value()));
 		}
 
 		public function visit_RichTextarea($obj)
 		{
-			$name = $obj->name();
-			$iname = $obj->iname();
+			$name = $obj->iname();
 			$value = $obj->value();
 			$attributes = $obj->attribute_html();
 			$html = <<<EOD
-<textarea name="$iname" id="$name" $attributes>$value</textarea>
+<textarea name="$name" id="$name" $attributes>$value</textarea>
 <script type="text/javascript" src="/scripts/util.js"></script>
 <script type="text/javascript" src="/scripts/fckeditor/fckeditor.js"></script>
 <script type="text/javascript">
@@ -1172,7 +1172,8 @@ EOD;
 
 		public function visit_DropdownInput($obj)
 		{
-			$html = '<select name="'.$obj->iname().'" id="'.$obj->name().'"'
+			$name = $obj->iname();
+			$html = '<select name="'.$name.'" id="'.$name.'"'
 				.$obj->attribute_html().'>';
 			$value = $obj->value();
 			$items = $obj->items();
@@ -1188,7 +1189,8 @@ EOD;
 
 		public function visit_Multiselect($obj)
 		{
-			$html = '<select name="'.$obj->iname().'[]" id="'.$obj->name()
+			$name = $obj->iname();
+			$html = '<select name="'.$iname.'[]" id="'.$name
 				.'" multiple="multiple"'.$obj->attribute_html().'>';
 			$value = $obj->value();
 			if(!$value)
@@ -1218,9 +1220,9 @@ EOD;
 EOD;
 			}
 
-			$name = $obj->name();
-			$span_name = $obj->name() . '_span';
-			$trigger_name = $obj->name() . '_trigger';
+			$name = $obj->iname();
+			$span_name = $name.'_span';
+			$trigger_name = $name.'_trigger';
 			$value = intval($obj->value());
 			if(!$value)
 				$value = time();
@@ -1286,10 +1288,10 @@ EOD;
 
 		protected function _simpleinput_html($obj)
 		{
-			$name = $obj->name();
+			$name = $obj->iname();
 			return sprintf(
 				'<input type="%s" name="%s" id="%s" value="%s" %s />',
-				$obj->type(), $obj->iname(), $name, $obj->value(),
+				$obj->type(), $name, $name, $obj->value(),
 				$obj->attribute_html());
 
 		}
