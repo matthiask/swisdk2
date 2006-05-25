@@ -139,6 +139,18 @@
 			return call_user_func_array(array($this->box(), 'add'), $args);
 		}
 
+		public function add_auto()
+		{
+			$args = func_get_args();
+			return call_user_func_array(array($this->box(), 'add_auto'), $args);
+		}
+
+		public function add_rule()
+		{
+			$args = func_get_args();
+			return call_user_func_array(array($this->box(), 'add_rule'), $args);
+		}
+
 		public function item($name)
 		{
 			foreach($this->boxes as &$box)
@@ -465,8 +477,6 @@
 						}
 						$f->set_items($items);
 						$f->set_form_box($this);
-						if($this->unique)
-							$f->enable_unique();
 						break;
 					case DB_REL_MANYTOMANY:
 						$f = $this->add_obj($title, new Multiselect(), $relations[$relspec]['field']);
@@ -477,8 +487,6 @@
 						}
 						$f->set_items($items);
 						$f->set_form_box($this);
-						if($this->unique)
-							$f->enable_unique();
 						break;
 					case DB_REL_MANY:
 						SwisdkError::handle(new BasicSwisdkError(
@@ -529,7 +537,7 @@
 		public function is_valid()
 		{
 			// has this form been submitted (or was it another form on the same page)
-			if(!isset($_REQUEST[$this->form_id.'_'.$this->form_id]))
+			if(!isset($_REQUEST[$this->form_id]) && !isset($_REQUEST[$this->form_id.'_'.$this->form_id]))
 				return false;
 
 			$valid = true;
@@ -756,7 +764,7 @@
 			$name = $this->name();
 			$sname = $this->_stripit($name);
 
-			if(($val = getInput($this->box_name.$name))!==null) {
+			if(($val = getInput($this->iname()))!==null) {
 				if(is_array($val))
 					$dbobj->set($sname, $val);
 				else
@@ -900,7 +908,7 @@
 				$this->message = $message;
 		}
 
-		public function is_valid(Form &$form)
+		public function is_valid(&$form)
 		{
 			if($this->is_valid_impl($form))
 				return true;
@@ -908,7 +916,7 @@
 			return false;
 		}
 
-		protected function is_valid_impl(Form &$form)
+		protected function is_valid_impl(&$form)
 		{
 			return false;
 		}
@@ -926,7 +934,7 @@
 			parent::__construct($message);
 		}
 
-		protected function is_valid_impl(Form &$form)
+		protected function is_valid_impl(&$form)
 		{
 			$dbobj = $form->dbobj();
 			return $dbobj->get($this->field1) == $dbobj->get($this->field2);
@@ -1133,7 +1141,7 @@
 		public function visit_FormBox($obj)
 		{
 			if($message = $obj->message())
-				$this->grid->add_html_end($message);
+				$this->grid->add_html_end('<span style="color:red">'.$message.'</span>');
 			if($title = $obj->title())
 				$this->_render_bar($obj, '<strong>'.$title.'</strong>');
 		}
