@@ -138,7 +138,7 @@
 		{
 			$dbo = DBObject::find($this->dbo_class, $this->args[0]);
 			if(!$dbo)
-				die('oops');
+				SwisdkError::handle( new FatalError("AdminComponent_edit::run() - Can't find the data. Class is: {$this->dbo_class} Argument is: {$this->args[0]}" ) );
 
 			$form = new Form($dbo);
 			$this->form_builder()->build($form);
@@ -165,7 +165,7 @@
 		{
 			$dbo = DBObject::find($this->dbo_class, $this->args[0]);
 			if(!$dbo)
-				die('help ');
+				SwisdkError::handle( new FatalError("AdminComponent_delete::run() - Can't find the data. Class is: {$this->dbo_class} Argument is: {$this->args[0]}" ) );
 
 			$dbo->delete();
 			$this->goto('_index');
