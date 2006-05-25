@@ -151,13 +151,24 @@
 	}
 
 	class AdminComponent_list extends AdminComponent {
+		
+		protected $tableView = null;
+		
 		public function run()
 		{
-			$tv = new DBTableView($this->dbo_class, 'DBTableViewForm');
-			$tv->append_column(new CmdsTableViewColumn($this->module_url,
-				$tv->dbobj()->dbobj()->primary()));
-			$this->html = $tv->html();
+			$this->tableView = new DBTableView($this->dbo_class, 'DBTableViewForm');
+			$this->complete_columns();
+			$this->html = $this->tableView->html();
 		}
+		
+		
+		public function complete_columns() 
+		{
+			$this->tableView->append_column(new CmdsTableViewColumn($this->module_url,
+				$this->tableView->dbobj()->dbobj()->primary()));
+		}
+		
+		
 	}
 
 	class AdminComponent_delete extends AdminComponent {
