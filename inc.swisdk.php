@@ -87,9 +87,17 @@
 		{
 			if(file_exists(APP_ROOT.'webapp/config.ini')) {
 				$cfg = parse_ini_file(APP_ROOT.'webapp/config.ini', true);
-				foreach($cfg as $section => $array)
+				foreach($cfg as $section => $array) {
+					if(($pos=strpos($section, '.'))!==false) {
+						$name = 'runtime.parser.'.substr($section, 0, $pos);
+						if(!is_array(Swisdk::$config[$name]))
+							Swisdk::$config[$name] = array();
+						array_unshift(Swisdk::$config[$name],
+							substr($section, $pos+1));
+					}
 					foreach($array as $key => $value)
 						Swisdk::$config[$section.'.'.$key] = $value;
+				}
 			} else {
 				SwisdkError::handle(new FatalError('No configuration file'));
 			}
