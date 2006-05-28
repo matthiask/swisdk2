@@ -153,23 +153,9 @@
 
 		public function html()
 		{
-			$html = <<<EOD
-<style type="text/css">
-body, td, th { font-family: sans-serif; font-size: small; } 
-table { border-spacing: 0; border-collapse: collapse; } 
-td, th { border: 1px solid #000; } 
-td { padding: 2px; } 
-thead, tfoot { background: #ccf; } 
-tfoot { text-align: right; } 
-tbody tr:hover { background: #eef; } 
-th { padding: 0px; } 
-th a { text-decoration: none; display: block; padding: 2px; }
-th a:hover { background: #eef; }
-</style>
-EOD;
 			$id = $this->form->id();
 			$p = $this->form->dbobj()->_prefix();
-			return $html.$this->form->html().parent::html().<<<EOD
+			return $this->form->html().parent::html().<<<EOD
 <script type="text/javascript">
 function order(col) {
 	var order = document.forms.$id.{$p}order;
