@@ -1168,12 +1168,12 @@
 
 		public function visit_CheckboxInput($obj)
 		{
-			$name = $this->iname();
+			$name = $obj->iname();
 			$this->_render($obj, sprintf(
 				'<input type="checkbox" name="%s" id="%s" %s />'
 				.'<input type="hidden" name="__check_'.$name
 				.'" value="1" />',
-				$obj->type(), $name, $name,
+				$name, $name,
 				($obj->value()?'checked="checked" ':' ')
 				.$obj->attribute_html()));
 		}
