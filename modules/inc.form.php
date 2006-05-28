@@ -513,9 +513,9 @@
 		public function autogenerate($fields=null, $ninc_regex=null)
 		{
 			if($fields===null)
-				$fields = array_keys($this->dbobj->field_list());
+				$fields = array_keys($this->dbobj()->field_list());
 			if($ninc_regex===null)
-				$ninc_regex = '/^'.$this->dbobj->_prefix().'(id|creation_dttm)$/';
+				$ninc_regex = '/^'.$this->dbobj()->_prefix().'(id|creation_dttm)$/';
 			foreach($fields as $fname) {
 				if(!preg_match($ninc_regex, $fname))
 					$this->add_auto($fname);
@@ -603,10 +603,10 @@
 	class FormML extends Form {
 		public function autogenerate($fields=null, $ninc_regex=null)
 		{
-			parent::autogenerate($fields, null);
-			$dbobj = $this->dbobj->dbobj();
+			//parent::autogenerate($fields, null);
+			$dbobj = $this->dbobj()->dbobj();
 			if($ninc_regex===null)
-				$ninc_regex = '/^'.$dbobj->_prefix().'((language_|'.$this->dbobj->_prefix().')?id|creation_dttm)$/';
+				$ninc_regex = '/^'.$dbobj->_prefix().'((language_|'.$this->dbobj()->_prefix().')?id|creation_dttm)$/';
 			if($dbobj instanceof DBOContainer) {
 				// FIXME this does not work for a new DBObjectML (the
 				// DBOContainer is empty so the languages cannot be
