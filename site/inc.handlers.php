@@ -82,7 +82,7 @@
 	class XHTMLSiteHandler extends SwisdkSiteHandler {
 		public function handle()
 		{
-			echo file_get_contents($file);
+			echo file_get_contents( Swisdk::config_value( 'runtime.includefile' ) );
 		}
 	}
 
