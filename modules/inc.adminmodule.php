@@ -24,7 +24,7 @@
 			$args = Swisdk::config_value('runtime.arguments');
 			$cmp = null;
 
-			if(isset($args[0])) {
+			if(isset($args[0]) && $args[0]) {
 				$cmp_class = 'AdminComponent_'.$this->dbo_class.$args[0];
 				if(class_exists($cmp_class))
 					$cmp = new $cmp_class;
