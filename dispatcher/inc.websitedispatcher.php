@@ -1,6 +1,7 @@
 <?php
 	/**
-	*	Copyright (c) 2006, Moritz Zumbühl <mail@momoetomo.ch>
+	*	Copyright (c) 2006, Moritz Zumbühl <mail@momoetomo.ch>,
+	*		Matthias Kestenholz <mk@spinlock.ch>
 	*	Distributed under the GNU General Public License.
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
@@ -9,19 +10,21 @@
 		public function collect_informations()
 		{
 			$input = $this->input();
-			$websites = explode( "," , Swisdk::config_value("runtime.websites") );	
-			$website = "default";
-			if( count( $websites ) ) {
-				foreach( $websites as $webs )
-				{
-					if( strpos ( $input , "/$webs" , 0 ) === 0 ) {
-						$website = $webs;
-						break;
-					}
+			$websites = Swisdk::config_value('runtime.parser.website');
+			$website = 'default';
+			foreach($websites as $w) {
+				$regex = str_replace('/', '\/',
+					Swisdk::config_value('website.'.$w.'.match'));
+				if(!$regex)
+					$regex = '\/'.$w;
+				if(preg_match('/^'.$regex.'/', $input)) {
+					$website = $w;
+					break;
 				}
-			} 			
-			
+			}
+
 			Swisdk::set_config_value("runtime.website", $website );
 		}
 	}
+
 ?>

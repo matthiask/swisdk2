@@ -62,11 +62,6 @@
 
 	class SmartyMaster {
 		/**
-		 * The SmartyMaster's Website :-)
-		 */
-		private $mWebsite;
-
-		/**
 		 * array holding the template file paths
 		 */
 		private $mTemplates;
@@ -112,12 +107,12 @@
 		 */
 		private function __construct()
 		{
-			$this->mWebsite = Swisdk::config_value('runtime.website');
+			$w = 'website.'.Swisdk::config_value('runtime.website').'.';
 			$this->mTemplates = array(
-				'full' => Swisdk::config_value($this->mWebsite.'.fullTemplate'),
-				'header' => Swisdk::config_value($this->mWebsite.'.header'),
-				'footer' => Swisdk::config_value($this->mWebsite.'.footer'));
-			$this->mTitle = Swisdk::config_value($this->mWebsite.'.title');
+				'fullTemplate' => Swisdk::config_value($w.'fullTemplate'),
+				'header' => Swisdk::config_value($w.'header'),
+				'footer' => Swisdk::config_value($w.'footer'));
+			$this->mTitle = Swisdk::config_value($w.'title');
 		}
 
 		/**
@@ -140,7 +135,7 @@
 		public function display($template = null, $generate = STREGION_ALL)
 		{
 			if($template===null)
-				$template = $this->mTemplates['full'];
+				$template = $this->mTemplates['fullTemplate'];
 
 			$smarty = $this->smarty();
 			if($smarty->template_exists($template)) {
