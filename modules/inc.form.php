@@ -1111,7 +1111,7 @@ EOD;
 		public function visit_Multiselect($obj)
 		{
 			$name = $obj->iname();
-			$html = '<select name="'.$iname.'[]" id="'.$name
+			$html = '<select name="'.$name.'[]" id="'.$name
 				.'" multiple="multiple"'.$obj->attribute_html().'>';
 			$value = $obj->value();
 			if(!$value)
