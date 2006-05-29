@@ -22,7 +22,7 @@
 					case DB_REL_SINGLE:
 						$this->create_rel_single($fname, $title, $relations[$fname]['class']);
 						break;
-					case DB_REL_MANY:
+					case DB_REL_MANYTOMANY:
 						$this->create_rel_many($fname, $title, $relations[$fname]['class']);
 						break;
 				}
@@ -68,6 +68,12 @@
 			foreach($fields as $fname)
 				if(!preg_match($ninc_regex, $fname))
 					$this->create_field($fname);
+
+			$relations = $dbobj->relations();
+			foreach($relations as $key => &$data) {
+				if($data['type']==DB_REL_MANYTOMANY)
+					$this->create_field($key);
+			}
 
 			// FIXME do not autogenerate fields which were
 			// created inside form_hook
