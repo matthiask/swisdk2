@@ -140,6 +140,7 @@
 			else
 				$form = new Form(DBObject::create($this->dbo_class));
 			$this->form_builder()->build($form);
+			$form->set_title('New '.$this->dbo_class);
 			if($form->is_valid()) {
 				$form->dbobj()->store();
 				$this->goto('_index');
@@ -167,6 +168,7 @@
 			else
 				$form = new Form($dbo);
 			$this->form_builder()->build($form);
+			$form->set_title('Edit '.$this->dbo_class);
 			if($form->is_valid()) {
 				$dbo->store();
 				$this->goto('_index');
