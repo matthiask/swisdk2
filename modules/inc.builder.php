@@ -14,6 +14,8 @@
 		public function create_field($field, $title = null)
 		{
 			$dbobj = $this->dbobj();
+			if($title === null)
+				$title = $this->pretty_title($field, $dbobj);
 			$fields = $dbobj->field_list();
 			$relations = $dbobj->relations();
 
@@ -42,6 +44,13 @@
 					$this->create_text($fname, $title);
 				}
 			}
+		}
+
+		public function pretty_title($field, &$dbobj)
+		{
+			return ucwords(str_replace('_', ' ',
+				preg_replace('/^('.$dbobj->_prefix()
+					.')?(.*?)(_id|_dttm)?$/', '\2', $field)));
 		}
 
 		abstract public function dbobj();
@@ -180,16 +189,85 @@
 
 	class TableViewBuilder extends BuilderBase {
 		protected $tv;
-		protected $form_class = 'DBTableViewForm';
+		protected $dbobj;
 
-		public function tableview(&$tableview)
+		public function build(&$tableview)
 		{
 			$this->tv = $tableview;
+			$this->dbobj = $tableview->dbobj()->dbobj();
+
+			if($tableview->dbobj()->dbobj() instanceof DBObjectML)
+				return $this->build_ml();
+			else
+				return $this->build_simple();
+		}
+
+		public function build_simple($finalize = true)
+		{
+			$dbobj = $this->dbobj();
+			$fields = array_keys($dbobj->field_list());
+			$ninc_regex = '/^'.$dbobj->_prefix()
+				.'(creation_dttm|password)$/';
+			foreach($fields as $fname)
+				if(!preg_match($ninc_regex, $fname))
+					$this->create_field($fname, null);
+
+			$relations = $dbobj->relations();
+			foreach($relations as $key => &$data) {
+				if($data['type']==DB_REL_MANYTOMANY)
+					$this->create_field($key, null);
+			}
+
+			// FIXME do not autogenerate fields which were
+			// created inside form_hook
+			$this->tableview_hook($form);
+			if($finalize)
+				$this->tv->append_column(new CmdsTableViewColumn(
+					Swisdk::config_value('runtime.controller.url'),
+					$this->tv->dbobj()->dbobj()->primary()));
+		}
+
+		public function build_ml()
+		{
+			$this->build_simple(false);
+
+			$primary = $this->dbobj->primary();
+			$this->dbobj = $this->dbobj->dbobj();
+			$fields = array_keys($this->dbobj->field_list());
+			$ninc_regex = '/^'.$this->dbobj->_prefix()
+				.'(id|creation_dttm|password|language_id|'.$primary.')$/';
+			foreach($fields as $fname)
+				if(!preg_match($ninc_regex, $fname))
+					$this->create_field($fname);
+
+			$relations = $this->dbobj->relations();
+			foreach($relations as $key => &$data) {
+				if($data['type']==DB_REL_MANYTOMANY)
+					$this->create_field($key, 'blah');
+			}
+
+			// FIXME do not autogenerate fields which were
+			// created inside form_hook
+			$this->tableview_hook_ml($form);
+			$this->tv->append_column(new CmdsTableViewColumn(
+				Swisdk::config_value('runtime.controller.url'),
+				$primary));
+		}
+
+		public function tableview_hook(&$form)
+		{
+			// customize that
+			//$this->form->add('item_type_id', new TextInput());
+		}
+
+		public function tableview_hook_ml(&$form)
+		{
+			// customize that
 		}
 
 		public function dbobj()
 		{
-			return $this->tv->dbobj()->dbobj();
+			return $this->dbobj;
 		}
 
 		public function create_rel_single($fname, $title, $class)
@@ -213,7 +291,7 @@
 		public function create_textarea($fname, $title)
 		{
 			$this->tv->append_column(
-				new TextTableViewColumn($title, $fname));
+				new TextTableViewColumn($title, $fname, 40));
 		}
 
 		public function create_bool($fname, $title)
@@ -225,7 +303,7 @@
 		public function create_text($fname, $title)
 		{
 			$this->tv->append_column(
-				new TextTableViewColumn($title, $fname));
+				new TextTableViewColumn($title, $fname, 40));
 		}
 	}
 

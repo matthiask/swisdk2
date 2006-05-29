@@ -180,31 +180,20 @@
 	}
 
 	class AdminComponent_list extends AdminComponent {
-		
-		protected $tableView = null;
-		
 		public function run()
 		{
+			$tableview = null;
 			if($this->multilanguage)
-				$this->tableview = new DBTableView(
+				$tableview = new DBTableView(
 					DBObjectML::create($this->dbo_class),
 					'DBTableViewForm');
 			else
-				$this->tableView = new DBTableView(
+				$tableview = new DBTableView(
 					$this->dbo_class, 'DBTableViewForm');
-			$this->complete_columns();
-			$this->html = $this->tableView->html();
+			$tableview->init();
+			$this->tableview_builder()->build($tableview);
+			$this->html = $tableview->html();
 		}
-		
-		
-		public function complete_columns() 
-		{
-			$this->tableView->append_column(new CmdsTableViewColumn(
-				$this->module_url,
-				$this->tableView->dbobj()->dbobj()->primary()));
-		}
-		
-		
 	}
 
 	class AdminComponent_delete extends AdminComponent {

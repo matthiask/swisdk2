@@ -50,51 +50,48 @@
 		}
 	}
 
-	class DBTableView extends TableView {
+	class DBTableView extends TableView implements ArrayAccess {
 
 		protected $obj;
 		protected $form;
 
 		protected $items_on_page = 10;
 
-		public function __construct($data_class, $form_class)
+		public function __construct($obj=null, $form=null)
 		{
-			if($data_class instanceof DBOContainer)
-				$this->obj = $data_class;
+			if($obj)
+				$this->bind($obj);
+			if($form)
+				$this->set_form($form);
+		}
+
+		public function bind($obj)
+		{
+			if($obj instanceof DBOContainer)
+				$this->obj = $obj;
 			else
-				$this->obj = DBOContainer::create($data_class);
+				// class name or DBObject instance!
+				$this->obj = DBOContainer::create($obj);
+		}
+
+		public function set_form($form = 'DBTableViewForm')
+		{
+			if($form instanceof Form)
+				$this->form = $form;
+			else if(class_exists($form))
+				$this->form = new $form();
+		}
+
+		public function init()
+		{
+			if(!$this->obj)
+				SwisdkError::handle(new FatalError(
+					'Cannot use DBTableView without DBOContainer'));
+			if(!$this->form)
+				$this->form = new DBTableViewForm();
 
 			$obj = $this->obj->dbobj();
-			$fields = $obj->field_list();
-			$relations_ = $obj->relations();
 
-			$relations = array();
-			foreach($relations_ as $class => &$r) {
-				$relations[$r['field']] = $r;
-			}
-
-			foreach($fields as &$field) {
-				$fname = $field['Field'];
-				$pretty = $obj->pretty($fname);
-				if(isset($relations[$fname])&&($fname!=$obj->primary())) {
-					$this->append_column(new DBTableViewColumn(
-						$pretty, $fname,
-						$relations[$fname]['class']));
-				} else if(strpos($fname,'dttm')!==false) {
-					$this->append_column(new DateTableViewColumn(
-						$pretty, $fname));
-				} else {
-					$this->append_column(new TextTableViewColumn(
-						$pretty, $fname));
-				}
-			}
-
-			if($form_class instanceof Form)
-				$this->form = $form_class;
-			else if(class_exists($form_class))
-				$this->form = new $form_class();
-			else
-				$this->form = new DBTableViewForm();
 			$this->form->bind(DBObject::create_with_data(
 				'DBTableView'.$obj->_class(),
 				array(
@@ -103,16 +100,24 @@
 					'start' => 0,
 					'limit' => $this->items_on_page
 				)));
-			$this->form->setup();
 
+			$this->form->setup();
 			$this->form->set_clauses($this->obj);
 			$this->obj->init();
 			$this->set_data($this->obj->data());
 		}
 
-		public function dbobj()
+		public function &dbobj()
 		{
 			return $this->obj;
+		}
+
+		public function form()
+		{
+			if(!$this->form) {
+				$form = new DBTableViewForm();
+			}
+			return $this->form;
 		}
 
 		protected function render_head()
@@ -178,5 +183,20 @@ function skim(step)
 </script>
 EOD;
 		}
+
+		/**
+		 * ArrayAccess implementation (see PHP SPL)
+		 */
+		public function offsetExists($offset) { return isset($this->columns[$offset]); }
+		public function offsetGet($offset) { return $this->columns[$offset]; }
+		public function offsetSet($offset, $value)
+		{
+			if($offset===null)
+				$this->columns[] = $value;
+			else
+				$this->columns[$offset] = $value;
+		}
+		public function offsetUnset($offset) { unset($this->columns[$offset]); }
 	}
+
 ?>

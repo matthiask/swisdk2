@@ -5,14 +5,15 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
-	class TableView {
+	class TableView implements Iterator {
 		
 		protected $columns = array();
 		protected $data = array();
+		protected $html;
 		
 		public function append_column(TableViewColumn $column)
 		{
-			$this->columns[] = $column;
+			$this->columns[$column->name()] = $column;
 		}
 
 		public function html()
@@ -65,6 +66,15 @@
 		{
 			return '';
 		}
+
+		/**
+		 * Iterator implementation (see PHP Object Iteration)
+		 */
+		public function rewind() { reset($this->columns); }
+		public function current() { return current($this->columns); }
+		public function key() { return key($this->columns); }
+		public function next() { return next($this->columns); }
+		public function valid() { return $this->current() !== false; }
 	}
 
 	abstract class TableViewColumn {
@@ -77,15 +87,10 @@
 
 		abstract public function html(&$data);
 
-		public function title()
-		{
-			return $this->title;
-		}
-
-		public function column()
-		{
-			return $this->column;
-		}
+		public function title()		{ return $this->title; }
+		public function column()	{ return $this->column; }
+		public function name()		{ return $this->column; }
+		public function set_title($t)	{ $this->title = $t; }
 
 		protected $title;
 		protected $column;
@@ -173,6 +178,11 @@ EOD;
 		public function title()
 		{
 			return null;
+		}
+
+		public function name()
+		{
+			return '__cmd_'.$this->column;
 		}
 	}
 
