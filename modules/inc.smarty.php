@@ -208,6 +208,8 @@
 		 */
 		private function generate_sections($region = STREGION_ALL)
 		{
+			$this->run_components();
+
 			$smarty = $this->smarty();
 
 			foreach($this->mHtmlFragments as $name => &$html)
@@ -246,6 +248,34 @@
 			}
 
 			return true;
+		}
+
+		public function run_components()
+		{
+			$key = 'website.'.Swisdk::config_value('runtime.website').'.components';
+			$cfg = Swisdk::config_value($key);
+			if($cfg) {
+				$components = explode(',', $cfg);
+				foreach($components as $c) {
+					$tokens = split('([\s]+)?=>([\s]+)?', trim($c));
+					if(count($tokens)==2) {
+						$this->add_html_handler($tokens[0],
+							$this->get_and_run_component($tokens[1]));
+					} else if(count($tokens)==1) {
+						$this->add_html_handler(strtolower($tokens[0]),
+							$this->get_and_run_component($tokens[0]));
+					}
+				}
+			}
+		}
+
+		private function get_and_run_component($name)
+		{
+			$class = $name.'Component';
+			require_once CONTENT_ROOT.'components/'.$class.'.inc.php';
+			$obj = new $class;
+			$obj->run();
+			return $obj;
 		}
 	}
 
