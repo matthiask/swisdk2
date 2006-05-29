@@ -49,6 +49,9 @@
 			$cmp = $this->component_dispatch();
 			$cmp->run();
 
+			Swisdk::set_config_value('runtime.navigation.url',
+				Swisdk::config_value('runtime.controller.url'));
+
 			$sm = SmartyMaster::instance();
 			$sm->add_html_handler('content', $cmp);
 			$sm->display();
