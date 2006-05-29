@@ -17,16 +17,20 @@
 			$fields = $dbobj->field_list();
 			$relations = $dbobj->relations();
 
-			if(isset($relations[$fname=$field])||isset($relations[$fname=$dbobj->name($field)])) {
+			if(isset($relations[$fname=$field])
+					||isset($relations[$fname=$dbobj->name($field)])) {
 				switch($relations[$fname]['type']) {
 					case DB_REL_SINGLE:
-						$this->create_rel_single($fname, $title, $relations[$fname]['class']);
+						$this->create_rel_single($fname, $title,
+							$relations[$fname]['class']);
 						break;
 					case DB_REL_MANYTOMANY:
-						$this->create_rel_many($fname, $title, $relations[$fname]['class']);
+						$this->create_rel_many($fname, $title,
+							$relations[$fname]['class']);
 						break;
 				}
-			} else if(isset($fields[$fname=$field])||isset($fields[$fname=$dbobj->name($field)])) {
+			} else if(isset($fields[$fname=$field])
+					||isset($fields[$fname=$dbobj->name($field)])) {
 				$finfo = $fields[$fname];
 				if(strpos($fname,'dttm')!==false) {
 					$this->create_date($fname, $title);

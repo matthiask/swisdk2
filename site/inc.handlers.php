@@ -1,8 +1,7 @@
 <?php
 	/*
-	*	Copyright (c) 2006, 
-	*	Matthias Kestenholz <mk@spinlock.ch> 
-	*	Moritz Zumbühl <mail@momoetomo.ch>
+	*	Copyright (c) 2006, Matthias Kestenholz <mk@spinlock.ch>,
+	*		Moritz Zumbühl <mail@momoetomo.ch>
 	*	Distributed under the GNU General Public License.
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
@@ -36,7 +35,8 @@
 			if( $classname != null ) {
 				return Swisdk::load_module( $classname , "sitehandlers/" );
 			} else {
-				return new FatalError( "Could not find the config-entry " . "runtime." . $type );
+				return new FatalError( "Could not find the config-entry runtime."
+					. $type );
 			}
 		}
 		
@@ -57,11 +57,14 @@
 			$class = Swisdk::config_value('runtime.controller.class');
 			
 			if( !$class ) {
-				SwisdkError::handle( new FatalError( "SiteController class is empty in registry! Be sure that you register your controller!" ) );
+				SwisdkError::handle( new FatalError( "SiteController class is"
+					." empty in registry! Be sure that you register"
+					." your controller!" ) );
 			}
 			
 			if( !class_exists( $class) ) {
-				SwisdkError::handle( new FatalError( "SiteController $class could not be found" ) );
+				SwisdkError::handle( new FatalError( "SiteController $class"
+					." could not be found" ) );
 			}
 			
 			$ctrl = new $class;
@@ -70,7 +73,8 @@
 				$ctrl->run();
 				return;
 			} else {
-				SwisdkError::handle( new FatalError( "Controller is not subclass of Site!" ) );
+				SwisdkError::handle( new FatalError( "Controller is not subclass"
+					." of Site!" ) );
 			}
 		}
 	}

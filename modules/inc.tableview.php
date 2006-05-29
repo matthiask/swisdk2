@@ -117,7 +117,8 @@
 		{
 			if($this->vars === null) {
 				$matches = array();
-				preg_match_all('/\{([A-Za-z_0-9]+)}/', $this->column, $matches, PREG_PATTERN_ORDER);
+				preg_match_all('/\{([A-Za-z_0-9]+)}/', $this->column,
+					$matches, PREG_PATTERN_ORDER);
 				if(isset($matches[1]))
 					$this->vars = $matches[1];
 				foreach($this->vars as $v)

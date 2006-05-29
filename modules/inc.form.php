@@ -304,11 +304,13 @@
 
 			$obj = null;
 
-			if(isset($relations[$fname=$field])||isset($relations[$fname=$dbobj->name($field)])) {
+			if(isset($relations[$fname=$field])
+					||isset($relations[$fname=$dbobj->name($field)])) {
 				switch($relations[$fname]['type']) {
 					case DB_REL_SINGLE:
 						$obj = new DropdownInput();
-						$dc = DBOContainer::find($relations[$fname]['class']);
+						$dc = DBOContainer::find(
+							$relations[$fname]['class']);
 						$choices = array();
 						foreach($dc as $o) {
 							$items[$o->id()] = $o->title();
@@ -317,7 +319,8 @@
 						break;
 					case DB_REL_MANYTOMANY:
 						$obj = new Multiselect();
-						$dc = DBOContainer::find($relations[$fname]['class']);
+						$dc = DBOContainer::find(
+							$relations[$fname]['class']);
 						$items = array();
 						foreach($dc as $o) {
 							$items[$o->id()] = $o->title();
@@ -325,7 +328,8 @@
 						$obj->set_items($items);
 						break;
 				}
-			} else if(isset($fields[$fname=$field])||isset($fields[$fname=$dbobj->name($field)])) {
+			} else if(isset($fields[$fname=$field])
+					||isset($fields[$fname=$dbobj->name($field)])) {
 				$finfo = $fields[$fname];
 				if(strpos($fname,'dttm')!==false) {
 					$obj = new DateInput();
@@ -347,8 +351,8 @@
 		protected function pretty_title($fname)
 		{
 			return ucwords(str_replace('_', ' ',
-				preg_replace('/^('.$this->dbobj()->_prefix().')?(.*?)(_id|_dttm)?$/',
-					'\2', $fname)));
+				preg_replace('/^('.$this->dbobj()->_prefix()
+					.')?(.*?)(_id|_dttm)?$/', '\2', $fname)));
 		}
 
 		protected function add_initialized_obj($obj)
@@ -394,8 +398,10 @@
 			if(isset($relations[$relspec])) {
 				switch($relations[$relspec]['type']) {
 					case DB_REL_SINGLE:
-						$f = $this->add_obj($title, new DropdownInput(), $relations[$relspec]['field']);
-						$dc = DBOContainer::find($relations[$relspec]['class']);
+						$f = $this->add_obj($title, new DropdownInput(),
+							$relations[$relspec]['field']);
+						$dc = DBOContainer::find(
+							$relations[$relspec]['class']);
 						$choices = array();
 						foreach($dc as $o) {
 							$items[$o->id()] = $o->title();
@@ -404,8 +410,10 @@
 						$f->set_form_box($this);
 						break;
 					case DB_REL_MANYTOMANY:
-						$f = $this->add_obj($title, new Multiselect(), $relations[$relspec]['field']);
-						$dc = DBOContainer::find($relations[$relspec]['class']);
+						$f = $this->add_obj($title, new Multiselect(),
+							$relations[$relspec]['field']);
+						$dc = DBOContainer::find(
+							$relations[$relspec]['class']);
 						$items = array();
 						foreach($dc as $o) {
 							$items[$o->id()] = $o->title();
@@ -415,7 +423,8 @@
 						break;
 					case DB_REL_MANY:
 						SwisdkError::handle(new BasicSwisdkError(
-							'Cannot edit relation of type DB_REL_MANY! relspec: '.$relspec));
+							'Cannot edit relation of type DB_REL_MANY!'
+							.' relspec: '.$relspec));
 					default:
 						SwisdkError::handle(new BasicSwisdkError(
 							'Oops. Unknown relation type '.$relspec));
@@ -438,7 +447,8 @@
 		public function is_valid()
 		{
 			// has this form been submitted (or was it another form on the same page)
-			if(!isset($_REQUEST[$this->form_id]) && !isset($_REQUEST[$this->form_id.'_'.$this->form_id]))
+			if(!isset($_REQUEST[$this->form_id])
+					&& !isset($_REQUEST[$this->form_id.'_'.$this->form_id]))
 				return false;
 
 			$valid = true;
@@ -553,7 +563,6 @@
 		 */
 		public function value()			{ return $this->value; }
 		public function set_value($value)	{ $this->value = $value; } 
-		public function iname()			{ return ($this->unique?$this->box_name:'').$this->name; }
 		public function name()			{ return $this->name; }
 		public function set_name($name)		{ $this->name = $name; } 
 		public function title()			{ return $this->_stripit($this->title); }
@@ -566,6 +575,10 @@
 				$this->message .= "\n<br />".$message;
 			else
 				$this->message = $message;
+		}
+
+		public function iname() {
+			return ($this->unique?$this->box_name:'').$this->name;
 		}
 
 		public function set_form_box(&$box)
@@ -736,7 +749,8 @@
 	}
 
 	/**
-	 * base class for all FormItems which want to occupy a whole line (no title, no message)
+	 * base class for all FormItems which want to occupy a whole
+	 * line (no title, no message)
 	 */
 	class FormBar extends FormItem {
 	}
@@ -877,14 +891,14 @@
 		public function __construct($message = null)
 		{
 			parent::__construct(
-				'/^((\"[^\"\f\n\r\t\v\b]+\")|([\w\!\#\$\%\&\'\*\+\-\~\/\^\`\|\{\}]+(\.'
-				. '[\w\!\#\$\%\&\'\*\+\-\~\/\^\`\|\{\}]+)*))@((\[(((25[0-5])|(2[0-4][0-9])'
-				. '|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.'
-				. '((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])'
-				. '|([0-1]?[0-9]?[0-9])))\])|(((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))'
-				. '\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])'
-				. '|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9])))|'
-				. '((([A-Za-z0-9\-])+\.)+[A-Za-z\-]+))$/',
+'/^((\"[^\"\f\n\r\t\v\b]+\")|([\w\!\#\$\%\&\'\*\+\-\~\/\^\`\|\{\}]+(\.'
+. '[\w\!\#\$\%\&\'\*\+\-\~\/\^\`\|\{\}]+)*))@((\[(((25[0-5])|(2[0-4][0-9])'
+. '|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.'
+. '((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])'
+. '|([0-1]?[0-9]?[0-9])))\])|(((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))'
+. '\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])'
+. '|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9])))|'
+. '((([A-Za-z0-9\-])+\.)+[A-Za-z\-]+))$/',
 				$message);
 		}
 	}
@@ -994,13 +1008,15 @@
 				.'" name="'.$obj->id()."\">\n");
 			$this->grid->add_html_end('</form>');
 			if($title = $obj->title())
-				$this->_render_bar($obj, '<big><strong>'.$title.'</strong></big>');
+				$this->_render_bar($obj,
+					'<big><strong>'.$title.'</strong></big>');
 		}
 
 		public function visit_FormBox($obj)
 		{
 			if($message = $obj->message())
-				$this->grid->add_html_end('<span style="color:red">'.$message.'</span>');
+				$this->grid->add_html_end('<span style="color:red">'
+					.$message.'</span>');
 			if($title = $obj->title())
 				$this->_render_bar($obj, '<strong>'.$title.'</strong>');
 		}
@@ -1118,7 +1134,8 @@ EOD;
 			if(!$js_sent) {
 				$js_sent = true;
 				$html.=<<<EOD
-<link rel="stylesheet" type="text/css" media="all" href="/scripts/calendar/calendar-win2k-1.css" title="win2k-cold-1" />
+<link rel="stylesheet" type="text/css" media="all"
+	href="/scripts/calendar/calendar-win2k-1.css" title="win2k-cold-1" />
 <script type="text/javascript" src="/scripts/calendar/calendar.js"></script>
 <script type="text/javascript" src="/scripts/calendar/calendar-en.js"></script>
 <script type="text/javascript" src="/scripts/calendar/calendar-setup.js"></script>
@@ -1137,7 +1154,8 @@ EOD;
 
 			$html.=<<<EOD
 <input type="hidden" name="$name" id="$name" value="$value" />
-<span id="$span_name">$display_value</span> <img src="/scripts/calendar/img.gif" id="$trigger_name"
+<span id="$span_name">$display_value</span> <img src="/scripts/calendar/img.gif"
+	id="$trigger_name"
 	style="cursor: pointer; border: 1px solid red;" title="Date selector"
 	onmouseover="this.style.background='red';" onmouseout="this.style.background=''" />
 <script type="text/javascript">
@@ -1198,7 +1216,7 @@ EOD;
 				'<input type="%s" name="%s" id="%s" value="%s" %s />',
 				$obj->type(), $name, $name, $obj->value(),
 				$obj->attribute_html());
-
 		}
 	}
+
 ?>

@@ -29,7 +29,8 @@
 				$cmp_class = 'AdminComponent_'.$this->dbo_class.$args[0];
 				if(class_exists($cmp_class))
 					$cmp = new $cmp_class;
-				else if(class_exists($cmp_class = 'AdminComponent'.$args[0])) 
+				else if(class_exists($cmp_class = 'AdminComponent'
+						.$args[0])) 
 					$cmp = new $cmp_class;
 				array_shift($args);
 			}
@@ -160,7 +161,8 @@
 			if(!$dbo)
 				SwisdkError::handle(new FatalError(
 					"AdminComponent_edit::run() - Can't find the data."
-					." Class is: {$this->dbo_class} Argument is: {$this->args[0]}"));
+					." Class is: {$this->dbo_class} Argument is: "
+					."{$this->args[0]}"));
 
 			$form = null;
 			if($this->multilanguage)
@@ -184,10 +186,12 @@
 		public function run()
 		{
 			if($this->multilanguage)
-				$this->tableview = new DBTableView(DBObjectML::create($this->dbo_class),
+				$this->tableview = new DBTableView(
+					DBObjectML::create($this->dbo_class),
 					'DBTableViewForm');
 			else
-				$this->tableView = new DBTableView($this->dbo_class, 'DBTableViewForm');
+				$this->tableView = new DBTableView(
+					$this->dbo_class, 'DBTableViewForm');
 			$this->complete_columns();
 			$this->html = $this->tableView->html();
 		}
@@ -195,7 +199,8 @@
 		
 		public function complete_columns() 
 		{
-			$this->tableView->append_column(new CmdsTableViewColumn($this->module_url,
+			$this->tableView->append_column(new CmdsTableViewColumn(
+				$this->module_url,
 				$this->tableView->dbobj()->dbobj()->primary()));
 		}
 		
@@ -211,7 +216,10 @@
 			else
 				$dbo = DBObject::find($this->dbo_class, $this->args[0]);
 			if(!$dbo)
-				SwisdkError::handle( new FatalError("AdminComponent_delete::run() - Can't find the data. Class is: {$this->dbo_class} Argument is: {$this->args[0]}" ) );
+				SwisdkError::handle(new FatalError(
+					"AdminComponent_delete::run() - Can't find the data."
+					." Class is: {$this->dbo_class} Argument is: "
+					."{$this->args[0]}"));
 
 			$dbo->delete();
 			$this->goto('_index');

@@ -27,11 +27,13 @@
 				return $eObj;
 			} else {
 				SwisdkError::handle(new FatalError(
-					'SwisdkError::handle: argument has not type BasicSwisdkError'));
+					'SwisdkError::handle: argument has not type'
+					.' BasicSwisdkError'));
 			}
 		}
 		
-		public static function setup($handler = array(__CLASS__, 'standard_output_handler'))
+		public static function setup($handler = array(__CLASS__,
+			'standard_output_handler'))
 		{
 			SwisdkError::$handler_callback = $handler;
 			set_error_handler( 'swisdk_php_error_handler' );
@@ -196,7 +198,8 @@
 		public function to_string($debug_mode = false)
 		{
 			if($debug_mode)
-				return __CLASS__.": {$this->args[0]} ({$this->args[1]}) in {$this->args[2]} at line {$this->args[3]}";
+				return __CLASS__.": {$this->args[0]} ({$this->args[1]}) in"
+					." {$this->args[2]} at line {$this->args[3]}";
 			
 			return 'An unexpected error occurred.';
 		}

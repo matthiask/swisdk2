@@ -61,12 +61,14 @@
 				if(!isset($_swisdk2_sitemap['processed'])) {
 					foreach($_swisdk2_sitemap as &$site) {
 						foreach($site as $language => &$page) {
-							SwisdkSitemap::loop_pages($page, '/'.($language?$language.'/':''));
+							SwisdkSitemap::loop_pages($page,
+								'/'.($language?$language.'/':''));
 						}
 					}
 					$_swisdk2_sitemap['processed'] = true;
 					file_put_contents($phpfile,
-						'<?php $_swisdk2_sitemap='.var_export($_swisdk2_sitemap, true).'?>');
+						'<?php $_swisdk2_sitemap='
+						.var_export($_swisdk2_sitemap, true).'?>');
 				}
 				$sitemap = $_swisdk2_sitemap;
 			}

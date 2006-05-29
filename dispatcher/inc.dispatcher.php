@@ -25,7 +25,8 @@
 					$class = trim($class);
 					
 					// load the dispatcher
-					$instance = Swisdk::load_module( $class , "dispatcher/" );
+					$instance = Swisdk::load_module( $class ,
+						"dispatcher/" );
 					if( SwisdkError::is_error( $instance ) )
 						SwisdkError::handle( $instance );
 					
@@ -40,7 +41,9 @@
 				}
 				
 			} else {
-				SwisdkError::handle( new FatalError( "There are no controller dispatch modules! At least give me one - please!" ) );
+				SwisdkError::handle( new FatalError(
+					"There are no controller dispatch modules!"
+					." At least give me one - please!" ) );
 			}
 		}
 	}

@@ -14,7 +14,8 @@
 		if(strpos($url, "\n")===false)
 			header('Location: '.$url);
 		else
-			SwisdkError::handle(new FatalError('Invalid location specification: '.$url));
+			SwisdkError::handle(new FatalError(
+				'Invalid location specification: '.$url));
 	}
 
 	/**

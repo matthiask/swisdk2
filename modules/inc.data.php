@@ -95,7 +95,8 @@
 		public function dirty()		{ return $this->dirty; }
 
 		/**
-		 * main DB handle (holds the mysqli instance in the current version of DBObject)
+		 * main DB handle (holds the mysqli instance in the current version
+		 * of DBObject)
 		 */
 		protected static $dbhandle = null;
 
@@ -220,7 +221,8 @@
 					if(preg_match($regex, $k))
 						$where[] = $k.'\''.DBObject::db_escape($v).'\' ';
 					else
-						$where[] = $p.$k.'\''.DBObject::db_escape($v).'\' ';
+						$where[] = $p.$k.'\''.DBObject::db_escape($v)
+							.'\' ';
 				$this->data = DBObject::db_get_row('SELECT * FROM '
 					.$this->table.implode(' AND ',$where));
 				if($this->data && count($this->data))
@@ -480,11 +482,13 @@
 
 			DBObject::$relations[$c1][$rel2] = array(
 				'type' => DB_REL_MANYTOMANY, 'table' => $table,
-				'join' => $o2->table().'.'.$o2->primary().'='.$table.'.'.$o2->primary(),
+				'join' => $o2->table().'.'.$o2->primary().'='
+					.$table.'.'.$o2->primary(),
 				'field' => $options, 'class' => $c2, 'foreign' => $o2->primary());
 			DBObject::$relations[$c2][$rel1] = array(
 				'type' => DB_REL_MANYTOMANY, 'table' => $table,
-				'join' => $o1->table().'.'.$o1->primary().'='.$table.'.'.$o1->primary(),
+				'join' => $o1->table().'.'.$o1->primary().'='
+					.$table.'.'.$o1->primary(),
 				'field' => $options, 'class' => $c1, 'foreign' => $o1->primary());
 		}
 
@@ -504,7 +508,8 @@
 					// FIXME this is seriously broken... gah
 					// see also DBObject::get() (around line 1000)
 					if(isset($this->data[$rel['field']]))
-						return DBObject::find($rel['class'], $this->data[$rel['field']]);
+						return DBObject::find($rel['class'],
+							$this->data[$rel['field']]);
 					else
 						return DBOContainer::create($rel['class']);
 				case DB_REL_MANY:
@@ -529,7 +534,8 @@
 		{
 			$container = DBOContainer::create($rel['class']);
 			$container->add_join($rel['table'], $rel['join']);
-			$container->add_clause($rel['table'].'.'.$this->primary().'=', $this->id());
+			$container->add_clause($rel['table'].'.'.$this->primary().'=',
+				$this->id());
 			if(is_array($params))
 				$container->add_clause_array($params);
 			$container->init();
@@ -543,13 +549,15 @@
 			foreach($rels as $class => &$rel) {
 				switch($rel['type']) {
 					case DB_REL_SINGLE:
-						$data = array_merge($data, $this->related($class)->data());
+						$data = array_merge($data,
+							$this->related($class)->data());
 						break;
 					case DB_REL_MANY:
 						$data[$class] = $this->related_many($rel)->data();
 						break;
 					case DB_REL_MANYTOMANY:
-						$data[$class] = $this->related_many_to_many($rel)->data();
+						$data[$class] =
+							$this->related_many_to_many($rel)->data();
 						break;
 				}
 			}
@@ -610,7 +618,8 @@
 					Swisdk::config_value('db.database')
 				);
 				if(mysqli_connect_errno())
-					SwisdkError::handle(new DBError("Connect failed: " . mysqli_connect_error()));
+					SwisdkError::handle(new DBError('Connect failed: '
+						.mysqli_connect_error()));
 			}
 
 			return DBObject::$dbhandle;
@@ -666,7 +675,8 @@
 		 *
 		 * $titles = DBObject::db_get_array('SELECT * FROM table');
 		 * $titles = DBObject::db_get_array('SELECT * FROM table', 'id');
-		 * $titles = DBObject::db_get_array('SELECT id,title FROM table',array('id','title'));
+		 * $titles = DBObject::db_get_array('SELECT id,title FROM table',
+		 * 	array('id','title'));
 		 */
 		public static function db_get_array($sql, $result_key=null)
 		{
@@ -675,7 +685,8 @@
 				return $res;
 			$array = array();
 			if($result_key) {
-				if(is_array($result_key) && (($key = $result_key[0]) && ($val = $result_key[1]))) {
+				if(is_array($result_key) && (($key = $result_key[0])
+						&& ($val = $result_key[1]))) {
 					while($row = $res->fetch_assoc())
 						$array[$row[$key]] = $row[$val];
 				} else {
@@ -850,8 +861,9 @@
 			$relations = $this->relations();
 
 			if(isset($relations[$var])) {
-				// FIXME It seems that I assumed that I'll always get a DBOContainer
-				// back from DBObject::related(). That is NOT always the case. (DB_REL_SINGLE)
+				// FIXME It seems that I assumed that I'll always get a
+				// DBOContainer back from DBObject::related(). That is
+				// NOT always the case. (DB_REL_SINGLE)
 				$obj = $this->related($var);
 				if($obj instanceof DBObject)
 					$this->data[$var] = $obj->id();
@@ -902,8 +914,8 @@
 		public function &field_list()
 		{
 			if(!isset(DBObject::$field_list[$this->class])) {
-				$rows = DBObject::db_get_array('SHOW COLUMNS FROM '.$this->table(),
-					'Field');
+				$rows = DBObject::db_get_array('SHOW COLUMNS FROM '
+					.$this->table(), 'Field');
 				DBObject::$field_list[$this->class] = $rows;
 			}
 			return DBObject::$field_list[$this->class];
@@ -1052,7 +1064,8 @@
 
 		public function total_count()
 		{
-			$sql = call_user_func_array(array(&$this->obj, '_select_sql'), $this->joins)
+			$sql = call_user_func_array(array(&$this->obj, '_select_sql'),
+					$this->joins)
 				. $this->clause_sql . $this->_fulltext_clause()
 				. (count($this->order_columns)
 					?' ORDER BY '.implode(',', $this->order_columns)
@@ -1065,8 +1078,8 @@
 		}
 
 		/**
-		 * here you can pass SQL fragments. The data will be automatically escaped so you can pass
-		 * anything you like.
+		 * here you can pass SQL fragments. The data will be automatically escaped
+		 * so you can pass anything you like.
 		 *
 		 * $doc->add_clause('pen_color=', $_POST['color']);
 		 * $doc->add_clause('pen_length>', $_POST['min-length']);
@@ -1099,9 +1112,11 @@
 				$this->clause_sql .= $binding.$clause;
 			} else if(is_array($data)) {
 				$matches = array();
-				preg_match_all('/\{([A-Za-z_0-9]+)}/', $clause, $matches, PREG_PATTERN_ORDER);
+				preg_match_all('/\{([A-Za-z_0-9]+)}/', $clause, $matches,
+					PREG_PATTERN_ORDER);
 				if(isset($matches[1])) {
-					array_walk_recursive($data, array('DBObject', 'db_escape_ref'));
+					array_walk_recursive($data,
+						array('DBObject', 'db_escape_ref'));
 					$p = array();
 					$q = array();
 					foreach($matches[1] as $v) {

@@ -34,14 +34,16 @@
 			}
 
 			if((isset($_SESSION['swisdk2']['user_ip_address']) 
-					&& $_SESSION['swisdk2']['user_ip_address']!=$_SERVER['REMOTE_ADDR'])
+					&& $_SESSION['swisdk2']['user_ip_address']
+						!=$_SERVER['REMOTE_ADDR'])
 					|| isset($_REQUEST['logout'])) {
 				unset($_SESSION['swisdk2']);
 				redirect('/');
 			}
 
 			if(isset($_SESSION['swisdk2']['user_id']) && !$this->user)
-				$this->user = DBObject::find('User', $_SESSION['swisdk2']['user_id']);
+				$this->user = DBObject::find('User',
+					$_SESSION['swisdk2']['user_id']);
 
 			if(!$this->user)
 				$this->user = DBObject::find('User', SWISDK2_VISITOR);

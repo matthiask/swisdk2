@@ -123,7 +123,8 @@
 			foreach($this->columns as &$col) {
 				$html .= '<th><a href="#" onclick="order(\''.$col->column().'\')">';
 				$html .= $col->title();
-				if($col->column()==$order && (!$col instanceof CmdsTableViewColumn)) {
+				if($col->column()==$order
+						&& (!$col instanceof CmdsTableViewColumn)) {
 					$html .= $dir=='DESC'?'&nbsp;&uArr;':'&nbsp;&dArr;';
 				}
 				$html .= '</a></th>';
