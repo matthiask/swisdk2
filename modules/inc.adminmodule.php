@@ -18,6 +18,7 @@
 	class AdminModule extends Site {
 		protected $dbo_class;
 		protected $arguments;
+		protected $multilanguage = false;
 
 		protected function component_dispatch()
 		{
@@ -66,6 +67,11 @@
 		{
 			return $this->arguments;
 		}
+
+		public function multilanguage()
+		{
+			return $this->multilanguage;
+		}
 	}
 
 	class AdminComponent implements IHtmlComponent {
@@ -73,6 +79,7 @@
 		protected $dbo_class;
 		protected $args;
 		protected $html;
+		protected $multilanguage;
 
 		public function run()
 		{
@@ -88,6 +95,7 @@
 			$this->module_url = $module->url();
 			$this->dbo_class = $module->dbo_class();
 			$this->args = $module->component_arguments();
+			$this->multilanguage = $module->multilanguage();
 		}
 
 		/**
@@ -126,7 +134,11 @@
 	class AdminComponent_new extends AdminComponent {
 		public function run()
 		{
-			$form = new Form(DBObject::create($this->dbo_class));
+			$form = null;
+			if($this->multilanguage)
+				$form = new FormML(DBObjectML::create($this->dbo_class));
+			else
+				$form = new Form(DBObject::create($this->dbo_class));
 			$this->form_builder()->build($form);
 			if($form->is_valid()) {
 				$form->dbobj()->store();
@@ -139,11 +151,21 @@
 	class AdminComponent_edit extends AdminComponent {
 		public function run()
 		{
-			$dbo = DBObject::find($this->dbo_class, $this->args[0]);
+			$dbo = null;
+			if($this->multilanguage)
+				$dbo = DBObjectML::find($this->dbo_class, $this->args[0]);
+			else
+				$dbo = DBObject::find($this->dbo_class, $this->args[0]);
 			if(!$dbo)
-				SwisdkError::handle( new FatalError("AdminComponent_edit::run() - Can't find the data. Class is: {$this->dbo_class} Argument is: {$this->args[0]}" ) );
+				SwisdkError::handle(new FatalError(
+					"AdminComponent_edit::run() - Can't find the data."
+					." Class is: {$this->dbo_class} Argument is: {$this->args[0]}"));
 
-			$form = new Form($dbo);
+			$form = null;
+			if($this->multilanguage)
+				$form = new FormML($dbo);
+			else
+				$form = new Form($dbo);
 			$this->form_builder()->build($form);
 			if($form->is_valid()) {
 				$dbo->store();
@@ -159,7 +181,11 @@
 		
 		public function run()
 		{
-			$this->tableView = new DBTableView($this->dbo_class, 'DBTableViewForm');
+			if($this->multilanguage)
+				$this->tableview = new DBTableView(DBObjectML::create($this->dbo_class),
+					'DBTableViewForm');
+			else
+				$this->tableView = new DBTableView($this->dbo_class, 'DBTableViewForm');
 			$this->complete_columns();
 			$this->html = $this->tableView->html();
 		}
@@ -177,7 +203,11 @@
 	class AdminComponent_delete extends AdminComponent {
 		public function run()
 		{
-			$dbo = DBObject::find($this->dbo_class, $this->args[0]);
+			$dbo = null;
+			if($this->multilanguage)
+				$dbo = DBObjectML::find($this->dbo_class, $this->args[0]);
+			else
+				$dbo = DBObject::find($this->dbo_class, $this->args[0]);
 			if(!$dbo)
 				SwisdkError::handle( new FatalError("AdminComponent_delete::run() - Can't find the data. Class is: {$this->dbo_class} Argument is: {$this->args[0]}" ) );
 
