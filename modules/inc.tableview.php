@@ -70,8 +70,9 @@
 	abstract class TableViewColumn {
 		public function __construct($title, $column)
 		{
-			$this->title = $title;
-			$this->column = $column;
+			$this->args = func_get_args();
+			$this->title = array_shift($this->args);
+			$this->column = array_shift($this->args);
 		}
 
 		abstract public function html(&$data);
@@ -88,11 +89,18 @@
 
 		protected $title;
 		protected $column;
+		protected $args;
 	}
 
+	/**
+	 * TextTableViewColumn takes a third parameter: maximal string length
+	 */
 	class TextTableViewColumn extends TableViewColumn {
 		public function html(&$data)
 		{
+			$str = $data[$this->column];
+			if($ml = $this->args[0])
+				return substr($str, 0, $ml).(strlen($str)>$ml?'&hellip;':'');
 			return $data[$this->column];
 		}
 	}
