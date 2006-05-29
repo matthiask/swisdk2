@@ -180,19 +180,25 @@
 	}
 
 	class AdminComponent_list extends AdminComponent {
+		protected $tableview;
+
 		public function run()
 		{
-			$tableview = null;
 			if($this->multilanguage)
-				$tableview = new DBTableView(
+				$this->tableview = new DBTableView(
 					DBObjectML::create($this->dbo_class),
 					'DBTableViewForm');
 			else
-				$tableview = new DBTableView(
+				$this->tableview = new DBTableView(
 					$this->dbo_class, 'DBTableViewForm');
-			$tableview->init();
-			$this->tableview_builder()->build($tableview);
-			$this->html = $tableview->html();
+			$this->tableview->init();
+			$this->tableview_builder()->build($this->tableview);
+			$this->complete_columns();
+			$this->html = $this->tableview->html();
+		}
+
+		public function complete_columns()
+		{
 		}
 	}
 
