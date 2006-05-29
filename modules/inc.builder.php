@@ -52,6 +52,14 @@
 	class FormBuilder extends BuilderBase {
 		public function build(&$form)
 		{
+			if($form instanceof FormML)
+				return $this->build_ml($form);
+			else
+				return $this->build_simple($form);
+		}
+
+		public function build_simple(&$form, $submitbtn = true)
+		{
 			$this->form = $form;
 			$dbobj = $form->dbobj();
 			$fields = array_keys($dbobj->field_list());
@@ -63,14 +71,51 @@
 
 			// FIXME do not autogenerate fields which were
 			// created inside form_hook
-			$this->form_hook();
+			$this->form_hook($form);
+			if($submitbtn)
+				$this->form->add(new SubmitButton());
+		}
+
+		public function build_ml(&$form)
+		{
+			$this->build_simple($form, false);
+
+			$dbobj =& $form->dbobj();
+			$box =& $form->box($dbobj->language());
+			$dbobjml =& $dbobj->dbobj();
+			$box->bind($dbobjml);
+
+			// work on the language form box (don't need to keep a
+			// reference to the main form around)
+			$this->form = $box;
+
+			$fields = array_keys($dbobjml->field_list());
+
+			// maybe this should be configurable? Someone might want to
+			// change the language of some entry, or might want to reparent
+			// the translation
+			$ninc_regex = '/^'.$dbobjml->_prefix()
+				.'(id|creation_dttm|language_id|'
+				.$dbobj->primary().')$/';
+			foreach($fields as $fname)
+				if(!preg_match($ninc_regex, $fname))
+					$this->create_field($fname);
+
+			// FIXME do not autogenerate fields which were
+			// created inside form_hook
+			$this->form_hook_ml($form);
 			$this->form->add(new SubmitButton());
 		}
 
-		public function form_hook()
+		public function form_hook(&$form)
 		{
 			// customize that
 			//$this->form->add('item_type_id', new TextInput());
+		}
+
+		public function form_hook_ml(&$form)
+		{
+			// customize that
 		}
 
 		public function dbobj()
