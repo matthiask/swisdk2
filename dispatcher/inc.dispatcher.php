@@ -22,6 +22,7 @@
 				$urifragment = $url;
 				
 				foreach( $modules as $class ) {
+					$class = trim($class);
 					
 					// load the dispatcher
 					$instance = Swisdk::load_module( $class , "dispatcher/" );
