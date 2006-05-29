@@ -1,0 +1,31 @@
+[[projects/swisdk|back to SWISDK]]
+
+# Permissions
+
+**The permission system and [[realms]] are tightly intertwined. Be
+sure to read both pages carefully.**
+
+Read the [[realms]] page for information on how to restrict access
+to pages or page trees.
+
+This is an example how you might restrict access to news items:
+
+    DBObject::has_a('News', 'Role');
+
+    $dbo = DBObject::find('News', getInput('id'));
+    // we suppose everything went well up to here.
+
+    // get access level of this news entry (minimum role)
+    $role_id = $dbo->related('Role')->id();
+
+    // get default group for current URL (you could also 
+    // specify another group here, of course)
+    $group_id = PermissionManager::group_for_url();
+
+    if(!PermissionManager::check_group_role($group_id, $role_id)) {
+        // Oops! Access is denied
+        die('access denied');
+    }
+    // else continue
+
+[[projects/swisdk|back to SWISDK]]

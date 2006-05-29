@@ -1,0 +1,194 @@
+# Installation
+
+## Prerequisites
+
+You need a server running PHP5 and the MySQLi interface to a MySQL database.
+
+## Get the source
+
+Inside your webserver root, do this:
+
+    $ git clone http://spinlock.ch/pub/git/swisdk2/swisdk.git swisdk
+    $ git clone http://spinlock.ch/pub/git/swisdk2/wiki.git webapp
+
+The second command fetches the example Wiki application. There is no bare `webapp` repository yet.
+
+Create the directories `webapp/cache` and `log`. Your directory structure
+will be as follows:
+
+    example.org/
+      webapp/
+        cache/
+        content/
+        htdocs/
+      log/
+      swisdk/
+
+You need to make three directories writeable for the webserver:
+
+    $ chgrp www-data log webapp/cache swisdk/lib/smarty/templates_c
+    $ chmod g+w www-data log webapp/cache swisdk/lib/smarty/templates_c
+
+## Configuration
+
+You need to create the file `config.ini` inside `content` with (at least)
+the following contents:
+
+    [core]
+    name = Some descriptive name (for email notification, etc)
+    admin_email = your-address@example.com
+
+    [error]
+    debug_mode = true (turn this off if you install SWISDK on a public server!
+    ; ignore_error_nrs = (PHP error numbers to ignore, see error_reporting())
+    email_notification = true (send email in case of errors)
+    logging = false
+    logfile = swisdk.log (will be created inside the log directory)
+
+    [db]
+    host = localhost
+    username = mysql_username
+    password = mysql_password
+    database = your_database
+
+    [dispatcher]
+    modules = GetParameterCarver,DomainDispatcher,WebsiteDispatcher,SitemapDispatcher,ControllerDispatcher
+    full.html = XHTMLSiteHandler
+    ctrl.php = PhpSiteHandler
+    smarty.tpl = SmartySiteHandler
+
+    [website.default]
+    fullTemplate = templates/main.tpl.html
+
+If you want a multilingual website:
+
+    [runtime]
+    language = en
+
+The wiki module needs a `wiki` directory relative to `example.org` and the
+location of `git` binaries:
+
+    [git]
+    bindir = /home/username/bin (or /usr/bin or /usr/local/bin or ...)
+
+    [wiki]
+    basedir = wiki
+
+All of these configuration bits can be accessed from PHP using `Swisdk::config_value('section.key')`.
+
+
+## Database
+
+### Create the minimal set of tables
+
+    CREATE TABLE `tbl_language` (
+      `language_id` int(11) NOT NULL auto_increment,
+      `language_key` varchar(4) NOT NULL,
+      `language_title` varchar(64) NOT NULL,
+      PRIMARY KEY  (`language_id`)
+    ) ENGINE=InnoDB DEFAULT ;
+
+    CREATE TABLE `tbl_realm` (
+      `realm_id` int(11) NOT NULL auto_increment,
+      `realm_title` varchar(255) NOT NULL,
+      `realm_url` varchar(255) NOT NULL,
+      `realm_role_id` int(11) NOT NULL,
+      PRIMARY KEY  (`realm_id`)
+    ) ENGINE=InnoDB DEFAULT ;
+
+    CREATE TABLE `tbl_role` (
+      `role_id` int(11) NOT NULL auto_increment,
+      `role_title` varchar(32) NOT NULL,
+      PRIMARY KEY  (`role_id`)
+    ) ENGINE=InnoDB DEFAULT ;
+
+    CREATE TABLE `tbl_user` (
+      `user_id` int(10) unsigned NOT NULL auto_increment,
+      `user_name` varchar(32) character set latin1 NOT NULL,
+      `user_forename` varchar(32) character set latin1 NOT NULL,
+      `user_title` varchar(32) character set latin1 NOT NULL,
+      `user_email` varchar(64) NOT NULL,
+      `user_login` varchar(16) character set latin1 NOT NULL,
+      `user_password` varchar(64) character set latin1 NOT NULL,
+      PRIMARY KEY  (`user_id`)
+    ) ENGINE=InnoDB DEFAULT ;
+
+    CREATE TABLE `tbl_user_group` (
+      `user_group_id` int(11) NOT NULL auto_increment,
+      `user_group_parent_id` int(11) NOT NULL,
+      `user_group_title` varchar(255) NOT NULL,
+      PRIMARY KEY  (`user_group_id`),
+      KEY `user_group_parent_id` (`user_group_parent_id`)
+    ) ENGINE=InnoDB DEFAULT ;
+
+    CREATE TABLE `tbl_user_group_permission` (
+      `user_group_permission_id` int(11) NOT NULL auto_increment,
+      `user_group_permission_user_group_id` int(11) NOT NULL,
+      `user_group_permission_realm_id` int(11) NOT NULL,
+      `user_group_permission_role_id` int(11) NOT NULL,
+      PRIMARY KEY  (`user_group_permission_id`)
+    ) ENGINE=InnoDB DEFAULT ;
+
+    CREATE TABLE `tbl_user_permission` (
+      `user_permission_id` int(11) NOT NULL auto_increment,
+      `user_permission_user_id` int(11) NOT NULL,
+      `user_permission_realm_id` int(11) NOT NULL,
+      `user_permission_role_id` int(11) NOT NULL,
+      PRIMARY KEY  (`user_permission_id`)
+    ) ENGINE=InnoDB DEFAULT ;
+
+    CREATE TABLE `tbl_user_to_user_group` (
+      `user_id` int(11) NOT NULL,
+      `user_group_id` int(11) NOT NULL,
+      KEY `user_id` (`user_id`),
+      KEY `user_group_id` (`user_group_id`)
+    ) ENGINE=InnoDB DEFAULT ;
+
+### Initialization data
+
+Create root group (the concept of content groups will be explained later (TO BE DONE!))
+
+    INSERT INTO `tbl_language` (`language_id`, `language_key`,
+        `language_title`) VALUES (1, 'en', 'english');
+
+    INSERT INTO `tbl_realm` (`realm_id`, `realm_title`, `realm_url`,
+        `realm_role_id`) VALUES (1, 'Root', '', 1);
+
+The contents of tbl_role must not be different (or you have to change the
+constants in the permission module)
+
+    INSERT INTO `tbl_role` (`role_id`, `role_title`) VALUES
+        (1, 'Visitor'), (2, 'Authenticated'),
+        (3, 'Member'), (4, 'Manager'),
+        (5, 'Administrator'), (6, 'SiteAdministrator');
+
+You may change the following values as you wish. The Visitor user however must
+be the user with ID 1 (hardcoded in session module). The values here are only
+a recommendation.
+
+    INSERT INTO `tbl_user` (`user_id`, `user_name`, `user_forename`,
+        `user_title`, `user_email`, `user_login`, `user_password`) VALUES
+        (1, 'Visitor', '', '', '', '', ''),
+        (2, 'Admin', 'istrator', 'Admin', 'admin@example.com',
+            'admin', 'MD5 hash of your password');
+
+    INSERT INTO `tbl_user_group` (`user_group_id`, `user_group_parent_id`,
+        `user_group_title`)
+        VALUES (1, 0, 'Root'), (2, 1, 'Administrators');
+
+Give the admin group `Administrator` role:
+
+    INSERT INTO `tbl_user_group_permission` (`user_group_permission_id`,
+        `user_group_permission_user_group_id`, `user_group_permission_realm_id`,
+        `user_group_permission_role_id`) VALUES (1, 2, 1, 5);
+
+Give the `Visitor` user permission to view something:
+
+    INSERT INTO `tbl_user_permission` (`user_permission_id`,
+        `user_permission_user_id`, `user_permission_realm_id`,
+        `user_permission_role_id`) VALUES (1, 1, 1, 1);
+
+Put the `Admin` user in `Administrators` group:
+
+    INSERT INTO `tbl_user_to_user_group` (`user_id`, `user_group_id`) VALUES (2, 2);
+

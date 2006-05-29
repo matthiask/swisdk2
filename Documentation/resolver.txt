@@ -1,0 +1,52 @@
+**Note!** The resolver has been replaced by the yet to be documented Dispatcher.
+The Dispatcher does essentially the same, but the dispatch rules are more
+configurable and also slightly different. For now you have to look at the
+Dispatcher source or at the wiki example application.
+
+# Request resolver
+
+Currently, the only resolver module doing real work is the `FilesystemResolver`.
+Other modules can be easily added if the need arises.
+
+## FilesystemResolver
+
+The filesystem resolver gets the path part of the URL and tries to find a
+template or a controller file below `CONTENT_ROOT` (normally the `content`
+directory of your SWISDK installation) to handle the request.
+
+If the request is `/group2/xy/abc`, the following paths are examined
+sequentially:
+
+* `/group2/xy/abc/Index_*`
+* `/group2/xy/abc_*`
+* `/group2/xy/Index_*`
+* `/group2/xy_*`
+* `/group2/Index_*`
+* `/group2_*`
+* `/Index_*`
+
+If nothing matched, the user will get a 404 (`SiteNotFoundError`).
+
+Then, the filename is examined for the following patterns and passed on to the
+matching `SiteHandler`:
+
+| Pattern | SiteHandler |
+| --------|-------------|
+| `tpl.html`|`TemplateSiteHandler`|
+| `ctrl.php`|`DynamicSiteHandler`|
+
+The `TemplateSiteHandler` simply loads the file's contents and sends them
+to the browser. The `DynamicSiteHandler` is slightly more complex (*Note:*
+Before reading the blob here, it is probably easier to just look at some
+example site controllers. One of them can be found on the [[forms]] page):
+
+* First, it includes the file
+* Inside the file should be a `Swisdk::register()` call with the class
+name of a Component or a Site. This class is instantiated. If it is a
+`Site`, its `run()`-method is executed. If it implements `IComponent`,
+the instance is handled by `ComponentRunnerSite` which does nothing
+more but call the `run()` method and display the content. Later, we
+perhaps want to do different things with components, but that is not
+decided yet (since the need did not arise yet to decide on that).
+
+[[projects/swisdk|back to SWISDK]]

@@ -1,0 +1,44 @@
+[[projects/swisdk|back to SWISDK]]
+
+# Realms
+
+Suppose you have a website which is managed by many people. Furthermore, you
+don't want to give everyone editing permissions for every part of the site.
+
+| URL fragment  | editable by (at least `Manager` role) |
+| --------------|------------ |
+| `/`           | ann, bob    |
+| `/realm1/`    | ann, frank  |
+| `/realm2/`    | bob, john   |
+| `/realm2/xy/` | john        |
+
+You don't want ann to edit `realm2`, you don't want bob to edit `realm2/xy`
+and you don't want frank or john to edit anything outside of their
+respective group pages.
+
+What does now happen, when ann wants to edit `example.com/info/test`?
+
+First, we search the best match for the realm. In this case, it is
+`/`, the root realm. She has the needed role, so she is allowed to edit the
+page.
+
+If she wanted to edit `/realm2/info` or `/realm2/xy/whatever`, her request
+would be denied because roles are not inherited. If you create a new realm,
+you have to explicitly distribute roles to all users and user groups that you
+wish have access to this realm.
+
+If you followed the [[projects/swisdk/installation|installation instructions]]
+closely, the default user `Visitor` will have view rights for this realm.
+If you create a new realm, and you want `Visitor` to also be able
+to view these pages, you need to explicitly give him view rights
+(`Visitor` role).
+
+**Note!** You can assign realms not only to URL fragments, but also
+explicitly to database records. That way, you can for example give the
+`Visitor` view rights for the `/news/` site, but not show him all articles,
+because some of the articles might contain sensitive information that you
+only want to show to approved members. See the page about
+[[projects/swisdk/permissions|permissions]] for more information on how
+to do this.
+
+[[projects/swisdk|back to SWISDK]]

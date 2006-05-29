@@ -1,0 +1,192 @@
+# Configuration
+
+This tries to be a complete list of all configuration variables:
+
+*Note!* Lists are always comma separated
+
+`core.admin_email` (string)
+
+: The site administrator's email address
+  This address is used for notifications in case of errors.
+
+`core.name` (string)
+
+: The name of this installation
+
+  This should be unique; it is prepended to notification emails for easy
+  sorting in your mail user agent.
+
+`db.database` (string)
+
+: name of MySQL database
+
+`db.host` (string)
+
+: host of the MySQL server (most often this is `localhost`
+
+`db.password` (string)
+
+: password for your MySQL user
+
+`db.username` (string)
+
+: username for the MySQL connection
+
+`dispatcher.modules` (list of string)
+
+: list of subclasses of ControllerDispatcherModule
+
+`dispatcher.*` (string)
+
+: SiteHandler class which handles files with the given extension
+  
+  Example:
+
+  Handle `/controller/` with file `CONTENT_ROOT/controller_ctrl.php`:
+    ctrl.php = PhpSiteHandler
+
+  Handle `/static_page/` with file `CONTENT_ROOT/static_page_tpl.html`:
+    tpl.html = SmartySiteHandler
+
+`error.debug_mode` (bool)
+
+: are error messages displayed on screen?
+
+`error.email_notification` (bool)
+
+: email notification when errors happen?
+
+`error.ignore_error_nrs` (list of int)
+
+: PHP error ids to ignore (see <http://ch2.php.net/error_reporting>)
+
+`error.logfile` (string)
+
+: filename of your logfile
+
+`error.logging` (bool)
+
+: is logging activated?
+
+`git.bindir` (string)
+
+: location of your git binaries (`WikiComponent`)
+
+`runtime.language` (string)
+
+: default language key
+
+`website.*`
+
+: Configuration for websites
+
+  You must provide at least either `fullTemplate` or `header` and `footer`
+  in this section!  
+  You can also specify a title and a regular expression for the website.
+
+  Example:
+
+    <pre><code>; handle site root
+    [website.default]
+    fullTemplate = path_to_template.html
+    title = some descriptive title
+
+    ; handle everything below /section-b/
+    [website.section-b]
+    fullTemplate = path_to_sectionb_template.html
+
+    ; handle everything which matches the regex `match`
+    [website.some-descriptive-name]
+    fullTemplate = path_to_template_xy.html
+    match = "/(abc|xyz\/def|section-b\/special-subsection)"</code></pre>
+
+  You can also provide a comma-separated list of components to execute
+  always (f.e. a `NavigationComponent`)
+
+  You can give the component name alone (`Navigation`) or you can specify
+  a region from your smarty template (`region => Navigation`).
+
+
+`wiki.basedir` (string)
+
+: location of wiki folder relative to your `content` folder
+
+
+The following variables are only set while SWISDK is serving a request:
+
+`runtime.controller.class` (string)
+
+: Site class (from `Swisdk::register()`)
+
+`runtime.controller.url` (string)
+
+: The URL to the controller.
+
+  Example:
+
+  Suppose the user requests the page at `/wiki/xyz/page`. You have a file
+  `wiki_ctrl.php` inside your `content` folder which handles this request.
+  `runtime.controller.url` will be set to `/wiki`
+
+`runtime.includefile` (string)
+
+: the file `DynamicSiteHandler` is going to include
+
+`runtime.language_id` (int)
+
+: the language id
+
+`runtime.request.host` (string)
+
+: the host part of the request (f.e. `http://www.example.com`)
+
+`runtime.request.uri` (string)
+
+: the full URL without host for the current request
+
+  For the example above, this would be set to `/wiki/xyz/page`
+
+`runtime.website` (string)
+
+: the current website; see also `website`
+
+## Example configuration file
+
+    ; SWISDK2 config file
+
+    [core]
+    name = Example!
+    admin_email = admin@example.com
+
+    [dispatcher]
+    modules = DomainDispatcher, WebsiteDispatcher, ControllerDispatcher
+    ctrl.php = PhpSiteHandler
+    full.html = XHTMLSiteHandler
+    tpl.html = SmartySiteHandler
+
+    [error]
+    debug_mode = true
+    ignore_error_nrs = 2,8,2048 ; ignore E_WARNING, E_NOTICE and E_STRICT
+    email_notification = true ; also send emails
+    logging = true
+    logfile = filename.log
+
+    [db]
+    host = localhost
+    username = db_user
+    password = db_pass
+    database = example_org
+
+    [runtime]
+    language = en
+    
+    [git]
+    bindir = /usr/local/bin
+
+    [wiki]
+    basedir = ../wiki
+
+    [website.default]
+    title = "Example.org - Examples and more"
+    fullTemplate = templates/main.tpl.html
+

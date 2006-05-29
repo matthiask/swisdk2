@@ -1,0 +1,134 @@
+# Forms
+
+The values of a form (defaults, POST data etc) are always stored in a
+DBObject. The DBObject does not necessarily need to refer to an existing
+table. If it does not, some aspects of DBObjects are, of course, not
+functional. You cannot use autogeneration and you obviously cannot store
+the data!
+
+## Form autogeneration
+
+Form autogeneration is achieved through the `Builder` module.
+
+The FormBuilder can use the DBObject bound to the form to get all fields
+in the database
+table. It then uses a number of rules to automatically create form
+elements. Normally, the field name and field type are inspected.
+
+The FormBuilder can be easily customized or extended through inheritance.
+
+## Examples
+
+### Minimal example
+
+    DBObject::belongs_to('Item', 'Project');
+    DBObject::has_a('Item', 'ItemSeverity');
+    DBObject::has_a('Item', 'ItemState');
+    DBObject::has_a('Item', 'ItemItemPriority');
+
+    $item = DBObject::find('Item', 42);
+    $form = new Form();
+    $form->bind($item);
+    $builder = new FormBuilder();
+    $builder->build($form);
+    $form->set_title('Edit Item');
+    $form->add(new SubmitButton());    
+
+    if($form->is_valid()) {
+        $item->store();
+        // or $form->dbobj()->store();
+        redirect('/somewhere/');
+    } else {
+        echo $form->html();
+    }
+
+The Form automatically writes its values into the bound DBObject.
+
+### Example without database
+
+    $form = new Form(DBObject::create('ContactForm'));
+    $form->set_title('contact form');
+    $form->add('sender'); // default FormItem is TextInput; use it
+    $form->add('title');
+    $form->add('text', new Textarea());
+    $form->add(new SubmitButton());
+
+Now, to get the values, use:
+
+    $values = $form->dbobj()->data();
+
+You should now have an associative array of the form
+
+    array(
+    	'contact_form_sender' => '...',
+    	'contact_form_title' => '...',
+    	'contact_form_text' => '...'
+    );
+    
+
+### Micro-example for language aware forms
+
+    $form = new FormML();
+    $form->bind(DBObjectML::find('News', 1));
+    $builder = new FormBuilder();
+    $builder->build($form);
+    $form->add(new SubmitButton());
+    if($form->is_valid()) {
+    	echo 'valid!';
+    	$form->dbobj()->store();
+    } else {
+    	echo $form->html();
+    }
+
+DBObject-conforming tables need to be created for 'News', 'NewsContent' and
+'Language' DBObjects for this snippet to work.
+
+### Complete MyAccount site
+
+    <?php
+    /*
+    *    Copyright (c) 2006, Matthias Kestenholz <mk@spinlock.ch>
+    *    Distributed under the GNU General Public License.
+    *    Read the entire license text here: http://www.gnu.org/licenses/gpl.html
+    */
+
+    require_once SWISDK_ROOT.'site/inc.site.php';
+    require_once MODULE_ROOT.'inc.form.php';
+    require_once MODULE_ROOT.'inc.permission.php';
+
+    class MyAccountSite extends Site {
+        public function run()
+        {
+            PermissionManager::check_throw(ROLE_AUTHENTICATED);
+
+            $dbo = SessionHandler::user();
+            $form = new Form();
+            $form->set_title('My Account');
+            $form->bind($dbo);
+            $form->add_auto('forename')->add_rule(new RequiredRule());
+            $form->add_auto('name')->add_rule(new RequiredRule());
+            $form->add_auto('email')->add_rule(new EmailRule());
+            $form->add('password0', new PasswordInput(), 'Password')
+                ->add_rule(new MD5EqualsRule($dbo->password));
+            $form->add('password1', new PasswordInput(), 'New Password');
+            $form->add('password2', new PasswordInput(), 'New Password (repeat)');
+            $form->add(new SubmitButton());
+
+            $form->add_rule(new EqualFieldsRule('password1', 'password2'));
+
+            if($form->is_valid()) {
+                if($pw = $dbo->get('password1'))
+                    $dbo->password = md5($dbo->get('password1'));
+                $dbo->store();
+            }
+            
+            echo $form->html();
+        }
+    }
+
+    Swisdk::register('MyAccountSite');
+
+    ?>
+
+
+[[projects/swisdk|back to SWISDK]]

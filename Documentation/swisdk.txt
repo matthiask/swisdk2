@@ -1,0 +1,52 @@
+# SWISDK 2
+
+**Note: this webpage is updated regularly, please check back soon if you don't find what you are searching for**
+
+The Simple Web Infrastructure SDK was born out of the need to simplify
+web application development. Its core is very small and easily understandable.
+The extension modules enable the developer to easily create multilingual
+websites with lots of forms and complex data models.
+
+The developers are currently [Moritz Zumb&uuml;hl](mailto:mail_@_momoetomo.ch)
+and myself - [Matthias Kestenholz](mailto:mk_@_spinlock.ch).
+
+## Why another web application framework?
+
+We evaluated many existing frameworks before beginning to write our own.
+The form and data handling of these frameworks were not satisfying, plus, many
+of them were essentially limited to a single language. We needed a framework
+which provided the ability to create multilingual sites without too much
+complexity.
+
+## What are the main features of SWISDK?
+
+* Multi-lingual from the ground up
+* Easy and automated form and data handling
+* Permission system
+* Uses smarty as template system (but does not depend heavily on it)
+* Configurable error handling
+* Creating a new page is as easy as it should be: Just drop a controller
+file in the correct place.
+* Many building blocks for web applications
+
+## What are the current restrictions?
+
+* Only runs on PHP5-enabled servers
+* For now, the only supported RDBMS is MySQL (using the mysqli interface). Support for other RDBMS can be easily added, since all accesses on the RDBMS
+are hidden from the user.
+* Poor documentation (somewhat mitigated by clean code and lots of comments)
+
+## More documentation
+
+* [[projects/swisdk/installation|Installation]]
+* [[projects/swisdk/configuration|Configuration]]
+* [[projects/swisdk/data_handling|Data handling]]
+* [[projects/swisdk/forms|Forms]]
+* [[projects/swisdk/realms|Realms]]
+* [[projects/swisdk/permissions|Permission handling]]
+* [[projects/swisdk/resolver|Request resolver]]
+
+## Where can I download it?
+
+There are no tarballs available, but you can use [git](http://git.or.cz/) or [cogito](http://kernel.org/pub/software/scm/cogito/) to checkout the
+source from our repository. Further instructions can be found in our [gitweb](http://spinlock.ch/cgi-bin/gitweb.pl)
