@@ -318,19 +318,22 @@
 				return true;
 			foreach(DBObject::$relations[$this->class] as &$rel) {
 				if($rel['type']==DB_REL_MANYTOMANY) {
-					if(!isset($this->data[$rel['field']]))
+					$field = $rel['field'];
+					if(!$field||!isset($this->data[$field]))
+						$field = $rel['class'];
+					if(!isset($this->data[$field]))
 						continue;
 					$res = DBObject::db_query('DELETE FROM '.$rel['table']
 						.' WHERE '.$this->primary.'='.$this->id());
 					if($res===false)
 						return false;
-					if(count($this->data[$rel['field']])) {
+					if(count($this->data[$field])) {
 						$sql = 'INSERT INTO '.$rel['table']
 							.' ('.$this->primary.','
 							.$rel['foreign'].') VALUES ('
 							.$this->id().','
 							.implode('),('.$this->id().',',
-							$this->data[$rel['field']]).')';
+							$this->data[$field]).')';
 						if(DBObject::db_query($sql)===false)
 							return false;
 					}
