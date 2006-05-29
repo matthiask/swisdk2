@@ -133,13 +133,17 @@
 		public static function login_form()
 		{
 			require_once MODULE_ROOT . 'inc.form.php';
+			require_once MODULE_ROOT . 'inc.smarty.php';
 			$form = new Form();
 			$form->bind(DBObject::create('Login'));
 			$form->set_title('Login');
 			$form->add('login_username');
 			$form->add('login_password', new PasswordInput());
 			$form->add(new SubmitButton());
-			echo $form->html();
+
+			$sm = SmartyMaster::instance();
+			$sm->add_html_fragment('content', $form->html());
+			$sm->display();
 			exit();
 		}
 	}
