@@ -14,80 +14,6 @@
 	 * necessarily need a database table for every form, though!)
 	 */
 
-	/**
-	 * Examples
-	 *
-	 *
-	 * minimal example
-	 * ***************
-	 *
-	 * DBObject::belongs_to('Item', 'Project');
-	 * DBObject::has_a('Item', 'ItemSeverity');
-	 * DBObject::has_a('Item', 'ItemState');
-	 * DBObject::has_a('Item', 'ItemItemPriority');
-	 *
-	 * $item = DBObject::find('Item', 42);
-	 * $form = new Form();
-	 * $form->bind($item, true); // autogenerate form
-	 * $form->set_title('Edit Item');
-	 * $form->add(new SubmitButton());
-	 *
-	 * echo $form->html();
-	 *
-	 * // after form submission and validation, simply do:
-	 *
-	 * $item->store();
-	 *
-	 * or
-	 *
-	 * $form->dbobj()->store();
-	 *
-	 * The Form automatically writes its values into the bound DBObject.
-	 *
-	 *
-	 *
-	 * example without database
-	 * ************************
-	 *
-	 * $form = new Form();
-	 * $form->bind(DBObject::create('ContactForm')); // cannot autogenerate (obviously!)
-	 * $form->set_title('contact form');
-	 * $form->add('sender'); // default FormItem is TextInput; use it
-	 * $form->add('title');
-	 * $form->add('text', new Textarea());
-	 * $form->add(new SubmitButton());
-	 *
-	 * // now, to get the values, use:
-	 *
-	 * $values = $form->dbobj()->data();
-	 *
-	 * You should now have an associative array of the form
-	 * array(
-	 * 	'contact_form_sender' => '...',
-	 * 	'contact_form_title' => '...',
-	 * 	'contact_form_text' => '...'
-	 * );
-	 * 
-	 *
-	 * 
-	 * micro-example for language aware forms
-	 * **************************************
-	 *
-	 * $form = new FormML();
-	 * $form->bind(DBObjectML::find('News', 1));
-	 * $form->autogenerate(); // might also pass true as second parameter to bind()
-	 * $form->add(new SubmitButton());
-	 * if($form->is_valid()) {
-	 * 	echo 'valid!';
-	 * 	$form->dbobj()->store();
-	 * } else {
-	 * 	echo $form->html();
-	 * }
-	 *
-	 * DBObject-conforming tables need to be created for 'News', 'NewsContent' and
-	 * 'Language' DBObjects for this snippet to work
-	 */
-
 	require_once MODULE_ROOT . 'inc.data.php';
 	require_once MODULE_ROOT . 'inc.layout.php';
 
@@ -128,9 +54,9 @@
 			return $this->box()->dbobj();
 		}
 
-		public function bind($dbobj, $autogenerate=false)
+		public function bind($dbobj)
 		{
-			$this->box()->bind($dbobj, $autogenerate);
+			$this->box()->bind($dbobj);
 		}
 
 		public function add()
@@ -229,22 +155,18 @@
 		/**
 		 * @param $dbobj: the DBObject bound to the Form
 		 */
-		public function __construct($dbobj=null, $autogenerate=false)
+		public function __construct($dbobj=null)
 		{
 			if($dbobj)
-				$this->bind($dbobj, $autogenerate);
+				$this->bind($dbobj);
 		}
 
 		/**
 		 * @param dbobj: a DBObject
-		 * @param autogenerate: automatically generate Form from relations
-		 * 	and field names of the DBObject
 		 */
-		public function bind($dbobj, $autogenerate=false)
+		public function bind($dbobj)
 		{
 			$this->dbobj = $dbobj;
-			if($autogenerate)
-				$this->autogenerate();
 			$this->generate_form_id();
 		}
 
@@ -370,6 +292,9 @@
 		 *
 		 * NOTE! The bound DBObject MUST point to a valid table if
 		 * you want to use this function.
+		 *
+		 * TODO: add_auto and FormBuilder implement the same autodetection
+		 * logic. Remove redundancy
 		 */
 		public function add_auto($field, $title=null)
 		{
@@ -390,7 +315,7 @@
 						}
 						$obj->set_items($items);
 						break;
-					case DB_REL_MANY:
+					case DB_REL_MANYTOMANY:
 						$obj = new Multiselect();
 						$dc = DBOContainer::find($relations[$fname]['class']);
 						$items = array();
@@ -498,30 +423,6 @@
 			}
 		}
 
-		/**
-		 * Use the DBObject's field list and the relations to build a Form
-		 */
-		protected function fname($name)
-		{
-			return $name;
-		}
-
-		/**
-		 * Inspect the field_list of the bound DBObject and automatically
-		 * build a form with most fields in the field_list
-		 */
-		public function autogenerate($fields=null, $ninc_regex=null)
-		{
-			if($fields===null)
-				$fields = array_keys($this->dbobj()->field_list());
-			if($ninc_regex===null)
-				$ninc_regex = '/^'.$this->dbobj()->_prefix().'(id|creation_dttm)$/';
-			foreach($fields as $fname) {
-				if(!preg_match($ninc_regex, $fname))
-					$this->add_auto($fname);
-			}
-		}
-
 		public function accept($renderer)
 		{
 			$this->add($this->form_id, new HiddenInput())->set_value(1);
@@ -577,55 +478,13 @@
 	}
 
 	/**
-	 * FormML and DBObjectML are even more tightly coupled to each other.
-	 * For now, there is no possibility to use multilanguage forms without
-	 * a backing database.
-	 *
-	 * FIXME: multi-language forms without DB should be possible
+	 * Multi-language forms are implemented by binding the parent DBObject and the
+	 * translation DBObject to two FormBoxes, which are both part of the main
+	 * Form
 	 */
-
-	/**
-	 * The FormMLBox does some additional name munging to make it possible
-	 * to display FormItems for the same fields for multiple languages
-	 * at the same time.
-	 */
-	class FormMLBox extends FormBox {
-		protected function fname($name)
-		{
-			if($this->language)
-				return '__language'.$this->language.'_'.$name;
-			return $name;
-		}
-
-		public $language;
-	}
 
 	class FormML extends Form {
-		public function autogenerate($fields=null, $ninc_regex=null)
-		{
-			//parent::autogenerate($fields, null);
-			$dbobj = $this->dbobj()->dbobj();
-			if($ninc_regex===null)
-				$ninc_regex = '/^'.$dbobj->_prefix().'((language_|'.$this->dbobj()->_prefix().')?id|creation_dttm)$/';
-			if($dbobj instanceof DBOContainer) {
-				// FIXME this does not work for a new DBObjectML (the
-				// DBOContainer is empty so the languages cannot be
-				// enumerated)
-				foreach($dbobj as &$obj) {
-					$box = new FormMLBox($this);
-					$box->language = $obj->language_id;
-					$box->autogenerate($fields, $ninc_regex);
-					$box->set_title('Language: '.$obj->language_id);
-					$this->add($box);
-				}
-			} else {
-				$box = new FormMLBox($this);
-				$box->language = $dbobj->language_id;
-				$box->autogenerate($fields, $ninc_regex);
-				$box->set_title('Language: '.$this->dbobj->language());
-				$this->add($box);
-			}
-		}
+		// this is only a type marker for the FormBuilder
 	}
 
 	/**
