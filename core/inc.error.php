@@ -12,12 +12,12 @@
 	{
 		SwisdkError::handle( new PHPError( $errno, $errstr, $file, $line, $context ) );	
 	}
-	
+
 	function swisdk_php_exception_handler( $exception )
 	{
 		SwisdkError::handle( new UnhandledExceptionError( $exception ) );
 	}
-	
+
 	class SwisdkError {
 
 		public static function handle( $eObj )
@@ -31,7 +31,7 @@
 					.' BasicSwisdkError'));
 			}
 		}
-		
+
 		public static function setup($handler = array(__CLASS__,
 			'standard_output_handler'))
 		{
@@ -58,7 +58,7 @@
 			call_user_func(SwisdkError::$handler_callback, $obj);
 		}
 	}
-	
+
 	/** 
 	 * - logging to file and email notification (configurable)
 	 *
@@ -68,13 +68,13 @@
 	class BasicSwisdkError {
 		public $args;
 		public $debug_mode;
-		
+
 		public function __construct( $message = null )
 		{
 			$this->args = func_get_args();
 			$this->debug_mode = Swisdk::config_value('error.debug_mode');
 		}
-		
+
 		public function run()
 		{
 			$dbgmsg = $this->to_string(true);
@@ -129,7 +129,7 @@
 				$message, 'From: swisdk-suckage@'.$_SERVER['SERVER_NAME']);
 		}
 	}
-	
+
 	/**
 	 * - error output
 	 * - sql string is shown if debug_mode is activated
@@ -148,7 +148,7 @@
 			return "\n".$this->args[1];
 		}
 	}
-	
+
 	/**
 	 * - error output
 	 * - notification by email (always, do not honor error.email_notification)
@@ -168,15 +168,15 @@
 	 */
 	class FatalError extends NotificationError {
 	}
-	
+
 	/**
 	*	TODO add a check if the file which was not found just isnt readable for
 	*	the webserver user... 
 	*/
 	class FileNotFoundError extends NotificationError {
 	}
-	
-	
+
+
 	/**
 	 * old school php erro :)
 	 * (terminates script, or not: configurable, as always)
@@ -207,7 +207,7 @@
 
 	class SuicideError extends BasicSwisdkError {
 	}
-	
+
 	/**
 	 * No comments. We don't like exceptions.
 	 *
@@ -233,4 +233,5 @@
 			exit();
 		}
 	}
+
 ?>

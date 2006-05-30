@@ -31,7 +31,7 @@
 			$value = $_GET[$var];
 		return $value;
 	}
-	
+
 	/**
 	*	Generates a string of random numbers and characters. 
 	*/
@@ -44,5 +44,5 @@
 	   	}
 		return $key;
 	}
-		
+
 ?>
