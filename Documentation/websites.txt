@@ -1,0 +1,69 @@
+# Websites
+
+One SWISDK installation can easily serve multiple websites.
+They may even be hierachically nested!
+
+The `config.ini` parser searches for sections named `website.xyz`, where `xyz`
+is either `default` for the default website or some other name for anything
+else.
+
+You can set the following values in the website section:
+
+`title`
+
+: Some descriptive title for this section. Might be used as website title
+  later.
+
+`fullTemplate`
+
+: path to a website template containing at least a `{$content}` marker.
+
+`header`
+
+: path to a partial template containing everything up to the
+  variable content
+
+`footer`
+
+: path to a partial template containing everything after the
+  variable content
+
+`match`
+
+: a regular expression which will be applied to the current URL. If the
+  expression matches, the current website section will be choosen.
+
+  If you don't supply a value for match, the URL's first path token
+  will be compared to the website name.
+
+`components`
+
+: comma-separated list of components that will always be executed.
+  You can either give the name alone (`Navigation`) or you can specify
+  a region from your smarty template (`region => Navigation`).
+
+  If you don't supply a region name, the lowercased component name
+  will be used.
+
+## Example website sections
+
+    [website.default]
+    title = Example.org
+    fullTemplate = path_to_template.html
+
+The following section handles everything below `/admin`
+
+    [website.admin]
+    title = Example.org Administration
+    fullTemplate = path_to_admin_template.html
+    components = Navigation
+
+Special section demonstrating the regular expression matching. We
+search for the two paths `/path1.1/path1.2` and `/path2` here.
+
+    [website.special]
+    title = Example.org Special subsection
+    fullTemplate = path_to_special_template.html
+    match = "/(path1.1\/path1.2|path2)"
+
+[[projects/swisdk|back to SWISDK]]

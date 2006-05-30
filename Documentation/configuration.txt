@@ -80,34 +80,7 @@ This tries to be a complete list of all configuration variables:
 
 `website.*`
 
-: Configuration for websites
-
-  You must provide at least either `fullTemplate` or `header` and `footer`
-  in this section!  
-  You can also specify a title and a regular expression for the website.
-
-  Example:
-
-    <pre><code>; handle site root
-    [website.default]
-    fullTemplate = path_to_template.html
-    title = some descriptive title
-
-    ; handle everything below /section-b/
-    [website.section-b]
-    fullTemplate = path_to_sectionb_template.html
-
-    ; handle everything which matches the regex `match`
-    [website.some-descriptive-name]
-    fullTemplate = path_to_template_xy.html
-    match = "/(abc|xyz\/def|section-b\/special-subsection)"</code></pre>
-
-  You can also provide a comma-separated list of components to execute
-  always (f.e. a `NavigationComponent`)
-
-  You can give the component name alone (`Navigation`) or you can specify
-  a region from your smarty template (`region => Navigation`).
-
+: Configuration for websites. Please see the [[websites]] page.
 
 `wiki.basedir` (string)
 
