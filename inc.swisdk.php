@@ -86,7 +86,7 @@
 						if(!is_array(Swisdk::$config[$name]))
 							Swisdk::$config[$name] = array();
 						array_unshift(Swisdk::$config[$name],
-							substr($section, $po1));
+							substr($section, $pos+1));
 					}
 					foreach($array as $key => $value)
 						Swisdk::$config[$section.'.'.$key] = $value;
