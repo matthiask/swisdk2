@@ -964,7 +964,7 @@
 		 * DBObject array
 		 */
 		protected $data = array();
-/**
+
 		/**
 		 * if this variable is non-null, it is used to assign the keys for
 		 * the DBObject array in init()
@@ -1004,6 +1004,8 @@
 		{
 			if($class instanceof DBObject)
 				return new DBOContainer($class);
+			else if(class_exists($class) && is_subclass_of($class, DBOContainer))
+				return new $class;
 			else
 				return new DBOContainer(DBObject::create($class));
 		}
