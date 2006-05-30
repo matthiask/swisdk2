@@ -696,11 +696,11 @@
 
 		public function init_value($dbobj)
 		{
-			$name = $this->name();
-			$sname = $this->_stripit($name);
+			$name = $this->iname();
+			$sname = $this->_stripit($this->name());
 
-			if(isset($_POST['__check_'.$this->box_name.$name])) {
-				if(getInput($this->box_name.$name))
+			if(isset($_POST['__check_'.$name])) {
+				if(getInput($name))
 					$dbobj->set($sname, 1);
 				else
 					$dbobj->set($sname, 0);
@@ -1045,7 +1045,7 @@
 		{
 			$name = $obj->iname();
 			$this->_render($obj, sprintf(
-				'<input type="checkbox" name="%s" id="%s" %s />'
+				'<input type="checkbox" name="%s" id="%s" %s value="1" />'
 				.'<input type="hidden" name="__check_'.$name
 				.'" value="1" />',
 				$name, $name,
