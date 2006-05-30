@@ -36,17 +36,19 @@ This tries to be a complete list of all configuration variables:
 
 : list of subclasses of ControllerDispatcherModule
 
-`dispatcher.*` (string)
+`dispatcher.*`
 
 : SiteHandler class which handles files with the given extension
   
   Example:
 
   Handle `/controller/` with file `CONTENT_ROOT/controller_ctrl.php`:
-    ctrl.php = PhpSiteHandler
+
+    `ctrl.php = PhpSiteHandler`
 
   Handle `/static_page/` with file `CONTENT_ROOT/static_page_tpl.html`:
-    tpl.html = SmartySiteHandler
+
+    `tpl.html = SmartySiteHandler`
 
 `error.debug_mode` (bool)
 
@@ -135,6 +137,11 @@ The following variables are only set while SWISDK is serving a request:
 `runtime.language_id` (int)
 
 : the language id
+
+`runtime.navigation.url` (string)
+
+: the URL which `NavigationComponent` should use to build the navigation
+  from. This value overrides `runtime.request.uri` if it is set.
 
 `runtime.request.host` (string)
 

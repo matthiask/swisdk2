@@ -1,5 +1,3 @@
-[[projects/swisdk|back to SWISDK]]
-
 # Realms
 
 Suppose you have a website which is managed by many people. Furthermore, you

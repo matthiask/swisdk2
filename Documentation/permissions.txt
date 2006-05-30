@@ -1,5 +1,3 @@
-[[projects/swisdk|back to SWISDK]]
-
 # Permissions
 
 **The permission system and [[realms]] are tightly intertwined. Be
