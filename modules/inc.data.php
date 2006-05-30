@@ -1335,10 +1335,22 @@
 		 */
 		protected $language;
 
-		public function language() {
+		public function language()
+		{
 			if($this->language == LANGUAGE_DEFAULT)
 				return Swisdk::language();
 			return $this->language;
+		}
+
+		public function set_language($language)
+		{
+			if($this->language == LANGUAGE_ALL)
+				SwisdkError::handle(new FatalError(
+					'Cannot assign language to DBObjectML in LANGUAGE_ALL mode'));
+			if($language == LANGUAGE_DEFAULT)
+				$this->language = Swisdk::language();
+			$this->language = $language;
+			$this->dbobj()->language_id = $this->language;
 		}
 
 		/**

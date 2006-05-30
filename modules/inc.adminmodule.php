@@ -136,9 +136,11 @@
 		public function run()
 		{
 			$form = null;
-			if($this->multilanguage)
-				$form = new FormML(DBObjectML::create($this->dbo_class));
-			else
+			if($this->multilanguage) {
+				$obj = DBObjectML::create($this->dbo_class);
+				$obj->set_language(Swisdk::language());
+				$form = new FormML($obj);
+			} else
 				$form = new Form(DBObject::create($this->dbo_class));
 			$this->form_builder()->build($form);
 			$form->set_title('New '.$this->dbo_class);
