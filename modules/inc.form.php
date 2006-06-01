@@ -292,60 +292,14 @@
 		 *
 		 * NOTE! The bound DBObject MUST point to a valid table if
 		 * you want to use this function.
-		 *
-		 * TODO: add_auto and FormBuilder implement the same autodetection
-		 * logic. Remove redundancy
 		 */
 		public function add_auto($field, $title=null)
 		{
-			$dbobj = $this->dbobj();
-			$fields = $dbobj->field_list();
-			$relations = $dbobj->relations();
-
-			$obj = null;
-
-			if(isset($relations[$fname=$field])
-					||isset($relations[$fname=$dbobj->name($field)])) {
-				switch($relations[$fname]['type']) {
-					case DB_REL_SINGLE:
-						$obj = new DropdownInput();
-						$dc = DBOContainer::find(
-							$relations[$fname]['class']);
-						$choices = array();
-						foreach($dc as $o) {
-							$items[$o->id()] = $o->title();
-						}
-						$obj->set_items($items);
-						break;
-					case DB_REL_MANYTOMANY:
-						$obj = new Multiselect();
-						$dc = DBOContainer::find(
-							$relations[$fname]['class']);
-						$items = array();
-						foreach($dc as $o) {
-							$items[$o->id()] = $o->title();
-						}
-						$obj->set_items($items);
-						break;
-				}
-			} else if(isset($fields[$fname=$field])
-					||isset($fields[$fname=$dbobj->name($field)])) {
-				$finfo = $fields[$fname];
-				if(strpos($fname,'dttm')!==false) {
-					$obj = new DateInput();
-				} else if(strpos($finfo['Type'], 'text')!==false) {
-					$obj = new Textarea();
-				} else if($finfo['Type']=='tinyint(1)') {
-					// mysql suckage. It does not really know
-					// a bool type, only tinyint(1)
-					$obj = new CheckboxInput();
-				} else {
-					$obj = new TextInput();
-				}
-			}
-
-			if($obj)
-				return $this->add_obj($fname, $obj, $title);
+			require_once MODULE_ROOT.'inc.builder.php';
+			static $builder = null;
+			if($builder===null)
+				$builder = new FormBuilder();
+			return $builder->create_auto($this, $field, $title);
 		}
 
 		protected function pretty_title($fname)

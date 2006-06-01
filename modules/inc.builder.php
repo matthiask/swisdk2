@@ -16,22 +16,26 @@
 			$dbobj = $this->dbobj();
 			if($title === null)
 				$title = $this->pretty_title($field, $dbobj);
-			$fields = $dbobj->field_list();
 			$relations = $dbobj->relations();
 
 			if(isset($relations[$fname=$field])
 					||isset($relations[$fname=$dbobj->name($field)])) {
 				switch($relations[$fname]['type']) {
 					case DB_REL_SINGLE:
-						$this->create_rel_single($fname, $title,
+						return $this->create_rel_single($fname, $title,
 							$relations[$fname]['class']);
-						break;
 					case DB_REL_MANYTOMANY:
-						$this->create_rel_many($fname, $title,
+						return $this->create_rel_many($fname, $title,
 							$relations[$fname]['class']);
-						break;
+					default:
+						SwisdkError::handle(new FatalError(
+							'Cannot handle'));
 				}
-			} else if(isset($fields[$fname=$field])
+			}
+
+			$fields = $dbobj->field_list();
+
+			if(isset($fields[$fname=$field])
 					||isset($fields[$fname=$dbobj->name($field)])) {
 				$finfo = $fields[$fname];
 
@@ -40,16 +44,16 @@
 					$dbobj->set($fname, $d);
 
 				if(strpos($fname,'dttm')!==false) {
-					$this->create_date($fname, $title);
+					return $this->create_date($fname, $title);
 				} else if(strpos($finfo['Type'], 'text')!==false) {
-					$this->create_textarea($fname, $title);
+					return $this->create_textarea($fname, $title);
 				} else if($finfo['Type']=='tinyint(1)') {
-					$this->create_bool($fname, $title);
+					return $this->create_bool($fname, $title);
 				} else if(strpos($finfo['Type'], 'enum')===0) {
-					$this->create_enum($fname, $title,
+					return $this->create_enum($fname, $title,
 						$this->_extract_enum_values($finfo['Type']));
 				} else {
-					$this->create_text($fname, $title);
+					return $this->create_text($fname, $title);
 				}
 			}
 		}
@@ -88,6 +92,12 @@
 				return $this->build_ml($form);
 			else
 				return $this->build_simple($form);
+		}
+
+		public function create_auto(&$form, $field, $title = null)
+		{
+			$this->form = $form;
+			return $this->create_field($field, $title);
 		}
 
 		public function build_simple(&$form, $submitbtn = true)
@@ -170,7 +180,7 @@
 				$items[$o->id()] = $o->title();
 			}
 			$obj->set_items($items);
-			$this->form->add($fname, $obj, $title);
+			return $this->form->add($fname, $obj, $title);
 		}
 
 		public function create_rel_many($fname, $title, $class)
@@ -182,34 +192,34 @@
 				$items[$o->id()] = $o->title();
 			}
 			$obj->set_items($items);
-			$this->form->add($fname, $obj, $title);
+			return $this->form->add($fname, $obj, $title);
 		}
 
 		public function create_date($fname, $title)
 		{
-			$this->form->add($fname, new DateInput(), $title);
+			return $this->form->add($fname, new DateInput(), $title);
 		}
 
 		public function create_textarea($fname, $title)
 		{
-			$this->form->add($fname, new Textarea(), $title);
+			return $this->form->add($fname, new Textarea(), $title);
 		}
 
 		public function create_bool($fname, $title)
 		{
-			$this->form->add($fname, new CheckboxInput(), $title);
+			return $this->form->add($fname, new CheckboxInput(), $title);
 		}
 
 		public function create_enum($fname, $title, $values)
 		{
 			$obj = new DropdownInput();
 			$obj->set_items(array_combine($values, $values));
-			$this->form->add($fname, $obj, $title);
+			return $this->form->add($fname, $obj, $title);
 		}
 
 		public function create_text($fname, $title)
 		{
-			$this->form->add($fname, new TextInput(), $title);
+			return $this->form->add($fname, new TextInput(), $title);
 		}
 	}
 
