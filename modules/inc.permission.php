@@ -80,6 +80,7 @@
 
 		public static function check_realm_role($realm, $role, $uid=null)
 		{
+			$realm = DBObject::db_escape($realm);
 			$user = null;
 			if(is_null($uid))
 				$user = SessionHandler::user();
