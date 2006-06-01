@@ -711,13 +711,17 @@
 		 * though. Perl does only now two escape functions and they work for
 		 * everything...)
 		 */
-		public static function db_escape($str)
+		public static function db_escape($str, $quote = true)
 		{
+			if($quote)
+				return '\''.DBObject::db()->escape_string($str).'\'';
 			return DBObject::db()->escape_string($str);
 		}
 
-		public static function db_escape_ref(&$str)
+		public static function db_escape_ref(&$str, $quote = true)
 		{
+			if($quote)
+				$str = '\''.DBObject::db()->escape_string($str).'\'';
 			$str = DBObject::db()->escape_string($str);
 		}
 
