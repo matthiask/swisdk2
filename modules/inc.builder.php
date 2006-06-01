@@ -34,6 +34,11 @@
 			} else if(isset($fields[$fname=$field])
 					||isset($fields[$fname=$dbobj->name($field)])) {
 				$finfo = $fields[$fname];
+
+				// set default value if it was set in database
+				if($dbobj->get($fname)===null && ($d = $fields[$fname]['Default']))
+					$dbobj->set($fname, $d);
+
 				if(strpos($fname,'dttm')!==false) {
 					$this->create_date($fname, $title);
 				} else if(strpos($finfo['Type'], 'text')!==false) {
