@@ -1112,6 +1112,10 @@
 							$this, 'set_index'),
 							$data);
 						break;
+					case ':join':
+						call_user_func_array(array(
+							$this, 'add_join'),
+							$data);
 				}
 				return;
 			}
@@ -1194,10 +1198,20 @@
 
 		/**
 		 * $doc->add_join('tbl_users', 'pen_user_id=user_id');
+		 *
+		 * or
+		 *
+		 * $doc->add_join('User');
 		 */
-		public function add_join($table, $clause)
+		public function add_join($table, $clause=null)
 		{
-			$this->joins .= ' LEFT JOIN ' . $table . ' ON ' . $clause;
+			if($clause===null) {
+				$dbo = DBObject::create($table);
+				$p = $dbo->primary();
+				$this->joins .= ' LEFT JOIN '.$dbo->table().' ON '
+					.$this->dbobj()->name($p).'='.$p;
+			} else
+				$this->joins .= ' LEFT JOIN ' . $table . ' ON ' . $clause;
 		}
 
 		/**
