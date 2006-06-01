@@ -74,8 +74,8 @@
 			}
 			return DBObject::db_get_row(
 				'SELECT realm_id,realm_role_id FROM tbl_realm WHERE '
-				.'(realm_url=\''.implode('\' OR realm_url=\'', $clauses)
-				.'\' OR realm_url=\'\') ORDER BY realm_url DESC LIMIT 1');
+				.'(realm_url='.implode(' OR realm_url=', $clauses)
+				.' OR realm_url=\'\') ORDER BY realm_url DESC LIMIT 1');
 		}
 
 		public static function check_realm_role($realm, $role, $uid=null)
