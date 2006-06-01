@@ -40,6 +40,9 @@
 					$this->create_textarea($fname, $title);
 				} else if($finfo['Type']=='tinyint(1)') {
 					$this->create_bool($fname, $title);
+				} else if(strpos($finfo['Type'], 'enum')===0) {
+					$this->create_enum($fname, $title,
+						$this->_extract_enum_values($finfo['Type']));
 				} else {
 					$this->create_text($fname, $title);
 				}
@@ -59,8 +62,19 @@
 		abstract public function create_date($fname, $title);
 		abstract public function create_textarea($fname, $title);
 		abstract public function create_bool($fname, $title);
+		abstract public function create_enum($fname, $title, $values);
 		abstract public function create_text($fname, $title);
+
+		protected function _extract_enum_values($string)
+		{
+			return explode('\',\'', substr($string, 6,
+				strlen($string)-8));
+		}
 	}
+
+	/**
+	 * TODO use default value from DB when constructing form?
+	 */
 
 	class FormBuilder extends BuilderBase {
 		public function build(&$form)
@@ -181,6 +195,13 @@
 			$this->form->add($fname, new CheckboxInput(), $title);
 		}
 
+		public function create_enum($fname, $title, $values)
+		{
+			$obj = new DropdownInput();
+			$obj->set_items(array_combine($values, $values));
+			$this->form->add($fname, $obj, $title);
+		}
+
 		public function create_text($fname, $title)
 		{
 			$this->form->add($fname, new TextInput(), $title);
@@ -298,6 +319,13 @@
 		{
 			$this->tv->append_column(
 				new BoolTableViewColumn($title, $fname));
+		}
+
+		public function create_enum($fname, $title, $values)
+		{
+			$this->tv->append_column(
+				new EnumTableViewColumn($title, $fname,
+					array_combine($values, $values)));
 		}
 
 		public function create_text($fname, $title)

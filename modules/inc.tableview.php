@@ -117,6 +117,16 @@
 		}
 	}
 
+	class EnumTableViewColumn extends TableViewColumn {
+		public function html(&$data)
+		{
+			$str = $data[$this->column];
+			if(isset($this->args[$str]))
+				return $this->args[$str];
+			return $str;
+		}
+	}
+
 	class TemplateTableViewColumn extends TableViewColumn {
 		public function html(&$data)
 		{
