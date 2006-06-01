@@ -1231,7 +1231,7 @@
 				&& count($fields = $this->obj->_fulltext_fields())) {
 				
 				$sql = ' AND (';
-				$search = DBObject::db_escape($this->fulltext_search);
+				$search = DBObject::db_escape($this->fulltext_search, false);
 				$sql .= implode(' LIKE \'%' . $search . '%\' OR ', $fields);
 				$sql .= ' LIKE \'%' . $search . '%\')';
 				return $sql;
