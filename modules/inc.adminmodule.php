@@ -193,6 +193,8 @@
 			else
 				$this->tableview = new DBTableView(
 					$this->dbo_class, 'DBTableViewForm');
+			if(class_exists($c = 'DBTableViewForm_'.$this->dbo_class))
+				$this->tableview->set_form($c);
 			$this->tableview->init();
 			$this->tableview_builder()->build($this->tableview);
 			$this->complete_columns();
