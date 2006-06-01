@@ -918,13 +918,16 @@
 			return DBObject::$fulltext_fields[$this->class];
 		}
 		
-		public function &field_list()
+		public function &field_list($field = null)
 		{
 			if(!isset(DBObject::$field_list[$this->class])) {
 				$rows = DBObject::db_get_array('SHOW COLUMNS FROM '
 					.$this->table(), 'Field');
 				DBObject::$field_list[$this->class] = $rows;
 			}
+			if($field!==null
+				&& isset(DBObject::$field_list[$this->class][$field]))
+				return DBObject::$field_list[$this->class][$field];
 			return DBObject::$field_list[$this->class];
 		}
 
