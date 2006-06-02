@@ -219,12 +219,11 @@
 
 				foreach($params as $k => $v)
 					if(preg_match($regex, $k))
-						$where[] = $k.'\''.DBObject::db_escape($v).'\' ';
+						$where[] = $k.DBObject::db_escape($v).' ';
 					else
-						$where[] = $p.$k.'\''.DBObject::db_escape($v)
-							.'\' ';
+						$where[] = $p.$k.DBObject::db_escape($v).' ';
 				$this->data = DBObject::db_get_row('SELECT * FROM '
-					.$this->table.implode(' AND ',$where));
+					.$this->table.implode(' AND ', $where));
 				if($this->data && count($this->data))
 					return true;
 			} else {
