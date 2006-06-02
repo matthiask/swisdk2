@@ -712,16 +712,19 @@
 		 */
 		public static function db_escape($str, $quote = true)
 		{
-			if($quote)
+			if($quote!==false)
 				return '\''.DBObject::db()->escape_string($str).'\'';
 			return DBObject::db()->escape_string($str);
 		}
 
+		/**
+		 * this function is used internally by DBOContainer::add_cl
+		 */
 		public static function db_escape_ref(&$str, $quote = true)
 		{
-			if($quote)
-				$str = '\''.DBObject::db()->escape_string($str).'\'';
 			$str = DBObject::db()->escape_string($str);
+			if($quote!==false)
+				$str = '\''.$str.'\'';
 		}
 
 		/**
@@ -1094,6 +1097,9 @@
 		 *
 		 * $doc->add_clause('pen_color=', $_POST['color']);
 		 * $doc->add_clause('pen_length>', $_POST['min-length']);
+		 *
+		 * $doc->add_clause('(pen_xy_id IN {blah} OR pen_yz={bleh})',
+		 * 	array('blah' => array(1,2,3), 'bleh' => 'string'));
 		 */
 		public function add_clause($clause, $data=null, $binding = 'AND')
 		{
