@@ -139,7 +139,7 @@
 	 *
 	 * There may be 1-n FormBoxes in one Form
 	 */
-	class FormBox implements Iterator {
+	class FormBox implements Iterator, ArrayAccess {
 		protected $title;
 		protected $items = array();
 		protected $boxrefs = array();
@@ -439,6 +439,21 @@
 		public function key()		{ return key($this->items); }
 		public function next()		{ return next($this->items); }
 		public function valid()		{ return $this->current() !== false; }
+
+		/**
+		 * ArrayAccess implementation (see PHP SPL)
+		 */
+		
+		public function offsetExists($offset) { return isset($this->items[$offset]); }
+		public function offsetGet($offset) { return $this->items[$offset]; }
+		public function offsetSet($offset, $value)
+		{
+			if($offset===null)
+				$this->items[] = $value;
+			else
+				$this->items[$offset] = $value;
+		}
+		public function offsetUnset($offset) { unset($this->items[$offset]); }
 	}
 
 	/**
