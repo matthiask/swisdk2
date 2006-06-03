@@ -248,7 +248,7 @@
 			$dbobj = $this->dbobj();
 			$fields = array_keys($dbobj->field_list());
 			$ninc_regex = '/^'.$dbobj->_prefix()
-				.'(creation_dttm|password)$/';
+				.'(password)$/';
 			foreach($fields as $fname)
 				if(!preg_match($ninc_regex, $fname))
 					$this->create_field($fname, null);
@@ -276,7 +276,7 @@
 			$this->dbobj = $this->dbobj->dbobj();
 			$fields = array_keys($this->dbobj->field_list());
 			$ninc_regex = '/^'.$this->dbobj->_prefix()
-				.'(id|creation_dttm|password|language_id|'.$primary.')$/';
+				.'(id|password|language_id|'.$primary.')$/';
 			foreach($fields as $fname)
 				if(!preg_match($ninc_regex, $fname))
 					$this->create_field($fname);
