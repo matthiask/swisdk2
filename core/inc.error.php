@@ -98,7 +98,12 @@
 		{
 			$bt = debug_backtrace();
 			$str = "<pre><b>Backtrace:</b>\n";
+			$disp = false;
 			foreach($bt as $frame) {
+				if($frame['class']=='SwisdkError' && $frame['function']=='handle')
+					$disp = true;
+				if(!$disp)
+					continue;
 				$str .= sprintf("%s() called at [%s]\n",
 					(isset($frame['class'])?
 					$frame['class'].$frame['type']:'').
@@ -145,7 +150,7 @@
 		protected function debug_string()
 		{
 			// return the SQL string when debug mode is activated
-			return "\n".$this->args[1];
+			return "\n".$this->args[1]."\n".parent::debug_string();
 		}
 	}
 
