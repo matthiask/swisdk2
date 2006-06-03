@@ -76,8 +76,9 @@
 
 		protected function _extract_enum_values($string)
 		{
-			return explode('\',\'', substr($string, 6,
+			$array = explode('\',\'', substr($string, 6,
 				strlen($string)-8));
+			return array_combine($array, $array);
 		}
 	}
 
@@ -218,7 +219,7 @@
 		public function create_enum($fname, $title, $values)
 		{
 			$obj = new DropdownInput();
-			$obj->set_items(array_combine($values, $values));
+			$obj->set_items($values);
 			return $this->form->add($fname, $obj, $title);
 		}
 
@@ -344,8 +345,7 @@
 		public function create_enum($fname, $title, $values)
 		{
 			$this->tv->append_column(
-				new EnumTableViewColumn($title, $fname,
-					array_combine($values, $values)));
+				new EnumTableViewColumn($title, $fname, $values));
 		}
 
 		public function create_text($fname, $title)
