@@ -155,6 +155,45 @@
 	class AdminComponent_edit extends AdminComponent {
 		public function run()
 		{
+			if($this->args[0]=='multiple')
+				$this->edit_multiple();
+			else
+				$this->edit_single();
+		}
+
+		protected function edit_multiple()
+		{
+			$dbo = null;
+
+			if($this->multilanguage)
+				$dbo = DBObjectML::create($this->dbo_class);
+			else
+				$dbo = DBObject::create($this->dbo_class);
+			$p = $dbo->primary();
+
+			$dboc = DBOContainer::find($dbo, array(
+				$p.' IN {list}' => array('list' => getInput($p))));
+
+			$builder = $this->form_builder();
+			$form = new Form();
+			$form->enable_unique();
+			foreach($dboc as $dbo) {
+				$box = $form->box($dbo->id());
+				$box->bind($dbo);
+				$box->add(new HiddenInput($p.'[]'))->set_value($dbo->id());
+				$builder->build($box);
+			}
+
+			if($form->is_valid()) {
+				$dboc->store();
+				$this->goto('_index');
+			} else
+				$this->html = $form->html();
+				return;
+		}
+
+		protected function edit_single()
+		{
 			$dbo = null;
 			if($this->multilanguage)
 				$dbo = DBObjectML::find($this->dbo_class, $this->args[0]);
@@ -187,12 +226,13 @@
 		public function run()
 		{
 			if($this->multilanguage)
-				$this->tableview = new DBTableView(
+				$this->tableview = new MultiDBTableView(
 					DBObjectML::create($this->dbo_class),
 					'DBTableViewForm');
 			else
-				$this->tableview = new DBTableView(
+				$this->tableview = new MultiDBTableView(
 					$this->dbo_class, 'DBTableViewForm');
+			$this->tableview->set_target($this->module_url);
 			if(class_exists($c = 'DBTableViewForm_'.$this->dbo_class))
 				$this->tableview->set_form($c);
 			$this->tableview->init();
@@ -208,6 +248,31 @@
 
 	class AdminComponent_delete extends AdminComponent {
 		public function run()
+		{
+			if($this->args[0]=='multiple')
+				$this->delete_multiple();
+			else
+				$this->delete_single();
+		}
+
+		protected function delete_multiple()
+		{
+			$dbo = null;
+
+			if($this->multilanguage)
+				$dbo = DBObjectML::create($this->dbo_class);
+			else
+				$dbo = DBObject::create($this->dbo_class);
+			$p = $dbo->primary();
+
+			$dboc = DBOContainer::find($dbo, array(
+				$p.' IN {list}' => array('list' => getInput($p))));
+
+			$dboc->delete();
+			$this->goto('_index');
+		}
+
+		protected function delete_single()
 		{
 			$dbo = null;
 			if($this->multilanguage)
