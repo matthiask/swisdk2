@@ -20,6 +20,17 @@
 		protected $arguments;
 		protected $multilanguage = false;
 
+		/**
+		 * this function tries to find a AdminComponent to handle the
+		 * incoming request.
+		 *
+		 * 1.: AdminComponent_DBObjectClass_action
+		 * 	for example: AdminComponent_News_edit
+		 * 2.: AdminComponent_action
+		 * 	these default implementations are provided below
+		 * 3.: AdminComponent_DBObjectClass_index
+		 * 4.: AdminComponent_index
+		 */
 		protected function component_dispatch()
 		{
 			$args = Swisdk::config_value('runtime.arguments');
@@ -37,8 +48,13 @@
 			
 			$this->arguments = $args;
 
-			if(!$cmp)
-				$cmp = new AdminComponent_index();
+			if(!$cmp) {
+				$cmp_class = 'AdminComponent_'.$this->dbo_class.'_index';
+				if(class_exists($cmp_class))
+					$cmp = new $cmp_class;
+				else
+					$cmp = new AdminComponent_index();
+			}
 
 			$cmp->set_module($this);
 
@@ -64,33 +80,39 @@
 			return $this->dbo_class;
 		}
 
+		/**
+		 * @return the remaining arguments after the module
+		 */
 		public function component_arguments()
 		{
 			return $this->arguments;
 		}
 
+		/**
+		 * @return multilanguage flag
+		 */
 		public function multilanguage()
 		{
 			return $this->multilanguage;
 		}
 	}
 
-	class AdminComponent implements IHtmlComponent {
+	abstract class AdminComponent implements IHtmlComponent {
 		protected $module_url;
 		protected $dbo_class;
 		protected $args;
 		protected $html;
 		protected $multilanguage;
 
-		public function run()
-		{
-		}
-
 		public function html()
 		{
 			return $this->html;
 		}
 
+		/**
+		 * the Component will get all informations it needs
+		 * from the AdminModule
+		 */
 		public function set_module(&$module)
 		{
 			$this->module_url = $module->url();
@@ -107,7 +129,12 @@
 			redirect($this->module_url.$tok);
 		}
 
-
+		/**
+		 * @return a FormBuilder instance 
+		 *
+		 * If a class FormBuilder_DBObjectClass exists, it will be
+		 * created and returned, otherwise the default FormBuilder
+		 */
 		public function form_builder()
 		{
 			$cmp_class = 'FormBuilder_'.$this->dbo_class;
@@ -116,6 +143,11 @@
 			return new FormBuilder();
 		}
 
+		/**
+		 * @return a TableViewBuilder instance
+		 *
+		 * same comments as above apply
+		 */
 		public function tableview_builder()
 		{
 			$cmp_class = 'TableViewBuilder_'.$this->dbo_class;
@@ -244,7 +276,6 @@
 				$this->goto('_index');
 			} else
 				$this->html = $form->html();
-				return;
 		}
 
 		protected function edit_single()
