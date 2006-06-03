@@ -126,13 +126,17 @@
 			$dir = $this->form->dbobj()->dir;
 			$html = '<thead><tr>';
 			foreach($this->columns as &$col) {
-				$html .= '<th><a href="#" onclick="order(\''.$col->column().'\')">';
-				$html .= $col->title();
-				if($col->column()==$order
-						&& (!$col instanceof CmdsTableViewColumn)) {
-					$html .= $dir=='DESC'?'&nbsp;&uArr;':'&nbsp;&dArr;';
+				$html .= '<th>';
+				if(!($col instanceof NoTitleTableViewColumn)) {
+					$html .= '<a href="#" onclick="order(\''.$col->column().'\')">';
+					$html .= $col->title();
+					if($col->column()==$order
+							&& (!$col instanceof NoTitleTableViewColumn)) {
+						$html .= $dir=='DESC'?'&nbsp;&uArr;':'&nbsp;&dArr;';
+					}
+					$html .= '</a>';
 				}
-				$html .= '</a></th>';
+				$html .= '</th>';
 			}
 
 			$html .= "</tr></thead>\n";
@@ -142,13 +146,7 @@
 		protected function render_foot()
 		{
 			$colcount = count($this->columns);
-			$formobj = $this->form->dbobj();
-			$p = $formobj->_prefix();
-			$data = $formobj->data();
-
-			$first = $data[$p.'start']+1;
-			$count = $this->obj->total_count();
-			$last = min($count, $first+$data[$p.'limit']-1);
+			list($first, $count, $last) = $this->list_position();
 
 			$str = 'displaying '.$first.'&ndash;'.$last.' of '.$count;
 			return '<tfoot><tr><td colspan="'.$colcount.'">'.$str.' | skim '
@@ -157,11 +155,27 @@
 				.'</td></tr></tfoot>';
 		}
 
+		protected function list_position()
+		{
+			$formobj = $this->form->dbobj();
+			$p = $formobj->_prefix();
+			$data = $formobj->data();
+
+			return array($data[$p.'start']+1,
+				$this->obj->total_count(),
+				min($count, $first+$data[$p.'limit']-1));
+		}
+
 		public function html()
+		{
+			return $this->form->html().parent::html().$this->form_javascript();
+		}
+
+		protected function form_javascript()
 		{
 			$id = $this->form->id();
 			$p = $this->form->dbobj()->_prefix();
-			return $this->form->html().parent::html().<<<EOD
+			return <<<EOD
 <script type="text/javascript">
 function order(col) {
 	var order = document.forms.$id.{$p}order;
@@ -197,6 +211,82 @@ EOD;
 				$this->columns[$offset] = $value;
 		}
 		public function offsetUnset($offset) { unset($this->columns[$offset]); }
+	}
+
+	class IDTableViewColumn extends NoTitleTableViewColumn {
+		public function html(&$data)
+		{
+			$id = $data[$this->column];
+			return sprintf('<input type="checkbox" name="%s[]" value="%d" />',
+				$this->column, $data[$this->column]);
+		}
+
+		public function name()
+		{
+			return '__id_'.$this->column;
+		}
+	}
+
+	class MultiDBTableView extends DBTableView {
+		protected $target = null;
+
+		public function set_target($target)
+		{
+			$this->target = $target;
+		}
+
+		public function html()
+		{
+			array_unshift($this->columns, new IDTableViewColumn(
+				null, $this->dbobj()->dbobj()->primary()));
+			return $this->form->html()
+				.$this->form_javascript()
+				.'<form name="tableview" action="'.$this->target.'" method="post">'
+				.'<input type="hidden" name="multiple" value="1" />'
+				.'<input type="hidden" name="command" value="" />'
+				.'<table>'
+				.$this->render_head()
+				.$this->render_body()
+				.$this->render_foot()
+				.'</table></form>';
+		}
+
+		public function render_foot()
+		{
+			$colcount = count($this->columns);
+			list($first, $count, $last) = $this->list_position();
+
+			$str = 'displaying '.$first.'&ndash;'.$last.' of '.$count;
+			return '<tfoot><tr>'
+				.'<td colspan="'.$colcount.'">'
+				.'<div style="float:left">'
+					.'<a href="javascript:tv_edit()">edit</a>'
+					.' or '
+					.'<a href="javascript:tv_delete()">delete</a> checked'
+				.'</div>'
+				.$str.' | skim '
+				.'<a href="javascript:skim(-'.$this->items_on_page.')">backwards</a> or '
+				.'<a href="javascript:skim('.$this->items_on_page.')">forwards</a>'
+				.'</td>'
+				.'</tr></tfoot>'.<<<EOD
+<script type="text/javascript">
+function tv_edit()
+{
+	document.forms.tableview.command.value='edit';
+	document.forms.tableview.action+='_edit/multiple';
+	document.forms.tableview.submit();
+}
+function tv_delete()
+{
+	if(!confirm('Really delete?'))
+		return;
+	document.forms.tableview.command.value='delete';
+	document.forms.tableview.action+='_delete/multiple';
+	document.forms.tableview.submit();
+}
+</script>
+EOD;
+		}
 	}
 
 ?>
