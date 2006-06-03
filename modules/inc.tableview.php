@@ -174,7 +174,13 @@
 		}
 	}
 
-	class CmdsTableViewColumn extends TableViewColumn {
+	/**
+	 * type hint for DBTableView
+	 */
+	abstract class NoTitleTableViewColumn extends TableViewColumn {
+	}
+
+	class CmdsTableViewColumn extends NoTitleTableViewColumn {
 		public function html(&$data)
 		{
 			$id = $data[$this->column];
@@ -183,11 +189,6 @@
 <a href="{$this->title}_delete/$id">delete</a>
 EOD;
 			return $html;
-		}
-
-		public function title()
-		{
-			return null;
 		}
 
 		public function name()
