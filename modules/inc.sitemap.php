@@ -6,6 +6,11 @@
 	*/
 
 	class SwisdkSitemap {
+
+		/**
+		 * return a fragment of the sitemap as specified
+		 * with the $url parameter
+		 */
 		public static function page($url, $site = 'default')
 		{
 			$sitemap = SwisdkSitemap::sitemap();
@@ -13,6 +18,8 @@
 			if(array_keys($ref)==array(''))
 				$ref =& reset($ref);
 			$tokens = explode('/', substr($url, 1));
+
+			// drill down until there are no more URL tokens
 			foreach($tokens as $t) {
 				if(!$t)
 					continue;
@@ -25,6 +32,9 @@
 			return $ref;
 		}
 
+		/**
+		 * return the whole sitemap
+		 */
 		public static function sitemap()
 		{
 			static $sitemap = null;
@@ -37,6 +47,9 @@
 
 				$regenerate = false;
 				if(file_exists($phpfile)) {
+					// regenerate if either sitemap.xml or the xsl
+					// stylesheet are newer than the cached php
+					// version
 					$xmls = stat($xmlfile);
 					$xsls = stat($xslfile);
 					$phps = stat($phpfile);
@@ -57,6 +70,10 @@
 				}
 
 				require_once $phpfile;
+
+				// do some postprocessing
+				// add full URLs and titles for every page, and also
+				// parent references where applicable
 
 				if(!isset($_swisdk2_sitemap['processed'])) {
 					foreach($_swisdk2_sitemap as &$site) {

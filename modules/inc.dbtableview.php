@@ -25,11 +25,18 @@
 			}
 		}
 
+		/**
+		 * setup() above will add a title and a submit button to the form
+		 * if you do not return false here, thereby making the form visible
+		 */
 		protected function setup_additional()
 		{
 			return false;
 		}
 
+		/**
+		 * add fulltext search field to form
+		 */
 		protected function add_fulltext_field()
 		{
 			$this->add($this->dbobj()->name('query'));
@@ -40,6 +47,10 @@
 			return Form::to_form_id($this->dbobj());
 		}
 
+		/**
+		 * call this function with your DBOContainer prior to
+		 * initialization!
+		 */
 		public function set_clauses(DBOContainer &$container)
 		{
 			$obj = $this->dbobj();
@@ -50,13 +61,30 @@
 		}
 	}
 
+	/**
+	 * display records in a searchable and sortable table
+	 */
 	class DBTableView extends TableView implements ArrayAccess {
 
+		/**
+		 * DBOContainer instance
+		 */
 		protected $obj;
+
+		/**
+		 * search form instance
+		 */
 		protected $form;
 
+		/**
+		 * the maximal count of items to display on one page
+		 */
 		protected $items_on_page = 10;
 
+		/**
+		 * @param obj: DBOContainer instance, DBObject instance or class
+		 * @param form: Form instance or class
+		 */
 		public function __construct($obj=null, $form=null)
 		{
 			if($obj)
@@ -82,6 +110,9 @@
 				$this->form = new $form();
 		}
 
+		/**
+		 * you need to call init() prior to adding any columns 
+		 */
 		public function init()
 		{
 			if(!$this->obj)
@@ -107,11 +138,17 @@
 			$this->set_data($this->obj->data());
 		}
 
+		/**
+		 * @return the DBOContainer
+		 */
 		public function &dbobj()
 		{
 			return $this->obj;
 		}
 
+		/**
+		 * @return the form instance
+		 */
 		public function form()
 		{
 			if(!$this->form) {
@@ -233,9 +270,17 @@ EOD;
 		}
 	}
 
+	/**
+	 * DBTableView specialization which allows to select several records
+	 * at once for deleting or editing
+	 */
 	class MultiDBTableView extends DBTableView {
 		protected $target = null;
 
+		/**
+		 * set the form target (f.e. your AdminModule controller url; the
+		 * controller must be able to handle the 'multiple' requests)
+		 */
 		public function set_target($target)
 		{
 			$this->target = $target;
@@ -257,6 +302,9 @@ EOD;
 				.'</table></form>';
 		}
 
+		/**
+		 * add edit and delete links to the table footer
+		 */
 		public function render_foot()
 		{
 			$colcount = count($this->columns);

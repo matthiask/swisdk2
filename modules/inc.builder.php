@@ -11,6 +11,12 @@
 
 	abstract class BuilderBase {
 		
+		/**
+		 * this function tries to handle everything that gets thrown at it
+		 *
+		 * it first searches the relations and then the field list for
+		 * matches.
+		 */
 		public function create_field($field, $title = null)
 		{
 			$dbobj = $this->dbobj();
@@ -25,7 +31,7 @@
 						return $this->create_rel_single($fname, $title,
 							$relations[$fname]['class']);
 					case DB_REL_MANYTOMANY:
-						return $this->create_rel_many($fname, $title,
+						return $this->create_rel_manytomany($fname, $title,
 							$relations[$fname]['class']);
 					default:
 						SwisdkError::handle(new FatalError(
@@ -65,15 +71,55 @@
 					.')?(.*?)(_id|_dttm)?$/', '\2', $field)));
 		}
 
+		/**
+		 * @return a DBObject instance of the correct class
+		 */
 		abstract public function dbobj();
+
+		/**
+		 * create a FormItem/Column for a relation of type has_a or
+		 * belongs_to
+		 */
 		abstract public function create_rel_single($fname, $title, $class);
-		abstract public function create_rel_many($fname, $title, $class);
+
+		/**
+		 * create a FormItem/Column for a relation of type n-to-m
+		 *
+		 * XXX this does not work correctly for TableViews right now
+		 */
+		abstract public function create_rel_manytomany($fname, $title, $class);
+
+		/**
+		 * create a date widget
+		 */
 		abstract public function create_date($fname, $title);
+
+		/**
+		 * create a textarea widget (f.e. length-limited for TableView)
+		 */
 		abstract public function create_textarea($fname, $title);
+
+		/**
+		 * checkbox or true/false column
+		 */
 		abstract public function create_bool($fname, $title);
+
+		/**
+		 * special handling of enum fields
+		 */
 		abstract public function create_enum($fname, $title, $values);
+
+		/**
+		 * everything else
+		 */
 		abstract public function create_text($fname, $title);
 
+		/**
+		 * helper which parses the MySQL enum field type description
+		 * and returns an array of all enums
+		 *
+		 * enum('a','b','c') => array('a'=>'a', 'b'=>'b', 'c'=>'c')
+		 */
 		protected function _extract_enum_values($string)
 		{
 			$array = explode('\',\'', substr($string, 6,
@@ -83,7 +129,7 @@
 	}
 
 	/**
-	 * TODO use default value from DB when constructing form?
+	 * TODO use default value from DB when constructing form? (not only for enums)
 	 */
 
 	class FormBuilder extends BuilderBase {
@@ -95,6 +141,9 @@
 				return $this->build_simple($form);
 		}
 
+		/**
+		 * this is used by FormBox::add_auto
+		 */
 		public function create_auto(&$form, $field, $title = null)
 		{
 			$this->form = $form;
@@ -189,7 +238,10 @@
 			return $this->form->add($fname, $obj, $title);
 		}
 
-		public function create_rel_many($fname, $title, $class)
+		/**
+		 * you could also display a list of checkboxes here...
+		 */
+		public function create_rel_manytomany($fname, $title, $class)
 		{
 			$obj = new Multiselect();
 			$dc = DBOContainer::find($class);
@@ -318,7 +370,7 @@
 				$title, $fname, $class));
 		}
 
-		public function create_rel_many($fname, $title, $class)
+		public function create_rel_manytomany($fname, $title, $class)
 		{
 			$this->tv->append_column(new DBTableViewColumn(
 				$title, $fname, $class));

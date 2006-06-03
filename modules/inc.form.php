@@ -19,21 +19,47 @@
 
 	class Form implements Iterator {
 
+		/**
+		 * array of formboxes (always at least one)
+		 */
 		protected $boxes = array();
+
+		/**
+		 * main form title
+		 */
 		protected $title;
+
+		/**
+		 * form id. Should be unique for the whole page
+		 *
+		 * FIXME make _really_ unique. It works without, but it is _ugly_
+		 */
 		protected $id = 'suppe';
+
+		/**
+		 * should the FormItem's names be mangled so that they are _really_
+		 * unique (f.e. edit multiple records of the same type on one page)
+		 */
 		protected $unique = false;
 
-		public function __construct($dbobj=null, $autogenerate=false)
+		public function __construct($dbobj=null)
 		{
 			if($dbobj)
-				$this->bind($dbobj, $autogenerate);
+				$this->bind($dbobj);
 		}
 
 		public function id() { return $this->id; }
 		public function title() { return $this->title; }
 		public function set_title($title=null) { $this->title = $title; }
+		public function enable_unique() { $this->unique = true; }
 
+		/**
+		 * return the FormBox with the given ID (this ID has no further
+		 * meaning)
+		 *
+		 * This function should also be used to create FormBoxes (FormML
+		 * returns FormMLBox)
+		 */
 		public function &box($id=0)
 		{
 			if(!isset($this->boxes[$id])) {
@@ -44,11 +70,11 @@
 			return $this->boxes[$id];
 		}
 
-		public function enable_unique()
-		{
-			$this->unique = true;
-		}
-
+		/**
+		 * easy form usage:
+		 *
+		 * forward these calls to the default FormBox
+		 */
 		public function dbobj()
 		{
 			return $this->box()->dbobj();
@@ -77,6 +103,9 @@
 			return call_user_func_array(array($this->box(), 'add_rule'), $args);
 		}
 
+		/**
+		 * search and return a FormItem
+		 */
 		public function item($name)
 		{
 			foreach($this->boxes as &$box)
@@ -103,6 +132,9 @@
 			return $renderer->html();
 		}
 
+		/**
+		 * accept the FormRenderer
+		 */
 		public function accept($renderer)
 		{
 			$renderer->visit($this);
@@ -140,17 +172,48 @@
 	 * There may be 1-n FormBoxes in one Form
 	 */
 	class FormBox implements Iterator, ArrayAccess {
+
+		/**
+		 * the title of this Box
+		 */
 		protected $title;
+
+		/**
+		 * holds all FormItems and FormBoxes that are part of this
+		 * FormBox
+		 */
 		protected $items = array();
+
+		/**
+		 * holds references to all FormBoxes which are stored in the
+		 * $items array
+		 */
 		protected $boxrefs = array();
 
 		/**
 		 * holds the DBObject bound to this FormBox
 		 */
 		protected $dbobj;
-		protected $form;
+
+		/**
+		 * every FormBox has its own unique form id
+		 */
 		protected $form_id;
+
+		/**
+		 * same as comment form Form::$unique
+		 */
 		protected $unique = false;
+
+		/**
+		 * validation message
+		 */
+		protected $message;
+
+		/**
+		 * Form and FormBox rules
+		 */
+		protected $rules = array();
 
 		/**
 		 * @param $dbobj: the DBObject bound to the Form
@@ -160,6 +223,10 @@
 			if($dbobj)
 				$this->bind($dbobj);
 		}
+
+		public function enable_unique() { $this->unique = true; }
+		public function set_title($title=null) { $this->title = $title; }
+		public function title() { return $this->title; }
 
 		/**
 		 * @param dbobj: a DBObject
@@ -194,6 +261,11 @@
 			$this->form_id = FormBox::to_form_id($this->dbobj());
 		}
 
+		/**
+		 * take a DBObject and return a form id
+		 *
+		 * XXX is it really necessary to take anything else but DBObjects?
+		 */
 		public static function to_form_id($tok, $id=0)
 		{
 			if($tok instanceof DBObject) {
@@ -203,28 +275,10 @@
 			return '__swisdk_form_'.$tok.'_'.($id?$id:0);
 		}
 
-		public function enable_unique()
-		{
-			$this->unique = true;
-		}
-
 		/**
-		 * set the (optional) title of a FormBox
+		 * add a validation message to the FormBox (will be displayed after
+		 * everything else)
 		 */
-		public function set_title($title=null)
-		{
-			$this->title = $title;
-		}
-
-		public function title()
-		{
-			return $this->title;
-		}
-
-		/**
-		 * add a validation message to the form
-		 */
-		protected $message;
 		public function message()		{ return $this->message; }
 		public function set_message($message)	{ $this->message = $message; }
 		public function add_message($message)
@@ -240,21 +294,17 @@
 			$this->rules[] = $rule;
 		}
 
-		protected $rules = array();
-
 		/**
-		 * This function has (at least) three overloads:
+		 * add a new element to this FormBox
 		 *
-		 * add(Title, FormItem)
-		 * add(Title, RelSpec) // See DBObject for the relation specs
+		 * add(field) // default FormItem is TextInput
+		 * add(field, FormItem)
+		 * add(field, FormItem, title)
+		 * add(relspec, title)
 		 * add(FormItem)
+		 * add(FormBox)
 		 *
-		 * Examples:
-		 *
-		 * $form->add('Title', new TextInput());
-		 * $form->add('Creation', new DateInput());
-		 * $form->add('Priority', 'ItemPriority');
-		 * $form->add(new SubmitButton());
+		 * returns the newly added FormItem
 		 */
 		public function add()
 		{
@@ -302,6 +352,18 @@
 			return $builder->create_auto($this, $field, $title);
 		}
 
+		/**
+		 * return a prettyfied title for this formitem name
+		 *
+		 * Examples:
+		 *
+		 * DBObject class: News
+		 *
+		 * news_title => Title
+		 * news_creation_dttm => Creation
+		 * news_description => Description
+		 * news_xy_zx => Xy Zx
+		 */
 		protected function pretty_title($fname)
 		{
 			return ucwords(str_replace('_', ' ',
@@ -309,6 +371,9 @@
 					.')?(.*?)(_id|_dttm)?$/', '\2', $fname)));
 		}
 
+		/**
+		 * handle add(FormItem) case
+		 */
 		protected function add_initialized_obj($obj)
 		{
 			$obj->set_preinitialized();
@@ -323,17 +388,15 @@
 			return $obj;
 		}
 
+		/**
+		 * handle add(field, FormItem) and add(field, FormItem, title) cases
+		 */
 		protected function add_obj($field, $obj, $title=null)
 		{
 			$dbobj = $this->dbobj();
 
 			if($title===null)
 				$title = $this->pretty_title($field);
-
-			/*
-			$field = $this->dbobj()->name(
-				$obj->field_name($title));
-			*/
 
 			$obj->set_title($title);
 			$obj->set_name($field);
@@ -347,6 +410,9 @@
 			return $obj;
 		}
 
+		/**
+		 * handle add(relspec, title) case
+		 */
 		protected function add_dbobj_ref($relspec, $title=null)
 		{
 			$relations = $this->dbobj()->relations();
@@ -387,6 +453,9 @@
 			}
 		}
 
+		/**
+		 * accept the FormRenderer
+		 */
 		public function accept($renderer)
 		{
 			$this->add($this->form_id, new HiddenInput())->set_value(1);
@@ -464,7 +533,6 @@
 	 */
 
 	class FormML extends Form {
-		// this is only a type marker for the FormBuilder
 		public function &box($id=0)
 		{
 			if(!isset($this->boxes[$id])) {
@@ -478,6 +546,7 @@
 	}
 
 	class FormMLBox extends FormBox {
+		// this is only a type marker for the FormBuilder
 	}
 
 	/**
@@ -522,18 +591,17 @@
 		protected $box_name = null;
 
 		/**
-		 * helper for Form::add_obj()
-		 *
-		 * Examples for a DBObject of class 'Item':
-		 *
-		 * TextInput with title 'Title' will be item_title
-		 * Textarea with title 'Description' will be item_description
-		 * DateInput with title 'Creation' will be item_creation_dttm
-		 *
-		 * This function must not add the prefix (item_), because that will
-		 * be added later. It should add _dttm for DateInput, however.
+		 * is this FormItem part of a Form/FormBox with unique-ness
+		 * enabled?
 		 */
-		public function field_name($title)	{ return strtolower($title); } 
+		protected $unique = false;
+
+		/**
+		 * has this element beed added to the FormBox with
+		 * add_initialized_obj ? If yes, do not mangle the name even
+		 * if $unique is true
+		 */
+		protected $preinitialized = false;
 
 		public function __construct($name=null)
 		{
@@ -559,29 +627,25 @@
 			else
 				$this->message = $message;
 		}
+		public function enable_unique() { $this->unique = true; }
+		public function set_preinitialized() { $this->preinitialized = true; }
 
+
+		/**
+		 * return a unique name for this FormItem
+		 */
 		public function iname() {
 			return ((!$this->preinitialized&&$this->unique)?
 				$this->box_name:'').$this->name;
 		}
 
+		/**
+		 * get some informations from the FormBox containing this
+		 * FormItem
+		 */
 		public function set_form_box(&$box)
 		{
 			$this->box_name = $box->id().'_';
-		}
-
-		protected $unique = false;
-
-		public function enable_unique()
-		{
-			$this->unique = true;
-		}
-
-		protected $preinitialized = false;
-
-		public function set_preinitialized()
-		{
-			$this->preinitialized = true;
 		}
 
 		/**
@@ -622,6 +686,10 @@
 			return $html;
 		}
 
+		/**
+		 * get the value from the user and store it in this FormItem
+		 * and also in the corresponding field in the bound DBObject
+		 */
 		public function init_value($dbobj)
 		{
 			$name = $this->name();
@@ -637,6 +705,9 @@
 			$this->set_value($dbobj->get($sname));
 		}
 
+		/**
+		 * add a FormItem validation rule
+		 */
 		public function add_rule(FormItemRule $rule)
 		{
 			$this->rules[] = $rule;
@@ -657,6 +728,9 @@
 		}
 	}
 
+	/**
+	 * base class for several simple input fields
+	 */
 	abstract class SimpleInput extends FormItem {
 		protected $type = '#INVALID';
 		public function type()
@@ -682,6 +756,10 @@
 		protected $attributes = array('size' => 60);
 	}
 
+	/**
+	 * CheckboxInput uses another hidden input field to verify if
+	 * the Checkbox was submitted at all.
+	 */
 	class CheckboxInput extends FormItem {
 		protected $type = 'checkbox';
 
@@ -701,6 +779,11 @@
 		}
 	}
 
+	/**
+	 * true, false and i-don't know!
+	 *
+	 * (or, more accurately, checked, unchecked and mixed)
+	 */
 	class TristateInput extends FormItem {
 	}
 
@@ -708,6 +791,9 @@
 		protected $attributes = array('rows' => 12, 'cols' => 60);
 	}
 
+	/**
+	 * Textarea with all the Wysiwyg-Bling!
+	 */
 	class RichTextarea extends FormItem {
 		protected $attributes = array('style' => 'width:800px;height:300px;');
 	}
@@ -742,6 +828,9 @@
 		}
 	}
 
+	/**
+	 * display all enum choices for a given SQL field
+	 */
 	class EnumInput extends Multiselect {
 
 		/**
@@ -775,13 +864,6 @@
 	}
 
 	class DateInput extends FormItem {
-		/**
-		 * see also comment at FormItem::field_name()
-		 */
-		public function field_name($title)
-		{
-			return strtolower($title) . '_dttm';
-		}
 	}
 
 	abstract class FormRule {
@@ -860,6 +942,12 @@
 		}
 	}
 
+	/**
+	 * the visitor user (default: user id 1) is not a valid user
+	 * if you use this rule.
+	 *
+	 * It will still be displayed in the DropdownInput (or whatever)!
+	 */
 	class UserRequiredRule extends RequiredRule {
 		protected $message = 'User required';
 
@@ -952,7 +1040,6 @@
 		}
 	}
 
-
 	/**
 	 * this specialization of Layout_Grid allows the form code to add
 	 * html fragments before the Grid table.
@@ -1000,6 +1087,16 @@
 			return $this->grid->html();
 		}
 
+		/**
+		 * handle the passed object
+		 *
+		 * it first tries to find a method named visit_ObjectClass , and if
+		 * not successful, walks the inheritance ancestry to find a matching
+		 * visit method.
+		 *
+		 * That way, you can derive your own FormItems without necessarily
+		 * needing to extend the FormRenderer
+		 */
 		public function visit($obj)
 		{
 			$class = get_class($obj);
@@ -1117,6 +1214,8 @@ function formitem_tristate(elem)
 	<input type="checkbox" name="__cb_%s" id="__cb_%s" %s />
 	<input type="hidden" name="%s" id="%s" value="%s" />
 </span>', $name, $name, $name, $cb_html, $name, $name, $value));
+
+			// only send the javascript once
 			$js = '';
 		}
 
@@ -1151,12 +1250,6 @@ add_event(window,'load',load_editor_$name);
 EOD;
 			$this->_render($obj, $html);
 		}
-
-		/**
-		 * public function visit_SelectionFormItem()
-		 *
-		 * no rendering for this item
-		 */
 
 		public function visit_DropdownInput($obj)
 		{
@@ -1241,17 +1334,19 @@ EOD;
 			$this->_render($obj, $html);
 		}
 
-		public function visit_FormBar($obj)
-		{
-			// humm... does nothing?
-			$this->_render_bar($this, 'FormBar');
-		}
-
 		public function visit_SubmitButton($obj)
 		{
 			$this->_render_bar($obj,
 				'<input type="submit" '.$obj->attribute_html().'/>');
 		}
+
+		/**
+		 * when you extend the FormRenderer, you can (and should) use
+		 * the functions below here to render your FormItems.
+		 *
+		 * If you only use those helpers, it will be very easy to
+		 * completely change the way some form is displayed.
+		 */
 
 		protected function _render($obj, $field_html)
 		{
