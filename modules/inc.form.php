@@ -701,6 +701,9 @@
 		}
 	}
 
+	class TristateInput extends FormItem {
+	}
+
 	class Textarea extends FormItem {
 		protected $attributes = array('rows' => 12, 'cols' => 60);
 	}
@@ -1068,6 +1071,53 @@
 				$name, $name,
 				($obj->value()?'checked="checked" ':' ')
 				.$obj->attribute_html()));
+		}
+
+		public function visit_TristateInput($obj)
+		{
+			static $js = "
+<script type=\"text/javascript\">
+function formitem_tristate(elem)
+{
+	var value = document.getElementById(elem.id.replace(/^__cont_/, ''));
+	var cb = document.getElementById('__cb_'+value.id);
+
+	switch(value.value) {
+		case 'checked':
+			cb.checked = false;
+			value.value = 'unchecked';
+			break;
+		case 'unchecked':
+			cb.checked = true;
+			cb.disabled = true;
+			value.value = 'mixed';
+			break;
+		case 'mixed':
+		default:
+			cb.checked = true;
+			cb.disabled = false;
+			value.value = 'checked';
+			break;
+	}
+
+	return false;
+}
+</script>";
+			$name = $obj->iname();
+			$value = $obj->value();
+			$cb_html = '';
+			if($value=='mixed')
+				$cb_html = 'checked="checked" disabled="disabled"';
+			else if($value=='checked')
+				$cb_html = 'checked="checked"';
+			$this->_render($obj, $js.sprintf(
+'<span style="position:relative;">
+	<div style="position:absolute;top:0;left:0;width:20px;height:20px;"
+		id="__cont_%s" onclick="formitem_tristate(this)"></div>
+	<input type="checkbox" name="__cb_%s" id="__cb_%s" %s />
+	<input type="hidden" name="%s" id="%s" value="%s" />
+</span>', $name, $name, $name, $cb_html, $name, $name, $value));
+			$js = '';
 		}
 
 		public function visit_Textarea($obj)
