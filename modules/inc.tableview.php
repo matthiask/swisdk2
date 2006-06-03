@@ -7,10 +7,16 @@
 
 	class TableView implements Iterator {
 		
+		/**
+		 * TableViewColumn instances
+		 */
 		protected $columns = array();
+
+		/**
+		 * the data to be rendererd (nested array)
+		 */
 		protected $data = array();
-		protected $html;
-		
+
 		public function append_column(TableViewColumn $column)
 		{
 			$this->columns[$column->name()] = $column;
@@ -78,22 +84,22 @@
 	}
 
 	abstract class TableViewColumn {
-		public function __construct($title, $column)
+		public function __construct($column, $title=null)
 		{
 			$this->args = func_get_args();
-			$this->title = array_shift($this->args);
 			$this->column = array_shift($this->args);
+			$this->title = array_shift($this->args);
 		}
 
 		abstract public function html(&$data);
 
-		public function title()		{ return $this->title; }
 		public function column()	{ return $this->column; }
+		public function title()		{ return $this->title; }
 		public function name()		{ return $this->column; }
 		public function set_title($t)	{ $this->title = $t; }
 
-		protected $title;
 		protected $column;
+		protected $title;
 		protected $args;
 	}
 
@@ -117,16 +123,23 @@
 		}
 	}
 
+	/**
+	 * pass the enum values array as third parameter, or not...
+	 */
 	class EnumTableViewColumn extends TableViewColumn {
 		public function html(&$data)
 		{
 			$str = $data[$this->column];
-			if(isset($this->args[$str]))
-				return $this->args[$str];
+			if(isset($this->args[0][$str]))
+				return $this->args[0][$str];
 			return $str;
 		}
 	}
 
+	/**
+	 * Example template:
+	 * <a href="/overview/{item_id}">{item_title}</a>
+	 */
 	class TemplateTableViewColumn extends TableViewColumn {
 		public function html(&$data)
 		{
@@ -151,21 +164,27 @@
 		protected $patterns = null;
 	}
 
+	/**
+	 * third parameter: strftime(3)-formatted string
+	 */
 	class DateTableViewColumn extends TableViewColumn {
-		public function __construct($title, $column, $fmt = '%d.%m.%Y : %H:%M')
-		{
-			parent::__construct($title, $column);
-			$this->fmt = $fmt;
-		}
-
 		public function html(&$data)
 		{
+			if($this->fmt === null) {
+				if(isset($this->args[0]) && $this->args[0])
+					$this->fmt = $this->args[0];
+				else
+					$this->fmt = '%d.%m.%Y : %H:%M';
+			}
 			return strftime($this->fmt, $data[$this->column]);
 		}
 
-		protected $fmt;
+		protected $fmt = null;
 	}
 
+	/**
+	 * pass a callback instead of a field name
+	 */
 	class CallbackTableViewColumn extends TableViewColumn {
 		public function html(&$data)
 		{
@@ -201,15 +220,14 @@ EOD;
 		}
 	}
 
+	/**
+	 * pass a DBObject class as third parameter
+	 */
 	class DBTableViewColumn extends TableViewColumn {
-		public function __construct($title, $column, $db_class)
-		{
-			parent::__construct($title, $column);
-			$this->db_class = $db_class;
-		}
-		
 		public function html(&$data)
 		{
+			if($this->db_class===null)
+				$this->db_class = $this->args[0];
 			$val = $data[$this->column];
 			if($this->db_data===null) {
 				$doc = DBOContainer::find($this->db_class);

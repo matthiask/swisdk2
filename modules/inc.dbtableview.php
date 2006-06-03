@@ -289,7 +289,7 @@ EOD;
 		public function html()
 		{
 			array_unshift($this->columns, new IDTableViewColumn(
-				null, $this->dbobj()->dbobj()->primary()));
+				$this->dbobj()->dbobj()->primary()));
 			return $this->form->html()
 				.$this->form_javascript()
 				.'<form name="tableview" action="'.$this->target.'" method="post">'

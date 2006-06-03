@@ -317,8 +317,8 @@
 			$this->tableview_hook($form);
 			if($finalize)
 				$this->tv->append_column(new CmdsTableViewColumn(
-					Swisdk::config_value('runtime.controller.url'),
-					$this->tv->dbobj()->dbobj()->primary()));
+					$this->tv->dbobj()->dbobj()->primary(),
+					Swisdk::config_value('runtime.controller.url')));
 		}
 
 		public function build_ml()
@@ -343,9 +343,8 @@
 			// FIXME do not autogenerate fields which were
 			// created inside form_hook
 			$this->tableview_hook_ml($form);
-			$this->tv->append_column(new CmdsTableViewColumn(
-				Swisdk::config_value('runtime.controller.url'),
-				$primary));
+			$this->tv->append_column(new CmdsTableViewColumn($primary,
+				Swisdk::config_value('runtime.controller.url')));
 		}
 
 		public function tableview_hook(&$form)
@@ -367,43 +366,43 @@
 		public function create_rel_single($fname, $title, $class)
 		{
 			$this->tv->append_column(new DBTableViewColumn(
-				$title, $fname, $class));
+				$fname, $title, $class));
 		}
 
 		public function create_rel_manytomany($fname, $title, $class)
 		{
 			$this->tv->append_column(new DBTableViewColumn(
-				$title, $fname, $class));
+				$fname, $title, $class));
 		}
 
 		public function create_date($fname, $title)
 		{
 			$this->tv->append_column(
-				new DateTableViewColumn($title, $fname));
+				new DateTableViewColumn($fname, $title));
 		}
 
 		public function create_textarea($fname, $title)
 		{
 			$this->tv->append_column(
-				new TextTableViewColumn($title, $fname, 40));
+				new TextTableViewColumn($fname, $title, 40));
 		}
 
 		public function create_bool($fname, $title)
 		{
 			$this->tv->append_column(
-				new BoolTableViewColumn($title, $fname));
+				new BoolTableViewColumn($fname, $title));
 		}
 
 		public function create_enum($fname, $title, $values)
 		{
 			$this->tv->append_column(
-				new EnumTableViewColumn($title, $fname, $values));
+				new EnumTableViewColumn($fname, $title, $values));
 		}
 
 		public function create_text($fname, $title)
 		{
 			$this->tv->append_column(
-				new TextTableViewColumn($title, $fname, 40));
+				new TextTableViewColumn($fname, $title, 40));
 		}
 	}
 
