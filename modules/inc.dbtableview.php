@@ -127,11 +127,12 @@
 			$html = '<thead><tr>';
 			foreach($this->columns as &$col) {
 				$html .= '<th>';
-				if(!($col instanceof NoDataTableViewColumn)) {
+				if($col instanceof NoDataTableViewColumn) {
+					$html .= $col->title();
+				} else {
 					$html .= '<a href="#" onclick="order(\''.$col->column().'\')">';
 					$html .= $col->title();
-					if($col->column()==$order
-							&& (!$col instanceof NoDataTableViewColumn)) {
+					if($col->column()==$order) {
 						$html .= $dir=='DESC'?'&nbsp;&uArr;':'&nbsp;&dArr;';
 					}
 					$html .= '</a>';
@@ -225,6 +226,11 @@ EOD;
 		{
 			return '__id_'.$this->column;
 		}
+
+		public function title()
+		{
+			return '<input type="checkbox" onchange="tv_toggle(this)" />';
+		}
 	}
 
 	class MultiDBTableView extends DBTableView {
@@ -283,6 +289,12 @@ function tv_delete()
 	document.forms.tableview.command.value='delete';
 	document.forms.tableview.action+='_delete/multiple';
 	document.forms.tableview.submit();
+}
+function tv_toggle(elem)
+{
+	var elems = document.forms.tableview.getElementsByTagName('input');
+	for(i=0; i<elems.length; i++)
+		elems[i].checked = elem.checked;
 }
 </script>
 EOD;
