@@ -133,7 +133,57 @@
 	}
 
 	class AdminComponent_new extends AdminComponent {
+		protected $multiple_new_count = 3;
+
 		public function run()
+		{
+			if($this->args[0]=='multiple')
+				$this->new_multiple();
+			else
+				$this->new_single();
+		}
+
+		protected function new_multiple()
+		{
+			$dboc = null;
+			$form = null;
+
+			if($this->multilanguage) {
+				$dboc = DBOContainer::create(
+					DBObjectML::create($this->dbo_class));
+				$form = new FormML();
+			} else {
+				$dboc = DBOContainer::create($this->dbo_class);
+				$form = new Form();
+			}
+
+			$builder = $this->form_builder();
+			$form->enable_unique();
+
+			for($i=1; $i<=$this->multiple_new_count; $i++) {
+				$box = $form->box($i);
+				$box->set_title('New '.$this->dbo_class);
+				$dbo = null;
+				if($this->multilanguage)
+					$dbo = DBObjectML::create($this->dbo_class);
+				else
+					$dbo = DBObject::create($this->dbo_class);
+				$dbo->id = -$i;
+				$box->bind($dbo);
+				$builder->build($box);
+				$dboc->add($dbo);
+			}
+
+			if($form->is_valid()) {
+				$dboc->unset_primary();
+				$dboc->store();
+
+				$this->goto('_index');
+			} else
+				$this->html = $form->html();
+		}
+
+		protected function new_single()
 		{
 			$form = null;
 			if($this->multilanguage) {
