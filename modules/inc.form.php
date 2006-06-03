@@ -311,6 +311,7 @@
 
 		protected function add_initialized_obj($obj)
 		{
+			$obj->set_preinitialized();
 			$obj->set_form_box($this);
 			if($this->unique)
 				$obj->enable_unique();
@@ -547,7 +548,8 @@
 		}
 
 		public function iname() {
-			return ($this->unique?$this->box_name:'').$this->name;
+			return ((!$this->preinitialized&&$this->unique)?
+				$this->box_name:'').$this->name;
 		}
 
 		public function set_form_box(&$box)
@@ -560,6 +562,13 @@
 		public function enable_unique()
 		{
 			$this->unique = true;
+		}
+
+		protected $preinitialized = false;
+
+		public function set_preinitialized()
+		{
+			$this->preinitialized = true;
 		}
 
 		/**
