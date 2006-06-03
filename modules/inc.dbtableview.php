@@ -199,8 +199,8 @@
 			$p = $formobj->_prefix();
 			$data = $formobj->data();
 
-			return array($data[$p.'start']+1,
-				$this->obj->total_count(),
+			return array($first = $data[$p.'start']+1,
+				$count = $this->obj->total_count(),
 				min($count, $first+$data[$p.'limit']-1));
 		}
 
