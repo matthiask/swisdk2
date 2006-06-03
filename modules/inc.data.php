@@ -384,6 +384,8 @@
 		 */
 		public function delete()
 		{
+			if(!$this->id())
+				return true;
 			$ret = DBObject::db_query('DELETE FROM ' . $this->table
 				. ' WHERE ' . $this->primary . '=' . $this->id());
 			$this->unset_primary();
@@ -524,6 +526,8 @@
 		protected function related_many(&$rel, $params=null)
 		{
 			$container = DBOContainer::create($rel['class']);
+			if(!$this->id())
+				return $container;
 			$container->add_clause($rel['field'].'=',
 				$this->id());
 			if(is_array($params))
@@ -535,6 +539,8 @@
 		protected function related_many_to_many(&$rel, $params=null)
 		{
 			$container = DBOContainer::create($rel['class']);
+			if(!$this->id())
+				return $container;
 			$container->add_join($rel['table'], $rel['join']);
 			$container->add_clause($rel['table'].'.'.$this->primary().'=',
 				$this->id());
