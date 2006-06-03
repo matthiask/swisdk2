@@ -175,10 +175,15 @@
 				$p.' IN {list}' => array('list' => getInput($p))));
 
 			$builder = $this->form_builder();
-			$form = new Form();
+			$form = null;
+			if($this->multilanguage)
+				$form = new FormML();
+			else
+				$form = new Form();
 			$form->enable_unique();
 			foreach($dboc as $dbo) {
 				$box = $form->box($dbo->id());
+				$box->set_title('Edit '.$this->dbo_class.' '.$dbo->id());
 				$box->bind($dbo);
 				$box->add(new HiddenInput($p.'[]'))->set_value($dbo->id());
 				$builder->build($box);

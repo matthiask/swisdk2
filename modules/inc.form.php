@@ -465,6 +465,19 @@
 
 	class FormML extends Form {
 		// this is only a type marker for the FormBuilder
+		public function &box($id=0)
+		{
+			if(!isset($this->boxes[$id])) {
+				$this->boxes[$id] = new FormMLBox();
+				if($this->unique)
+					$this->boxes[$id]->enable_unique();
+			}
+			return $this->boxes[$id];
+		}
+
+	}
+
+	class FormMLBox extends FormBox {
 	}
 
 	/**

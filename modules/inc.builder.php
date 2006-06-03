@@ -88,7 +88,7 @@
 	class FormBuilder extends BuilderBase {
 		public function build(&$form)
 		{
-			if($form instanceof FormML)
+			if(($form instanceof FormML) || ($form instanceof FormMLBox))
 				return $this->build_ml($form);
 			else
 				return $this->build_simple($form);
@@ -129,7 +129,12 @@
 			$this->build_simple($form, false);
 
 			$dbobj =& $form->dbobj();
-			$box =& $form->box($dbobj->language());
+			$box = null;
+			// FIXME this is hacky. FormBox should have a box() method too?:w
+			if($form instanceof FormBox)
+				$box = $form->add(new FormMLBox());
+			else
+				$box =& $form->box($dbobj->language());
 			$dbobjml =& $dbobj->dbobj();
 			$box->bind($dbobjml);
 
