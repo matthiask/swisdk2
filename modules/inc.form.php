@@ -989,7 +989,27 @@
 			else if($obj instanceof FormBox)
 				$class = 'FormBox';
 
-			call_user_func(array($this, 'visit_'.$class), $obj);
+			$method = 'visit_'.$class;
+			if(method_exists($this, $method)) {
+				call_user_func(array($this, $method), $obj);
+				return;
+			} else {
+				$parents = class_parents($class);
+				foreach($parents as $p) {
+					$method = 'visit_'.$p;
+					if(method_exists($this, $method)) {
+						call_user_func(array($this, $method),
+							$obj);
+						return;
+					}
+				}
+			}
+
+			echo "oops.";
+			return;
+
+			SwisdkError::handle(new FatalError(
+				'FormRenderer::visit: Cannot visit '.$class));
 		}
 
 		public function visit_Form($obj)
@@ -1020,16 +1040,6 @@
 		public function visit_SimpleInput($obj)
 		{
 			$this->_render($obj, $this->_simpleinput_html($obj));
-		}
-
-		public function visit_TextInput($obj)
-		{
-			$this->visit_SimpleInput($obj);
-		}
-
-		public function visit_PasswordInput($obj)
-		{
-			$this->visit_SimpleInput($obj);
 		}
 
 		public function visit_CheckboxInput($obj)
