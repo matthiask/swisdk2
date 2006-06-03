@@ -127,11 +127,11 @@
 			$html = '<thead><tr>';
 			foreach($this->columns as &$col) {
 				$html .= '<th>';
-				if(!($col instanceof NoTitleTableViewColumn)) {
+				if(!($col instanceof NoDataTableViewColumn)) {
 					$html .= '<a href="#" onclick="order(\''.$col->column().'\')">';
 					$html .= $col->title();
 					if($col->column()==$order
-							&& (!$col instanceof NoTitleTableViewColumn)) {
+							&& (!$col instanceof NoDataTableViewColumn)) {
 						$html .= $dir=='DESC'?'&nbsp;&uArr;':'&nbsp;&dArr;';
 					}
 					$html .= '</a>';
@@ -213,7 +213,7 @@ EOD;
 		public function offsetUnset($offset) { unset($this->columns[$offset]); }
 	}
 
-	class IDTableViewColumn extends NoTitleTableViewColumn {
+	class IDTableViewColumn extends NoDataTableViewColumn {
 		public function html(&$data)
 		{
 			$id = $data[$this->column];

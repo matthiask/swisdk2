@@ -177,10 +177,14 @@
 	/**
 	 * type hint for DBTableView
 	 */
-	abstract class NoTitleTableViewColumn extends TableViewColumn {
+	abstract class NoDataTableViewColumn extends TableViewColumn {
+		public function title()
+		{
+			return null;
+		}
 	}
 
-	class CmdsTableViewColumn extends NoTitleTableViewColumn {
+	class CmdsTableViewColumn extends NoDataTableViewColumn {
 		public function html(&$data)
 		{
 			$id = $data[$this->column];
