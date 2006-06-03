@@ -739,6 +739,22 @@
 		}
 	}
 
+	class EnumInput extends Multiselect {
+
+		/**
+		 * ATTENTION! $table _cannot_ be escaped
+		 */
+		public function __construct($table, $field)
+		{
+			$fs = DBObject::db_get_array('SHOW COLUMNS FROM '
+				.$table, 'Field');
+			$field = $fs[$field];
+			$array = explode('\',\'', substr($field['Type'], 6,
+				strlen($field['Type'])-8));
+			$this->set_items(array_combine($array, $array));
+		}
+	}
+
 	/**
 	 * base class for all FormItems which want to occupy a whole
 	 * line (no title, no message)
