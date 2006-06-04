@@ -657,6 +657,11 @@
 		}
 		public function enable_unique() { $this->unique = true; }
 		public function set_preinitialized() { $this->preinitialized = true; }
+		public function set_default_value($value)
+		{
+			if(!$this->value)
+				$this->value = $value;
+		}
 
 
 		/**
