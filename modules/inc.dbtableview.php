@@ -15,13 +15,14 @@
 		public function setup()
 		{
 			$p = $this->dbobj()->_prefix();
-			$this->add($p.'order', new HiddenInput());
-			$this->add($p.'dir', new HiddenInput());
-			$this->add($p.'start', new HiddenInput());
-			$this->add($p.'limit', new HiddenInput());
+			$box = $this->box('search');
+			$box->add($p.'order', new HiddenInput());
+			$box->add($p.'dir', new HiddenInput());
+			$box->add($p.'start', new HiddenInput());
+			$box->add($p.'limit', new HiddenInput());
 			if($this->setup_additional()!==false) {
 				$this->set_title('Search form');
-				$this->add(new SubmitButton());
+				$this->box('search')->add(new SubmitButton());
 			}
 		}
 
@@ -39,7 +40,7 @@
 		 */
 		protected function add_fulltext_field()
 		{
-			$this->add($this->dbobj()->name('query'));
+			$this->box('search')->add($this->dbobj()->name('query'));
 		}
 
 		public function name()
@@ -53,11 +54,23 @@
 		 */
 		public function set_clauses(DBOContainer &$container)
 		{
-			$obj = $this->dbobj();
+			$obj = $this->box('search')->dbobj();
 			$container->add_order_column($obj->order, $obj->dir);
 			$container->set_limit($obj->start, $obj->limit);
 			if($query = $obj->query)
 				$container->set_fulltext($query);
+		}
+	}
+
+	class TableViewFormRenderer extends FormRenderer {
+		public function html_start()
+		{
+			return $this->html_start.$this->grid->html().'<br />';
+		}
+
+		public function html_end()
+		{
+			return $this->html_end;
 		}
 	}
 
@@ -121,16 +134,15 @@
 			if(!$this->form)
 				$this->form = new DBTableViewForm();
 
-			$obj = $this->obj->dbobj();
+			$obj = $this->obj;
+			$dbo = $obj->dbobj_clone();
 
-			$this->form->bind(DBObject::create_with_data(
-				'DBTableView'.$obj->_class(),
-				array(
-					'order' => $obj->primary(),
-					'dir' => 'ASC',
-					'start' => 0,
-					'limit' => $this->items_on_page
-				)));
+			$dbo->order = $dbo->primary();
+			$dbo->dir = 'ASC';
+			$dbo->start = 0;
+			$dbo->limit = $this->items_on_page;
+
+			$this->form->bind($dbo);
 
 			$this->form->setup();
 			$this->form->set_clauses($this->obj);
@@ -187,10 +199,45 @@
 			list($first, $count, $last) = $this->list_position();
 
 			$str = 'displaying '.$first.'&ndash;'.$last.' of '.$count;
-			return '<tfoot><tr><td colspan="'.$colcount.'">'.$str.' | skim '
+			return '<tfoot><tr><td colspan="'.$colcount.'">'
+				.$this->multi_foot()
+				.$str.' | skim '
 				.'<a href="javascript:skim(-'.$this->items_on_page.')">backwards</a> or '
 				.'<a href="javascript:skim('.$this->items_on_page.')">forwards</a>'
 				.'</td></tr></tfoot>';
+		}
+
+		protected function multi_foot()
+		{
+			$id = $this->form->id();
+			return '<div style="float:left">'
+				.'<a href="javascript:tv_edit()">edit</a>'
+				.' or '
+				.'<a href="javascript:tv_delete()">delete</a> checked'
+				. ($a_html?'<br />'.$a_html:'')
+				.'</div>'
+				.<<<EOD
+<script type="text/javascript">
+function tv_edit()
+{
+	document.forms.$id.action = document.forms.$id.action.replace(/\/_list/, '/_edit/multiple');
+	document.forms.$id.submit();
+}
+function tv_delete()
+{
+	if(!confirm('Really delete?'))
+		return;
+	document.forms.$id.action = document.forms.$id.action.replace(/\/_list/, '/_delete/multiple');
+	document.forms.$id.submit();
+}
+function tv_toggle(elem)
+{
+	var elems = document.forms.$id.getElementsByTagName('input');
+	for(i=0; i<elems.length; i++)
+		elems[i].checked = elem.checked;
+}
+</script>
+EOD;
 		}
 
 		protected function list_position()
@@ -206,7 +253,14 @@
 
 		public function html()
 		{
-			return $this->form->html().parent::html().$this->form_javascript();
+			array_unshift($this->columns, new IDTableViewColumn(
+				$this->dbobj()->dbobj()->primary()));
+			$renderer = new TableViewFormRenderer();
+			$this->form->accept($renderer);
+			return $renderer->html_start()
+				.parent::html()
+				.$this->form_javascript()
+				.$renderer->html_end();
 		}
 
 		protected function form_javascript()
@@ -254,9 +308,16 @@ EOD;
 	class IDTableViewColumn extends NoDataTableViewColumn {
 		public function html(&$data)
 		{
+			static $selected = null;
+			if($selected===null) {
+				if(($ids = getInput($this->column)) && is_array($ids))
+					$selected = array_flip($ids);
+				else
+					$selected = array();
+			}
 			$id = $data[$this->column];
-			return sprintf('<input type="checkbox" name="%s[]" value="%d" />',
-				$this->column, $data[$this->column]);
+			return sprintf('<input type="checkbox" name="%s[]" value="%d" %s />',
+				$this->column, $id, isset($selected[''.$id])?'checked="checked"':'');
 		}
 
 		public function name()
@@ -267,85 +328,6 @@ EOD;
 		public function title()
 		{
 			return '<input type="checkbox" onchange="tv_toggle(this)" />';
-		}
-	}
-
-	/**
-	 * DBTableView specialization which allows to select several records
-	 * at once for deleting or editing
-	 */
-	class MultiDBTableView extends DBTableView {
-		protected $target = null;
-
-		/**
-		 * set the form target (f.e. your AdminModule controller url; the
-		 * controller must be able to handle the 'multiple' requests)
-		 */
-		public function set_target($target)
-		{
-			$this->target = $target;
-		}
-
-		public function html()
-		{
-			array_unshift($this->columns, new IDTableViewColumn(
-				$this->dbobj()->dbobj()->primary()));
-			return $this->form->html()
-				.$this->form_javascript()
-				.'<form name="tableview" action="'.$this->target.'" method="post">'
-				.'<input type="hidden" name="multiple" value="1" />'
-				.'<input type="hidden" name="command" value="" />'
-				.'<table>'
-				.$this->render_head()
-				.$this->render_body()
-				.$this->render_foot()
-				.'</table></form>';
-		}
-
-		/**
-		 * add edit and delete links to the table footer
-		 */
-		public function render_foot()
-		{
-			$colcount = count($this->columns);
-			list($first, $count, $last) = $this->list_position();
-
-			$str = 'displaying '.$first.'&ndash;'.$last.' of '.$count;
-			return '<tfoot><tr>'
-				.'<td colspan="'.$colcount.'">'
-				.'<div style="float:left">'
-					.'<a href="javascript:tv_edit()">edit</a>'
-					.' or '
-					.'<a href="javascript:tv_delete()">delete</a> checked'
-				.'</div>'
-				.$str.' | skim '
-				.'<a href="javascript:skim(-'.$this->items_on_page.')">backwards</a> or '
-				.'<a href="javascript:skim('.$this->items_on_page.')">forwards</a>'
-				.'</td>'
-				.'</tr></tfoot>'.<<<EOD
-<script type="text/javascript">
-function tv_edit()
-{
-	document.forms.tableview.command.value='edit';
-	document.forms.tableview.action+='_edit/multiple';
-	document.forms.tableview.submit();
-}
-function tv_delete()
-{
-	if(!confirm('Really delete?'))
-		return;
-	document.forms.tableview.command.value='delete';
-	document.forms.tableview.action+='_delete/multiple';
-	document.forms.tableview.submit();
-}
-function tv_toggle(elem)
-{
-	var elems = document.forms.tableview.getElementsByTagName('input');
-	for(i=0; i<elems.length; i++)
-		elems[i].checked = elem.checked;
-}
-</script>
-EOD;
 		}
 	}
 
