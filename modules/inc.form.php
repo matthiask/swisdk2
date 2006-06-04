@@ -31,10 +31,8 @@
 
 		/**
 		 * form id. Should be unique for the whole page
-		 *
-		 * FIXME make _really_ unique. It works without, but it is _ugly_
 		 */
-		protected $id = 'suppe';
+		protected $form_id;
 
 		/**
 		 * should the FormItem's names be mangled so that they are _really_
@@ -48,10 +46,41 @@
 				$this->bind($dbobj);
 		}
 
-		public function id() { return $this->id; }
 		public function title() { return $this->title; }
 		public function set_title($title=null) { $this->title = $title; }
 		public function enable_unique() { $this->unique = true; }
+
+		public function id()
+		{
+			if(!$this->form_id)
+				$this->generate_form_id();
+			return $this->form_id;
+		}
+
+		/**
+		 * generate an id for this form
+		 *
+		 * the id is used to track which form has been submitted if there
+		 * were multiple forms on one page. See also is_valid()
+		 */
+		public function generate_form_id()
+		{
+			$this->form_id = Form::to_form_id($this->dbobj());
+		}
+
+		/**
+		 * take a DBObject and return a form id
+		 *
+		 * XXX is it really necessary to take anything else but DBObjects?
+		 */
+		public static function to_form_id($tok, $id=0)
+		{
+			if($tok instanceof DBObject) {
+				$id = $tok->id();
+				return '__swisdk_form_'.$tok->table().'_'.($id?$id:0);
+			}
+			return '__swisdk_form_'.$tok.'_'.($id?$id:0);
+		}
 
 		/**
 		 * return the FormBox with the given ID (this ID has no further
@@ -62,10 +91,15 @@
 		 */
 		public function &box($id=0)
 		{
+			if(!$id && count($this->boxes))
+				return reset($this->boxes);
+
 			if(!isset($this->boxes[$id])) {
 				$this->boxes[$id] = new FormBox();
 				if($this->unique)
 					$this->boxes[$id]->enable_unique();
+				if($obj = $this->dbobj())
+					$this->boxes[$id]->bind($obj);
 			}
 			return $this->boxes[$id];
 		}
@@ -137,6 +171,8 @@
 		 */
 		public function accept($renderer)
 		{
+			$this->add(new HiddenInput($this->id()))->set_value(1);
+
 			$renderer->visit($this);
 			foreach($this->boxes as &$box)
 				$box->accept($renderer);
@@ -147,6 +183,10 @@
 		 */
 		public function is_valid()
 		{
+			// has this form been submitted (or was it another form on the same page)
+			if(!isset($_REQUEST[$this->id()]))
+				return false;
+
 			$valid = true;
 			// loop over all FormBox es
 			foreach($this->boxes as &$box)
@@ -196,11 +236,6 @@
 		protected $dbobj;
 
 		/**
-		 * every FormBox has its own unique form id
-		 */
-		protected $form_id;
-
-		/**
 		 * same as comment form Form::$unique
 		 */
 		protected $unique = false;
@@ -214,6 +249,11 @@
 		 * Form and FormBox rules
 		 */
 		protected $rules = array();
+
+		/**
+		 * FormBox Id
+		 */
+		protected $formbox_id;
 
 		/**
 		 * @param $dbobj: the DBObject bound to the Form
@@ -233,8 +273,8 @@
 		 */
 		public function bind($dbobj)
 		{
+			$this->formbox_id = Form::to_form_id($dbobj);
 			$this->dbobj = $dbobj;
-			$this->generate_form_id();
 		}
 
 		/**
@@ -247,32 +287,7 @@
 
 		public function id()
 		{
-			return $this->form_id;
-		}
-
-		/**
-		 * generate an id for this form
-		 *
-		 * the id is used to track which form has been submitted if there
-		 * were multiple forms on one page. See also is_valid()
-		 */
-		public function generate_form_id()
-		{
-			$this->form_id = FormBox::to_form_id($this->dbobj());
-		}
-
-		/**
-		 * take a DBObject and return a form id
-		 *
-		 * XXX is it really necessary to take anything else but DBObjects?
-		 */
-		public static function to_form_id($tok, $id=0)
-		{
-			if($tok instanceof DBObject) {
-				$id = $tok->id();
-				return '__swisdk_form_'.$tok->table().'_'.($id?$id:0);
-			}
-			return '__swisdk_form_'.$tok.'_'.($id?$id:0);
+			return $this->formbox_id;
 		}
 
 		/**
@@ -454,12 +469,30 @@
 		}
 
 		/**
+		 * @return the FormBox html
+		 *
+		 * NOTE! This is not used when calling Form::html()
+		 */
+		public function html($arg = 'FormRenderer')
+		{
+			$renderer = null;
+			if($arg instanceof FormRenderer)
+				$renderer = $arg;
+			else if(class_exists($arg))
+				$renderer = new $arg;
+			else
+				SwisdkError::handle(new FatalError(
+					'Invalid renderer specification: '.$arg));
+			$this->accept($renderer);
+
+			return $renderer->html();
+		}
+
+		/**
 		 * accept the FormRenderer
 		 */
 		public function accept($renderer)
 		{
-			$this->add($this->form_id, new HiddenInput())->set_value(1);
-
 			$renderer->visit($this);
 			foreach($this->items as &$item)
 				$item->accept($renderer);
@@ -470,11 +503,6 @@
 		 */
 		public function is_valid()
 		{
-			// has this form been submitted (or was it another form on the same page)
-			if(!isset($_REQUEST[$this->form_id])
-					&& !isset($_REQUEST[$this->form_id.'_'.$this->form_id]))
-				return false;
-
 			$valid = true;
 			// loop over FormRules
 			foreach($this->rules as &$rule)
@@ -1040,51 +1068,35 @@
 		}
 	}
 
-	/**
-	 * this specialization of Layout_Grid allows the form code to add
-	 * html fragments before the Grid table.
-	 *
-	 * This is mostly used for hidden input fields and other bookkeeping
-	 * information. It might also be used for javascript etc. later on.
-	 */
-	class Form_Grid extends Layout_Grid {
-		protected $start = '';
-		protected $end = '';
-		protected $html = '';
+	class FormRenderer {
+
+		protected $grid;
+		protected $html_start = '';
+		protected $html_end = '';
+
+		public function __construct()
+		{
+			$this->grid = new Layout_Grid();
+		}
+
+		public function html()
+		{
+			return $this->html_start.$this->grid->html().$this->html_end;
+		}
 
 		public function add_html($html)
 		{
-			$this->html .= $html;
+			$this->html_start .= $html;
 		}
 
 		public function add_html_start($html)
 		{
-			$this->start = $html.$this->start;
+			$this->html_start = $html.$this->html_start;
 		}
 
 		public function add_html_end($html)
 		{
-			$this->end .= $html;
-		}
-
-		public function html()
-		{
-			return $this->start.parent::html().$this->html.$this->end;
-		}
-	}
-
-	class FormRenderer {
-
-		protected $grid;
-
-		public function __construct()
-		{
-			$this->grid = new Form_Grid();
-		}
-
-		public function html()
-		{
-			return $this->grid->html();
+			$this->html_end .= $html;
 		}
 
 		/**
@@ -1130,10 +1142,10 @@
 
 		public function visit_Form($obj)
 		{
-			$this->grid->add_html_start(
+			$this->add_html_start(
 				'<form method="post" action="'.$_SERVER['REQUEST_URI']
 				.'" name="'.$obj->id()."\">\n");
-			$this->grid->add_html_end('</form>');
+			$this->add_html_end('</form>');
 			if($title = $obj->title())
 				$this->_render_bar($obj,
 					'<big><strong>'.$title.'</strong></big>');
@@ -1142,7 +1154,7 @@
 		public function visit_FormBox($obj)
 		{
 			if($message = $obj->message())
-				$this->grid->add_html_end('<span style="color:red">'
+				$this->add_html_end('<span style="color:red">'
 					.$message.'</span>');
 			if($title = $obj->title())
 				$this->_render_bar($obj, '<strong>'.$title.'</strong>');
@@ -1150,7 +1162,7 @@
 
 		public function visit_HiddenInput($obj)
 		{
-			$this->grid->add_html($this->_simpleinput_html($obj));
+			$this->add_html($this->_simpleinput_html($obj));
 		}
 
 		public function visit_SimpleInput($obj)
