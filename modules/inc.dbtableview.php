@@ -253,7 +253,7 @@ EOD;
 
 		public function html()
 		{
-			array_unshift($this->columns, new IDTableViewColumn(
+			$this->prepend_column(new IDTableViewColumn(
 				$this->dbobj()->dbobj()->primary()));
 			$renderer = new TableViewFormRenderer();
 			$this->form->accept($renderer);

@@ -22,6 +22,16 @@
 			$this->columns[$column->name()] = $column;
 		}
 
+		public function prepend_column(TableViewColumn $column)
+		{
+			$name = $column->name();
+			if(isset($this->columns[$name]))
+				unset($this->columns[$name]);
+			$this->columns = array_merge(
+				array($name => $column),
+				$this->columns);
+		}
+
 		public function html()
 		{
 			return '<table>'
