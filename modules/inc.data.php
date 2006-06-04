@@ -13,6 +13,9 @@
 	define('LANGUAGE_DEFAULT', -1);
 	define('LANGUAGE_ALL', -2);
 
+	// this string denotes the section name in the config file!
+	define('DB_CONNECTION_DEFAULT', 'db');
+
 	/**
 	 * DBObject
 	 *
@@ -116,6 +119,26 @@
 		 * handle_error was false and an error occurred
 		 */
 		protected static $error_obj=null;
+
+		/**
+		 * DB Connection ID (only used if you want multiple DB connections)
+		 */
+		protected $db_connection_id = DB_CONNECTION_DEFAULT;
+		
+		public function db_connection()
+		{
+			return $this->db_connection_id;
+		}
+
+		/**
+		 * switch DB connection
+		 *
+		 * @param $name: config section for DB connection parameters
+		 */
+		public function set_db_connection($name)
+		{
+			$this->db_connection_id = $name;
+		}
 
 		/**
 		 * automatically handle DB errors?
@@ -233,7 +256,8 @@
 		{
 			if($this->id())
 				$this->data = DBObject::db_get_row('SELECT * FROM '
-					.$this->table.' WHERE '.$this->primary.'='.$this->id());
+					.$this->table.' WHERE '.$this->primary.'='.$this->id(),
+					$this->db_connection_id);
 			$this->dirty = false;
 			return ($this->data && count($this->data));
 		}
@@ -259,15 +283,16 @@
 		public function update()
 		{
 			$this->auto_update_fields();
-			DBObject::db_start_transaction();
+			DBObject::db_start_transaction($this->db_connection_id);
 			$res = DBObject::db_query('UPDATE ' . $this->table . ' SET '
 				. $this->_vals_sql() . ' WHERE '
-				. $this->primary . '=' . $this->id());
+				. $this->primary . '=' . $this->id(),
+				$this->db_connection_id);
 			if($res===false || !$this->_update_relations()) {
-				DBObject::db_rollback();
+				DBObject::db_rollback($this->db_connection_id);
 				return false;
 			}
-			DBObject::db_commit();
+			DBObject::db_commit($this->db_connection_id);
 			$this->dirty = false;
 			return true;
 		}
@@ -278,20 +303,22 @@
 		public function insert()
 		{
 			$this->auto_update_fields();
-			DBObject::db_start_transaction();
+			DBObject::db_start_transaction($this->db_connection_id);
 			$this->unset_primary();
 			$res = DBObject::db_query('INSERT INTO ' . $this->table
-				. ' SET ' . $this->_vals_sql());
+				. ' SET ' . $this->_vals_sql(),
+				$this->db_connection_id);
 			if($res===false) {
-				DBObject::db_rollback();
+				DBObject::db_rollback($this->db_connection_id);
 				return false;
 			}
-			$this->data[$this->primary] = DBObject::db_insert_id();
+			$this->data[$this->primary] = DBObject::db_insert_id(
+				$this->db_connection_id);
 			if(!$this->_update_relations()) {
-				DBObject::db_rollback();
+				DBObject::db_rollback($this->db_connection_id);
 				return false;
 			}
-			DBObject::db_commit();
+			DBObject::db_commit($this->db_connection_id);
 			$this->dirty = false;
 			return true;
 		}
@@ -316,7 +343,8 @@
 					if(!isset($this->data[$field]))
 						continue;
 					$res = DBObject::db_query('DELETE FROM '.$rel['table']
-						.' WHERE '.$this->primary.'='.$this->id());
+						.' WHERE '.$this->primary.'='.$this->id(),
+						$this->db_connection_id);
 					if($res===false)
 						return false;
 					if(count($this->data[$field])) {
@@ -326,7 +354,8 @@
 							.$this->id().','
 							.implode('),('.$this->id().',',
 							$this->data[$field]).')';
-						if(DBObject::db_query($sql)===false)
+						if(DBObject::db_query($sql,
+							$this->db_connection_id)===false)
 							return false;
 					}
 				}
@@ -342,7 +371,7 @@
 		 */
 		protected function _vals_sql()
 		{
-			$dbh = DBObject::db();
+			$dbh = DBObject::db($this->db_connection_id);
 			$vals = array();
 			$fields = array_keys($this->field_list());
 			foreach($fields as $field) {
@@ -609,21 +638,21 @@
 		/**
 		 * @return: the DB handle
 		 */
-		protected static function &db()
+		protected static function &db($connection_id = DB_CONNECTION_DEFAULT)
 		{
-			if(is_null(DBObject::$dbhandle)) {
-				DBObject::$dbhandle = new mysqli(
-					Swisdk::config_value('db.host'),
-					Swisdk::config_value('db.username'),
-					Swisdk::config_value('db.password'),
-					Swisdk::config_value('db.database')
+			if(!isset(DBObject::$dbhandle[$connection_id])) {
+				DBObject::$dbhandle[$connection_id] = new mysqli(
+					Swisdk::config_value($connection_id.'.host'),
+					Swisdk::config_value($connection_id.'.username'),
+					Swisdk::config_value($connection_id.'.password'),
+					Swisdk::config_value($connection_id.'.database')
 				);
 				if(mysqli_connect_errno())
 					SwisdkError::handle(new DBError('Connect failed: '
 						.mysqli_connect_error()));
 			}
 
-			return DBObject::$dbhandle;
+			return DBObject::$dbhandle[$connection_id];
 		}
 
 		/**
@@ -636,9 +665,9 @@
 		 * on the format of the return value as it is implementation specific and might
 		 * change when another DB access layer (PDO?) is used inside DBObject
 		 */
-		public static function db_query($sql)
+		public static function db_query($sql, $connection_id = DB_CONNECTION_DEFAULT)
 		{
-			$dbh = DBObject::db();
+			$dbh = DBObject::db($connection_id);
 			$result = $dbh->query($sql);
 			DBObject::$error_obj = null;
 			if($dbh->errno) {
@@ -656,9 +685,9 @@
 		 * Return the result of the passed SQL query as an array of associative
 		 * values.
 		 */
-		public static function db_get_row($sql)
+		public static function db_get_row($sql, $connection_id = DB_CONNECTION_DEFAULT)
 		{
-			$res = DBObject::db_query($sql);
+			$res = DBObject::db_query($sql, $connection_id);
 			if($res===false)
 				return $res;
 			return $res->fetch_assoc();
@@ -679,9 +708,10 @@
 		 * $titles = DBObject::db_get_array('SELECT id,title FROM table',
 		 * 	array('id','title'));
 		 */
-		public static function db_get_array($sql, $result_key=null)
+		public static function db_get_array($sql, $result_key=null,
+			$connection_id = DB_CONNECTION_DEFAULT)
 		{
-			$res = DBObject::db_query($sql);
+			$res = DBObject::db_query($sql, $connection_id);
 			if($res===false)
 				return $res;
 			$array = array();
@@ -709,19 +739,22 @@
 		 * though. Perl does only now two escape functions and they work for
 		 * everything...)
 		 */
-		public static function db_escape($str, $quote = true)
+		public static function db_escape($str, $quote = true,
+			$connection_id = DB_CONNECTION_DEFAULT)
 		{
 			if($quote!==false)
-				return '\''.DBObject::db()->escape_string($str).'\'';
-			return DBObject::db()->escape_string($str);
+				return '\''.DBObject::db($connection_id)
+					->escape_string($str).'\'';
+			return DBObject::db($connection_id)->escape_string($str);
 		}
 
 		/**
 		 * this function is used internally by DBOContainer::add_cl
 		 */
-		public static function db_escape_ref(&$str, $quote = true)
+		public static function db_escape_ref(&$str, $quote = true,
+			$connection_id = DB_CONNECTION_DEFAULT)
 		{
-			$str = DBObject::db()->escape_string($str);
+			$str = DBObject::db($connection_id)->escape_string($str);
 			if($quote!==false)
 				$str = '\''.$str.'\'';
 		}
@@ -731,43 +764,43 @@
 		*   "Returns the auto generated id used in the last query"
 		*	@see http://www.php.net/manual-lookup.php?pattern=mysqli_insert_id
 		*/
-		public static function db_insert_id() 
+		public static function db_insert_id($connection_id = DB_CONNECTION_DEFAULT) 
 		{
-			return DBObject::db()->insert_id;
+			return DBObject::db($connection_id)->insert_id;
 		}
 		
 		/**
 		 * Wrap DB transaction functions
 		 */
 
-		protected static $in_transaction = 0;
+		protected static $in_transaction = array(DB_CONNECTION_DEFAULT => 0);
 
-		public static function db_start_transaction()
+		public static function db_start_transaction($connection_id = DB_CONNECTION_DEFAULT)
 		{
-			if(DBObject::$in_transaction==0)
-				DBObject::db()->autocommit(false);
-			DBObject::$in_transaction++;
+			if(DBObject::$in_transaction[$connection_id]==0)
+				DBObject::db($connection_id)->autocommit(false);
+			DBObject::$in_transaction[$connection_id]++;
 		}
 
-		public static function db_commit()
+		public static function db_commit($connection_id = DB_CONNECTION_DEFAULT)
 		{
-			DBObject::$in_transaction--;
-			if(DBObject::$in_transaction<=0) {
-				$dbh = DBObject::db();
+			DBObject::$in_transaction[$connection_id]--;
+			if(DBObject::$in_transaction[$connection_id]<=0) {
+				$dbh = DBObject::db($connection_id);
 				$dbh->commit();
 				$dbh->autocommit(true);
-				DBObject::$in_transaction = 0;
+				DBObject::$in_transaction[$connection_id] = 0;
 			}
 		}
 
-		public static function db_rollback()
+		public static function db_rollback($connection_id = DB_CONNECTION_DEFAULT)
 		{
-			DBObject::$in_transaction--;
-			if(DBObject::$in_transaction<=0) {
-				$dbh = DBObject::db();
+			DBObject::$in_transaction[$connection_id]--;
+			if(DBObject::$in_transaction[$connection_id]<=0) {
+				$dbh = DBObject::db($connection_id);
 				$dbh->rollback();
 				$dbh->autocommit(true);
-				DBObject::$in_transaction = 0;
+				DBObject::$in_transaction[$connection_id] = 0;
 			}
 		}
 
@@ -843,7 +876,10 @@
 		public function __set($var, $value)
 		{
 			$this->dirty = true;
-			return ($this->data[$this->name($var)] = $value);
+			if($var=='id')
+				return ($this->data[$this->primary] = $value);
+			else
+				return ($this->data[$this->name($var)] = $value);
 		}
 
 		public function __isset($var)
@@ -953,6 +989,10 @@
 			print_r(DBObject::$relations);
 			echo "<b>tables</b>\n";
 			print_r(DBObject::$_tables);
+			echo "<b>transaction</b>\n";
+			print_r(DBObject::$in_transaction);
+			echo "<b>handles</b>\n";
+			print_r(DBObject::$dbhandle);
 			echo '</pre>';
 		}
 	}
@@ -1051,7 +1091,7 @@
 					?' ORDER BY '.implode(',', $this->order_columns)
 					:'')
 				. $this->limit;
-			$res = DBObject::db_query($sql);
+			$res = DBObject::db_query($sql, $this->obj->db_connection());
 			if($res===false)
 				return false;
 
@@ -1084,7 +1124,7 @@
 					?' ORDER BY '.implode(',', $this->order_columns)
 					:'');
 			$sql = str_replace('SELECT *', 'SELECT COUNT(*) AS count', $sql);
-			$res = DBObject::db_get_row($sql);
+			$res = DBObject::db_get_row($sql, $this->obj->db_connection());
 			if($res===false)
 				return false;
 			return $res['count'];
@@ -1150,7 +1190,8 @@
 					$this->clause_sql .= $binding.preg_replace($p, $q, $clause);
 				}
 			} else {
-				$this->clause_sql .= $binding.$clause.DBObject::db_escape($data);
+				$this->clause_sql .= $binding.$clause
+					.DBObject::db_escape($data, true, $this->obj->db_connection());
 			}
 		}
 
@@ -1235,7 +1276,8 @@
 				&& count($fields = $this->obj->_fulltext_fields())) {
 				
 				$sql = ' AND (';
-				$search = DBObject::db_escape($this->fulltext_search, false);
+				$search = DBObject::db_escape($this->fulltext_search, false,
+					$this->obj->db_connection());
 				$sql .= implode(' LIKE \'%' . $search . '%\' OR ', $fields);
 				$sql .= ' LIKE \'%' . $search . '%\')';
 				return $sql;
@@ -1415,6 +1457,7 @@
 						$this->obj->language_id = $this->language;
 					}
 				}
+				$this->obj->set_db_connection($this->db_connection_id);
 			}
 			return $this->obj;
 		}
@@ -1487,40 +1530,40 @@
 
 		public function update()
 		{
-			DBObject::db_start_transaction();
+			DBObject::db_start_transaction($this->db_connection_id);
 			if(parent::update()===false||!$this->obj->update()) {
-				DBObject::db_rollback();
+				DBObject::db_rollback($this->db_connection_id);
 				return false;
 			}
-			DBObject::db_commit();
+			DBObject::db_commit($this->db_connection_id);
 			return true;
 		}
 
 		public function insert()
 		{
-			DBObject::db_start_transaction();
+			DBObject::db_start_transaction($this->db_connection_id);
 			if(parent::insert()===false) {
-				DBObject::db_rollback();
+				DBObject::db_rollback($this->db_connection_id);
 				return false;
 			}
 			$this->obj->unset_primary();
 			$this->obj->{$this->primary} = $this->id();
 			if($this->obj->insert()===false) {
-				DBObject::db_rollback();
+				DBObject::db_rollback($this->db_connection_id);
 				return false;
 			}
-			DBObject::db_commit();
+			DBObject::db_commit($this->db_connection_id);
 			return true;
 		}
 
 		public function delete()
 		{
-			DBObject::db_start_transaction();
+			DBObject::db_start_transaction($this->db_connection_id);
 			if($this->obj->delete()===false || parent::delete()===false) {
-				DBObject::db_rollback();
+				DBObject::db_rollback($this->db_connection_id);
 				return false;
 			}
-			DBObject::db_commit();
+			DBObject::db_commit($this->db_connection_id);
 			return true;
 		}
 
