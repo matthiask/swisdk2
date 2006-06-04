@@ -62,7 +62,7 @@
 		}
 	}
 
-	class TableViewFormRenderer extends FormRenderer {
+	class TableViewFormRenderer extends TableFormRenderer {
 		public function html_start()
 		{
 			return $this->html_start.$this->grid->html().'<br />';

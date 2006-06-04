@@ -151,7 +151,7 @@
 		/**
 		 * @return the Form html
 		 */
-		public function html($arg = 'FormRenderer')
+		public function html($arg = 'TableFormRenderer')
 		{
 			$renderer = null;
 			if($arg instanceof FormRenderer)
@@ -473,7 +473,7 @@
 		 *
 		 * NOTE! This is not used when calling Form::html()
 		 */
-		public function html($arg = 'FormRenderer')
+		public function html($arg = 'TableFormRenderer')
 		{
 			$renderer = null;
 			if($arg instanceof FormRenderer)
@@ -1073,21 +1073,14 @@
 		}
 	}
 
-	class FormRenderer {
+	abstract class FormRenderer {
 
-		protected $grid;
 		protected $html_start = '';
 		protected $html_end = '';
 
-		public function __construct()
-		{
-			$this->grid = new Layout_Grid();
-		}
-
-		public function html()
-		{
-			return $this->html_start.$this->grid->html().$this->html_end;
-		}
+		abstract public function html();
+		abstract protected function _render($obj, $field_html);
+		abstract protected function _render_bar($obj, $html);
 
 		public function add_html($html)
 		{
@@ -1357,26 +1350,6 @@ EOD;
 				'<input type="submit" '.$obj->attribute_html().'/>');
 		}
 
-		/**
-		 * when you extend the FormRenderer, you can (and should) use
-		 * the functions below here to render your FormItems.
-		 *
-		 * If you only use those helpers, it will be very easy to
-		 * completely change the way some form is displayed.
-		 */
-
-		protected function _render($obj, $field_html)
-		{
-			$y = $this->grid->height();
-			$this->grid->add_item(0, $y, $this->_title_html($obj));
-			$this->grid->add_item(1, $y, $field_html.$this->_message_html($obj));
-		}
-
-		protected function _render_bar($obj, $html)
-		{
-			$this->grid->add_item(0, $this->grid->height(), $html, 2, 1);
-		}
-
 		protected function _title_html($obj)
 		{
 			return '<label for="'.$obj->iname().'">'.$obj->title().'</label>';
@@ -1395,6 +1368,32 @@ EOD;
 				'<input type="%s" name="%s" id="%s" value="%s" %s />',
 				$obj->type(), $name, $name, $obj->value(),
 				$obj->attribute_html());
+		}
+	}
+
+	class TableFormRenderer extends FormRenderer {
+		protected $grid;
+
+		public function __construct()
+		{
+			$this->grid = new Layout_Grid();
+		}
+
+		public function html()
+		{
+			return $this->html_start.$this->grid->html().$this->html_end;
+		}
+
+		protected function _render($obj, $field_html)
+		{
+			$y = $this->grid->height();
+			$this->grid->add_item(0, $y, $this->_title_html($obj));
+			$this->grid->add_item(1, $y, $field_html.$this->_message_html($obj));
+		}
+
+		protected function _render_bar($obj, $html)
+		{
+			$this->grid->add_item(0, $this->grid->height(), $html, 2, 1);
 		}
 	}
 
