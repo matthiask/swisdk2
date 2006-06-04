@@ -253,8 +253,11 @@
 				$dbo = DBObject::create($this->dbo_class);
 			$p = $dbo->primary();
 
+			$list = getInput($p);
+			if(!is_array($list) || !count($list))
+				$this->goto('_index');
 			$dboc = DBOContainer::find($dbo, array(
-				$p.' IN {list}' => array('list' => getInput($p))));
+				$p.' IN {list}' => array('list' => $list)));
 
 			$builder = $this->form_builder();
 			$form = null;
@@ -312,13 +315,12 @@
 		public function run()
 		{
 			if($this->multilanguage)
-				$this->tableview = new MultiDBTableView(
+				$this->tableview = new DBTableView(
 					DBObjectML::create($this->dbo_class),
 					'DBTableViewForm');
 			else
-				$this->tableview = new MultiDBTableView(
+				$this->tableview = new DBTableView(
 					$this->dbo_class, 'DBTableViewForm');
-			$this->tableview->set_target($this->module_url);
 			if(class_exists($c = 'DBTableViewForm_'.$this->dbo_class))
 				$this->tableview->set_form($c);
 			$this->tableview->init();
@@ -351,8 +353,11 @@
 				$dbo = DBObject::create($this->dbo_class);
 			$p = $dbo->primary();
 
+			$list = getInput($p);
+			if(!is_array($list) || !count($list))
+				$this->goto('_index');
 			$dboc = DBOContainer::find($dbo, array(
-				$p.' IN {list}' => array('list' => getInput($p))));
+				$p.' IN {list}' => array('list' => $list)));
 
 			$dboc->delete();
 			$this->goto('_index');
