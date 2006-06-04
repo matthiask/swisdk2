@@ -867,7 +867,7 @@
 		 */
 		public function __get($var)
 		{
-			$name = $this->name($var);
+			$name = ($var=='id'?$this->primary:$this->name($var));
 			if(isset($this->data[$name]))
 				return $this->data[$name];
 			return null;
@@ -1643,17 +1643,24 @@
 
 		public function __get($var)
 		{
-			$name = $this->name($var);
-			if(in_array($name, array_keys($this->field_list()))) {
-				if(isset($this->data[$name]))
-					return $this->data[$name];
-				return null;
-			}
-
-			return $this->dbobj()->$var;
+			$dbo = $this->dbobj();
+			$fields = $dbo->field_list();
+			if(isset($fields[$name = $dbo->name($var)]))
+				return $obj->get($name);
+			if(isset($this->data[$name = $this->name($var)]))
+				return $this->data[$name];
+			return null;
 		}
 
-		// FIXME __set function?
+		public function __set($var, $value)
+		{
+			$dbo = $this->dbobj();
+			$fields = $dbo->field_list();
+			if(isset($fields[$name = $dbo->name($var)]))
+				$obj->set($name, $value);
+			else
+				$this->data[$this->name($var)] = $value;
+		}
 	}
 
 ?>
