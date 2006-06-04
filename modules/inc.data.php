@@ -180,14 +180,7 @@
 
 		public static function create_with_data($class, $data)
 		{
-			$obj = null;
-			if(class_exists($class))
-				$obj = new $class();
-			else {
-				$obj = new DBObject(false);
-				$obj->class = $class;
-				$obj->_setup_dbvars();
-			}
+			$obj = DBObject::create($class);
 
 			foreach($data as $k => $v)
 				$obj->$k = $v;
@@ -1309,6 +1302,10 @@
 			}
 		}
 
+		public function dbobj_clone()
+		{
+			return clone $this->obj;
+		}
 
 		public function __get($var)
 		{
@@ -1440,6 +1437,16 @@
 			$obj->class = $class;
 			$obj->_setup_dbvars();
 			$obj->language = $language;
+			return $obj;
+		}
+
+		public static function create_with_data($class, $data,
+			$language = LANGUAGE_DEFAULT)
+		{
+			$obj = DBObjectML::create($class, $language);
+
+			foreach($data as $k => $v)
+				$obj->$k = $v;
 			return $obj;
 		}
 
