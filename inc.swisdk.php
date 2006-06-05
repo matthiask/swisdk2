@@ -62,6 +62,7 @@
 			define('LOG_ROOT', APP_ROOT.'log/');
 			define('CONTENT_ROOT' , WEBAPP_ROOT . 'content/');
 			define('CACHE_ROOT', WEBAPP_ROOT.'cache/');
+			define('UPLOAD_ROOT', WEBAPP_ROOT.'upload/');
 
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';

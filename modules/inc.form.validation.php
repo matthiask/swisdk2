@@ -179,4 +179,32 @@
 		}
 	}
 
+	class UploadedFileRule extends FormItemRule {
+		protected $message = 'Please provide a file';
+
+		protected function is_valid_impl(FormItem &$item)
+		{
+			return !$item->no_upload();
+		}
+	}
+
+	class ImageFileRule extends FormItemRule {
+		protected $message = 'Please provide a valid image file';
+
+		protected function is_valid_impl(FormItem &$item)
+		{
+			// NOTE! you could probably stuff more checks in here. I
+			// hope these should be enough
+			$data = $item->files_data();
+			$mime = $data['type'];
+			if(in_array($data['type'], array('image/png', 'image/gif',
+					'image/jpg', 'image/jpeg', 'image/pjpeg'))
+				&& @getimagesize($data['path'])!==false)
+				return true;
+
+			$item->unlink_cachefile();
+			return false;
+		}
+	}
+
 ?>

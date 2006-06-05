@@ -235,6 +235,57 @@
 	class FileUpload extends SimpleInput {
 		protected $type = 'file';
 		protected $attributes = array('size' => 60);
+		
+		protected $files_data;
+		protected $no_upload = true;
+
+		public function init_value($dbobj)
+		{
+			$name = $this->iname();
+			if(isset($_FILES[$name])) {
+				$this->files_data = $_FILES[$name];
+				// TODO error checking
+				$fname = preg_replace('/[^A-Za-z0-9\.-_]+/', '_',
+					$this->files_data['name']);
+				$pos = strrpos($fname, '.');
+				if($pos===false)
+					$fname .= uniqid();
+				else
+					$fname = substr($fname, 0, $pos).'_'
+						.uniqid().substr($fname, $pos);
+
+				$this->files_data['path'] = CACHE_ROOT.'upload/'.$fname;
+				if(move_uploaded_file($this->files_data['tmp_name'],
+						$this->files_data['path'])) {
+					$dbobj->set($this->_stripit($this->name()),
+						$fname);
+					$this->no_upload = false;
+				}
+			}
+		}
+
+		/**
+		 * these functions should be used by FormItemRules to validate
+		 * the uploaded files
+		 */
+		public function files_data()
+		{
+			return $this->files_data;
+		}
+
+		public function no_upload()
+		{
+			return $this->no_upload;
+		}
+
+		/**
+		 * this function should be called inside the FormItemRule if
+		 * the upload does not validate
+		 */
+		public function unlink_cachefile()
+		{
+			unlink($this->files_data['path']);
+		}
 	}
 
 	/**
