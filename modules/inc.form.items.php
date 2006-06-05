@@ -297,7 +297,7 @@
 		 */
 		public function unlink_cachefile()
 		{
-			unlink($this->files_data['path']);
+			@unlink($this->files_data['path']);
 		}
 	}
 
