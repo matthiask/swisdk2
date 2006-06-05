@@ -110,6 +110,13 @@
 		protected static $error_obj=null;
 
 		/**
+		 * unset this flag if you do not want some fields to be updated
+		 * automatically prior to update or insertion (creation_dttm,
+		 * update_dttm, author_id, ...)
+		 */
+		protected $auto_update_fields = true;
+
+		/**
 		 * DB Connection ID (only used if you want multiple DB connections)
 		 */
 		protected $db_connection_id = DB_CONNECTION_DEFAULT;
@@ -289,11 +296,12 @@
 		/**
 		 * Explicitly request an insert be done. This should always succeed.
 		 */
-		public function insert()
+		public function insert($force_primary = false)
 		{
 			$this->auto_update_fields(true);
 			DBObject::db_start_transaction($this->db_connection_id);
-			$this->unset_primary();
+			if(!$force_primary)
+				$this->unset_primary();
 			$res = DBObject::db_query('INSERT INTO ' . $this->table
 				. ' SET ' . $this->_vals_sql(),
 				$this->db_connection_id);
@@ -378,6 +386,8 @@
 		 */
 		protected function auto_update_fields($new = false)
 		{
+			if(!$this->auto_update_fields)
+				return;
 			$fields = array_keys($this->field_list());
 			$dttm_regex = '/_('.($new?'creation|':'').'update)_dttm$/';
 			$author_regex = '/_author_id$/';

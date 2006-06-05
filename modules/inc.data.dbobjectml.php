@@ -66,9 +66,8 @@
 					if($id = $this->id())
 						$this->obj = DBObject::find($this->tclass, array(
 							$this->primary.'=' => $id,
-							'language_id=' => $language
-						));
-					else {
+							'language_id=' => $language));
+					if(!$this->obj) {
 						$this->obj = DBObject::create($this->tclass);
 						$this->obj->language_id = $this->language;
 					}
@@ -155,10 +154,10 @@
 			return true;
 		}
 
-		public function insert()
+		public function insert($force_primary = false)
 		{
 			DBObject::db_start_transaction($this->db_connection_id);
-			if(parent::insert()===false) {
+			if(parent::insert($force_primary)===false) {
 				DBObject::db_rollback($this->db_connection_id);
 				return false;
 			}
@@ -259,10 +258,15 @@
 
 		public function __get($var)
 		{
+			if($var=='id') {
+				if(isset($this->data[$this->primary]))
+					return $this->data[$this->primary];
+				return null;
+			}
 			$dbo = $this->dbobj();
 			$fields = $dbo->field_list();
 			if(isset($fields[$name = $dbo->name($var)]))
-				return $obj->get($name);
+				return $dbo->get($name);
 			if(isset($this->data[$name = $this->name($var)]))
 				return $this->data[$name];
 			return null;
@@ -270,12 +274,14 @@
 
 		public function __set($var, $value)
 		{
+			if($var=='id')
+				return ($this->data[$this->primary] = $value);
 			$dbo = $this->dbobj();
 			$fields = $dbo->field_list();
 			if(isset($fields[$name = $dbo->name($var)]))
-				$dbo->set($name, $value);
+				return $dbo->set($name, $value);
 			else
-				$this->data[$this->name($var)] = $value;
+				return $this->data[$this->name($var)] = $value;
 		}
 	}
 
