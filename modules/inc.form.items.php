@@ -232,6 +232,11 @@
 		protected $attributes = array('size' => 60);
 	}
 
+	class FileUpload extends SimpleInput {
+		protected $type = 'file';
+		protected $attributes = array('size' => 60);
+	}
+
 	/**
 	 * CheckboxInput uses another hidden input field to verify if
 	 * the Checkbox was submitted at all.
@@ -352,8 +357,6 @@
 	}
 
 	class SubmitButton extends FormBar {
-		protected $attributes = array('value' => 'Submit');
-
 		public function init_value($dbobj)
 		{
 			// i have no value

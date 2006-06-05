@@ -10,6 +10,7 @@
 		protected $html_start = '';
 		protected $html_end = '';
 		protected $javascript = '';
+		protected $file_upload = false;
 
 		abstract public function html();
 		abstract protected function _render($obj, $field_html);
@@ -76,17 +77,22 @@
 
 		protected function visit_Form_start($obj)
 		{
-			$this->add_html_start(
-				'<form method="post" action="'.$_SERVER['REQUEST_URI']
-				.'" name="'.$obj->id()."\">\n");
-			$this->add_html_end('</form>');
 			if($title = $obj->title())
 				$this->_render_bar($obj,
 					'<big><strong>'.$title.'</strong></big>');
 		}
 
-		protected function visit_Form_end()
+		protected function visit_Form_end($obj)
 		{
+			$upload = '';
+			if($this->file_upload)
+				$upload = ' enctype="multipart/form-data">'
+					.'<input type="hidden" name="MAX_FILE_SIZE" '
+					.'value="2000000"';
+			$this->add_html_start(
+				'<form method="post" action="'.$_SERVER['REQUEST_URI']
+				.'" name="'.$obj->id()."\"$upload>\n");
+			$this->add_html_end('</form>');
 		}
 
 		protected function visit_FormBox_start($obj)
@@ -112,6 +118,12 @@
 		{
 			$this->javascript .= $obj->javascript();
 			$this->_render($obj, $this->_simpleinput_html($obj));
+		}
+
+		protected function visit_FileUpload($obj)
+		{
+			$this->file_upload = true;
+			$this->visit_SimpleInput($obj);
 		}
 
 		protected function visit_CheckboxInput($obj)
@@ -301,8 +313,14 @@ EOD;
 		protected function visit_SubmitButton($obj)
 		{
 			$this->javascript .= $obj->javascript();
+			$name = $obj->name();
+			$value = $obj->value();
+			if(!$value)
+				$value = 'Submit';
 			$this->_render_bar($obj,
-				'<input type="submit" '.$obj->attribute_html().'/>');
+				'<input type="submit" '.$obj->attribute_html()
+				.($name?' name="'.$name.'"':'')
+				.' value="'.$value.'" />');
 		}
 
 		protected function _title_html($obj)
