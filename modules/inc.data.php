@@ -302,7 +302,7 @@
 		 */
 		public function insert()
 		{
-			$this->auto_update_fields();
+			$this->auto_update_fields(true);
 			DBObject::db_start_transaction($this->db_connection_id);
 			$this->unset_primary();
 			$res = DBObject::db_query('INSERT INTO ' . $this->table
@@ -387,15 +387,15 @@
 		 * automatically fill up update_dttm, creation_dttm, author_id
 		 * et al.
 		 */
-		protected function auto_update_fields()
+		protected function auto_update_fields($new = false)
 		{
 			$fields = array_keys($this->field_list());
-			$dttm_regex = '/_(creation|update)_dttm$/';
+			$dttm_regex = '/_('.($new?'creation|':'').'update)_dttm$/';
 			$author_regex = '/_author_id$/';
 			foreach($fields as $field) {
 				if(preg_match($dttm_regex, $field))
 					$this->set($field, time());
-				else if(preg_match($author_regex, $field)
+				else if($new && preg_match($author_regex, $field)
 						&&!$this->get($field))
 					$this->set($field, SessionHandler::user()->id());
 			}
