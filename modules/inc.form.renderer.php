@@ -12,7 +12,6 @@
 		protected $javascript = '';
 		protected $file_upload = false;
 
-		abstract public function html();
 		abstract protected function _render($obj, $field_html);
 		abstract protected function _render_bar($obj, $html);
 
