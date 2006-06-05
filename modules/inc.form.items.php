@@ -31,6 +31,11 @@
 		protected $value;
 
 		/**
+		 * info text
+		 */
+		protected $info;
+
+		/**
 		 * validation rule objects
 		 */
 		protected $rules = array();
@@ -79,6 +84,8 @@
 		public function set_name($name)		{ $this->name = $name; } 
 		public function title()			{ return $this->_stripit($this->title); }
 		public function set_title($title)	{ $this->title = $title; } 
+		public function info()			{ return $this->info; }
+		public function set_info($info)		{ $this->info = $info; } 
 		public function message()		{ return $this->message; }
 		public function set_message($message)	{ $this->message = $message; }
 		public function add_message($message)

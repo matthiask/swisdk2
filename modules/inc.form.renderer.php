@@ -331,7 +331,13 @@ EOD;
 		protected function _message_html($obj)
 		{
 			$msg = $obj->message();
-			return $msg?'<br /><span style="color:red">'.$msg.'</span>':'';
+			return $msg?'<div style="clear:both;color:red">'.$msg.'</div>':'';
+		}
+
+		protected function _info_html($obj)
+		{
+			$msg = $obj->info();
+			return $msg?'<div style="float:left;">'.$msg.'</div>':'';
 		}
 
 		protected function _simpleinput_html($obj)
@@ -371,7 +377,10 @@ EOD;
 		{
 			$y = $this->grid()->height();
 			$this->grid()->add_item(0, $y, $this->_title_html($obj));
-			$this->grid()->add_item(1, $y, $field_html.$this->_message_html($obj));
+			$this->grid()->add_item(1, $y,
+				'<div style="float:left;">'.$field_html.'</div>'
+				.$this->_info_html($obj)
+				.$this->_message_html($obj));
 		}
 
 		protected function _render_bar($obj, $html)
