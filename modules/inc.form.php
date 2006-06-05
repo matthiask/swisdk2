@@ -873,6 +873,11 @@
 			return $this->items;
 		}
 
+		public function add_null_item()
+		{
+			$this->items = array_merge(array(0 => ' -- select -- '), $this->items);
+		}
+
 		protected $items=array();
 	}
 

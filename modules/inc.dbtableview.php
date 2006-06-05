@@ -78,7 +78,9 @@
 
 		public function html_end()
 		{
-			return $this->grid('action')->html().$this->html_end;
+			return $this->grid('action')->html()
+				.$this->javascript()
+				.$this->html_end;
 		}
 
 		protected function &grid($which = null)
