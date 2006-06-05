@@ -1078,6 +1078,23 @@
 			return $container;
 		}
 
+		public static function find_by_id($class, $ids)
+		{
+			$container = null;
+			if(is_string($class))
+				$container = new DBOContainer(DBObject::create($class));
+			else
+				$container = new DBOContainer($class);
+
+			if(!is_array($ids) || !count($ids))
+				return false;
+			$container->add_clause($container->dbobj()->primary().' IN {list}',
+				array('list' => $ids));
+			if($container->init()===false)
+				return false;
+			return $container;
+		}
+
 		/**
 		 * Build SQL query and fill up DBObject array
 		 */
