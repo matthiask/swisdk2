@@ -677,7 +677,7 @@
 		public function set_preinitialized() { $this->preinitialized = true; }
 		public function set_default_value($value)
 		{
-			if(!$this->value)
+			if($this->value===null)
 				$this->value = $value;
 		}
 
@@ -1336,11 +1336,12 @@ EOD;
 				.$obj->attribute_html().'>';
 			$value = $obj->value();
 			$items = $obj->items();
-			foreach($items as $k => $v) {
+			foreach($items as $id => $title) {
 				$html .= '<option ';
-				if($value==$k)
+				if((is_numeric($id) && $id===intval($value))
+						|| (!is_numeric($id) && $id==="$value"))
 					$html .= 'selected="selected" ';
-				$html .= 'value="'.$k.'">'.$v.'</option>';
+				$html .= 'value="'.$id.'">'.$title.'</option>';
 			}
 			$html .= '</select>';
 			$this->_render($obj, $html);
