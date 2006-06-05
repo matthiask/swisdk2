@@ -88,7 +88,7 @@
 		 * This function should also be used to create FormBoxes (FormML
 		 * returns FormMLBox)
 		 */
-		public function &box($id=0)
+		public function &box($id=null)
 		{
 			if(!$id && count($this->boxes))
 				return reset($this->boxes);
@@ -98,8 +98,12 @@
 				$this->boxes[$id]->set_name($id);
 				if($this->unique)
 					$this->boxes[$id]->enable_unique();
-				if($obj = $this->dbobj())
-					$this->boxes[$id]->bind($obj);
+				if($this->dbobj_tmp) {
+					$this->boxes[$id]->bind($this->dbobj_tmp);
+					$this->dbobj_tmp = null;
+				} else
+					if($obj = $this->dbobj())
+						$this->boxes[$id]->bind($obj);
 			}
 			return $this->boxes[$id];
 		}
@@ -113,10 +117,15 @@
 		{
 			return $this->box()->dbobj();
 		}
+		
+		protected $dbobj_tmp;
 
 		public function bind($dbobj)
 		{
-			$this->box()->bind($dbobj);
+			if(!count($this->boxes))
+				$this->dbobj_tmp = $dbobj;
+			else
+				$this->box()->bind($dbobj);
 		}
 
 		public function add()
