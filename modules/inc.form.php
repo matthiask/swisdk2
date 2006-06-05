@@ -17,6 +17,10 @@
 	require_once MODULE_ROOT . 'inc.data.php';
 	require_once MODULE_ROOT . 'inc.layout.php';
 
+	define('FORMRENDERER_VISIT_DEFAULT', 0);
+	define('FORMRENDERER_VISIT_START', 1);
+	define('FORMRENDERER_VISIT_END', 2);
+
 	class Form implements Iterator {
 
 		/**
@@ -70,16 +74,11 @@
 
 		/**
 		 * take a DBObject and return a form id
-		 *
-		 * XXX is it really necessary to take anything else but DBObjects?
 		 */
-		public static function to_form_id($tok, $id=0)
+		public static function to_form_id($dbo, $id=0)
 		{
-			if($tok instanceof DBObject) {
-				$id = $tok->id();
-				return '__swisdk_form_'.$tok->table().'_'.($id?$id:0);
-			}
-			return '__swisdk_form_'.$tok.'_'.($id?$id:0);
+			$id = $dbo->id();
+			return '__swisdk_form_'.$dbo->table().'_'.($id?$id:0);
 		}
 
 		/**
@@ -173,9 +172,10 @@
 		{
 			$this->add(new HiddenInput($this->id()))->set_value(1);
 
-			$renderer->visit($this);
+			$renderer->visit($this, FORMRENDERER_VISIT_START);
 			foreach($this->boxes as &$box)
 				$box->accept($renderer);
+			$renderer->visit($this, FORMRENDERER_VISIT_END);
 		}
 
 		/**
@@ -493,9 +493,10 @@
 		 */
 		public function accept($renderer)
 		{
-			$renderer->visit($this);
+			$renderer->visit($this, FORMRENDERER_VISIT_START);
 			foreach($this->items as &$item)
 				$item->accept($renderer);
+			$renderer->visit($this, FORMRENDERER_VISIT_END);
 		}
 
 		/**
@@ -1107,22 +1108,28 @@
 		 * That way, you can derive your own FormItems without necessarily
 		 * needing to extend the FormRenderer
 		 */
-		public function visit($obj)
+		public function visit($obj, $stage = FORMRENDERER_VISIT_DEFAULT)
 		{
+			$suffix = '';
+			if($stage==FORMRENDERER_VISIT_START)
+				$suffix = '_start';
+			else if($stage==FORMRENDERER_VISIT_END)
+				$suffix = '_end';
+
 			$class = get_class($obj);
 			if($obj instanceof Form)
 				$class = 'Form';
 			else if($obj instanceof FormBox)
 				$class = 'FormBox';
 
-			$method = 'visit_'.$class;
+			$method = 'visit_'.$class.$suffix;
 			if(method_exists($this, $method)) {
 				call_user_func(array($this, $method), $obj);
 				return;
 			} else {
 				$parents = class_parents($class);
 				foreach($parents as $p) {
-					$method = 'visit_'.$p;
+					$method = 'visit_'.$p.$suffix;
 					if(method_exists($this, $method)) {
 						call_user_func(array($this, $method),
 							$obj);
@@ -1131,14 +1138,11 @@
 				}
 			}
 
-			echo "oops.";
-			return;
-
 			SwisdkError::handle(new FatalError(
 				'FormRenderer::visit: Cannot visit '.$class));
 		}
 
-		public function visit_Form($obj)
+		protected function visit_Form_start($obj)
 		{
 			$this->add_html_start(
 				'<form method="post" action="'.$_SERVER['REQUEST_URI']
@@ -1149,7 +1153,11 @@
 					'<big><strong>'.$title.'</strong></big>');
 		}
 
-		public function visit_FormBox($obj)
+		protected function visit_Form_end()
+		{
+		}
+
+		protected function visit_FormBox_start($obj)
 		{
 			if($message = $obj->message())
 				$this->add_html_end('<span style="color:red">'
@@ -1158,17 +1166,21 @@
 				$this->_render_bar($obj, '<strong>'.$title.'</strong>');
 		}
 
-		public function visit_HiddenInput($obj)
+		protected function visit_FormBox_end($obj)
+		{
+		}
+
+		protected function visit_HiddenInput($obj)
 		{
 			$this->add_html($this->_simpleinput_html($obj));
 		}
 
-		public function visit_SimpleInput($obj)
+		protected function visit_SimpleInput($obj)
 		{
 			$this->_render($obj, $this->_simpleinput_html($obj));
 		}
 
-		public function visit_CheckboxInput($obj)
+		protected function visit_CheckboxInput($obj)
 		{
 			$name = $obj->iname();
 			$this->_render($obj, sprintf(
@@ -1180,7 +1192,7 @@
 				.$obj->attribute_html()));
 		}
 
-		public function visit_TristateInput($obj)
+		protected function visit_TristateInput($obj)
 		{
 			static $js = "
 <script type=\"text/javascript\">
@@ -1229,7 +1241,7 @@ function formitem_tristate(elem)
 			$js = '';
 		}
 
-		public function visit_Textarea($obj)
+		protected function visit_Textarea($obj)
 		{
 			$name = $obj->iname();
 			$this->_render($obj, sprintf(
@@ -1238,7 +1250,7 @@ function formitem_tristate(elem)
 				$obj->value()));
 		}
 
-		public function visit_RichTextarea($obj)
+		protected function visit_RichTextarea($obj)
 		{
 			$name = $obj->iname();
 			$value = $obj->value();
@@ -1261,7 +1273,7 @@ EOD;
 			$this->_render($obj, $html);
 		}
 
-		public function visit_DropdownInput($obj)
+		protected function visit_DropdownInput($obj)
 		{
 			$name = $obj->iname();
 			$html = '<select name="'.$name.'" id="'.$name.'"'
@@ -1278,7 +1290,7 @@ EOD;
 			$this->_render($obj, $html);
 		}
 
-		public function visit_Multiselect($obj)
+		protected function visit_Multiselect($obj)
 		{
 			$name = $obj->iname();
 			$html = '<select name="'.$name.'[]" id="'.$name
@@ -1297,7 +1309,7 @@ EOD;
 			$this->_render($obj, $html);
 		}
 
-		public function visit_DateInput($obj)
+		protected function visit_DateInput($obj)
 		{
 			$html = '';
 			static $js_sent = false;
@@ -1344,7 +1356,7 @@ EOD;
 			$this->_render($obj, $html);
 		}
 
-		public function visit_SubmitButton($obj)
+		protected function visit_SubmitButton($obj)
 		{
 			$this->_render_bar($obj,
 				'<input type="submit" '.$obj->attribute_html().'/>');
