@@ -63,14 +63,40 @@
 	}
 
 	class TableViewFormRenderer extends TableFormRenderer {
+		protected $current = 'search';
+		protected $grids = array();
+
+		public function __construct()
+		{
+			// do nothing
+		}
+
 		public function html_start()
 		{
-			return $this->html_start.$this->grid->html().'<br />';
+			return $this->html_start.$this->grid('search')->html().'<br />';
 		}
 
 		public function html_end()
 		{
-			return $this->html_end;
+			return $this->grid('action')->html().$this->html_end;
+		}
+
+		protected function &grid($which = null)
+		{
+			if(!$which)
+				$which = $this->current;
+			if(!isset($this->grids[$which]))
+				$this->grids[$which] = new Layout_Grid();
+			return $this->grids[$which];
+		}
+
+		protected function visit_FormBox_start($obj)
+		{
+			if($obj->name()==='search')
+				$this->current = 'search';
+			else
+				$this->current = 'action';
+			parent::visit_FormBox_start($obj);
 		}
 	}
 

@@ -95,6 +95,7 @@
 
 			if(!isset($this->boxes[$id])) {
 				$this->boxes[$id] = new FormBox();
+				$this->boxes[$id]->set_name($id);
 				if($this->unique)
 					$this->boxes[$id]->enable_unique();
 				if($obj = $this->dbobj())
@@ -254,6 +255,17 @@
 		 * FormBox Id
 		 */
 		protected $formbox_id;
+
+		/**
+		 * FormBox name
+		 *
+		 * this may be used to keep track of different FormBoxes
+		 * It is currently (060605) only used for the DBTableView
+		 * FormRenderer
+		 */
+		protected $name;
+		public function name() { return $this->name; }
+		public function set_name($name) { $this->name = $name; }
 
 		/**
 		 * @param $dbobj: the DBObject bound to the Form
@@ -1386,26 +1398,28 @@ EOD;
 	class TableFormRenderer extends FormRenderer {
 		protected $grid;
 
-		public function __construct()
-		{
-			$this->grid = new Layout_Grid();
-		}
-
 		public function html()
 		{
-			return $this->html_start.$this->grid->html().$this->html_end;
+			return $this->html_start.$this->grid()->html().$this->html_end;
+		}
+
+		protected function &grid()
+		{
+			if(!$this->grid)
+				$this->grid = new Layout_Grid();
+			return $this->grid;
 		}
 
 		protected function _render($obj, $field_html)
 		{
-			$y = $this->grid->height();
-			$this->grid->add_item(0, $y, $this->_title_html($obj));
-			$this->grid->add_item(1, $y, $field_html.$this->_message_html($obj));
+			$y = $this->grid()->height();
+			$this->grid()->add_item(0, $y, $this->_title_html($obj));
+			$this->grid()->add_item(1, $y, $field_html.$this->_message_html($obj));
 		}
 
 		protected function _render_bar($obj, $html)
 		{
-			$this->grid->add_item(0, $this->grid->height(), $html, 2, 1);
+			$this->grid()->add_item(0, $this->grid()->height(), $html, 2, 1);
 		}
 	}
 
