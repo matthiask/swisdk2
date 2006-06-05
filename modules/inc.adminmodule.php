@@ -312,7 +312,7 @@
 	class AdminComponent_list extends AdminComponent {
 		protected $tableview;
 
-		public function run()
+		protected function rewire_tableview()
 		{
 			if($this->multilanguage)
 				$this->tableview = new DBTableView(
@@ -323,13 +323,23 @@
 					$this->dbo_class, 'DBTableViewForm');
 			if(class_exists($c = 'DBTableViewForm_'.$this->dbo_class))
 				$this->tableview->set_form($c);
+		}
+
+		public function run()
+		{
+			$this->rewire_tableview();
+			$this->execute_actions();
 			$this->tableview->init();
 			$this->tableview_builder()->build($this->tableview);
 			$this->complete_columns();
 			$this->html = $this->tableview->html();
 		}
 
-		public function complete_columns()
+		protected function execute_actions()
+		{
+		}
+
+		protected function complete_columns()
 		{
 		}
 	}
