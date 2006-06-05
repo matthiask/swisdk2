@@ -184,6 +184,7 @@
 		public function add_rule(FormItemRule $rule)
 		{
 			$this->rules[] = $rule;
+			return $this;
 		}
 
 		public function is_valid()
