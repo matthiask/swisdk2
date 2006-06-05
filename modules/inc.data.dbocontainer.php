@@ -133,6 +133,8 @@
 					$this->data[$obj->id()] = $obj;
 				}
 			}
+
+			return true;
 		}
 
 		public function count()
