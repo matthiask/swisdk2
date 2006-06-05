@@ -232,6 +232,11 @@
 		protected $attributes = array('size' => 60);
 	}
 
+	/**
+	 * you will get a filename relative to CACHE_ROOT.'upload/'. If you want
+	 * to store the file permanently, you have to move it to UPLOAD_ROOT
+	 * yourself!
+	 */
 	class FileUpload extends SimpleInput {
 		protected $type = 'file';
 		protected $attributes = array('size' => 60);

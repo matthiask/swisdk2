@@ -190,6 +190,8 @@
 
 	class ImageFileRule extends FormItemRule {
 		protected $message = 'Please provide a valid image file';
+		protected $image_mimetypes = array('image/png', 'image/gif',
+			'image/jpg', 'image/jpeg', 'image/pjpeg');
 
 		protected function is_valid_impl(FormItem &$item)
 		{
@@ -197,9 +199,8 @@
 			// hope these should be enough
 			$data = $item->files_data();
 			$mime = $data['type'];
-			if(in_array($data['type'], array('image/png', 'image/gif',
-					'image/jpg', 'image/jpeg', 'image/pjpeg'))
-				&& @getimagesize($data['path'])!==false)
+			if(in_array($data['type'], $this->image_mimetypes)
+					&& @getimagesize($data['path'])!==false)
 				return true;
 
 			$item->unlink_cachefile();
