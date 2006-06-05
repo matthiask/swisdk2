@@ -644,6 +644,11 @@
 		 */
 		protected $preinitialized = false;
 
+		/**
+		 * javascript fragments
+		 */
+		protected $javascript = '';
+
 		public function __construct($name=null)
 		{
 			if($name)
@@ -772,6 +777,16 @@
 		{
 			$renderer->visit($this);
 		}
+
+		public function add_javascript($js)
+		{
+			$this->javascript .= $js;
+		}
+
+		public function javascript()
+		{
+			return $this->javascript;
+		}
 	}
 
 	/**
@@ -877,7 +892,23 @@
 	/**
 	 * display all enum choices for a given SQL field
 	 */
-	class EnumInput extends Multiselect {
+	class EnumMultiInput extends Multiselect {
+
+		/**
+		 * ATTENTION! $table _cannot_ be escaped
+		 */
+		public function __construct($table, $field)
+		{
+			$fs = DBObject::db_get_array('SHOW COLUMNS FROM '
+				.$table, 'Field');
+			$field = $fs[$field];
+			$array = explode('\',\'', substr($field['Type'], 6,
+				strlen($field['Type'])-8));
+			$this->set_items(array_combine($array, $array));
+		}
+	}
+
+	class EnumInput extends DropdownInput {
 
 		/**
 		 * ATTENTION! $table _cannot_ be escaped
@@ -1090,6 +1121,7 @@
 
 		protected $html_start = '';
 		protected $html_end = '';
+		protected $javascript = '';
 
 		abstract public function html();
 		abstract protected function _render($obj, $field_html);
@@ -1184,16 +1216,19 @@
 
 		protected function visit_HiddenInput($obj)
 		{
+			$this->javascript .= $obj->javascript();
 			$this->add_html($this->_simpleinput_html($obj));
 		}
 
 		protected function visit_SimpleInput($obj)
 		{
+			$this->javascript .= $obj->javascript();
 			$this->_render($obj, $this->_simpleinput_html($obj));
 		}
 
 		protected function visit_CheckboxInput($obj)
 		{
+			$this->javascript .= $obj->javascript();
 			$name = $obj->iname();
 			$this->_render($obj, sprintf(
 				'<input type="checkbox" name="%s" id="%s" %s value="1" />'
@@ -1206,6 +1241,7 @@
 
 		protected function visit_TristateInput($obj)
 		{
+			$this->javascript .= $obj->javascript();
 			static $js = "
 <script type=\"text/javascript\">
 function formitem_tristate(elem)
@@ -1255,6 +1291,7 @@ function formitem_tristate(elem)
 
 		protected function visit_Textarea($obj)
 		{
+			$this->javascript .= $obj->javascript();
 			$name = $obj->iname();
 			$this->_render($obj, sprintf(
 				'<textarea name="%s" id="%s" %s>%s</textarea>',
@@ -1264,6 +1301,7 @@ function formitem_tristate(elem)
 
 		protected function visit_RichTextarea($obj)
 		{
+			$this->javascript .= $obj->javascript();
 			$name = $obj->iname();
 			$value = $obj->value();
 			$attributes = $obj->attribute_html();
@@ -1287,6 +1325,7 @@ EOD;
 
 		protected function visit_DropdownInput($obj)
 		{
+			$this->javascript .= $obj->javascript();
 			$name = $obj->iname();
 			$html = '<select name="'.$name.'" id="'.$name.'"'
 				.$obj->attribute_html().'>';
@@ -1304,6 +1343,7 @@ EOD;
 
 		protected function visit_Multiselect($obj)
 		{
+			$this->javascript .= $obj->javascript();
 			$name = $obj->iname();
 			$html = '<select name="'.$name.'[]" id="'.$name
 				.'" multiple="multiple"'.$obj->attribute_html().'>';
@@ -1323,6 +1363,7 @@ EOD;
 
 		protected function visit_DateInput($obj)
 		{
+			$this->javascript .= $obj->javascript();
 			$html = '';
 			static $js_sent = false;
 			if(!$js_sent) {
@@ -1370,6 +1411,7 @@ EOD;
 
 		protected function visit_SubmitButton($obj)
 		{
+			$this->javascript .= $obj->javascript();
 			$this->_render_bar($obj,
 				'<input type="submit" '.$obj->attribute_html().'/>');
 		}
@@ -1393,6 +1435,11 @@ EOD;
 				$obj->type(), $name, $name, $obj->value(),
 				$obj->attribute_html());
 		}
+
+		protected function javascript()
+		{
+			return '<script type="text/javascript">'.$this->javascript.'</script>';
+		}
 	}
 
 	class TableFormRenderer extends FormRenderer {
@@ -1400,7 +1447,10 @@ EOD;
 
 		public function html()
 		{
-			return $this->html_start.$this->grid()->html().$this->html_end;
+			return $this->html_start
+				.$this->grid()->html()
+				.$this->javascript()
+				.$this->html_end;
 		}
 
 		protected function &grid()
