@@ -354,12 +354,14 @@
 
 		public function add($param)
 		{
-			if($param instanceof DBObject)
+			if($param instanceof DBObject) {
 				if($this->init_index!==null)
 					$this->data[$param->{$this->init_index}] = $param;
-				else
+				else if(isset($this->data[$param->id()]))
 					$this->data[$param->id()] = $param;
-			else {
+				else
+					$this->data[] = $param;
+			} else {
 				$obj = clone $this->obj;
 				$obj->set_data($param);
 				if($this->init_index!==null)

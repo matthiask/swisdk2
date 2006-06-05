@@ -273,7 +273,7 @@
 			$dbo = $this->dbobj();
 			$fields = $dbo->field_list();
 			if(isset($fields[$name = $dbo->name($var)]))
-				$obj->set($name, $value);
+				$dbo->set($name, $value);
 			else
 				$this->data[$this->name($var)] = $value;
 		}
