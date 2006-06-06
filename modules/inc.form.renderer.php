@@ -11,6 +11,7 @@
 		protected $html_end = '';
 		protected $javascript = '';
 		protected $file_upload = false;
+		protected $js_validation = true;
 
 		abstract protected function _render($obj, $field_html);
 		abstract protected function _render_bar($obj, $html);
@@ -36,6 +37,16 @@
 		{
 			if($func)
 				$this->functions[] = $func;
+		}
+
+		public function set_javascript_validation($enabled = true)
+		{
+			$this->js_validation = $enabled;
+		}
+
+		public function javascript_validation()
+		{
+			return $this->js_validation;
 		}
 
 		/**
@@ -91,14 +102,7 @@
 
 		protected function visit_Form_end($obj)
 		{
-			// add validation rule javascript
-			$rules = $obj->rules();
-			foreach($rules as &$rule) {
-				list($funcname, $js) = $rule->validation_javascript($obj);
-				$this->javascript .= $js;
-				$this->add_validation_function($funcname);
-			}
-
+			$this->_collect_javascript($obj);
 
 			$upload = '';
 			$valid = '';
@@ -116,6 +120,9 @@
 
 		protected function _validation_html($obj)
 		{
+			if(!$this->js_validation)
+				return;
+
 			if(!count($this->functions))
 				return null;
 			$id = $obj->id();
@@ -132,8 +139,12 @@ function validate_'.$id.'()
 
 		protected function _collect_javascript($obj)
 		{
-			// add add_javascript_fragment fragments
-			$this->javascript .= $obj->javascript();
+			// add add_javascript() fragments
+			if(!$obj instanceof Form && !$obj instanceof FormBox)
+				$this->javascript .= $obj->javascript();
+
+			if(!$this->js_validation)
+				return;
 
 			// add validation rule javascript
 			$rules = $obj->rules();
