@@ -365,6 +365,9 @@
 		 * Private helper for update() and insert(). This function takes care
 		 * of SQL injections by properly escaping every string that hits the
 		 * database.
+		 *
+		 * XXX: should we truncate the data f.e. at 64kb to avoid too long
+		 * SQL statements?
 		 */
 		protected function _vals_sql()
 		{
