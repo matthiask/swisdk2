@@ -30,6 +30,14 @@
 			$this->html_end .= $html;
 		}
 
+		protected $functions = array();
+
+		public function add_validation_function($func)
+		{
+			if($func)
+				$this->functions[] = $func;
+		}
+
 		/**
 		 * handle the passed object
 		 *
@@ -83,22 +91,64 @@
 
 		protected function visit_Form_end($obj)
 		{
+			// add validation rule javascript
+			$rules = $obj->rules();
+			foreach($rules as &$rule) {
+				list($funcname, $js) = $rule->validation_javascript($obj);
+				$this->javascript .= $js;
+				$this->add_validation_function($funcname);
+			}
+
+
 			$upload = '';
+			$valid = '';
 			if($this->file_upload)
 				$upload = ' enctype="multipart/form-data">'
 					.'<input type="hidden" name="MAX_FILE_SIZE" '
 					.'value="2000000"';
+			list($html, $js) = $this->_validation_html($obj);
 			$this->add_html_start(
 				'<form method="post" action="'.$_SERVER['REQUEST_URI']
-				.'" name="'.$obj->id()."\"$upload>\n");
+				.'" name="'.$obj->id()."\" $html $upload>\n".$js);
+			$this->add_html_end('<span style="color:red" id="'.$obj->id().'_span"> </span>');
 			$this->add_html_end('</form>');
+		}
+
+		protected function _validation_html($obj)
+		{
+			if(!count($this->functions))
+				return null;
+			$id = $obj->id();
+			$js = '<script type="text/javascript">
+function validate_'.$id.'()
+{
+	var valid = true;
+	if(!'.implode("()) valid = false;\n\tif(!", $this->functions).'()) valid = false;
+	return valid;
+}
+</script>';
+			return array('onsubmit="return validate_'.$id.'()"', $js);
+		}
+
+		protected function _collect_javascript($obj)
+		{
+			// add add_javascript_fragment fragments
+			$this->javascript .= $obj->javascript();
+
+			// add validation rule javascript
+			$rules = $obj->rules();
+			foreach($rules as &$rule) {
+				list($funcname, $js) = $rule->validation_javascript($obj);
+				$this->javascript .= $js;
+				$this->add_validation_function($funcname);
+			}
 		}
 
 		protected function visit_FormBox_start($obj)
 		{
-			if($message = $obj->message())
-				$this->add_html_end('<span style="color:red">'
-					.$message.'</span>');
+			$message = $obj->message();
+			$this->add_html_end('<span style="color:red">'
+				.($message?$message:' ').'</span>');
 			if($title = $obj->title())
 				$this->_render_bar($obj, '<strong>'.$title.'</strong>');
 		}
@@ -109,25 +159,26 @@
 
 		protected function visit_HiddenInput($obj)
 		{
-			$this->javascript .= $obj->javascript();
+			$this->_collect_javascript($obj);
 			$this->add_html($this->_simpleinput_html($obj));
 		}
 
 		protected function visit_SimpleInput($obj)
 		{
-			$this->javascript .= $obj->javascript();
+			$this->_collect_javascript($obj);
 			$this->_render($obj, $this->_simpleinput_html($obj));
 		}
 
 		protected function visit_FileUpload($obj)
 		{
+			$this->_collect_javascript($obj);
 			$this->file_upload = true;
 			$this->visit_SimpleInput($obj);
 		}
 
 		protected function visit_CheckboxInput($obj)
 		{
-			$this->javascript .= $obj->javascript();
+			$this->_collect_javascript($obj);
 			$name = $obj->iname();
 			$this->_render($obj, sprintf(
 				'<input type="checkbox" name="%s" id="%s" %s value="1" />'
@@ -140,7 +191,7 @@
 
 		protected function visit_TristateInput($obj)
 		{
-			$this->javascript .= $obj->javascript();
+			$this->_collect_javascript($obj);
 			static $js = "
 <script type=\"text/javascript\">
 function formitem_tristate(elem)
@@ -190,7 +241,7 @@ function formitem_tristate(elem)
 
 		protected function visit_Textarea($obj)
 		{
-			$this->javascript .= $obj->javascript();
+			$this->_collect_javascript($obj);
 			$name = $obj->iname();
 			$this->_render($obj, sprintf(
 				'<textarea name="%s" id="%s" %s>%s</textarea>',
@@ -200,7 +251,7 @@ function formitem_tristate(elem)
 
 		protected function visit_RichTextarea($obj)
 		{
-			$this->javascript .= $obj->javascript();
+			$this->_collect_javascript($obj);
 			$name = $obj->iname();
 			$value = $obj->value();
 			$attributes = $obj->attribute_html();
@@ -224,7 +275,7 @@ EOD;
 
 		protected function visit_DropdownInput($obj)
 		{
-			$this->javascript .= $obj->javascript();
+			$this->_collect_javascript($obj);
 			$name = $obj->iname();
 			$html = '<select name="'.$name.'" id="'.$name.'"'
 				.$obj->attribute_html().'>';
@@ -243,7 +294,7 @@ EOD;
 
 		protected function visit_Multiselect($obj)
 		{
-			$this->javascript .= $obj->javascript();
+			$this->_collect_javascript($obj);
 			$name = $obj->iname();
 			$html = '<select name="'.$name.'[]" id="'.$name
 				.'" multiple="multiple"'.$obj->attribute_html().'>';
@@ -263,7 +314,7 @@ EOD;
 
 		protected function visit_DateInput($obj)
 		{
-			$this->javascript .= $obj->javascript();
+			$this->_collect_javascript($obj);
 			$html = '';
 			static $js_sent = false;
 			if(!$js_sent) {
@@ -311,7 +362,7 @@ EOD;
 
 		protected function visit_SubmitButton($obj)
 		{
-			$this->javascript .= $obj->javascript();
+			$this->_collect_javascript($obj);
 			$name = $obj->name();
 			$value = $obj->value();
 			if(!$value)
@@ -330,7 +381,8 @@ EOD;
 		protected function _message_html($obj)
 		{
 			$msg = $obj->message();
-			return $msg?'<div style="clear:both;color:red">'.$msg.'</div>':'';
+			$name = $obj->iname();
+			return '<div id="'.$name.'_span" style="clear:both;color:red">'.($msg?$msg:' ').'</div>';
 		}
 
 		protected function _info_html($obj)

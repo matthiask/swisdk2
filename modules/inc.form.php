@@ -146,6 +146,11 @@
 			return call_user_func_array(array($this->box(), 'add_rule'), $args);
 		}
 
+		public function rules()
+		{
+			return $this->box()->rules();
+		}
+
 		/**
 		 * search and return a FormItem
 		 */
@@ -329,6 +334,11 @@
 		{
 			$this->rules[] = $rule;
 			return $this;
+		}
+
+		public function &rules()
+		{
+			return $this->rules;
 		}
 
 		/**

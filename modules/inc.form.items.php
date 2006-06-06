@@ -187,6 +187,11 @@
 			return $this;
 		}
 
+		public function &rules()
+		{
+			return $this->rules;
+		}
+
 		public function is_valid()
 		{
 			$valid = true;
