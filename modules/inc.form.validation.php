@@ -65,7 +65,8 @@ EOD;
 		protected function is_valid_impl(&$form)
 		{
 			$dbobj = $form->dbobj();
-			return $dbobj->get($this->field1) == $dbobj->get($this->field2);
+			return $dbobj->get($this->field1->name())
+				== $dbobj->get($this->field2->name());
 		}
 
 		public function validation_javascript(&$form)
@@ -73,13 +74,13 @@ EOD;
 			static $sent_func = false;
 			$funcname = 'form_validate_equal_'.uniqid();
 			$id = $form->id();
-			// FIXME should use iname() here
+			$in1 = $this->field1->iname();
+			$in2 = $this->field2->iname();
 			$js = <<<EOD
 
 function $funcname()
 {
-	if(document.getElementById('{$this->field1}').value
-			==document.getElementById('{$this->field2}').value) {
+	if(document.getElementById('$in1').value==document.getElementById('$in2').value) {
 		document.getElementById('{$id}_span').firstChild.data = ' ';
 		return true;
 	}
