@@ -254,7 +254,7 @@ EOD;
 			$js = <<<EOD
 function formitem_regex_rule_$id(id)
 {
-	var user = document.getElementById(id).value;
+	var value = document.getElementById(id).value;
 	return value.match({$this->regex});
 }
 EOD;
@@ -265,6 +265,7 @@ EOD;
 	}
 
 	class EmailRule extends RegexRule {
+		protected $message = 'Please enter a valid email address';
 		public function __construct($message = null)
 		{
 			parent::__construct(
