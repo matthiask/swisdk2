@@ -533,13 +533,11 @@
 			$rel =& DBObject::$relations[$this->class][$class];
 			switch($rel['type']) {
 				case DB_REL_SINGLE:
-					// FIXME this is seriously broken... gah
-					// see also DBObject::get() (around line 1000)
 					if(isset($this->data[$rel['field']]))
 						return DBObject::find($rel['class'],
 							$this->data[$rel['field']]);
 					else
-						return DBOContainer::create($rel['class']);
+						return DBObject::create($rel['class']);
 				case DB_REL_MANY:
 					return $this->related_many($rel, $params);
 				case DB_REL_MANYTOMANY:
@@ -907,9 +905,6 @@
 			$relations = $this->relations();
 
 			if(isset($relations[$var])) {
-				// FIXME It seems that I assumed that I'll always get a
-				// DBOContainer back from DBObject::related(). That is
-				// NOT always the case. (DB_REL_SINGLE)
 				$obj = $this->related($var);
 				if($obj instanceof DBObject)
 					$this->data[$var] = $obj->id();
