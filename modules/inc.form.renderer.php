@@ -345,7 +345,6 @@ EOD;
 			$value = intval($obj->value());
 			if(!$value)
 				$value = time();
-			// TODO use iname
 
 			$display_value = strftime("%d. %B %Y : %H:%M", $value);
 
