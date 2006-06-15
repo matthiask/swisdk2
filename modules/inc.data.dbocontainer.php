@@ -239,8 +239,7 @@
 		 */
 		public function add_order_column($column, $dir=null)
 		{
-			// FIXME cannot order on fields of joined tables
-			if(in_array($column, array_keys($this->obj->field_list())))
+			if(!preg_match('/[^A-Za-z0-9_]/', $column))
 				$this->order_columns[] = $column
 					. ($dir=='DESC'?' DESC':' ASC');
 		}
