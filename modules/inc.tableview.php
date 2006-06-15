@@ -119,7 +119,7 @@
 	class TextTableViewColumn extends TableViewColumn {
 		public function html(&$data)
 		{
-			$str = $data[$this->column];
+			$str = strip_tags($data[$this->column]);
 			if($ml = $this->args[0])
 				return substr($str, 0, $ml).(strlen($str)>$ml?'&hellip;':'');
 			return $data[$this->column];
