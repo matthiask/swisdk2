@@ -175,7 +175,7 @@
 			$this->form->setup();
 			$this->form->set_clauses($this->obj);
 			$this->obj->init();
-			$this->set_data($this->obj->data());
+			$this->set_data($this->obj->all_data());
 		}
 
 		/**

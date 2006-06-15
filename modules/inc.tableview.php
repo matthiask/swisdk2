@@ -241,14 +241,23 @@ EOD;
 			$val = $data[$this->column];
 			if($this->db_data===null) {
 				$doc = DBOContainer::find($this->db_class);
-				foreach($doc as $id => &$obj) {
+				foreach($doc as $id => &$obj)
 					$this->db_data[$id] = $obj->title();
-				}
 			}
-			
-			if(!isset($this->db_data[$val])) {
+
+			if(is_array($val)) {
+				$keys = array_keys($val);
+				$vals = array();
+				foreach($keys as $key)
+					if(isset($this->db_data[$key]))
+						$vals[] = $this->db_data[$key];
+					else
+						$vals[] = $key;
+				return implode(', ', $vals);
+			}
+
+			if(!isset($this->db_data[$val]))
 				return null;
-			}
 			return $this->db_data[$val];
 		}
 

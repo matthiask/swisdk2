@@ -84,8 +84,6 @@
 
 		/**
 		 * create a FormItem/Column for a relation of type n-to-m
-		 *
-		 * XXX this does not work correctly for TableViews right now
 		 */
 		abstract public function create_rel_manytomany($fname, $title, $class);
 
