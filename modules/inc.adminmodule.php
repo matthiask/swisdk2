@@ -166,6 +166,7 @@
 
 	class AdminComponent_new extends AdminComponent {
 		protected $multiple_new_count = 3;
+		protected $form;
 
 		public function run()
 		{
@@ -178,63 +179,75 @@
 		protected function new_multiple()
 		{
 			$dboc = null;
-			$form = null;
+			$this->form = null;
 
 			if($this->multilanguage) {
-				$dboc = DBOContainer::create(
-					DBObjectML::create($this->dbo_class));
-				$form = new FormML();
+				$dboc = dbocontainer::create(
+					dbobjectml::create($this->dbo_class));
+				$this->form = new FormML();
 			} else {
-				$dboc = DBOContainer::create($this->dbo_class);
-				$form = new Form();
+				$dboc = dbocontainer::create($this->dbo_class);
+				$this->form = new Form();
 			}
 
 			$builder = $this->form_builder();
-			$form->enable_unique();
+			$this->form->enable_unique();
 
 			for($i=1; $i<=$this->multiple_new_count; $i++) {
-				$box = $form->box($i);
-				$box->set_title('New '.$this->dbo_class);
+				$box = $this->form->box($i);
+				$box->set_title('new '.$this->dbo_class);
 				$dbo = null;
 				if($this->multilanguage)
-					$dbo = DBObjectML::create($this->dbo_class);
+					$dbo = dbobjectml::create($this->dbo_class);
 				else
-					$dbo = DBObject::create($this->dbo_class);
+					$dbo = dbobject::create($this->dbo_class);
 				$dbo->id = -$i;
 				$box->bind($dbo);
 				$builder->build($box);
 				$dboc->add($dbo);
 			}
+			$this->complete_form_ml();
 
-			if($form->is_valid()) {
+			if($this->form->is_valid()) {
 				$dboc->unset_primary();
 				$dboc->store();
 
 				$this->goto('_index');
 			} else
-				$this->html = $form->html();
+				$this->html = $this->form->html();
 		}
 
 		protected function new_single()
 		{
-			$form = null;
+			$this->form = null;
 			if($this->multilanguage) {
-				$obj = DBObjectML::create($this->dbo_class);
-				$obj->set_language(Swisdk::language());
-				$form = new FormML($obj);
+				$obj = dbobjectml::create($this->dbo_class);
+				$obj->set_language(swisdk::language());
+				$this->form = new FormML($obj);
 			} else
-				$form = new Form(DBObject::create($this->dbo_class));
-			$this->form_builder()->build($form);
-			$form->set_title('New '.$this->dbo_class);
-			if($form->is_valid()) {
-				$form->dbobj()->store();
+				$this->form = new Form(dbobject::create($this->dbo_class));
+			$this->form_builder()->build($this->form);
+			$this->complete_form();
+			$this->form->set_title('new '.$this->dbo_class);
+			if($this->form->is_valid()) {
+				$this->form->dbobj()->store();
 				$this->goto('_index');
 			} else
-				$this->html = $form->html();
+				$this->html = $this->form->html();
+		}
+
+		protected function complete_form()
+		{
+		}
+
+		protected function complete_form_ml()
+		{
 		}
 	}
 
 	class AdminComponent_edit extends AdminComponent {
+		protected $form;
+
 		public function run()
 		{
 			if($this->args[0]=='multiple')
@@ -260,25 +273,25 @@
 				$p.' IN {list}' => array('list' => $list)));
 
 			$builder = $this->form_builder();
-			$form = null;
 			if($this->multilanguage)
-				$form = new FormML();
+				$this->form = new FormML();
 			else
-				$form = new Form();
-			$form->enable_unique();
+				$this->form = new Form();
+			$this->form->enable_unique();
 			foreach($dboc as $dbo) {
-				$box = $form->box($dbo->id());
+				$box = $this->form->box($dbo->id());
 				$box->set_title('Edit '.$this->dbo_class.' '.$dbo->id());
 				$box->bind($dbo);
 				$box->add(new HiddenInput($p.'[]'))->set_value($dbo->id());
 				$builder->build($box);
 			}
+			$this->complete_form_ml();
 
-			if($form->is_valid()) {
+			if($this->form->is_valid()) {
 				$dboc->store();
 				$this->goto('_index');
 			} else
-				$this->html = $form->html();
+				$this->html = $this->form->html();
 		}
 
 		protected function edit_single()
@@ -294,18 +307,26 @@
 					." Class is: {$this->dbo_class} Argument is: "
 					."{$this->args[0]}"));
 
-			$form = null;
 			if($this->multilanguage)
-				$form = new FormML($dbo);
+				$this->form = new FormML($dbo);
 			else
-				$form = new Form($dbo);
-			$this->form_builder()->build($form);
-			$form->set_title('Edit '.$this->dbo_class);
-			if($form->is_valid()) {
+				$this->form = new Form($dbo);
+			$this->form_builder()->build($this->form);
+			$this->complete_form();
+			$this->form->set_title('Edit '.$this->dbo_class);
+			if($this->form->is_valid()) {
 				$dbo->store();
 				$this->goto('_index');
 			} else
-				$this->html = $form->html();
+				$this->html = $this->form->html();
+		}
+
+		protected function complete_form()
+		{
+		}
+
+		protected function complete_form_ml()
+		{
 		}
 	}
 
