@@ -596,10 +596,20 @@
 	class FormML extends Form {
 		public function &box($id=0)
 		{
+			if(!$id && count($this->boxes))
+				return reset($this->boxes);
+
 			if(!isset($this->boxes[$id])) {
 				$this->boxes[$id] = new FormMLBox();
+				$this->boxes[$id]->set_name($id);
 				if($this->unique)
 					$this->boxes[$id]->enable_unique();
+				if($this->dbobj_tmp) {
+					$this->boxes[$id]->bind($this->dbobj_tmp);
+					$this->dbobj_tmp = null;
+				} else
+					if($obj = $this->dbobj())
+						$this->boxes[$id]->bind($obj);
 			}
 			return $this->boxes[$id];
 		}
