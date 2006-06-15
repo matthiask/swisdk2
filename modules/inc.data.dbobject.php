@@ -324,9 +324,6 @@
 		 * this helper should always be executed inside a transaction (that
 		 * is actually the case when you use update() or insert(), the only
 		 * place where this helper is used right now)
-		 *
-		 * XXX oops, a transaction does not really help here. I should lock
-		 * the table while the user is editing data
 		 */
 		protected function _update_relations()
 		{
@@ -366,8 +363,8 @@
 		 * of SQL injections by properly escaping every string that hits the
 		 * database.
 		 *
-		 * XXX: should we truncate the data f.e. at 64kb to avoid too long
-		 * SQL statements?
+		 * We do not need to truncate the data as long as the maximal POST
+		 * size (default 2MB) is smaller than the mysql packet size (default 16MB).
 		 */
 		protected function _vals_sql()
 		{
@@ -524,19 +521,23 @@
 		 * get related DBObject or DBOContainer (depending on relation type)
 		 *
 		 * @param class: class of related object OR name given to the relation (n-to-m)
-		 * @param params: additional params for related_many and related_many_to_many
-		 * 		Is currently NOT used for DB_REL_SINGLE  (TODO: any sane thing I
-		 * 		could do with it?)
+		 * @param params: additional params for find, related_many or related_many_to_many
 		 */
 		public function related($class, $params=null)
 		{
 			$rel =& DBObject::$relations[$this->class][$class];
 			switch($rel['type']) {
 				case DB_REL_SINGLE:
-					if(isset($this->data[$rel['field']]))
-						return DBObject::find($rel['class'],
-							$this->data[$rel['field']]);
-					else
+					if(isset($this->data[$rel['field']])) {
+						if(!is_array($params))
+							return DBObject::find($rel['class'],
+								$this->data[$rel['field']]);
+						else
+							return DBObject::find($rel['class'],
+							array_merge($params,
+								array($rel['foreign'].'=',
+								$this->data[$rel['field']])));
+					} else
 						return DBObject::create($rel['class']);
 				case DB_REL_MANY:
 					return $this->related_many($rel, $params);
@@ -884,7 +885,6 @@
 
 		public function __isset($var)
 		{
-			// TODO I could also use the field list here
 			return isset($this->data[$this->name($var)]);
 		}
 
