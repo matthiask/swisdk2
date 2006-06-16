@@ -10,8 +10,10 @@
 		/**
 		 * return a fragment of the sitemap as specified
 		 * with the $url parameter
+		 *
+		 * @param partial: is a partial URL allowed?
 		 */
-		public static function page($url, $site = 'default')
+		public static function page($url, $site = 'default', $partial = false)
 		{
 			$sitemap = SwisdkSitemap::sitemap();
 			$ref =& $sitemap[$site];
@@ -25,6 +27,8 @@
 					continue;
 				if(isset($ref['pages'][$t]))
 					$ref =& $ref['pages'][$t];
+				else if($partial)
+					return $ref;
 				else
 					return false;
 			}

@@ -36,6 +36,9 @@ $_swisdk2_sitemap['<xsl:value-of select="@id"/>']['<xsl:value-of select="@lang"/
 	<xsl:if test="@url">
 	'url' => '<xsl:value-of select="@url"/>',
 	</xsl:if>
+	<xsl:if test="@rewrite">
+	'rewrite' => '<xsl:value-of select="@rewrite"/>',
+	</xsl:if>
 	<xsl:if test="count(*) &gt; 0">
 	'pages' => array(
 		<xsl:apply-templates/>

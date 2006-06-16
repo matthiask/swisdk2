@@ -10,11 +10,18 @@
 	class SitemapDispatcher extends ControllerDispatcherModule {
 		public function collect_informations()
 		{
-			$page = SwisdkSitemap::page($this->input());
-			if($page!==false && isset($page['path']))
+			$input = $this->input();
+			$page = SwisdkSitemap::page($input);
+			if($page===false) {
+				$page = SwisdkSitemap::page($input,
+					'default', true);
+				if(isset($page['rewrite']))
+					$this->set_output(str_replace(
+						$page['url'], $page['rewrite'],
+						$input));
+			} else if(isset($page['path']))
 				$this->set_output($page['path']);
 		}
-		
 	}
 
 ?>
