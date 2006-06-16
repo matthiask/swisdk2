@@ -575,6 +575,8 @@
 
 		public function all_related()
 		{
+			if(!isset(DBObject::$relations[$this->class]))
+				return array();
 			$data = array();
 			$rels =& DBObject::$relations[$this->class];
 			foreach($rels as $class => &$rel) {
