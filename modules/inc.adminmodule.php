@@ -155,6 +155,14 @@
 				return new $cmp_class();
 			return new TableViewBuilder();
 		}
+
+		/**
+		 * @return a FormRenderer instance
+		 */
+		public function form_renderer()
+		{
+			return new TableFormRenderer();
+		}
 	}
 
 	class AdminComponent_index extends AdminComponent {
@@ -214,7 +222,7 @@
 
 				$this->goto('_index');
 			} else
-				$this->html = $this->form->html();
+				$this->html = $this->form->html($this->form_renderer());
 		}
 
 		protected function new_single()
@@ -233,7 +241,7 @@
 				$this->form->dbobj()->store();
 				$this->goto('_index');
 			} else
-				$this->html = $this->form->html();
+				$this->html = $this->form->html($this->form_renderer());
 		}
 
 		protected function complete_form()
@@ -291,7 +299,7 @@
 				$dboc->store();
 				$this->goto('_index');
 			} else
-				$this->html = $this->form->html();
+				$this->html = $this->form->html($this->form_renderer());
 		}
 
 		protected function edit_single()
@@ -318,7 +326,7 @@
 				$dbo->store();
 				$this->goto('_index');
 			} else
-				$this->html = $this->form->html();
+				$this->html = $this->form->html($this->form_renderer());
 		}
 
 		protected function complete_form()
