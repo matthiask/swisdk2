@@ -239,9 +239,12 @@
 		 */
 		public function add_order_column($column, $dir=null)
 		{
-			if(!preg_match('/[^A-Za-z0-9_]/', $column))
-				$this->order_columns[] = $column
-					. ($dir=='DESC'?' DESC':' ASC');
+			if(!preg_match('/[^A-Za-z0-9_\.]/', $column))
+				$this->order_columns[] = 
+					((strpos($column, '.')===false)?
+						$this->obj->table().'.':'')
+					.$column
+					.($dir=='DESC'?' DESC':' ASC');
 		}
 
 		/**
@@ -280,10 +283,31 @@
 		public function add_join($table, $clause=null)
 		{
 			if($clause===null) {
-				$dbo = DBObject::create($table);
-				$p = $dbo->primary();
-				$this->joins .= ' LEFT JOIN '.$dbo->table().' ON '
-					.$this->dbobj()->name($p).'='.$p;
+				$relations = $this->obj->relations();
+				if(isset($relations[$table]) && $rel = $relations[$table]) {
+					switch($rel['type']) {
+						case DB_REL_SINGLE:
+						case DB_REL_MANY:
+							$this->joins .= ' LEFT JOIN '.$rel['table']
+								.' ON '.$this->obj->table().'.'
+								.$rel['field'].'='
+								.$rel['table'].'.'
+								.$rel['foreign_key'];
+							break;
+						case DB_REL_MANYTOMANY:
+							$this->joins .= ' LEFT JOIN '.$rel['table']
+								.' ON '.$this->obj->table().'.'
+								.$this->obj->primary().'='
+								.$rel['table'].'.'
+								.$this->obj->primary();
+							break;
+					}
+				} else {
+					$dbo = DBObject::create($table);
+					$p = $dbo->primary();
+					$this->joins .= ' LEFT JOIN '.$dbo->table().' ON '
+						.$this->dbobj()->name($p).'='.$p;
+				}
 			} else
 				$this->joins .= ' LEFT JOIN ' . $table . ' ON ' . $clause;
 		}
