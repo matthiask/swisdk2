@@ -330,7 +330,7 @@
 			if(!isset(DBObject::$relations[$this->class]))
 				return true;
 			foreach(DBObject::$relations[$this->class] as &$rel) {
-				if($rel['type']==DB_REL_MANYTOMANY) {
+				if($rel['type']==DB_REL_N_TO_M) {
 					$field = $rel['field'];
 					if(!$field||!isset($this->data[$field]))
 						$field = $rel['class'];
@@ -506,12 +506,12 @@
 			$table = substr($table, 0, strlen($table)-1);
 
 			DBObject::$relations[$c1][$rel2] = array(
-				'type' => DB_REL_MANYTOMANY, 'table' => $table,
+				'type' => DB_REL_N_TO_M, 'table' => $table,
 				'join' => $o2->table().'.'.$o2->primary().'='
 					.$table.'.'.$o2->primary(),
 				'field' => $options, 'class' => $c2, 'foreign' => $o2->primary());
 			DBObject::$relations[$c2][$rel1] = array(
-				'type' => DB_REL_MANYTOMANY, 'table' => $table,
+				'type' => DB_REL_N_TO_M, 'table' => $table,
 				'join' => $o1->table().'.'.$o1->primary().'='
 					.$table.'.'.$o1->primary(),
 				'field' => $options, 'class' => $c1, 'foreign' => $o1->primary());
@@ -541,7 +541,7 @@
 						return DBObject::create($rel['class']);
 				case DB_REL_MANY:
 					return $this->related_many($rel, $params);
-				case DB_REL_MANYTOMANY:
+				case DB_REL_N_TO_M:
 					return $this->related_many_to_many($rel, $params);
 			}
 		}
@@ -588,7 +588,7 @@
 					case DB_REL_MANY:
 						$data[$class] = $this->related_many($rel)->data();
 						break;
-					case DB_REL_MANYTOMANY:
+					case DB_REL_N_TO_M:
 						$data[$class] =
 							$this->related_many_to_many($rel)->data();
 						break;

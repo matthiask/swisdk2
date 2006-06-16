@@ -8,7 +8,7 @@
 	define('DB_REL_UNSPECIFIED', 0);
 	define('DB_REL_SINGLE', 1);
 	define('DB_REL_MANY', 2);
-	define('DB_REL_MANYTOMANY', 3);
+	define('DB_REL_N_TO_M', 3);
 
 	define('LANGUAGE_DEFAULT', -1);
 	define('LANGUAGE_ALL', -2);

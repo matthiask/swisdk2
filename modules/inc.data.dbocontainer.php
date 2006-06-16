@@ -294,7 +294,7 @@
 								.$rel['table'].'.'
 								.$rel['foreign_key'];
 							break;
-						case DB_REL_MANYTOMANY:
+						case DB_REL_N_TO_M:
 							$this->joins .= ' LEFT JOIN '.$rel['table']
 								.' ON '.$this->obj->table().'.'
 								.$this->obj->primary().'='

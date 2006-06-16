@@ -30,7 +30,7 @@
 					case DB_REL_SINGLE:
 						return $this->create_rel_single($fname, $title,
 							$relations[$fname]['class']);
-					case DB_REL_MANYTOMANY:
+					case DB_REL_N_TO_M:
 						return $this->create_rel_manytomany($fname, $title,
 							$relations[$fname]['class']);
 					default:
@@ -161,7 +161,7 @@
 
 			$relations = $dbobj->relations();
 			foreach($relations as $key => &$data) {
-				if($data['type']==DB_REL_MANYTOMANY)
+				if($data['type']==DB_REL_N_TO_M)
 					$this->create_field($key);
 			}
 
@@ -306,7 +306,7 @@
 
 			$relations = $dbobj->relations();
 			foreach($relations as $key => &$data) {
-				if($data['type']==DB_REL_MANYTOMANY)
+				if($data['type']==DB_REL_N_TO_M)
 					$this->create_field($key, null);
 			}
 
@@ -334,7 +334,7 @@
 
 			$relations = $this->dbobj->relations();
 			foreach($relations as $key => &$data) {
-				if($data['type']==DB_REL_MANYTOMANY)
+				if($data['type']==DB_REL_N_TO_M)
 					$this->create_field($key, 'blah');
 			}
 
