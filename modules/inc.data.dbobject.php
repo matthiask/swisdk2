@@ -324,6 +324,8 @@
 		 * this helper should always be executed inside a transaction (that
 		 * is actually the case when you use update() or insert(), the only
 		 * place where this helper is used right now)
+		 *
+		 * TODO need to check this function for sql injection safety
 		 */
 		protected function _update_relations()
 		{
@@ -351,6 +353,36 @@
 						if(DBObject::db_query($sql,
 							$this->db_connection_id)===false)
 							return false;
+					}
+				} else if($rel['type']==DB_REL_3WAY) {
+					$field = $rel['field'];
+					if(!$field||!isset($this->data[$field]))
+						$field = $rel['class'];
+					if(!isset($this->data[$field]))
+						continue;
+					$res = DBObject::db_query('DELETE FROM '.$rel['table']
+						.' WHERE '.$this->primary.'='.$this->id(),
+						$this->db_connection_id);
+					if($res===false)
+						return false;
+					if(count($this->data[$field])) {
+						$frags = array();
+						foreach($this->data[$field] as $v1 => $v2)
+							if($v1 && $v2)
+								$frags[] = $v1.','.$v2;
+						if(count($frags)) {
+							$o3 = DBObject::create($rel['choices']);
+							$sql = 'INSERT INTO '.$rel['table']
+								.' ('.$this->primary.','
+								.$rel['foreign'].','
+								.$o3->primary().') VALUES ('
+								.$this->id().','
+								.implode('),('.$this->id().',',
+								$frags).')';
+							if(DBObject::db_query($sql,
+								$this->db_connection_id)===false)
+								return false;
+						}
 					}
 				}
 			}
@@ -407,6 +439,7 @@
 		{
 			if(!$this->id())
 				return true;
+			// TODO remove n-to-m relation links
 			$ret = DBObject::db_query('DELETE FROM ' . $this->table
 				. ' WHERE ' . $this->primary . '=' . $this->id());
 			$this->unset_primary();
@@ -510,11 +543,32 @@
 				'join' => $o2->table().'.'.$o2->primary().'='
 					.$table.'.'.$o2->primary(),
 				'field' => $options, 'class' => $c2, 'foreign' => $o2->primary());
+			if($options===null)
+				return;
 			DBObject::$relations[$c2][$rel1] = array(
 				'type' => DB_REL_N_TO_M, 'table' => $table,
 				'join' => $o1->table().'.'.$o1->primary().'='
 					.$table.'.'.$o1->primary(),
 				'field' => $options, 'class' => $c1, 'foreign' => $o1->primary());
+		}
+
+		/**
+		 * DBObject::threeway('Article', 'Realm', 'Role');
+		 */
+		public static function threeway($c1, $c2, $c3)
+		{
+			$o1 = DBObject::create($c1);
+			$o2 = DBObject::create($c2);
+
+			$table = 'tbl_'.$o1->name('to_'.$o2->name(''));
+			$table = substr($table, 0, strlen($table)-1);
+
+			DBObject::$relations[$c1][$c2] = array(
+				'type' => DB_REL_3WAY, 'table' => $table,
+				'join' => $o2->table().'.'.$o2->primary().'='
+					.$table.'.'.$o2->primary(),
+				'class' => $c2, 'choices' => $c3,
+				'foreign' => $o2->primary());
 		}
 
 		/**
@@ -543,6 +597,8 @@
 					return $this->related_many($rel, $params);
 				case DB_REL_N_TO_M:
 					return $this->related_many_to_many($rel, $params);
+				case DB_REL_3WAY:
+					return $this->related_3way($rel, $params);
 			}
 		}
 
@@ -573,6 +629,11 @@
 			return $container;
 		}
 
+		protected function related_3way(&$rel, $params=null)
+		{
+			return $this->related_many_to_many($rel, $params);
+		}
+
 		public function all_related()
 		{
 			if(!isset(DBObject::$relations[$this->class]))
@@ -592,6 +653,9 @@
 						$data[$class] =
 							$this->related_many_to_many($rel)->data();
 						break;
+					case DB_REL_3WAY:
+						$data[$class] =
+							$this->related_3way($rel)->data();
 				}
 			}
 			return $data;
@@ -908,10 +972,20 @@
 
 			if(isset($relations[$var])) {
 				$obj = $this->related($var);
-				if($obj instanceof DBObject)
-					$this->data[$var] = $obj->id();
-				else
-					$this->data[$var] = $obj->ids();
+				switch($relations[$var]['type']) {
+					case DB_REL_SINGLE:
+						$this->data[$var] = $obj->id();
+						break;
+					case DB_REL_MANY:
+					case DB_REL_N_TO_M:
+						$this->data[$var] = $obj->ids();
+						break;
+					case DB_REL_3WAY:
+						$this->data[$var] = $obj->collect_full(
+							DBObject::create($relations[$var]['class'])->primary(),
+							DBObject::create($relations[$var]['choices'])->primary());
+						break;
+				}
 				return $this->data[$var];
 			}
 		}

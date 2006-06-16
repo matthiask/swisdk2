@@ -167,15 +167,33 @@
 		{
 			$name = $this->name();
 			$sname = $this->_stripit($name);
+			$iname = $this->iname();
+			$val = null;
 
-			if(($val = getInput($this->iname()))!==null) {
-				if(is_array($val))
-					$dbobj->set($sname, $val);
-				else
-					$dbobj->set($sname, stripslashes($val));
+			// handle one level of array brackets
+			if(false!==($pos = strpos($iname, '['))) {
+				if($idx = intval(substr($iname, $pos+1, -1))) {
+					$array = null;
+					$pname = substr($iname, 0, $pos);
+					if($val = getInput($pname)) {
+						$array = $dbobj->get($pname);
+						$array[$idx] = $val[$idx];
+						$dbobj->set($pname, $array);
+					} else
+						$array = $dbobj->get($pname);
+
+					$this->set_value($array[$idx]);
+				}
+			} else {
+				if(($val = getInput($this->iname()))!==null) {
+					if(is_array($val))
+						$dbobj->set($sname, $val);
+					else
+						$dbobj->set($sname, stripslashes($val));
+				}
+
+				$this->set_value($dbobj->get($sname));
 			}
-
-			$this->set_value($dbobj->get($sname));
 		}
 
 		/**
@@ -380,6 +398,14 @@
 			if(!$val)
 				return array();
 			return $val;
+		}
+
+		public function init_value($dbobj)
+		{
+			parent::init_value($dbobj);
+			$sname = $this->_stripit($this->name());
+			if(!$dbobj->get($sname))
+				$dbobj->set($sname, array());
 		}
 	}
 

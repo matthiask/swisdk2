@@ -33,6 +33,10 @@
 					case DB_REL_N_TO_M:
 						return $this->create_rel_manytomany($fname, $title,
 							$relations[$fname]['class']);
+					case DB_REL_3WAY:
+						return $this->create_rel_3way($fname, $title,
+							$relations[$fname]['class'],
+							$relations[$fname]['choices']);
 					default:
 						SwisdkError::handle(new FatalError(
 							'Cannot handle'));
@@ -86,6 +90,11 @@
 		 * create a FormItem/Column for a relation of type n-to-m
 		 */
 		abstract public function create_rel_manytomany($fname, $title, $class);
+
+		/**
+		 * create a FormItem/Column for a relation of type 3way
+		 */
+		abstract public function create_rel_3way($fname, $title, $class, $field);
 
 		/**
 		 * create a date widget
@@ -161,7 +170,8 @@
 
 			$relations = $dbobj->relations();
 			foreach($relations as $key => &$data) {
-				if($data['type']==DB_REL_N_TO_M)
+				if($data['type']==DB_REL_N_TO_M
+						||$data['type']==DB_REL_3WAY)
 					$this->create_field($key);
 			}
 
@@ -251,6 +261,26 @@
 			return $this->form->add($fname, $obj, $title);
 		}
 
+		public function create_rel_3way($fname, $title, $class, $field)
+		{
+			$choices = DBOContainer::find($field);
+			$items = array();
+			foreach($choices as $o) {
+				$items[$o->id()] = $o->title();
+			}
+
+			$fields = array();
+			$second = DBOContainer::find($class);
+			foreach($second as $o) {
+				$obj = new DropdownInput();
+				$obj->set_items($items);
+				$fields[] =& $this->form->add($fname.'['.$o->id().']',
+					$obj, $o->title().' '.$o->_class());
+			}
+
+			return $fields;
+		}
+
 		public function create_date($fname, $title)
 		{
 			return $this->form->add($fname, new DateInput(), $title);
@@ -306,7 +336,8 @@
 
 			$relations = $dbobj->relations();
 			foreach($relations as $key => &$data) {
-				if($data['type']==DB_REL_N_TO_M)
+				if($data['type']==DB_REL_N_TO_M
+						||$data['type']==DB_REL_3WAY)
 					$this->create_field($key, null);
 			}
 
@@ -334,7 +365,8 @@
 
 			$relations = $this->dbobj->relations();
 			foreach($relations as $key => &$data) {
-				if($data['type']==DB_REL_N_TO_M)
+				if($data['type']==DB_REL_N_TO_M
+						||$data['type']==DB_REL_3WAY)
 					$this->create_field($key, 'blah');
 			}
 
@@ -369,6 +401,13 @@
 
 		public function create_rel_manytomany($fname, $title, $class)
 		{
+			$this->tv->append_column(new DBTableViewColumn(
+				$fname, $title, $class));
+		}
+
+		public function create_rel_3way($fname, $title, $class, $field)
+		{
+			// TODO show information from choices ($field) too
 			$this->tv->append_column(new DBTableViewColumn(
 				$fname, $title, $class));
 		}

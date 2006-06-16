@@ -239,7 +239,7 @@
 		 */
 		public function add_order_column($column, $dir=null)
 		{
-			if(!preg_match('/[^A-Za-z0-9_\.]/', $column))
+			if($column && !preg_match('/[^A-Za-z0-9_\.]/', $column))
 				$this->order_columns[] = 
 					((strpos($column, '.')===false)?
 						$this->obj->table().'.':'')
@@ -295,6 +295,7 @@
 								.$rel['foreign_key'];
 							break;
 						case DB_REL_N_TO_M:
+						case DB_REL_3WAY:
 							$this->joins .= ' LEFT JOIN '.$rel['table']
 								.' ON '.$this->obj->table().'.'
 								.$this->obj->primary().'='
@@ -370,6 +371,14 @@
 			$array = array();
 			foreach($this->data as &$dbobj)
 				$array[$dbobj->$key] = $dbobj->$value;
+			return $array;
+		}
+
+		public function collect_full($key, $value)
+		{
+			$array = array();
+			foreach($this->data as &$dbobj)
+				$array[$dbobj->get($key)] = $dbobj->get($value);
 			return $array;
 		}
 
