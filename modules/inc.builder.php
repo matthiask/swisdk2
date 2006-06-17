@@ -274,6 +274,7 @@
 			foreach($second as $o) {
 				$obj = new DropdownInput();
 				$obj->set_items($items);
+				$obj->add_null_item();
 				$fields[] =& $this->form->add($fname.'['.$o->id().']',
 					$obj, $o->title().' '.$o->_class());
 			}
