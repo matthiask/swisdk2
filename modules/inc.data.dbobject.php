@@ -543,8 +543,6 @@
 				'join' => $o2->table().'.'.$o2->primary().'='
 					.$table.'.'.$o2->primary(),
 				'field' => $options, 'class' => $c2, 'foreign' => $o2->primary());
-			if($options===null)
-				return;
 			DBObject::$relations[$c2][$rel1] = array(
 				'type' => DB_REL_N_TO_M, 'table' => $table,
 				'join' => $o1->table().'.'.$o1->primary().'='
