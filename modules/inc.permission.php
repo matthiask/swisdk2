@@ -147,6 +147,32 @@
 			$sm->display();
 			exit();
 		}
+
+		/**
+		 * @return an array of all realms (realm_id as key, realm_title as value)
+		 * 	for which the user (current user if none given) has at least
+		 * 	the given role
+		 */
+		public static function realms_for_role($role_id, $uid = null)
+		{
+			if($uid===null)
+				$uid = SessionHandler::user()->id();
+			$rid = intval($role_id);
+			$sql = 'SELECT realm_id, realm_title FROM tbl_realm '
+				.'LEFT JOIN tbl_user_permission '
+					.'ON realm_id=user_permission_realm_id '
+				.'WHERE user_permission_user_id='.$uid
+					.' AND user_permission_role_id>='.$rid
+				.' UNION ALL '
+				.'SELECT realm_id, realm_title FROM tbl_realm '
+				.'LEFT JOIN tbl_user_group_permission '
+					.'ON realm_id=user_group_permission_realm_id '
+				.'LEFT JOIN tbl_user_to_user_group '
+					.'ON user_group_permission_user_group_id=user_group_id '
+				.'WHERE user_id='.$uid
+					.' AND user_group_permission_role_id>='.$rid;
+			return DBObject::db_get_array($sql, array('realm_id', 'realm_title'));
+		}
 	}
 
 ?>
