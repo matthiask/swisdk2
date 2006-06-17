@@ -323,6 +323,34 @@ EOD;
 			$this->_render($obj, $html);
 		}
 
+		protected function visit_ThreewayInput($obj)
+		{
+			$values = $obj->value();
+			$html = array();
+			$second = $obj->second();
+			foreach($second as $k => $v) {
+				$name = $obj->iname()."[$k]";
+				$html[] = sprintf(
+					'<label for="%s">%s</label>: '
+					.$this->threeway_helper_choice($obj, $values[$k]),
+					$name, $v, $name, $name);
+			}
+			$this->_render($obj, implode('<br />', $html));
+		}
+
+		protected function threeway_helper_choice($obj, $value=null)
+		{
+			$choices = $obj->choices();
+			$html = '<select name="%s" id="%s"><option value="0"> -- </option>';
+			foreach($choices as $k => $v)
+				$html .= '<option value="'.$k.'"'
+					.($k==$value?' selected="selected"':'')
+					.'>'.$v.'</option>';
+			$html .= '</select>';
+			return $html;
+		}
+
+
 		protected function visit_DateInput($obj)
 		{
 			$this->_collect_javascript($obj);

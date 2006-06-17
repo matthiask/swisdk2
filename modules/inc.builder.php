@@ -263,23 +263,7 @@
 
 		public function create_rel_3way($fname, $title, $class, $field)
 		{
-			$choices = DBOContainer::find($field);
-			$items = array();
-			foreach($choices as $o) {
-				$items[$o->id()] = $o->title();
-			}
-
-			$fields = array();
-			$second = DBOContainer::find($class);
-			foreach($second as $o) {
-				$obj = new DropdownInput();
-				$obj->set_items($items);
-				$obj->add_null_item();
-				$fields[] =& $this->form->add($fname.'['.$o->id().']',
-					$obj, $o->title().' '.$o->_class());
-			}
-
-			return $fields;
+			return $this->form->add($fname, new ThreewayInput(), $title);
 		}
 
 		public function create_date($fname, $title)

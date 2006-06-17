@@ -444,6 +444,29 @@
 		}
 	}
 
+	class ThreewayInput extends FormItem {
+		protected $relation;
+
+		public function set_form_box(&$box)
+		{
+			parent::set_form_box($box);
+			$rels = $box->dbobj()->relations();
+			$this->relation = $rels[$this->_stripit($this->name())];
+		}
+
+		public function second()
+		{
+			return DBOContainer::find($this->_stripit($this->name()))
+				->collect('id', 'title');
+		}
+
+		public function choices()
+		{
+			return DBOContainer::find($this->relation['choices'])
+				->collect('id', 'title');
+		}
+	}
+
 	/**
 	 * base class for all FormItems which want to occupy a whole
 	 * line (no title, no message)
