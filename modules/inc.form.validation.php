@@ -281,6 +281,16 @@ EOD;
 		}
 	}
 
+	class UrlRule extends RegexRule {
+		protected $message = 'Please enter a valid URL';
+		public function __construct($message = null)
+		{
+			parent::__construct(
+				'/^(http|https):\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*'
+				.'\.[a-z]{2,5}((:[0-9]{1,5})?\/.*)?$/i', $message);
+		}
+	}
+
 	class CallbackRule extends FormItemRule {
 		public function __construct($callback, $message = null)
 		{
