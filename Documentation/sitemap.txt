@@ -1,0 +1,7 @@
+# Sitemap
+
+The sitemap is a XML file which is used to describe the hierarchy of
+webpages. Because it is used to generate the navigation, it also needs
+to provide the respective titles in all languages.
+
+You can also use the sitemap to do simple rewriting of incoming requests.

@@ -171,4 +171,30 @@ to do it differently:
     $events->add_clause('event_author_id=', 13);
     $events->init();
 
+## Smart ways to send a query to the database
+
+Get all records
+
+    $dboc = DBOContainer::find('Item');
+
+Get the records with ID 2, 5 and 6
+
+    $dboc = DBOContainer::find('Item', array(
+        'item_id IN {list}' => array('list' => array(2,5,6))));
+
+Ok, that was not too nice. But you can do a lot more with this syntax:
+
+    $dboc = DBOContainer::find('Item', array(
+        '(item_id IN {ids} OR item_author_id IN {authors})' =>
+            array(
+                'ids' => array(...),
+                'authors' => array(...)
+        )));
+
+You only want a single record?
+
+    $user = DBObject::find('User', array(
+        'user_login=' => $_POST['login_username'],
+        'user_password=' => sha1($_POST['login_password'])));
+
 [[projects/swisdk|back to SWISDK]]

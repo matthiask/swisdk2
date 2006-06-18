@@ -45,8 +45,16 @@ are hidden from the user.
 * [[projects/swisdk/realms|Realms]]
 * [[projects/swisdk/permissions|Permission handling]]
 * [[projects/swisdk/resolver|Request resolver]]
+* [[projects/swisdk/sitemap|Sitemap]]
 
 ## Where can I download it?
 
 There are no tarballs available, but you can use [git](http://git.or.cz/) or [cogito](http://kernel.org/pub/software/scm/cogito/) to checkout the
-source from our repository. Further instructions can be found in our [gitweb](http://spinlock.ch/cgi-bin/gitweb.pl)
+source from our repository.
+
+The following two commands should do the trick:
+
+    $ git clone http://spinlock.ch/pub/git/swisdk2/swisdk.git swisdk
+    $ git clone http://spinlock.ch/pub/git/swisdk2/wiki.git webapp
+
+You can also browse our [gitweb](http://spinlock.ch/cgi-bin/gitweb.pl)
