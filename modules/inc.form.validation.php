@@ -234,6 +234,7 @@ EOD;
 
 	class RegexRule extends FormItemRule {
 		protected $message = 'Value does not validate';
+		protected $empty_valid = true;
 
 		public function __construct($regex, $message = null)
 		{
@@ -243,7 +244,9 @@ EOD;
 		
 		protected function is_valid_impl(FormItem &$item)
 		{
-			return preg_match($this->regex, $item->value());
+			$value = $item->value();
+			return (!$value && $this->empty_valid)
+				|| preg_match($this->regex, $value);
 		}
 
 		protected function validation_js_impl(FormItem &$item)
@@ -251,11 +254,14 @@ EOD;
 			static $sent = false;
 			$id = $item->iname();
 			$sent = true;
+			$empty_valid = '';
+			if($this->empty_valid)
+				$empty_valid = 'value==\'\' || ';
 			$js = <<<EOD
 function formitem_regex_rule_$id(id)
 {
 	var value = document.getElementById(id).value;
-	return value.match({$this->regex});
+	return {$empty_valid}value.match({$this->regex});
 }
 EOD;
 			return array('formitem_regex_rule_'.$id, $js);
