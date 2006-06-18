@@ -122,16 +122,18 @@ EOD;
 				return null;
 			$name = $item->iname();
 			$message = $this->message;
-			$funcname = 'formitem_validate_'.$name;
+			$id = uniqid();
+			$funcname = 'formitem_validate_'.$name.'_'.$id;
 			$js = <<<EOD
 
 function $funcname()
 {
+	document.getElementById('{$name}_span').firstChild.data =
+		document.getElementById('{$name}_span').firstChild.data.replace(/$message/, ' ');
 	if(!$rulefunc('$name')) {
-		document.getElementById('{$name}_span').firstChild.data = '$message';
+		document.getElementById('{$name}_span').firstChild.data += '$message';
 		return false;
 	}
-	document.getElementById('{$name}_span').firstChild.data = ' ';
 	return true;
 }
 $rulejs;
