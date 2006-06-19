@@ -97,6 +97,16 @@
 			}
 		}
 
+		public static function dump()
+		{
+			if(!Swisdk::config_value('error.debug_mode'))
+				return;
+			echo '<pre>';
+			echo '<strong>Swisdk config</strong><br />';
+			print_r(Swisdk::$config);
+			echo '</pre>';
+		}
+
 		public static function set_config_value($key, $value)
 		{
 			Swisdk::$config[$key] = $value;

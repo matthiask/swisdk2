@@ -1053,6 +1053,8 @@
 
 		public static function dump()
 		{
+			if(!Swisdk::config_value('error.debug_mode'))
+				return;
 			echo '<pre>';
 			echo "<b>field list</b>\n";
 			print_r(DBObject::$field_list);
