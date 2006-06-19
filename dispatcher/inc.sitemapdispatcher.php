@@ -12,6 +12,9 @@
 		{
 			$input = $this->input();
 			$page = SwisdkSitemap::page($input);
+			if(isset($page['title']))
+				Swisdk::set_config_value('runtime.page.title',
+					$page['title']);
 			if($page===false) {
 				$page = SwisdkSitemap::page($input,
 					'default', true);

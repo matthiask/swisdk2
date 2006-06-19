@@ -23,7 +23,9 @@
 				}
 			}
 
-			Swisdk::set_config_value("runtime.website", $website );
+			Swisdk::set_config_value('runtime.website', $website);
+			Swisdk::set_config_value('runtime.website.title',
+				Swisdk::config_value('website.'.$w.'.title'));
 		}
 	}
 
