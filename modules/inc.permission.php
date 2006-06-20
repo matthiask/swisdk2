@@ -87,9 +87,9 @@
 			else
 				$user = DBObject::find('User', $uid);
 
-			$perms = DBObject::db_get_row('SELECT user_permission_role_id '
-				.'FROM tbl_user_permission WHERE user_permission_user_id='
-				.$user->id().' AND user_permission_realm_id='.$realm);
+			$perms = DBObject::db_get_row('SELECT role_id '
+				.'FROM tbl_user_to_realm WHERE user_id='
+				.$user->id().' AND realm_id='.$realm);
 
 			//
 			// the user must have an entry in the permission table, even
@@ -100,7 +100,7 @@
 			// the amount of data which will be necessary once you have some
 			// realms in the system. (Roughly #users * #realms)
 			//
-			if($perms && $perms['user_permission_role_id']>=$role)
+			if($perms && $perms['role_id']>=$role)
 				return true;
 
 			//
@@ -110,13 +110,13 @@
 			if(!count($groups))
 				return false;
 
-			$perms = DBObject::db_get_array('SELECT user_group_permission_role_id '
-				.'FROM tbl_user_group_permission '
-				.'WHERE user_group_permission_user_group_id IN ('
-				.implode(',', $groups).') AND user_group_permission_realm_id='
+			$perms = DBObject::db_get_array('SELECT role_id '
+				.'FROM tbl_user_group_to_realm '
+				.'WHERE user_group_id IN ('
+				.implode(',', $groups).') AND realm_id='
 				.$realm);
 			foreach($perms as &$p)
-				if($p['user_group_permission_role_id']>=$role)
+				if($p['role_id']>=$role)
 					return true;
 
 			//
@@ -158,19 +158,18 @@
 			if($uid===null)
 				$uid = SessionHandler::user()->id();
 			$rid = intval($role_id);
-			$sql = 'SELECT realm_id, realm_title FROM tbl_realm '
-				.'LEFT JOIN tbl_user_permission '
-					.'ON realm_id=user_permission_realm_id '
-				.'WHERE user_permission_user_id='.$uid
-					.' AND user_permission_role_id>='.$rid
+			$sql = 'SELECT tbl_realm.realm_id, realm_title FROM tbl_realm '
+				.'LEFT JOIN tbl_user_to_realm '
+					.'ON tbl_realm.realm_id=tbl_user_to_realm.realm_id '
+				.'WHERE user_id='.$uid.' AND role_id>='.$rid
 				.' UNION ALL '
-				.'SELECT realm_id, realm_title FROM tbl_realm '
-				.'LEFT JOIN tbl_user_group_permission '
-					.'ON realm_id=user_group_permission_realm_id '
+				.'SELECT tbl_realm.realm_id, realm_title FROM tbl_realm '
+				.'LEFT JOIN tbl_user_group_to_realm '
+					.'ON tbl_realm.realm_id=tbl_user_group_to_realm.realm_id '
 				.'LEFT JOIN tbl_user_to_user_group '
-					.'ON user_group_permission_user_group_id=user_group_id '
-				.'WHERE user_id='.$uid
-					.' AND user_group_permission_role_id>='.$rid;
+					.'ON tbl_user_group_to_realm.user_group_id='
+						.'tbl_user_to_user_group.user_group_id '
+				.'WHERE user_id='.$uid.' AND role_id>='.$rid;
 			return DBObject::db_get_array($sql, array('realm_id', 'realm_title'));
 		}
 	}
