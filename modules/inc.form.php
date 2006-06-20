@@ -128,6 +128,15 @@
 				$this->box()->bind($dbobj);
 		}
 
+		/**
+		 * refresh all FormItem's values (read values from DBObject)
+		 */
+		public function refresh()
+		{
+			foreach($this->boxes as &$box)
+				$box->refresh();
+		}
+
 		public function add()
 		{
 			$args = func_get_args();
@@ -339,6 +348,15 @@
 		public function &rules()
 		{
 			return $this->rules;
+		}
+
+		/**
+		 * refresh all FormItem's values (read values from DBObject)
+		 */
+		public function refresh()
+		{
+			foreach($this->items as &$item)
+				$item->refresh();
 		}
 
 		/**

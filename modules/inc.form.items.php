@@ -197,6 +197,14 @@
 		}
 
 		/**
+		 * refresh the FormItem's value (read value from DBObject)
+		 */
+		public function refresh()
+		{
+			$this->set_value($this->dbobj()->get($this->_stripit($this->name())));
+		}
+
+		/**
 		 * add a FormItem validation rule
 		 */
 		public function add_rule(FormItemRule $rule)
