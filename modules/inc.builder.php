@@ -243,6 +243,8 @@
 				$items[$o->id()] = $o->title();
 			}
 			$obj->set_items($items);
+			if(strpos($fname, '_parent_id')==strlen($fname)-10)
+				$obj->add_null_item();
 			return $this->form->add($fname, $obj, $title);
 		}
 
@@ -381,20 +383,20 @@
 		public function create_rel_single($fname, $title, $class)
 		{
 			$this->tv->append_column(new DBTableViewColumn(
-				$fname, $title, $class));
+				$fname, $title, $class, $this->dbobj->primary()));
 		}
 
 		public function create_rel_manytomany($fname, $title, $class)
 		{
 			$this->tv->append_column(new DBTableViewColumn(
-				$fname, $title, $class));
+				$fname, $title, $class, $this->dbobj->primary()));
 		}
 
 		public function create_rel_3way($fname, $title, $class, $field)
 		{
 			// TODO show information from choices ($field) too
 			$this->tv->append_column(new DBTableViewColumn(
-				$fname, $title, $class));
+				$fname, $title, $class, $this->dbobj->primary()));
 		}
 
 		public function create_date($fname, $title)

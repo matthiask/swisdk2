@@ -641,8 +641,11 @@
 			foreach($rels as $class => &$rel) {
 				switch($rel['type']) {
 					case DB_REL_SINGLE:
-						$data = array_merge($data,
-							$this->related($class)->data());
+						if($this->class == $rel['class'])
+							$data[$class] = $this->related($class)->data();
+						else
+							$data = array_merge($data,
+								$this->related($class)->data());
 						break;
 					case DB_REL_MANY:
 						$data[$class] = $this->related_many($rel)->data();

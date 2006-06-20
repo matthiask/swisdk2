@@ -246,13 +246,19 @@ EOD;
 			}
 
 			if(is_array($val)) {
+				if(isset($val[$this->column])) {
+					if(isset($val[$this->args[1]])) {
+						$key = $val[$this->args[1]];
+						if(isset($this->db_data[$key]))
+							return $this->db_data[$key];
+					}
+					return null;
+				}
 				$keys = array_keys($val);
 				$vals = array();
 				foreach($keys as $key)
 					if(isset($this->db_data[$key]))
 						$vals[] = $this->db_data[$key];
-					else
-						$vals[] = $key;
 				return implode(', ', $vals);
 			}
 
