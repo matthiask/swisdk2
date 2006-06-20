@@ -15,7 +15,7 @@
 	 * it only uses SwisdkError::handle for error conditions.
 	 */
 
-	class DBObject implements Iterator {
+	class DBObject implements Iterator, ArrayAccess {
 
 		/**
 		 * The PHP __CLASS__ macro is near to useless. It would be worth something
@@ -1005,6 +1005,30 @@
 		public function key() { return key($this->data); }
 		public function next() { return next($this->data); }
 		public function valid() { return $this->current() !== false; }
+
+		/**
+		 * ArrayAccess implementation (see PHP SPL)
+		 */
+		public function offsetExists($var)
+		{
+			$relations = $this->relations();
+			return isset($this->data[$var]) || isset($relations[$var]);
+		}
+		
+		public function offsetGet($var)
+		{
+			return $this->get($var);
+		}
+
+		public function offsetSet($var, $value)
+		{
+			return $this->set($var, $value);
+		}
+
+		public function offsetUnset($var)
+		{
+			unset($this->data[$var]);
+		}
 
 		/**
 		 * Various helpers
