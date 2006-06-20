@@ -86,7 +86,7 @@ All of these configuration bits can be accessed from PHP using `Swisdk::config_v
       `language_key` varchar(4) NOT NULL,
       `language_title` varchar(64) NOT NULL,
       PRIMARY KEY  (`language_id`)
-    ) ENGINE=InnoDB DEFAULT ;
+    ) ;
 
     CREATE TABLE `tbl_realm` (
       `realm_id` int(11) NOT NULL auto_increment,
@@ -94,13 +94,13 @@ All of these configuration bits can be accessed from PHP using `Swisdk::config_v
       `realm_url` varchar(255) NOT NULL,
       `realm_role_id` int(11) NOT NULL,
       PRIMARY KEY  (`realm_id`)
-    ) ENGINE=InnoDB DEFAULT ;
+    ) ;
 
     CREATE TABLE `tbl_role` (
       `role_id` int(11) NOT NULL auto_increment,
       `role_title` varchar(32) NOT NULL,
       PRIMARY KEY  (`role_id`)
-    ) ENGINE=InnoDB DEFAULT ;
+    ) ;
 
     CREATE TABLE `tbl_user` (
       `user_id` int(10) unsigned NOT NULL auto_increment,
@@ -111,7 +111,14 @@ All of these configuration bits can be accessed from PHP using `Swisdk::config_v
       `user_login` varchar(16) character set latin1 NOT NULL,
       `user_password` varchar(64) character set latin1 NOT NULL,
       PRIMARY KEY  (`user_id`)
-    ) ENGINE=InnoDB DEFAULT ;
+    ) ;
+
+    CREATE TABLE `tbl_user_to_realm` (
+      `user_id` int(11) NOT NULL,
+      `realm_id` int(11) NOT NULL,
+      `role_id` int(11) NOT NULL,
+      PRIMARY KEY  (`user_id`,`realm_id`)
+    ) ;
 
     CREATE TABLE `tbl_user_group` (
       `user_group_id` int(11) NOT NULL auto_increment,
@@ -119,30 +126,21 @@ All of these configuration bits can be accessed from PHP using `Swisdk::config_v
       `user_group_title` varchar(255) NOT NULL,
       PRIMARY KEY  (`user_group_id`),
       KEY `user_group_parent_id` (`user_group_parent_id`)
-    ) ENGINE=InnoDB DEFAULT ;
+    ) ;
 
-    CREATE TABLE `tbl_user_group_permission` (
-      `user_group_permission_id` int(11) NOT NULL auto_increment,
-      `user_group_permission_user_group_id` int(11) NOT NULL,
-      `user_group_permission_realm_id` int(11) NOT NULL,
-      `user_group_permission_role_id` int(11) NOT NULL,
-      PRIMARY KEY  (`user_group_permission_id`)
-    ) ENGINE=InnoDB DEFAULT ;
-
-    CREATE TABLE `tbl_user_permission` (
-      `user_permission_id` int(11) NOT NULL auto_increment,
-      `user_permission_user_id` int(11) NOT NULL,
-      `user_permission_realm_id` int(11) NOT NULL,
-      `user_permission_role_id` int(11) NOT NULL,
-      PRIMARY KEY  (`user_permission_id`)
-    ) ENGINE=InnoDB DEFAULT ;
+    CREATE TABLE `tbl_user_group_to_realm` (
+      `user_group_id` int(11) NOT NULL,
+      `realm_id` int(11) NOT NULL,
+      `role_id` int(11) NOT NULL,
+      PRIMARY KEY  (`user_group_id`,`realm_id`)
+    ) ;
 
     CREATE TABLE `tbl_user_to_user_group` (
       `user_id` int(11) NOT NULL,
       `user_group_id` int(11) NOT NULL,
       KEY `user_id` (`user_id`),
       KEY `user_group_id` (`user_group_id`)
-    ) ENGINE=InnoDB DEFAULT ;
+    ) ;
 
 ### Initialization data
 
@@ -178,15 +176,13 @@ a recommendation.
 
 Give the admin group `Administrator` role:
 
-    INSERT INTO `tbl_user_group_permission` (`user_group_permission_id`,
-        `user_group_permission_user_group_id`, `user_group_permission_realm_id`,
-        `user_group_permission_role_id`) VALUES (1, 2, 1, 5);
+    INSERT INTO `tbl_user_group_to_realm` (`user_group_id`, `realm_id`,
+        `role_id`) VALUES (2, 1, 5);
 
 Give the `Visitor` user permission to view something:
 
-    INSERT INTO `tbl_user_permission` (`user_permission_id`,
-        `user_permission_user_id`, `user_permission_realm_id`,
-        `user_permission_role_id`) VALUES (1, 1, 1, 1);
+    INSERT INTO `tbl_user_to_realm` (`user_id`, `realm_id`,
+        `role_id`) VALUES (1, 1, 1);
 
 Put the `Admin` user in `Administrators` group:
 

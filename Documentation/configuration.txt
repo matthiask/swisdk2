@@ -89,6 +89,11 @@ This tries to be a complete list of all configuration variables:
 
 The following variables are only set while SWISDK is serving a request:
 
+`runtime.arguments` (array of string)
+
+: URL tokens (these were separated by slashes) which remain after taking
+away the controller part
+
 `runtime.controller.class` (string)
 
 : Site class (from `Swisdk::register()`)
@@ -116,6 +121,10 @@ The following variables are only set while SWISDK is serving a request:
 : the URL which `NavigationComponent` should use to build the navigation
   from. This value overrides `runtime.request.uri` if it is set.
 
+`runtime.page.title` (string)
+
+: the title of the current page (taken from the sitemap)
+
 `runtime.request.host` (string)
 
 : the host part of the request (f.e. `http://www.example.com`)
@@ -129,6 +138,10 @@ The following variables are only set while SWISDK is serving a request:
 `runtime.website` (string)
 
 : the current website; see also `website`
+
+`runtime.website.title` (string)
+
+: the title of the current website (taken from the `website` section)
 
 ## Example configuration file
 
