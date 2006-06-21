@@ -36,7 +36,7 @@
 			$body = $mime->get();
 			$hdrs = $mime->headers( $hdrs );
 			
-			$mail =&amp; Mail::factory( 'mail' );
+			$mail =& Mail::factory( 'mail' );
 			return $mail->send( $message->receiver() , $hdrs, $body );
 		}
 	}
@@ -84,7 +84,7 @@
 	
 		/**
 			This method returns a method name wich shoudl accepts the data for the message.
-			The EMailMessage supports methods for array, dbobject and simple (string &amp; numbers) data.
+			The EMailMessage supports methods for array, dbobject and simple (string & numbers) data.
 			If you want accept your own data subclass this method and add your own acceptor method to 
 			the sub-class.
 		*/
@@ -125,9 +125,9 @@
 			
 			$state = $this->generate_subject();
 			
-			if ( !SwisdkError::is_error( $state = $this->generate_sender() ) &amp;&amp;
-				 !SwisdkError::is_error( $state = $this->generate_receivers() ) &amp;&amp; 
-				 !SwisdkError::is_error( $state = $this->generate_subject() ) &amp;&amp; 
+			if ( !SwisdkError::is_error( $state = $this->generate_sender() ) &&
+				 !SwisdkError::is_error( $state = $this->generate_receivers() ) && 
+				 !SwisdkError::is_error( $state = $this->generate_subject() ) && 
 				 !SwisdkError::is_error( $state =  $this->generate_body() ) ) {
 				return true;
 			} else {
@@ -183,7 +183,7 @@
 		
 		public function get_adress_string( $name , $adress )
 		{
-			if( isset( $dbobj->message_name ) &amp;&amp; $dbobj->message_name != "" )
+			if( isset( $dbobj->message_name ) && $dbobj->message_name != "" )
 			{
 				return $name .= " <$adress>";
 			} else {
@@ -225,7 +225,7 @@
 			$smarty = $this->smarty();
 			foreach( $data as $key => $d )
 			{
-				if( is_string($key) &amp;&amp; $key != "" ) {
+				if( is_string($key) && $key != "" ) {
 					$smarty->assign( $key , $d );
 				}
 			}
@@ -318,7 +318,7 @@
 		public function send_email() 
 		{
 			$args = func_get_args();
-			if( count( $args ) == 1 &amp;&amp; is_array( $args[0] ) )
+			if( count( $args ) == 1 && is_array( $args[0] ) )
 			{
 				$param_data = array( "receiver_adress" => $args[0]["to"] , "sender_adress" => $args[0]["from"],
 					"subject" => $args[0]["subject"], "body" => $args[0]["body"], "headers" => $args[0]["headers"]
@@ -334,14 +334,14 @@
 					
 				return $this->handle_email_data( $param_data ); 
 				
-			} else if( count( $args ) == 2 &amp;&amp; (is_array( $args[0] ) &amp;&amp; is_string( $args[1] ) )  ) {
+			} else if( count( $args ) == 2 && (is_array( $args[0] ) && is_string( $args[1] ) )  ) {
 				
 				//instance template message and add data 
 				$message = $this->instance_message( "SmartyEmailMessage" );
 				$mesage->set_template( $args[1] );
 				return $this->handle_email( $message , $args[0] );
 				
-			} else if( count( $args ) == 2 &amp;&amp; (is_string( $args[0] ) || $args[0] instanceof EMailMessage)  ) {
+			} else if( count( $args ) == 2 && (is_string( $args[0] ) || $args[0] instanceof EMailMessage)  ) {
 				//instance message , and call handle emai
 				$message = $this->instance_message($args[0]);
 				if( SwisdkError::is_error($message) )
