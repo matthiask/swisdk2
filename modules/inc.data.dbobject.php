@@ -365,7 +365,8 @@
 						$this->db_connection_id);
 					if($res===false)
 						return false;
-					if(count($this->data[$field])) {
+					if(is_array($this->data[$field])
+							&& count($this->data[$field])) {
 						$frags = array();
 						foreach($this->data[$field] as $v1 => $v2)
 							if($v1 && $v2)
