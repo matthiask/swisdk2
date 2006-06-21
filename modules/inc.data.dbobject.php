@@ -553,20 +553,25 @@
 		/**
 		 * DBObject::threeway('Article', 'Realm', 'Role');
 		 */
-		public static function threeway($c1, $c2, $c3)
+		public static function threeway($c1, $c2, $c3, $options = null)
 		{
 			$o1 = DBObject::create($c1);
 			$o2 = DBObject::create($c2);
 
+			$rel = $c2;
+			if($options!==null)
+				$rel = $options;
+
 			$table = 'tbl_'.$o1->name('to_'.$o2->name(''));
 			$table = substr($table, 0, strlen($table)-1);
 
-			DBObject::$relations[$c1][$c2] = array(
+			DBObject::$relations[$c1][$rel] = array(
 				'type' => DB_REL_3WAY, 'table' => $table,
 				'join' => $o2->table().'.'.$o2->primary().'='
 					.$table.'.'.$o2->primary(),
 				'class' => $c2, 'choices' => $c3,
-				'foreign' => $o2->primary());
+				'foreign' => $o2->primary(),
+				'field' => $rel);
 		}
 
 		/**

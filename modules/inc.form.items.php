@@ -464,7 +464,7 @@
 
 		public function second()
 		{
-			return DBOContainer::find($this->_stripit($this->name()))
+			return DBOContainer::find($this->relation['class'])
 				->collect('id', 'title');
 		}
 
