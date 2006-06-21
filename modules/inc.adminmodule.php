@@ -40,12 +40,17 @@
 				$cmp_class = 'AdminComponent_'.$this->dbo_class.$args[0];
 				if(class_exists($cmp_class))
 					$cmp = new $cmp_class;
+				else if($args[0]=='_new' && class_exists($cmp_class =
+						'AdminComponent_'.$this->dbo_class.'_edit'))
+					$cmp = new $cmp_class;
 				else if(class_exists($cmp_class = 'AdminComponent'
 						.$args[0])) 
 					$cmp = new $cmp_class;
+				else if($args[0]=='_new')
+					$cmp = new AdminComponent_edit();
 				array_shift($args);
 			}
-			
+
 			$this->arguments = $args;
 
 			if(!$cmp) {
@@ -172,169 +177,134 @@
 		}
 	}
 
-	class AdminComponent_new extends AdminComponent {
-		protected $multiple_new_count = 3;
-		protected $form;
-
-		public function run()
-		{
-			if($this->args[0]=='multiple')
-				$this->new_multiple();
-			else
-				$this->new_single();
-		}
-
-		protected function new_multiple()
-		{
-			$dboc = null;
-			$this->form = null;
-
-			if($this->multilanguage) {
-				$dboc = dbocontainer::create(
-					dbobjectml::create($this->dbo_class));
-				$this->form = new FormML();
-			} else {
-				$dboc = dbocontainer::create($this->dbo_class);
-				$this->form = new Form();
-			}
-
-			$builder = $this->form_builder();
-			$this->form->enable_unique();
-
-			for($i=1; $i<=$this->multiple_new_count; $i++) {
-				$box = $this->form->box($i);
-				$box->set_title('new '.$this->dbo_class);
-				$dbo = null;
-				if($this->multilanguage)
-					$dbo = dbobjectml::create($this->dbo_class);
-				else
-					$dbo = dbobject::create($this->dbo_class);
-				$dbo->id = -$i;
-				$box->bind($dbo);
-				$builder->build($box);
-				$dboc->add($dbo);
-			}
-			$this->complete_form_ml();
-
-			if($this->form->is_valid()) {
-				$dboc->unset_primary();
-				$dboc->store();
-
-				$this->goto('_index');
-			} else
-				$this->html = $this->form->html($this->form_renderer());
-		}
-
-		protected function new_single()
-		{
-			$this->form = null;
-			if($this->multilanguage) {
-				$obj = dbobjectml::create($this->dbo_class);
-				$obj->set_language(swisdk::language());
-				$this->form = new FormML($obj);
-			} else
-				$this->form = new Form(dbobject::create($this->dbo_class));
-			$this->form_builder()->build($this->form);
-			$this->complete_form();
-			$this->form->set_title('new '.$this->dbo_class);
-			if($this->form->is_valid()) {
-				$this->form->dbobj()->store();
-				$this->goto('_index');
-			} else
-				$this->html = $this->form->html($this->form_renderer());
-		}
-
-		protected function complete_form()
-		{
-		}
-
-		protected function complete_form_ml()
-		{
-		}
-	}
-
 	class AdminComponent_edit extends AdminComponent {
 		protected $form;
+		protected $obj;
+		protected $multiple = false;
+		protected $editmode = true;
 
 		public function run()
 		{
 			if($this->args[0]=='multiple')
+				$this->multiple = true;
+			if($this->multiple)
 				$this->edit_multiple();
 			else
 				$this->edit_single();
 		}
 
-		protected function edit_multiple()
+		public function get_dbobj($val = null)
 		{
-			$dbo = null;
+			if($this->multiple && $this->obj)
+				return $this->obj->dbobj_clone();
+			if($this->multilanguage) {
+				if($val)
+					return DBObjectML::find($this->dbo_class, $val);
+				else
+					return DBObjectML::create($this->dbo_class);
+			} else {
+				if($val)
+					return DBObject::find($this->dbo_class, $val);
+				else
+					return DBObject::create($this->dbo_class);
+			}
+		}
 
-			if($this->multilanguage)
-				$dbo = DBObjectML::create($this->dbo_class);
-			else
-				$dbo = DBObject::create($this->dbo_class);
-			$p = $dbo->primary();
+		public function init_dbobj()
+		{
+			if($this->multiple) {
+				$obj = $this->get_dbobj();
+				if(($val = getInput($obj->primary()))
+						&& is_array($val)) {
+					$this->obj = DBOContainer::find_by_id($obj, $val);
+				} else {
+					$this->obj = DBOContainer::create($obj);
+					$this->editmode = false;
+				}
+			} else {
+				if(isset($this->args[0]))
+					$this->obj = $this->get_dbobj($this->args[0]);
+				else {
+					$this->obj = $this->get_dbobj();
+					$this->editmode = false;
+				}
+			}
+		}
 
-			$list = getInput($p);
-			if(!is_array($list) || !count($list))
-				$this->goto('_index');
-			$dboc = DBOContainer::find($dbo, array(
-				$p.' IN {list}' => array('list' => $list)));
-
-			$builder = $this->form_builder();
+		public function init_form()
+		{
 			if($this->multilanguage)
 				$this->form = new FormML();
 			else
 				$this->form = new Form();
-			$this->form->enable_unique();
-			foreach($dboc as $dbo) {
-				$box = $this->form->box($dbo->id());
-				$box->set_title('Edit '.$this->dbo_class.' '.$dbo->id());
-				$box->bind($dbo);
-				$box->add(new HiddenInput($p.'[]'))->set_value($dbo->id());
-				$builder->build($box);
-			}
-			$this->complete_form_ml();
+		}
 
+		public function build_form($box = null)
+		{
+			$builder = $this->form_builder();
+			if($box)
+				$builder->build($box);
+			else
+				$builder->build($this->form);
+		}
+
+		public function execute()
+		{
 			if($this->form->is_valid()) {
-				$dboc->store();
+				if(!$this->editmode)
+					$this->obj->unset_primary();
+				$this->obj->store();
 				$this->goto('_index');
 			} else
 				$this->html = $this->form->html($this->form_renderer());
+		}
+
+		protected function edit_multiple()
+		{
+			$this->init_dbobj();
+			if(!$this->obj)
+				$this->goto('_list');
+			$this->init_form();
+			$this->form->enable_unique();
+			if(!$this->editmode) {
+				for($i=1; $i<=3; $i++) {
+					$box = $this->form->box($this->dbo_class.'_'.$i);
+					$box->set_title('New '.$this->dbo_class);
+					$obj = $this->get_dbobj();
+					$obj->id = -$i;
+					$box->bind($obj);
+					$this->build_form($box);
+					$this->obj->add($obj);
+				}
+			} else {
+				foreach($this->obj as $obj) {
+					$box = $this->form->box($this->dbo_class.'_'.$obj->id());
+					$box->set_title('Edit '.$this->dbo_class.' '.$obj->id());
+					$box->bind($obj);
+					$box->add(new HiddenInput($obj->primary().'[]'))
+						->set_value($obj->id());
+					$this->build_form($box);
+				}
+			}
+
+			$this->execute();
 		}
 
 		protected function edit_single()
 		{
-			$dbo = null;
-			if($this->multilanguage)
-				$dbo = DBObjectML::find($this->dbo_class, $this->args[0]);
+			$this->init_dbobj();
+			if(!$this->obj)
+				$this->goto('_list');
+			$this->init_form();
+			$this->form->bind($this->obj);
+			if($this->editmode)
+				$this->form->set_title('Edit '.$this->dbo_class
+					.' '.$this->obj->id());
 			else
-				$dbo = DBObject::find($this->dbo_class, $this->args[0]);
-			if(!$dbo)
-				SwisdkError::handle(new FatalError(
-					"AdminComponent_edit::run() - Can't find the data."
-					." Class is: {$this->dbo_class} Argument is: "
-					."{$this->args[0]}"));
+				$this->form->set_title('New '.$this->dbo_class);
+			$this->build_form($this->form);
 
-			if($this->multilanguage)
-				$this->form = new FormML($dbo);
-			else
-				$this->form = new Form($dbo);
-			$this->form_builder()->build($this->form);
-			$this->complete_form();
-			$this->form->set_title('Edit '.$this->dbo_class);
-			if($this->form->is_valid()) {
-				$dbo->store();
-				$this->goto('_index');
-			} else
-				$this->html = $this->form->html($this->form_renderer());
-		}
-
-		protected function complete_form()
-		{
-		}
-
-		protected function complete_form_ml()
-		{
+			$this->execute();
 		}
 	}
 
