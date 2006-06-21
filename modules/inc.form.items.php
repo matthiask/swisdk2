@@ -199,9 +199,9 @@
 		/**
 		 * refresh the FormItem's value (read value from DBObject)
 		 */
-		public function refresh()
+		public function refresh($dbobj)
 		{
-			$this->set_value($this->dbobj()->get($this->_stripit($this->name())));
+			$this->set_value($dbobj->get($this->_stripit($this->name())));
 		}
 
 		/**
