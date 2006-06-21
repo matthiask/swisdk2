@@ -30,6 +30,9 @@
 		 * 	these default implementations are provided below
 		 * 3.: AdminComponent_DBObjectClass_index
 		 * 4.: AdminComponent_index
+		 *
+		 * It always tries to load the "edit" action if no "new" handler
+		 * can be found.
 		 */
 		protected function component_dispatch()
 		{
@@ -253,10 +256,16 @@
 			if($this->form->is_valid()) {
 				if(!$this->editmode)
 					$this->obj->unset_primary();
+				$this->post_process();
 				$this->obj->store();
 				$this->goto('_index');
 			} else
 				$this->html = $this->form->html($this->form_renderer());
+		}
+
+		public function post_process()
+		{
+			// hook
 		}
 
 		protected function edit_multiple()
