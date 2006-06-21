@@ -162,13 +162,16 @@
 			if(!$this->form)
 				$this->form = new DBTableViewForm();
 
-			$obj = $this->obj;
-			$dbo = $obj->dbobj_clone();
+			$dbo = $this->obj->dbobj_clone();
 
-			$dbo->order = $dbo->primary();
-			$dbo->dir = 'ASC';
-			$dbo->start = 0;
-			$dbo->limit = $this->items_on_page;
+			$dbo->order = isset($this->form_defaults['order'])?
+				$this->form_defaults['order']:$dbo->primary();
+			$dbo->dir = isset($this->form_defaults['dir'])?
+				$this->form_defaults['dir']:'ASC';
+			$dbo->start = isset($this->form_defaults['start'])?
+				$this->form_defaults['start']:0;
+			$dbo->limit = isset($this->form_defaults['limit'])?
+				$this->form_defaults['limit']:$this->items_on_page;
 
 			$this->form->bind($dbo);
 
@@ -176,6 +179,13 @@
 			$this->form->set_clauses($this->obj);
 			$this->obj->init();
 			$this->set_data($this->obj->all_data());
+		}
+
+		protected $form_defaults = array();
+
+		public function set_form_defaults($defaults)
+		{
+			$this->form_defaults = $defaults;
 		}
 
 		/**
