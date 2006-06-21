@@ -13,10 +13,10 @@
 	}
 
 	/**
-	*	Standart email sender send the email with pear::mail_mime
+	*	Standard email sender sends the email with pear::mail_mime
 	*	Does currently NOT support cc and bcc receipts.
 	*/
-	class StandartEmailSender implements IEMailMessageSender
+	class StandardEmailSender implements IEMailMessageSender
 	{
 		public function send_message( EMailMessage $message )
 		{
@@ -327,7 +327,7 @@
 				return $this->handle_email_data( $param_data ); 
 				
 			} else if( count( $args ) == 4 ) {
-				//instance standart message, create data array from params  
+				//instance standard message, create data array from params  
 				$param_data = array( "receiver_adress" => $args[0], "sender_adress" => $args[1], 
 					"subject" => $args[2], "body" => $args[3]
 					);
@@ -378,7 +378,7 @@
 		
 		public function handle_email_data( $data ) 
 		{
-			//instance standart message, create data array from array (args0)
+			//instance standard message, create data array from array (args0)
 			$message = $this->instance_message( Swisdk::config_value("emailer.message") );
 			if( SwisdkError::is_error($message) )
 				return $message;
