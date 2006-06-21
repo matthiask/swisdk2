@@ -187,6 +187,32 @@
 			$group = DBObject::db_get_row($sql);
 			return max($user['role_id'], $group['role_id']);
 		}
+
+		/**
+		 * various helper functions
+		 */
+		public function set_realm_clause(&$dboc, $realm_link = 'RealmLink')
+		{
+			$dbo = $dboc->dbobj();
+			$relations = $dbo->relations();
+			if(!isset($relations[$realm_link]))
+				return;
+
+			$realm = PermissionManager::realm_for_url();
+			$params = array(
+				'realm_id' => $realm['realm_id'],
+				'user_role_id' => PermissionManager::role_for_realm($realm['realm_id']));
+
+			$p = $dbo->_prefix();
+			$sql = "({$p}realm_id={realm_id} AND {$p}role_id<={user_role_id}
+					OR {$p}id IN (
+						SELECT DISTINCT {$p}id FROM tbl_{$p}to_realm
+						WHERE realm_id={realm_id} AND role_id<={user_role_id}
+					) 
+				)";
+			$dboc->add_clause($sql, $params);
+
+		}
 	}
 
 ?>
