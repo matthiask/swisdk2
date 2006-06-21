@@ -218,7 +218,7 @@
 					$valid = false;
 			return $valid;
 		}
-
+			
 		/**
 		 * Iterator implementation (see PHP Object Iteration)
 		 */
@@ -356,7 +356,7 @@
 		public function refresh()
 		{
 			foreach($this->items as &$item)
-				$item->refresh();
+				$item->refresh($this->dbobj());
 		}
 
 		/**
@@ -578,6 +578,7 @@
 					return $item;
 			return null;
 		}
+
 
 		/**
 		 * Iterator implementation (see PHP Object Iteration)
