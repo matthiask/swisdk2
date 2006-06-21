@@ -82,7 +82,7 @@
 		public function set_value($value)	{ $this->value = $value; } 
 		public function name()			{ return $this->name; }
 		public function set_name($name)		{ $this->name = $name; } 
-		public function title()			{ return $this->_stripit($this->title); }
+		public function title()			{ return $this->title; }
 		public function set_title($title)	{ $this->title = $title; } 
 		public function info()			{ return $this->info; }
 		public function set_info($info)		{ $this->info = $info; } 
@@ -122,19 +122,6 @@
 		}
 
 		/**
-		 * internal hack, implementation detail of MLForm that found its
-		 * way into the standard form code... I hate it. But it works.
-		 * And the user does not havel to care.
-		 *
-		 * This strips the part of the FormItem name that makes it possible
-		 * to display multiple FormItems of the same fields in the same form.
-		 */
-		protected function _stripit($str)
-		{
-			return preg_replace('/__language([0-9]+)_/', '', $str);
-		}
-
-		/**
 		 * get an array of html attributes
 		 */
 		public function attributes()
@@ -166,7 +153,6 @@
 		public function init_value($dbobj)
 		{
 			$name = $this->name();
-			$sname = $this->_stripit($name);
 			$iname = $this->iname();
 			$val = null;
 
@@ -187,12 +173,12 @@
 			} else {
 				if(($val = getInput($this->iname()))!==null) {
 					if(is_array($val))
-						$dbobj->set($sname, $val);
+						$dbobj->set($name, $val);
 					else
-						$dbobj->set($sname, stripslashes($val));
+						$dbobj->set($name, stripslashes($val));
 				}
 
-				$this->set_value($dbobj->get($sname));
+				$this->set_value($dbobj->get($name));
 			}
 		}
 
@@ -201,7 +187,7 @@
 		 */
 		public function refresh($dbobj)
 		{
-			$this->set_value($dbobj->get($this->_stripit($this->name())));
+			$this->set_value($dbobj->get($this->name()));
 		}
 
 		/**
@@ -301,8 +287,7 @@
 				$this->files_data['path'] = CACHE_ROOT.'upload/'.$fname;
 				if(move_uploaded_file($this->files_data['tmp_name'],
 						$this->files_data['path'])) {
-					$dbobj->set($this->_stripit($this->name()),
-						$fname);
+					$dbobj->set($this->name(), $fname);
 					$this->no_upload = false;
 				}
 			}
@@ -342,16 +327,15 @@
 		public function init_value($dbobj)
 		{
 			$name = $this->iname();
-			$sname = $this->_stripit($this->name());
 
 			if(isset($_POST['__check_'.$name])) {
 				if(getInput($name))
-					$dbobj->set($sname, 1);
+					$dbobj->set($name, 1);
 				else
-					$dbobj->set($sname, 0);
+					$dbobj->set($name, 0);
 			}
 
-			$this->set_value($dbobj->get($sname));
+			$this->set_value($dbobj->get($name));
 		}
 	}
 
@@ -411,9 +395,9 @@
 		public function init_value($dbobj)
 		{
 			parent::init_value($dbobj);
-			$sname = $this->_stripit($this->name());
-			if(!$dbobj->get($sname))
-				$dbobj->set($sname, array());
+			$name = $this->name();
+			if(!$dbobj->get($name))
+				$dbobj->set($name, array());
 		}
 	}
 
@@ -459,7 +443,7 @@
 		{
 			parent::set_form_box($box);
 			$rels = $box->dbobj()->relations();
-			$this->relation = $rels[$this->_stripit($this->name())];
+			$this->relation = $rels[$this->name()];
 		}
 
 		public function second()
