@@ -204,8 +204,9 @@
 				'user_role_id' => PermissionManager::role_for_realm($realm['realm_id']));
 
 			$p = $dbo->_prefix();
-			$sql = "({$p}realm_id={realm_id} AND {$p}role_id<={user_role_id}
-					OR {$p}id IN (
+			$t = $dbo->table();
+			$sql = "($t.{$p}realm_id={realm_id} AND $t.{$p}role_id<={user_role_id}
+					OR $t.{$p}id IN (
 						SELECT DISTINCT {$p}id FROM tbl_{$p}to_realm
 						WHERE realm_id={realm_id} AND role_id<={user_role_id}
 					) 
