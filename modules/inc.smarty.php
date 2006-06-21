@@ -29,8 +29,8 @@
 			$this->caching = false;
 			$this->security = false;
 			error_reporting($er);
-			$this->register_function('swisdk_config_value',
-				'_smarty_swisdk_config_value');
+			$this->register_function('swisdk_runtime_value',
+				'_smarty_swisdk_runtime_value');
 		}
 
 		public function __call($method, $args)
@@ -62,12 +62,12 @@
 		protected $smarty;
 	}
 
-	function _smarty_swisdk_config_value($params, &$smarty)
+	function _smarty_swisdk_runtime_value($params, &$smarty)
 	{
-		if(isset($params['format']))
-			return sprintf($params['format'],
-				Swisdk::config_value($params['key']));
-		return Swisdk::config_value($params['key']);
+		$val = Swisdk::config_value('runtime.'.$params['key']);
+		if(isset($params['format']) && $val)
+			return sprintf($params['format'], $val);
+		return $val;
 	}
 
 	class SmartyMaster {
