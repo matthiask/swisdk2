@@ -172,6 +172,21 @@
 				.'WHERE user_id='.$uid.' AND role_id>='.$rid;
 			return DBObject::db_get_array($sql, array('realm_id', 'realm_title'));
 		}
+
+		public static function role_for_realm($realm, $uid = null)
+		{
+			if($uid===null)
+				$uid = SessionHandler::user()->id();
+			$rid = intval($realm);
+			$sql = 'SELECT role_id FROM tbl_user_to_realm WHERE user_id='.$uid.' AND '
+				.'realm_id='.$rid;
+			$user = DBObject::db_get_row($sql);
+			$sql = 'SELECT MAX(role_id) AS role_id FROM tbl_user_group_to_realm, tbl_user_to_user_group '
+				.'WHERE tbl_user_group_to_realm.user_group_id=tbl_user_to_user_group.user_group_id'
+				.' AND user_id='.$uid.' AND realm_id='.$rid;
+			$group = DBObject::db_get_row($sql);
+			return max($user['role_id'], $group['role_id']);
+		}
 	}
 
 ?>
