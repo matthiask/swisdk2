@@ -340,6 +340,7 @@
 
 	class AdminComponent_list extends AdminComponent {
 		protected $tableview;
+		protected $creation_enabled = true;
 
 		protected function rewire_tableview()
 		{
@@ -361,7 +362,10 @@
 			$this->tableview->init();
 			$this->tableview_builder()->build($this->tableview);
 			$this->complete_columns();
-			$this->html = $this->tableview->html();
+			$this->html = ($this->creation_enabled?'<button type="button" '
+				.'onclick="window.location.href=\''.$this->module_url.'_new\'">'
+				.'Create '.$this->dbo_class.'</button>':'')
+				.$this->tableview->html();
 		}
 
 		protected function execute_actions()
