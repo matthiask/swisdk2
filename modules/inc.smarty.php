@@ -22,9 +22,9 @@
 			$er = error_reporting(E_ALL^E_NOTICE);
 			require_once SWISDK_ROOT . 'lib/smarty/libs/Smarty.class.php';
 			$this->smarty = new Smarty();
-			$this->smarty->compile_dir = SWISDK_ROOT . 'lib/smarty/templates_c';
-			$this->smarty->cache_dir = SWISDK_ROOT . 'lib/smarty/cache';
+			$this->smarty->compile_dir = CACHE_ROOT.'smarty';
 			$this->smarty->template_dir = CONTENT_ROOT;
+			//$this->smarty->cache_dir = CACHE_ROOT.'smarty';
 			//$this->config_dir
 			$this->caching = false;
 			$this->security = false;
