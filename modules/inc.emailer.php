@@ -3,7 +3,6 @@
 	require_once MODULE_ROOT . "inc.data.php";
 	require_once MODULE_ROOT . "inc.form.php";
 	
-	
 	/**
 	*	Interface sending emails.
 	*/
@@ -138,8 +137,8 @@
 		public function generate_sender() 
 		{
 			$rawdata = $this->rawdata();
-			if( isset( $rawdata["sender_adress"] ) ) {
-				$this->set_sender( $this->get_adress_string( isset( $rawdata["sender_name"] ) ? $rawdata["sender_name"] : "" , $rawdata["sender_adress"] ) );
+			if( isset( $rawdata["sender_address"] ) ) {
+				$this->set_sender( $this->get_address_string( isset( $rawdata["sender_name"] ) ? $rawdata["sender_name"] : "" , $rawdata["sender_address"] ) );
 				return true;
 			}
 			
@@ -149,8 +148,8 @@
 		public function generate_receivers() 
 		{
 			$rawdata = $this->rawdata();
-			if( isset( $rawdata["receiver_adress"] ) ) {
-				$this->set_receiver( $this->get_adress_string( isset( $rawdata["receiver_name"] ) ? $rawdata["receiver_name"] : "" , $rawdata["receiver_adress"] ) );
+			if( isset( $rawdata["receiver_address"] ) ) {
+				$this->set_receiver( $this->get_address_string( isset( $rawdata["receiver_name"] ) ? $rawdata["receiver_name"] : "" , $rawdata["receiver_address"] ) );
 				return true;
 			}
 			
@@ -181,13 +180,13 @@
 			return true;
 		}
 		
-		public function get_adress_string( $name , $adress )
+		public function get_address_string( $name , $address )
 		{
 			if( isset( $dbobj->message_name ) && $dbobj->message_name != "" )
 			{
-				return $name .= " <$adress>";
+				return $name .= " <$address>";
 			} else {
-				return $adress;
+				return $address;
 			}
 		}
 		
@@ -325,7 +324,7 @@
 			$args = func_get_args();
 			if( count( $args ) == 1 && is_array( $args[0] ) )
 			{
-				$param_data = array( "receiver_adress" => $args[0]["to"] , "sender_adress" => $args[0]["from"],
+				$param_data = array( "receiver_address" => $args[0]["to"] , "sender_address" => $args[0]["from"],
 					"subject" => $args[0]["subject"], "body" => $args[0]["body"], "headers" => $args[0]["headers"]
 					);
 				
@@ -333,7 +332,7 @@
 				
 			} else if( count( $args ) == 4 ) {
 				//instance standard message, create data array from params  
-				$param_data = array( "receiver_adress" => $args[0], "sender_adress" => $args[1], 
+				$param_data = array( "receiver_address" => $args[0], "sender_address" => $args[1], 
 					"subject" => $args[2], "body" => $args[3]
 					);
 					
