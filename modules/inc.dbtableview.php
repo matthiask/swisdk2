@@ -256,6 +256,7 @@
 				.'</div>'
 				.<<<EOD
 <script type="text/javascript">
+//<![CDATA[
 function tv_edit()
 {
 	document.forms.$id.action = document.forms.$id.action.replace(/\/_list/, '/_edit/multiple');
@@ -274,6 +275,7 @@ function tv_toggle(elem)
 	for(i=0; i<elems.length; i++)
 		elems[i].checked = elem.checked;
 }
+//]]>
 </script>
 EOD;
 		}
@@ -307,6 +309,7 @@ EOD;
 			$p = $this->form->dbobj()->_prefix();
 			return <<<EOD
 <script type="text/javascript">
+//<![CDATA[
 function order(col) {
 	var order = document.forms.$id.{$p}order;
 	var dir = document.forms.$id.{$p}dir;
@@ -324,6 +327,7 @@ function skim(step)
 	start.value=parseInt(start.value)+step;
 	document.forms.$id.submit();
 }
+//]]>
 </script>
 EOD;
 		}

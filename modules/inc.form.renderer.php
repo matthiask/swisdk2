@@ -127,12 +127,14 @@
 				return null;
 			$id = $obj->id();
 			$js = '<script type="text/javascript">
+//<![CDATA[
 function validate_'.$id.'()
 {
 	var valid = true;
 	if(!'.implode("()) valid = false;\n\tif(!", $this->functions).'()) valid = false;
 	return valid;
 }
+//]]>
 </script>';
 			return array('onsubmit="return validate_'.$id.'()"', $js);
 		}
@@ -205,6 +207,7 @@ function validate_'.$id.'()
 			$this->_collect_javascript($obj);
 			static $js = "
 <script type=\"text/javascript\">
+//<![CDATA[
 function formitem_tristate(elem)
 {
 	var value = document.getElementById(elem.id.replace(/^__cont_/, ''));
@@ -230,6 +233,7 @@ function formitem_tristate(elem)
 
 	return false;
 }
+//]]>
 </script>";
 			$name = $obj->iname();
 			$value = $obj->value();
@@ -271,6 +275,7 @@ function formitem_tristate(elem)
 <script type="text/javascript" src="/scripts/util.js"></script>
 <script type="text/javascript" src="/scripts/fckeditor/fckeditor.js"></script>
 <script type="text/javascript">
+//<![CDATA[
 function load_editor_$name(){
 var oFCKeditor = new FCKeditor('$name');
 oFCKeditor.BasePath = '/scripts/fckeditor/';
@@ -279,6 +284,7 @@ oFCKeditor.Width = 750;
 oFCKeditor.ReplaceTextarea();
 }
 add_event(window,'load',load_editor_$name);
+//]]>
 </script>
 EOD;
 			$this->_render($obj, $html);
@@ -383,6 +389,7 @@ EOD;
 	style="cursor: pointer; border: 1px solid red;" title="Date selector"
 	onmouseover="this.style.background='red';" onmouseout="this.style.background=''" />
 <script type="text/javascript">
+//<![CDATA[
 Calendar.setup({
 	inputField  : "$name",
 	ifFormat    : "%s",
@@ -393,6 +400,7 @@ Calendar.setup({
 	showsTime   : true,
 	step        : 1
 });
+//]]>
 </script>
 EOD;
 			$this->_render($obj, $html);
@@ -440,7 +448,11 @@ EOD;
 
 		protected function javascript()
 		{
-			return '<script type="text/javascript">'.$this->javascript.'</script>';
+			return '<script type="text/javascript">'
+				."\n//<![CDATA[\n"
+				.$this->javascript
+				."\n//]]>\n"
+				.'</script>';
 		}
 	}
 
