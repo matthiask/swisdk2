@@ -324,31 +324,43 @@
 		protected $tableview;
 		protected $creation_enabled = true;
 
-		protected function rewire_tableview()
+		public function get_dbobj()
 		{
 			if($this->multilanguage)
-				$this->tableview = new DBTableView(
-					DBObjectML::create($this->dbo_class),
-					'DBTableViewForm');
+				return DBObjectML::create($this->dbo_class);
 			else
-				$this->tableview = new DBTableView(
-					$this->dbo_class, 'DBTableViewForm');
+				return DBObject::create($this->dbo_class);
+		}
+
+		public function init_tableview()
+		{
+			$this->tableview = new DBTableView($this->get_dbobj());
+		}
+
+		public function init_tableview_form()
+		{
 			if(class_exists($c = 'DBTableViewForm_'.$this->dbo_class))
 				$this->tableview->set_form($c);
 		}
 
 		public function run()
 		{
-			$this->rewire_tableview();
+			$this->init_tableview();
+			$this->init_tableview_form();
 			$this->execute_actions();
 			$this->tableview->init();
-			$this->tableview_builder()->build($this->tableview);
-			$this->complete_columns();
+			$this->build_tableview();
 			$this->html = ($this->creation_enabled?'<button type="button" '
 				.'onclick="window.location.href=\''.$this->module_url
 					.'_new\'">'
 				.'Create '.$this->dbo_class.'</button>':'')
 				.$this->tableview->html();
+		}
+
+		public function build_tableview()
+		{
+			$this->tableview_builder()->build($this->tableview);
+			$this->complete_columns();
 		}
 
 		protected function execute_actions()
