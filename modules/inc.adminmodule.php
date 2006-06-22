@@ -44,7 +44,8 @@
 				if(class_exists($cmp_class))
 					$cmp = new $cmp_class;
 				else if($args[0]=='_new' && class_exists($cmp_class =
-						'AdminComponent_'.$this->dbo_class.'_edit'))
+						'AdminComponent_'.$this->dbo_class
+						.'_edit'))
 					$cmp = new $cmp_class;
 				else if(class_exists($cmp_class = 'AdminComponent'
 						.$args[0])) 
@@ -287,8 +288,10 @@
 				}
 			} else {
 				foreach($this->obj as $obj) {
-					$box = $this->form->box($this->dbo_class.'_'.$obj->id());
-					$box->set_title('Edit '.$this->dbo_class.' '.$obj->id());
+					$box = $this->form->box($this->dbo_class
+						.'_'.$obj->id());
+					$box->set_title('Edit '.$this->dbo_class
+						.' '.$obj->id());
 					$box->bind($obj);
 					$box->add(new HiddenInput($obj->primary().'[]'))
 						->set_value($obj->id());
@@ -342,7 +345,8 @@
 			$this->tableview_builder()->build($this->tableview);
 			$this->complete_columns();
 			$this->html = ($this->creation_enabled?'<button type="button" '
-				.'onclick="window.location.href=\''.$this->module_url.'_new\'">'
+				.'onclick="window.location.href=\''.$this->module_url
+					.'_new\'">'
 				.'Create '.$this->dbo_class.'</button>':'')
 				.$this->tableview->html();
 		}
@@ -394,9 +398,10 @@
 				$dbo = DBObject::find($this->dbo_class, $this->args[0]);
 			if(!$dbo)
 				SwisdkError::handle(new FatalError(
-					"AdminComponent_delete::run() - Can't find the data."
-					." Class is: {$this->dbo_class} Argument is: "
-					."{$this->args[0]}"));
+					'AdminComponent_delete::run() - Can\'t find '
+					.'the data.'
+					.' Class is: '.$this->dbo_class.' Argument is: '
+					.intval($this->args[0])));
 
 			$dbo->delete();
 			$this->goto('_index');
