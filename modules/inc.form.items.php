@@ -316,6 +316,11 @@
 		{
 			@unlink($this->files_data['path']);
 		}
+
+		public function __destruct()
+		{
+			$this->unlink_cachefile();
+		}
 	}
 
 	/**
