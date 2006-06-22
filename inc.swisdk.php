@@ -105,8 +105,11 @@
 		{
 			if($dir{0}!='/')
 				$dir = DATA_ROOT.$dir;
+			umask(0002);
 			if(!file_exists($dir))
-				@mkdir($dir);
+				if(!@mkdir($dir, 0775))
+					SwisdkError::handle(new FatalError(
+						'Could not create data directory '.$dir));
 		}
 
 		public static function dump()
