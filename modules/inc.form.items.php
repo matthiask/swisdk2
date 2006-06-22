@@ -285,6 +285,7 @@
 						.uniqid().substr($fname, $pos);
 
 				$this->files_data['path'] = CACHE_ROOT.'upload/'.$fname;
+				Swisdk::require_data_directory(CACHE_ROOT.'upload');
 				if(move_uploaded_file($this->files_data['tmp_name'],
 						$this->files_data['path'])) {
 					$dbobj->set($this->name(), $fname);
