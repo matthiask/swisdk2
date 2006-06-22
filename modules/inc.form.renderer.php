@@ -13,8 +13,8 @@
 		protected $file_upload = false;
 		protected $js_validation = true;
 
-		abstract protected function _render($obj, $field_html);
-		abstract protected function _render_bar($obj, $html);
+		abstract protected function _render($obj, $field_html, $row_class = null);
+		abstract protected function _render_bar($obj, $html, $row_class = null);
 
 		public function add_html($html)
 		{
@@ -97,7 +97,8 @@
 		{
 			if($title = $obj->title())
 				$this->_render_bar($obj,
-					'<big><strong>'.$title.'</strong></big>');
+					'<big><strong>'.$title.'</strong></big>',
+					'sf-form-title');
 		}
 
 		protected function visit_Form_end($obj)
@@ -113,7 +114,7 @@
 			list($html, $js) = $this->_validation_html($obj);
 			$this->add_html_start(
 				'<form method="post" action="'.$_SERVER['REQUEST_URI']
-				.'" id="'.$obj->id()."\" $html $upload><div>\n".$js);
+				.'" id="'.$obj->id()."\" $html $upload class=\"sf-form\"><div>\n".$js);
 			$this->add_html_end('<span style="color:red" id="'.$obj->id().'_span"> </span>');
 			$this->add_html_end('</div></form>');
 		}
@@ -163,7 +164,8 @@ function validate_'.$id.'()
 			$this->add_html_end('<span style="color:red">'
 				.($message?$message:' ').'</span>');
 			if($title = $obj->title())
-				$this->_render_bar($obj, '<strong>'.$title.'</strong>');
+				$this->_render_bar($obj, '<strong>'.$title.'</strong>',
+					'sf-box-title');
 		}
 
 		protected function visit_FormBox_end($obj)
@@ -356,7 +358,6 @@ EOD;
 			return $html;
 		}
 
-
 		protected function visit_DateInput($obj)
 		{
 			$this->_collect_javascript($obj);
@@ -416,7 +417,8 @@ EOD;
 			$this->_render_bar($obj,
 				'<input type="submit" '.$obj->attribute_html()
 				.($name?' name="'.$name.'"':'')
-				.' value="'.$value.'" />');
+				.' value="'.$value.'" />',
+				'sf-button');
 		}
 
 		protected function _title_html($obj)
@@ -428,7 +430,8 @@ EOD;
 		{
 			$msg = $obj->message();
 			$name = $obj->iname();
-			return '<div id="'.$name.'_span" style="clear:both;color:red">'.($msg?$msg:' ').'</div>';
+			return '<div id="'.$name.'_span" style="clear:both;color:red">'
+				.($msg?$msg:' ').'</div>';
 		}
 
 		protected function _info_html($obj)
@@ -474,19 +477,26 @@ EOD;
 			return $this->grid;
 		}
 
-		protected function _render($obj, $field_html)
+		protected function _render($obj, $field_html, $row_class = null)
 		{
-			$y = $this->grid()->height();
-			$this->grid()->add_item(0, $y, $this->_title_html($obj));
-			$this->grid()->add_item(1, $y,
+			$grid = $this->grid();
+			$y = $grid->height();
+			if($row_class)
+				$grid->set_row_class($y, $row_class);
+			$grid->add_item(0, $y, $this->_title_html($obj));
+			$grid->add_item(1, $y,
 				'<div style="float:left;">'.$field_html.'</div>'
 				.$this->_info_html($obj)
 				.$this->_message_html($obj));
 		}
 
-		protected function _render_bar($obj, $html)
+		protected function _render_bar($obj, $html, $row_class = null)
 		{
-			$this->grid()->add_item(0, $this->grid()->height(), $html, 2, 1);
+			$grid = $this->grid();
+			$y = $grid->height();
+			if($row_class)
+				$grid->set_row_class($y, $row_class);
+			$grid->add_item(0, $y, $html, 2, 1);
 		}
 	}
 
