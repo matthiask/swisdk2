@@ -149,7 +149,7 @@
 		public function generate_receivers() 
 		{
 			$rawdata = $this->rawdata();
-			if( isset( $rawdata["receiver_name"] ) ) {
+			if( isset( $rawdata["receiver_adress"] ) ) {
 				$this->set_receiver( $this->get_adress_string( isset( $rawdata["receiver_name"] ) ? $rawdata["receiver_name"] : "" , $rawdata["receiver_adress"] ) );
 				return true;
 			}
@@ -198,7 +198,12 @@
 		protected $smarty = null;
 		protected $template = "";
 		
-		public function smarty() { return $this->smarty; }
+		public function smarty() { 
+			if( $this->smarty === null ) {
+				$this->smarty = new SwisdkSmarty();
+			}	
+			return $this->smarty; 
+		}
 		public function set_smarty( $smarty ) { $this->smarty = $smarty; }
 		
 		public function template() { return $this->template; }
