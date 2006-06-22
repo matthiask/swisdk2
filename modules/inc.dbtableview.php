@@ -151,6 +151,19 @@
 				$this->form = new $form();
 		}
 
+		public function append_auto($field, $title=null)
+		{
+			require_once MODULE_ROOT.'inc.builder.php';
+			static $builder = null;
+			if($builder===null)
+				$builder = new TableViewBuilder();
+			if(is_array($field)) {
+				foreach($field as $f)
+					$builder->create_auto($this, $f, null);
+			} else
+				return $builder->create_auto($this, $field, $title);
+		}
+
 		/**
 		 * you need to call init() prior to adding any columns 
 		 */

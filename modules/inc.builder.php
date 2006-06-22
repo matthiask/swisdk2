@@ -311,6 +311,13 @@
 				return $this->build_simple();
 		}
 
+		public function create_auto(&$tableview, $field, $title = null)
+		{
+			$this->tv = $tableview;
+			$this->dbobj = $tableview->dbobj()->dbobj();
+			return $this->create_field($field, $title);
+		}
+
 		public function build_simple($finalize = true)
 		{
 			$dbobj = $this->dbobj();
