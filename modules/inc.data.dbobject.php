@@ -715,11 +715,12 @@
 		protected static function &db($connection_id = DB_CONNECTION_DEFAULT)
 		{
 			if(!isset(DBObject::$dbhandle[$connection_id])) {
+				$prefix = 'db'.($connection_id=='db'?'':'.'.$connection_id);
 				DBObject::$dbhandle[$connection_id] = new mysqli(
-					Swisdk::config_value($connection_id.'.host'),
-					Swisdk::config_value($connection_id.'.username'),
-					Swisdk::config_value($connection_id.'.password'),
-					Swisdk::config_value($connection_id.'.database')
+					Swisdk::config_value($prefix.'.host'),
+					Swisdk::config_value($prefix.'.username'),
+					Swisdk::config_value($prefix.'.password'),
+					Swisdk::config_value($prefix.'.database')
 				);
 				if(mysqli_connect_errno())
 					SwisdkError::handle(new DBError('Connect failed: '
