@@ -259,19 +259,21 @@
 //<![CDATA[
 function tv_edit()
 {
-	document.forms.$id.action = document.forms.$id.action.replace(/\/_list/, '/_edit/multiple');
-	document.forms.$id.submit();
+	var form = document.getElementById('$id');
+	form.action = form.action.replace(/\/_list/, '/_edit/multiple');
+	form.submit();
 }
 function tv_delete()
 {
 	if(!confirm('Really delete?'))
 		return;
-	document.forms.$id.action = document.forms.$id.action.replace(/\/_list/, '/_delete/multiple');
-	document.forms.$id.submit();
+	var form = document.getElementById('$id');
+	form.action = form.action.replace(/\/_list/, '/_delete/multiple');
+	form.submit();
 }
 function tv_toggle(elem)
 {
-	var elems = document.forms.$id.getElementsByTagName('input');
+	var elems = document.getElementById('$id').getElementsByTagName('input');
 	for(i=0; i<elems.length; i++)
 		elems[i].checked = elem.checked;
 }
@@ -311,21 +313,23 @@ EOD;
 <script type="text/javascript">
 //<![CDATA[
 function order(col) {
-	var order = document.forms.$id.{$p}order;
-	var dir = document.forms.$id.{$p}dir;
+	var form = document.getElementById('$id');
+	var order = form.{$p}order;
+	var dir = form.{$p}dir;
 	if(order.value==col) {
 		dir.value=(dir.value=='DESC'?'ASC':'DESC');
 	} else {
 		dir.value='ASC';
 		order.value=col;
 	}
-	document.forms.$id.submit();
+	form.submit();
 }
 function skim(step)
 {
-	var start = document.forms.$id.{$p}start;
+	var form = document.getElementById('$id');
+	var start = form.{$p}start;
 	start.value=parseInt(start.value)+step;
-	document.forms.$id.submit();
+	form.submit();
 }
 //]]>
 </script>

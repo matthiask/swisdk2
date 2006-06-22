@@ -113,9 +113,9 @@
 			list($html, $js) = $this->_validation_html($obj);
 			$this->add_html_start(
 				'<form method="post" action="'.$_SERVER['REQUEST_URI']
-				.'" name="'.$obj->id()."\" $html $upload>\n".$js);
+				.'" id="'.$obj->id()."\" $html $upload><div>\n".$js);
 			$this->add_html_end('<span style="color:red" id="'.$obj->id().'_span"> </span>');
-			$this->add_html_end('</form>');
+			$this->add_html_end('</div></form>');
 		}
 
 		protected function _validation_html($obj)

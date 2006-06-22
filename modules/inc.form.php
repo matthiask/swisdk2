@@ -194,7 +194,7 @@
 		 */
 		public function accept($renderer)
 		{
-			$this->add(new HiddenInput($this->id()))->set_value(1);
+			$this->add(new HiddenInput('__guard_'.$this->id()))->set_value(1);
 
 			$renderer->visit($this, FORMRENDERER_VISIT_START);
 			foreach($this->boxes as &$box)
@@ -208,7 +208,7 @@
 		public function is_valid()
 		{
 			// has this form been submitted (or was it another form on the same page)
-			if(!isset($_REQUEST[$this->id()]))
+			if(!isset($_REQUEST['__guard_'.$this->id()]))
 				return false;
 
 			$valid = true;
