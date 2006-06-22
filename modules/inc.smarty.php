@@ -31,6 +31,8 @@
 			error_reporting($er);
 			$this->register_function('swisdk_runtime_value',
 				'_smarty_swisdk_runtime_value');
+
+			Swisdk::require_data_directory($this->smarty->compile_dir);
 		}
 
 		public function __call($method, $args)

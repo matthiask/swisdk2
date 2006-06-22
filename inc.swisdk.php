@@ -61,11 +61,15 @@
 			define('WEBAPP_ROOT', APP_ROOT.'webapp/');
 			define('LOG_ROOT', APP_ROOT.'log/');
 			define('CONTENT_ROOT' , WEBAPP_ROOT . 'content/');
-			define('CACHE_ROOT', WEBAPP_ROOT.'cache/');
-			define('UPLOAD_ROOT', WEBAPP_ROOT.'upload/');
+			// DATA_ROOT must be writeable for the webserver
+			define('DATA_ROOT', WEBAPP_ROOT.'data/');
+			define('CACHE_ROOT', DATA_ROOT.'cache/');
+			define('UPLOAD_ROOT', DATA_ROOT.'upload/');
 
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
+
+			Swisdk::require_data_directory(CACHE_ROOT);
 
 			SwisdkError::setup();
 			Swisdk::read_configfile();
@@ -95,6 +99,14 @@
 			} else {
 				SwisdkError::handle(new FatalError('No configuration file'));
 			}
+		}
+
+		public static function require_data_directory($dir)
+		{
+			if($dir{0}!='/')
+				$dir = DATA_ROOT.$dir;
+			if(!file_exists($dir))
+				@mkdir($dir);
 		}
 
 		public static function dump()
