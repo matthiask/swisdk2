@@ -191,7 +191,6 @@
 			$this->form->setup();
 			$this->form->set_clauses($this->obj);
 			$this->obj->init();
-			$this->set_data($this->obj->all_data());
 		}
 
 		protected $form_defaults = array();
@@ -308,6 +307,7 @@ EOD;
 
 		public function html()
 		{
+			$this->set_data($this->obj->all_data());
 			$this->prepend_column(new IDTableViewColumn(
 				$this->dbobj()->dbobj()->primary()));
 			$renderer = new TableViewFormRenderer();
