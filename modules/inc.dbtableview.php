@@ -105,7 +105,7 @@
 	/**
 	 * display records in a searchable and sortable table
 	 */
-	class DBTableView extends TableView implements ArrayAccess {
+	class DBTableView extends TableView {
 
 		/**
 		 * DBOContainer instance
@@ -348,20 +348,6 @@ function skim(step)
 </script>
 EOD;
 		}
-
-		/**
-		 * ArrayAccess implementation (see PHP SPL)
-		 */
-		public function offsetExists($offset) { return isset($this->columns[$offset]); }
-		public function offsetGet($offset) { return $this->columns[$offset]; }
-		public function offsetSet($offset, $value)
-		{
-			if($offset===null)
-				$this->columns[] = $value;
-			else
-				$this->columns[$offset] = $value;
-		}
-		public function offsetUnset($offset) { unset($this->columns[$offset]); }
 	}
 
 	class IDTableViewColumn extends NoDataTableViewColumn {

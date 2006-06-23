@@ -5,7 +5,7 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
-	class TableView implements Iterator {
+	class TableView implements Iterator, ArrayAccess {
 		
 		/**
 		 * TableViewColumn instances
@@ -19,6 +19,7 @@
 
 		public function append_column(TableViewColumn $column)
 		{
+			$column->set_tableview($this);
 			$this->columns[$column->name()] = $column;
 		}
 
@@ -91,6 +92,21 @@
 		public function key() { return key($this->columns); }
 		public function next() { return next($this->columns); }
 		public function valid() { return $this->current() !== false; }
+
+		/**
+		 * ArrayAccess implementation (see PHP SPL)
+		 */
+		public function offsetExists($offset) { return isset($this->columns[$offset]); }
+		public function offsetGet($offset) { return $this->columns[$offset]; }
+		public function offsetSet($offset, $value)
+		{
+			$value->set_tableview($this);
+			if($offset===null)
+				$this->columns[] = $value;
+			else
+				$this->columns[$offset] = $value;
+		}
+		public function offsetUnset($offset) { unset($this->columns[$offset]); }
 	}
 
 	abstract class TableViewColumn {
@@ -108,9 +124,15 @@
 		public function name()		{ return $this->column; }
 		public function set_title($t)	{ $this->title = $t; }
 
+		public function set_tableview(&$tableview)
+		{
+			$this->tableview = $tableview;
+		}
+
 		protected $column;
 		protected $title;
 		protected $args;
+		protected $tableview;
 	}
 
 	/**
