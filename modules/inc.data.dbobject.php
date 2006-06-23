@@ -446,10 +446,28 @@
 		{
 			if(!$this->id())
 				return true;
-			// TODO remove n-to-m relation links
+			DBObject::db_start_transaction($this->db_connection_id);
 			$ret = DBObject::db_query('DELETE FROM ' . $this->table
-				. ' WHERE ' . $this->primary . '=' . $this->id());
+				. ' WHERE ' . $this->primary . '=' . $this->id(),
+				$this->db_connection_id);
 			$this->unset_primary();
+			if(isset(DBObject::$relations[$this->class])) {
+				foreach(DBObject::$relations[$this->class] as &$rel) {
+					if($rel['type']==DB_REL_N_TO_M
+							|| $rel['type']==DB_REL_3WAY) {
+						if(!DBObject::db_query('DELETE FROM '
+								.$rel['table'].' WHERE '
+								.$this->primary
+								.'='.$this->id(),
+								$this->db_connection_id)) {
+							DBObject::db_rollback(
+								$this->db_connection_id);
+							return false;
+						}
+					}
+				}
+			}
+			DBObject::db_commit($this->db_connection_id);
 			return $ret;
 		}
 
@@ -937,6 +955,7 @@
 
 		public function unset_primary()
 		{
+			$this->dirty = true;
 			unset($this->data[$this->primary]);
 		}
 
