@@ -324,8 +324,6 @@
 		 * this helper should always be executed inside a transaction (that
 		 * is actually the case when you use update() or insert(), the only
 		 * place where this helper is used right now)
-		 *
-		 * TODO need to check this function for sql injection safety
 		 */
 		protected function _update_relations()
 		{
@@ -343,15 +341,22 @@
 						$this->db_connection_id);
 					if($res===false)
 						return false;
-					if(count($this->data[$field])) {
+					if(is_array($this->data[$field])
+							&& count($this->data[$field])) {
+						$ids = array();
+						foreach($this->data[$field] as $id)
+							if($id = intval($id))
+								$ids[] = $id;
+						if(!count($ids))
+							return true;
 						$sql = 'INSERT INTO '.$rel['table']
 							.' ('.$this->primary.','
 							.$rel['foreign'].') VALUES ('
 							.$this->id().','
 							.implode('),('.$this->id().',',
-							$this->data[$field]).')';
+							$ids).')';
 						if(DBObject::db_query($sql,
-							$this->db_connection_id)===false)
+								$this->db_connection_id)===false)
 							return false;
 					}
 				} else if($rel['type']==DB_REL_3WAY) {
@@ -369,21 +374,22 @@
 							&& count($this->data[$field])) {
 						$frags = array();
 						foreach($this->data[$field] as $v1 => $v2)
-							if($v1 && $v2)
-								$frags[] = $v1.','.$v2;
-						if(count($frags)) {
-							$o3 = DBObject::create($rel['choices']);
-							$sql = 'INSERT INTO '.$rel['table']
-								.' ('.$this->primary.','
-								.$rel['foreign'].','
-								.$o3->primary().') VALUES ('
-								.$this->id().','
-								.implode('),('.$this->id().',',
-								$frags).')';
-							if(DBObject::db_query($sql,
+							if(($id1 = intval($v1))
+									&& ($id2 = $intval($v2)))
+								$frags[] = $id1.','.$id2;
+						if(!count($frags))
+							return true;
+						$o3 = DBObject::create($rel['choices']);
+						$sql = 'INSERT INTO '.$rel['table']
+							.' ('.$this->primary.','
+							.$rel['foreign'].','
+							.$o3->primary().') VALUES ('
+							.$this->id().','
+							.implode('),('.$this->id().',',
+							$frags).')';
+						if(DBObject::db_query($sql,
 								$this->db_connection_id)===false)
-								return false;
-						}
+							return false;
 					}
 				}
 			}
