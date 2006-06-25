@@ -451,6 +451,8 @@ EOD;
 
 		protected function javascript()
 		{
+			if(!$this->javascript)
+				return;
 			return '<script type="text/javascript">'
 				."\n//<![CDATA[\n"
 				.$this->javascript
