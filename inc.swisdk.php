@@ -11,7 +11,7 @@
 
 		public static function runFromHttpRequest()
 		{
-			define('APP_ROOT', $_SERVER['DOCUMENT_ROOT'] . '/../../');
+			define('APP_ROOT', realpath($_SERVER['DOCUMENT_ROOT'] . '/../..').'/');
 
 			Swisdk::run(array('REQUEST_URI' =>
 				((isset($_SERVER['HTTPS'])&&$_SERVER['HTTPS']=='on')
@@ -103,11 +103,16 @@
 
 		public static function require_data_directory($dir)
 		{
+			if(preg_match('/[^A-Za-z0-9\.-_\/]/', $dir)
+					|| strpos($dir, '..')!==false)
+				SwisdkError::handle(new FatalError(
+					'Invalid path passed to require_data_directory:'
+					.$dir));
 			if($dir{0}!='/')
 				$dir = DATA_ROOT.$dir;
 			umask(0002);
 			if(!file_exists($dir))
-				if(!@mkdir($dir, 0775))
+				if(!@mkdir($dir, 0775, true))
 					SwisdkError::handle(new FatalError(
 						'Could not create data directory '.$dir));
 		}
