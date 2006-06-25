@@ -142,7 +142,8 @@
 		{
 			$html = ' ';
 			foreach($this->attributes as $k => $v)
-				$html .= $k.'="'.htmlspecialchars($v).'" ';
+				if($v)
+					$html .= $k.'="'.htmlspecialchars($v).'" ';
 			return $html;
 		}
 
