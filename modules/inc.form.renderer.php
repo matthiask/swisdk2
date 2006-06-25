@@ -108,15 +108,15 @@
 			$upload = '';
 			$valid = '';
 			if($this->file_upload)
-				$upload = ' enctype="multipart/form-data">'
+				$upload = 'enctype="multipart/form-data">'."\n"
 					.'<input type="hidden" name="MAX_FILE_SIZE" '
 					.'value="2000000"';
 			list($html, $js) = $this->_validation_html($obj);
 			$this->add_html_start(
 				'<form method="post" action="'.$_SERVER['REQUEST_URI']
-				.'" id="'.$obj->id()."\" $html $upload class=\"sf-form\"><div>\n".$js);
+				.'" id="'.$obj->id()."\" $html $upload class=\"sf-form\">\n<div>\n".$js);
 			$this->add_html_end('<span style="color:red" id="'.$obj->id().'_span"> </span>');
-			$this->add_html_end('</div></form>');
+			$this->add_html_end("</div></form>\n");
 		}
 
 		protected function _validation_html($obj)
@@ -175,7 +175,7 @@ function validate_'.$id.'()
 		protected function visit_HiddenInput($obj)
 		{
 			$this->_collect_javascript($obj);
-			$this->add_html($this->_simpleinput_html($obj));
+			$this->add_html($this->_simpleinput_html($obj)."\n");
 		}
 
 		protected function visit_SimpleInput($obj)
@@ -250,7 +250,7 @@ function formitem_tristate(elem)
 		id="__cont_%s" onclick="formitem_tristate(this)"></div>
 	<input type="checkbox" name="__cb_%s" id="__cb_%s" %s />
 	<input type="hidden" name="%s" id="%s" value="%s" />
-</span>', $name, $name, $name, $cb_html, $name, $name, $value));
+</span>'."\n", $name, $name, $name, $cb_html, $name, $name, $value));
 
 			// only send the javascript once
 			$js = '';
@@ -288,6 +288,7 @@ oFCKeditor.ReplaceTextarea();
 add_event(window,'load',load_editor_$name);
 //]]>
 </script>
+
 EOD;
 			$this->_render($obj, $html);
 		}
@@ -403,6 +404,7 @@ Calendar.setup({
 });
 //]]>
 </script>
+
 EOD;
 			$this->_render($obj, $html);
 		}
