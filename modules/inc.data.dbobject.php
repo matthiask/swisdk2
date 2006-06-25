@@ -780,6 +780,15 @@
 			return $result;
 		}
 
+		public static function db_create_temporary_table($class, $fields)
+		{
+			$dbo = DBObject::create($class);
+			$p = $dbo->_prefix();
+			$sql = 'CREATE TEMPORARY TABLE '.$dbo->table().' ('
+				.$p.implode(' INT(11), '.$p, $fields).' INT(11))';
+			return DBObject::db_query($sql);
+		}
+
 		/**
 		 * Return the result of the passed SQL query as an array of associative
 		 * values.
