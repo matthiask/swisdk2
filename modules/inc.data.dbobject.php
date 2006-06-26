@@ -375,7 +375,7 @@
 						$frags = array();
 						foreach($this->data[$field] as $v1 => $v2)
 							if(($id1 = intval($v1))
-									&& ($id2 = $intval($v2)))
+									&& ($id2 = intval($v2)))
 								$frags[] = $id1.','.$id2;
 						if(!count($frags))
 							return true;
