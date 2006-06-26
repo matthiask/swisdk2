@@ -254,7 +254,44 @@
 				.$str.' | skim '
 				.'<a href="javascript:skim(-'.$this->items_on_page.')">backwards</a> or '
 				.'<a href="javascript:skim('.$this->items_on_page.')">forwards</a>'
-				."</td>\n</tr>\n</tfoot>\n</table>";
+				."</td>\n</tr>\n</tfoot>\n</table>".<<<EOD
+<script type="text/javascript">
+//<![CDATA[
+function init_tableview()
+{
+	var tables = document.getElementsByTagName('table');
+	for(i=0; i<tables.length; i++) {
+		if(tables[i].className=='s-table') {
+			var rows = tables[i].getElementsByTagName('tr');
+			for(j=0; j<rows.length; j++) {
+				rows[j].onclick = function(){
+					var cb = this.getElementsByTagName('input')[0];
+					cb.checked = !cb.checked;
+					cb.onchange();
+				}
+				var cb = rows[j].getElementsByTagName('input')[0];
+				cb.onchange = function(){
+					var row = this.parentNode.parentNode;
+					if(this.checked)
+						row.className = 'checked';
+					else
+						row.className = '';
+				}
+				cb.onclick = function(){
+					// hack. revert toggle effect of tr.onclick
+					this.checked = !this.checked;
+				}
+				if(cb.checked)
+					rows[j].className = 'checked';
+			}
+		}
+	}
+}
+add_event(window, 'load', init_tableview);
+//]]>
+</script>
+
+EOD;
 		}
 
 		protected function multi_foot()
