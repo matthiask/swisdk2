@@ -223,7 +223,7 @@
 		{
 			$order = $this->form->dbobj()->order;
 			$dir = $this->form->dbobj()->dir;
-			$html = '<thead><tr>';
+			$html = "<table class=\"s-table\">\n<thead>\n<tr>\n";
 			foreach($this->columns as &$col) {
 				$html .= '<th>';
 				if($col instanceof NoDataTableViewColumn) {
@@ -236,10 +236,10 @@
 					}
 					$html .= '</a>';
 				}
-				$html .= '</th>';
+				$html .= "</th>\n";
 			}
 
-			$html .= "</tr></thead>\n";
+			$html .= "</tr>\n</thead>\n";
 			return $html;
 		}
 
@@ -249,12 +249,12 @@
 			list($first, $count, $last) = $this->list_position();
 
 			$str = 'displaying '.$first.'&ndash;'.$last.' of '.$count;
-			return '<tfoot><tr><td colspan="'.$colcount.'">'
+			return "<tfoot>\n<tr>\n<td colspan=\"".$colcount.'">'
 				.$this->multi_foot()
 				.$str.' | skim '
 				.'<a href="javascript:skim(-'.$this->items_on_page.')">backwards</a> or '
 				.'<a href="javascript:skim('.$this->items_on_page.')">forwards</a>'
-				.'</td></tr></tfoot>';
+				."</td>\n</tr>\n</tfoot>\n</table>";
 		}
 
 		protected function multi_foot()

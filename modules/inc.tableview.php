@@ -35,11 +35,9 @@
 
 		public function html()
 		{
-			return '<table>'
-				. $this->render_head()
-				. $this->render_body()
-				. $this->render_foot()
-				. '</table>';
+			return $this->render_head()
+				.$this->render_body()
+				.$this->render_foot();
 		}
 
 		public function set_data($data)
@@ -54,16 +52,16 @@
 
 		protected function render_head()
 		{
-			$html = '<thead><tr>';
+			$html = "<table class=\"s-table\">\n<thead>\n<tr>\n";
 			foreach($this->columns as &$col)
-				$html .= '<th>' . $col->title() . '</th>';
-			$html .= "</tr></thead>\n";
+				$html .= '<th>'.$col->title()."</th>\n";
+			$html .= "</tr>\n</thead>\n";
 			return $html;
 		}
 
 		protected function render_body()
 		{
-			$html = '<tbody>';
+			$html = "<tbody>\n";
 			foreach($this->data as &$row)
 				$html .= $this->render_row($row);
 			$html .= "</tbody>\n";
@@ -72,16 +70,16 @@
 
 		protected function render_row(&$row)
 		{
-			$html = '<tr>';
+			$html = "<tr>\n";
 			foreach($this->columns as &$col)
-				$html .= '<td>' . $col->html($row) . '</td>';
+				$html .= '<td>'.$col->html($row)."</td>\n";
 			$html .= "</tr>\n";
 			return $html;
 		}
 
 		protected function render_foot()
 		{
-			return '';
+			return "</table>\n";
 		}
 
 		/**

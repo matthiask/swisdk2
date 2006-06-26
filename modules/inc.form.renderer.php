@@ -115,7 +115,7 @@
 			$this->add_html_start(
 				'<form method="post" action="'.$_SERVER['REQUEST_URI']
 				.'" id="'.$obj->id()."\" $html class=\"sf-form\" $upload>\n<div>\n".$js);
-			$this->add_html_end('<span style="color:red" id="'.$obj->id().'_span"> </span>');
+			$this->add_html_end('<span style="color:red" id="'.$obj->id()."_span\"> </span>\n");
 			$this->add_html_end("</div></form>\n");
 		}
 
@@ -162,7 +162,7 @@ function validate_'.$id.'()
 		{
 			$message = $obj->message();
 			$this->add_html_end('<span style="color:red">'
-				.($message?$message:' ').'</span>');
+				.($message?$message:' ')."</span>\n");
 			if($title = $obj->title())
 				$this->_render_bar($obj, '<strong>'.$title.'</strong>',
 					'sf-box-title');
@@ -298,7 +298,7 @@ EOD;
 			$this->_collect_javascript($obj);
 			$name = $obj->iname();
 			$html = '<select name="'.$name.'" id="'.$name.'"'
-				.$obj->attribute_html().'>';
+				.$obj->attribute_html().">\n";
 			$value = $obj->value();
 			$items = $obj->items();
 			foreach($items as $id => $title) {
@@ -306,9 +306,9 @@ EOD;
 				if((is_numeric($id) && $id===intval($value))
 						|| (!is_numeric($id) && $id==="$value"))
 					$html .= 'selected="selected" ';
-				$html .= 'value="'.$id.'">'.$title.'</option>';
+				$html .= 'value="'.$id.'">'.$title."</option>\n";
 			}
-			$html .= '</select>';
+			$html .= "</select>\n";
 			$this->_render($obj, $html);
 		}
 
@@ -317,7 +317,7 @@ EOD;
 			$this->_collect_javascript($obj);
 			$name = $obj->iname();
 			$html = '<select name="'.$name.'[]" id="'.$name
-				.'" multiple="multiple"'.$obj->attribute_html().'>';
+				.'" multiple="multiple"'.$obj->attribute_html().">\n";
 			$value = $obj->value();
 			if(!$value)
 				$value = array();
@@ -326,9 +326,9 @@ EOD;
 				$html .= '<option ';
 				if(in_array($k,$value))
 					$html .= 'selected="selected" ';
-				$html .= 'value="'.$k.'">'.$v.'</option>';
+				$html .= 'value="'.$k.'">'.$v."</option>\n";
 			}
-			$html .= '</select>';
+			$html .= "</select>\n";
 			$this->_render($obj, $html);
 		}
 
@@ -344,18 +344,19 @@ EOD;
 					.$this->threeway_helper_choice($obj, $values[$k]),
 					$name, $v, $name, $name);
 			}
-			$this->_render($obj, implode('<br />', $html));
+			$this->_render($obj, implode("<br />\n", $html));
 		}
 
 		protected function threeway_helper_choice($obj, $value=null)
 		{
 			$choices = $obj->choices();
-			$html = '<select name="%s" id="%s"><option value="0"> -- </option>';
+			$html = "<select name=\"%s\" id=\"%s\">\n"
+				."<option value=\"0\"> -- </option>";
 			foreach($choices as $k => $v)
 				$html .= '<option value="'.$k.'"'
 					.($k==$value?' selected="selected"':'')
-					.'>'.$v.'</option>';
-			$html .= '</select>';
+					.'>'.$v."</option>\n";
+			$html .= "</select>\n";
 			return $html;
 		}
 
@@ -433,13 +434,13 @@ EOD;
 			$msg = $obj->message();
 			$name = $obj->iname();
 			return '<div id="'.$name.'_span" style="clear:both;color:red">'
-				.($msg?$msg:' ').'</div>';
+				.($msg?$msg:' ')."</div>\n";
 		}
 
 		protected function _info_html($obj)
 		{
 			$msg = $obj->info();
-			return $msg?'<div style="float:left;">'.$msg.'</div>':'';
+			return $msg?'<div style="float:left;">'.$msg."</div>\n":'';
 		}
 
 		protected function _simpleinput_html($obj)
@@ -489,7 +490,7 @@ EOD;
 				$grid->set_row_class($y, $row_class);
 			$grid->add_item(0, $y, $this->_title_html($obj));
 			$grid->add_item(1, $y,
-				'<div style="float:left;">'.$field_html.'</div>'
+				'<div style="float:left;">'.$field_html."</div>\n"
 				.$this->_info_html($obj)
 				.$this->_message_html($obj));
 		}

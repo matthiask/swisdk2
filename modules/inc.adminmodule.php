@@ -353,7 +353,7 @@
 			$this->html = ($this->creation_enabled?'<button type="button" '
 				.'onclick="window.location.href=\''.$this->module_url
 					.'_new\'">'
-				.'Create '.$this->dbo_class.'</button>':'')
+				.'Create '.$this->dbo_class."</button>\n":'')
 				.$this->tableview->html();
 		}
 
