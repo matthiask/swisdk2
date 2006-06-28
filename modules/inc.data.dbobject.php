@@ -447,8 +447,9 @@
 			if(!$this->id())
 				return true;
 			DBObject::db_start_transaction($this->db_connection_id);
+			$id = $this->id();
 			$ret = DBObject::db_query('DELETE FROM ' . $this->table
-				. ' WHERE ' . $this->primary . '=' . $this->id(),
+				. ' WHERE ' . $this->primary . '=' . $id,
 				$this->db_connection_id);
 			$this->unset_primary();
 			if(isset(DBObject::$relations[$this->class])) {
@@ -458,7 +459,7 @@
 						if(!DBObject::db_query('DELETE FROM '
 								.$rel['table'].' WHERE '
 								.$this->primary
-								.'='.$this->id(),
+								.'='.$id,
 								$this->db_connection_id)) {
 							DBObject::db_rollback(
 								$this->db_connection_id);
