@@ -239,6 +239,11 @@
 		 */
 		public function add_order_column($column, $dir=null)
 		{
+			if( $column == "rand" ) {
+				$this->order_columns[] = " rand()";
+				return;
+			}
+			
 			if($column && !preg_match('/[^A-Za-z0-9_\.]/', $column))
 				$this->order_columns[] = 
 					((strpos($column, '.')===false)?
