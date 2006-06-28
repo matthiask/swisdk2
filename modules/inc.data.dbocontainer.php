@@ -240,8 +240,14 @@
 		 */
 		public function add_order_column($column, $dir=null, $prepend=false)
 		{
-			if($column && !preg_match('/[^A-Za-z0-9_\.]/', $column)) {
-				$col = ((strpos($column, '.')===false)?
+			if($column == 'rand') {
+				$this->order_columns[] = ' rand()';
+				return;
+			}
+
+			if($column && !preg_match('/[^A-Za-z0-9_\.]/', $column))
+				$this->order_columns[] = 
+					((strpos($column, '.')===false)?
 						$this->obj->table().'.':'')
 					.$column
 					.($dir=='DESC'?' DESC':' ASC');
