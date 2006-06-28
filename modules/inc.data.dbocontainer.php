@@ -245,7 +245,7 @@
 				return;
 			}
 
-			if($column && !preg_match('/[^A-Za-z0-9_\.]/', $column))
+			if($column && !preg_match('/[^A-Za-z0-9_\.]/', $column)) {
 				$this->order_columns[] = 
 					((strpos($column, '.')===false)?
 						$this->obj->table().'.':'')
