@@ -11,9 +11,10 @@
 	*/
 	function redirect($url)
 	{
-		if(strpos($url, "\n")===false)
+		if(strpos($url, "\n")===false) {
+			session_write_close();
 			header('Location: '.$url);
-		else
+		} else
 			SwisdkError::handle(new FatalError(
 				'Invalid location specification: '.$url));
 	}
