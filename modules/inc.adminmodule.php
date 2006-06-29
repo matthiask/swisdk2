@@ -375,6 +375,9 @@
 	class AdminComponent_delete extends AdminComponent {
 		public function run()
 		{
+			if(getInput('guard')!=guardToken('delete'))
+				$this->goto('_index');
+
 			if($this->args[0]=='multiple')
 				$this->delete_multiple();
 			else

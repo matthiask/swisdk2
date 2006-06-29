@@ -194,6 +194,13 @@
 		 */
 		public function accept($renderer)
 		{
+			//
+			// this guard entry serves two purposes
+			// 1. When there are more than one form on one page, this entry
+			//    can be used to tell, which form was submitted.
+			// 2. The ID should be unique and not predictable. This is used
+			//    as a safeguard against CSRF attacks
+			//
 			$this->add(new HiddenInput('__guard_'.$this->id()))->set_value(guardToken());
 
 			$renderer->visit($this, FORMRENDERER_VISIT_START);

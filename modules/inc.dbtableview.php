@@ -297,6 +297,7 @@ EOD;
 		protected function multi_foot()
 		{
 			$id = $this->form->id();
+			$gid = guardToken('delete');
 			return '<div style="float:left">'
 				.'<a href="javascript:tv_edit()">edit</a>'
 				.' or '
@@ -317,7 +318,7 @@ function tv_delete()
 	if(!confirm('Really delete?'))
 		return;
 	var form = document.getElementById('$id');
-	form.action = form.action.replace(/\/_list/, '/_delete/multiple');
+	form.action = form.action.replace(/\/_list/, '/_delete/multiple?guard=$gid');
 	form.submit();
 }
 function tv_toggle(elem)

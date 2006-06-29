@@ -237,9 +237,12 @@
 		public function html(&$data)
 		{
 			$id = $data[$this->column];
+			$gid = guardToken('delete');
 			$html =<<<EOD
-<a href="{$this->title}_edit/$id">edit</a><br />
-<a href="{$this->title}_delete/$id">delete</a>
+<a href="{$this->title}_edit/$id"><img src="/images/icons/database_edit.png" alt="edit" /></a>
+<a onclick="if(confirm('Really delete?')){window.location.href='{$this->title}_delete/$id?guard=$gid';}" href="#">
+	<img src="/images/icons/database_delete.png" alt="delete" />
+</a>
 EOD;
 			return $html;
 		}
