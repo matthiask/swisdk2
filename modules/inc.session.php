@@ -19,6 +19,9 @@
 			if(!session_id()) {
 				session_start();
 			}
+
+			$agent_hash = sha1($_SERVER['HTTP_USER_AGENT']
+				.Swisdk::config_value('core.token'));
 			
 			if(isset($_REQUEST['login_username'])
 					&& isset($_REQUEST['login_password'])) {
@@ -26,18 +29,20 @@
 					'user_login=' => $_REQUEST['login_username'],
 					'user_password=' => md5($_REQUEST['login_password'])));
 				if($user) {
+					session_regenerate_id(true);
 					$_SESSION['swisdk2']['user_id'] = $user->id;
-					$_SESSION['swisdk2']['user_ip_address'] =
-						$_SERVER['REMOTE_ADDR'];
+					$_SESSION['swisdk2']['user_agent'] = $agent_hash;
 					$this->user = $user;
 				}
 			}
 
-			if((isset($_SESSION['swisdk2']['user_ip_address']) 
-					&& $_SESSION['swisdk2']['user_ip_address']
-						!=$_SERVER['REMOTE_ADDR'])
+			if((isset($_SESSION['swisdk2']['user_agent']) 
+					&& $_SESSION['swisdk2']['user_agent']!=$agent_hash)
 					|| isset($_REQUEST['logout'])) {
-				unset($_SESSION['swisdk2']);
+				if(isset($_COOKIE[session_name()]))
+					setcookie(session_name(), '', time()-42000, '/');
+				$_SESSION = array();
+				session_destroy();
 				redirect('/');
 			}
 
