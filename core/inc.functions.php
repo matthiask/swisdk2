@@ -34,16 +34,24 @@
 	}
 
 	/**
-	*	Generates a string of random numbers and characters. 
+	* Generates a string of random numbers and characters. 
 	*/
 	function randomKeys($length)
   	{
-		$pattern = "1234567890abcdefghijklmnopqrstuvwxyz";
-		for($i=0;$i<$length;$i++)
-   		{
+		$pattern = '1234567890abcdefghijklmnopqrstuvwxyz';
+		for($i=0; $i<$length; $i++)
 		     $key .= $pattern{rand(0,35)};
-	   	}
 		return $key;
+	}
+
+	/**
+	 * generates a unique ID which may be used to guard against CSRF attacks
+	 *
+	 * http://en.wikipedia.org/wiki/Cross-site_request_forgery
+	 */
+	function guardToken($token = null)
+	{
+		return sha1(session_id().Swisdk::config_value('core.token').$token);
 	}
 
 ?>

@@ -194,8 +194,7 @@
 		 */
 		public function accept($renderer)
 		{
-			$this->add(new HiddenInput('__guard_'.$this->id()))->set_value(sha1(
-				session_id().Swisdk::config_value('core.token')));
+			$this->add(new HiddenInput('__guard_'.$this->id()))->set_value(guardToken());
 
 			$renderer->visit($this, FORMRENDERER_VISIT_START);
 			foreach($this->boxes as &$box)
@@ -210,8 +209,7 @@
 		{
 			// has this form been submitted (or was it another form on the same page)
 			if(!isset($_REQUEST['__guard_'.$this->id()])
-					|| $_REQUEST['__guard_'.$this->id()]!=
-					sha1(session_id().Swisdk::config_value('core.token')))
+					|| $_REQUEST['__guard_'.$this->id()]!=guardToken())
 				return false;
 
 			$valid = true;
