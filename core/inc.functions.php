@@ -20,17 +20,21 @@
 	}
 
 	/**
-	* Returns the GET or POST value given by $parameter (if both exists the post
-	* values is returned)
+	* Returns the REQUEST value given by $var
 	*/
-	function getInput($var, $default=null, $cleanInput = true)
+	function getInputRaw($var, $default = null)
 	{
-		$value = $default;
-		if(isset($_POST[$var]))
-			$value = $_POST[$var];
-		else if(isset($_GET[$var]))
-			$value = $_GET[$var];
-		if($value && $cleanInput && !is_numeric($value)) {
+		return isset($_REQUEST[$var])?$_REQUEST[$var]:null;
+	}
+
+	/**
+	 * Returns the REQUEST value given by $var, cleaning it to disable
+		 * XSS attacks if value is a string or an array of strings
+	 */
+	function getInput($var, $default = null)
+	{
+		$value = getInputRaw($var, $default);
+		if($value) {
 			if(is_array($value))
 				array_walk_recursive($value, 'cleanInputRef');
 			else
@@ -44,6 +48,8 @@
 	 */
 	function cleanInput($value)
 	{
+		if(!$value || is_numeric($value))
+			return $value;
 		require_once SWISDK_ROOT.'lib/contrib/externalinput.php';
 		return popoon_classes_externalinput::basicClean($value);
 	}
