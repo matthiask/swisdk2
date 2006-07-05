@@ -505,7 +505,6 @@
 							$items[$o->id()] = $o->title();
 						}
 						$f->set_items($items);
-						$f->set_form_box($this);
 						break;
 					case DB_REL_N_TO_M:
 						$f = $this->add_obj($title, new Multiselect(),
@@ -517,7 +516,6 @@
 							$items[$o->id()] = $o->title();
 						}
 						$f->set_items($items);
-						$f->set_form_box($this);
 						break;
 					case DB_REL_MANY:
 						SwisdkError::handle(new BasicSwisdkError(
