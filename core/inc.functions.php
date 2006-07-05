@@ -23,14 +23,34 @@
 	* Returns the GET or POST value given by $parameter (if both exists the post
 	* values is returned)
 	*/
-	function getInput($var, $default=null)
+	function getInput($var, $default=null, $cleanInput = true)
 	{
 		$value = $default;
 		if(isset($_POST[$var]))
 			$value = $_POST[$var];
 		else if(isset($_GET[$var]))
 			$value = $_GET[$var];
+		if($cleanInput && !is_numeric($value)) {
+			if(is_array($value))
+				array_walk_recursive($value, 'cleanInputRef');
+			else
+				cleanInputRef($value);
+		}
 		return $value;
+	}
+
+	/**
+	 * Clean HTML, hopefully disabling XSS attack vectors
+	 */
+	function cleanInput($value)
+	{
+		require_once SWISDK_ROOT.'lib/contrib/externalinput.php';
+		return popoon_classes_externalinput::basicClean($value);
+	}
+
+	function cleanInputRef(&$var)
+	{
+		$var = cleanInput($var);
 	}
 
 	/**
