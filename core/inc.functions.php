@@ -30,7 +30,7 @@
 			$value = $_POST[$var];
 		else if(isset($_GET[$var]))
 			$value = $_GET[$var];
-		if($cleanInput && !is_numeric($value)) {
+		if($value && $cleanInput && !is_numeric($value)) {
 			if(is_array($value))
 				array_walk_recursive($value, 'cleanInputRef');
 			else
