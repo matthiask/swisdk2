@@ -31,7 +31,7 @@
 			$this->ref--;
 		}
 
-		protected function _render($obj, $field_html)
+		protected function _render($obj, $field_html, $row_class = null)
 		{
 			$this->stack[$this->ref][$obj->name()] = array(
 				'type' => get_class($obj),
@@ -42,7 +42,7 @@
 				'info' => $this->_info_html($obj));
 		}
 
-		protected function _render_bar($obj, $html)
+		protected function _render_bar($obj, $html, $row_class = null)
 		{
 			if($obj instanceof Form)
 				$this->array['form'] = array(
