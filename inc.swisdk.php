@@ -11,8 +11,6 @@
 
 		public static function runFromHttpRequest()
 		{
-			define('APP_ROOT', $_SERVER['DOCUMENT_ROOT'] . '/../../');
-
 			Swisdk::run(array('REQUEST_URI' =>
 				((isset($_SERVER['HTTPS'])&&$_SERVER['HTTPS']=='on')
 					?'https://':'http://')
@@ -29,10 +27,7 @@
 			 * so we use the SCRIPT_NAME and assume that the file is in
 			 * APP_ROOT/swisdk/commandline.php
 			 */
-			$swisdk = substr( __FILE__ ,  0 , strrpos(__FILE__ , "/") );
-			$apppath = substr( $swisdk , 0 ,  strrpos( $swisdk , "/")+1 );
-
-			define( 'APP_ROOT', $apppath );
+			define('APP_ROOT', dirname(dirname(__FILE__)).'/');
 
 			$requestUri = '';
 			if( isset( $_SERVER['argv'][1]) ) {
@@ -52,6 +47,10 @@
 		*/
 		public static function run($arguments)
 		{
+			if(!defined('APP_ROOT'))
+				define('APP_ROOT', realpath($_SERVER['DOCUMENT_ROOT']
+						.'/../../').'/');
+
 			date_default_timezone_set('Europe/Zurich');
 
 			define('HTDOCS_ROOT', APP_ROOT . 'webapp/htdocs/');
