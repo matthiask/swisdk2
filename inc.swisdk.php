@@ -45,8 +45,13 @@
 			3. Dispatch request
 			4. Instance the controller and execute it
 		*/
-		public static function run($arguments)
+		public static function init()
 		{
+			static $initialized = false;
+			if($initialized)
+				return;
+			$initialized = true;
+
 			if(!defined('APP_ROOT'))
 				define('APP_ROOT', realpath($_SERVER['DOCUMENT_ROOT']
 						.'/../../').'/');
@@ -72,6 +77,11 @@
 
 			SwisdkError::setup();
 			Swisdk::read_configfile();
+		}
+
+		public static function run($arguments)
+		{
+			Swisdk::init();
 			require_once SWISDK_ROOT . "dispatcher/inc.dispatcher.php";
 			SwisdkControllerDispatcher::dispatch( $arguments['REQUEST_URI'] );
 			require_once SWISDK_ROOT . 'site/inc.handlers.php';
