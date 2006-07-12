@@ -5,7 +5,7 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
-	class TableView implements Iterator {
+	class TableView implements Iterator, ArrayAccess {
 		
 		/**
 		 * TableViewColumn instances
@@ -19,6 +19,7 @@
 
 		public function append_column(TableViewColumn $column)
 		{
+			$column->set_tableview($this);
 			$this->columns[$column->name()] = $column;
 		}
 
@@ -34,11 +35,9 @@
 
 		public function html()
 		{
-			return '<table>'
-				. $this->render_head()
-				. $this->render_body()
-				. $this->render_foot()
-				. '</table>';
+			return $this->render_head()
+				.$this->render_body()
+				.$this->render_foot();
 		}
 
 		public function set_data($data)
@@ -53,16 +52,16 @@
 
 		protected function render_head()
 		{
-			$html = '<thead><tr>';
+			$html = "<table class=\"s-table\">\n<thead>\n<tr>\n";
 			foreach($this->columns as &$col)
-				$html .= '<th>' . $col->title() . '</th>';
-			$html .= "</tr></thead>\n";
+				$html .= '<th>'.$col->title()."</th>\n";
+			$html .= "</tr>\n</thead>\n";
 			return $html;
 		}
 
 		protected function render_body()
 		{
-			$html = '<tbody>';
+			$html = "<tbody>\n";
 			foreach($this->data as &$row)
 				$html .= $this->render_row($row);
 			$html .= "</tbody>\n";
@@ -71,16 +70,16 @@
 
 		protected function render_row(&$row)
 		{
-			$html = '<tr>';
+			$html = "<tr>\n";
 			foreach($this->columns as &$col)
-				$html .= '<td>' . $col->html($row) . '</td>';
+				$html .= '<td>'.$col->html($row)."</td>\n";
 			$html .= "</tr>\n";
 			return $html;
 		}
 
 		protected function render_foot()
 		{
-			return '';
+			return "</table>\n";
 		}
 
 		/**
@@ -91,6 +90,21 @@
 		public function key() { return key($this->columns); }
 		public function next() { return next($this->columns); }
 		public function valid() { return $this->current() !== false; }
+
+		/**
+		 * ArrayAccess implementation (see PHP SPL)
+		 */
+		public function offsetExists($offset) { return isset($this->columns[$offset]); }
+		public function offsetGet($offset) { return $this->columns[$offset]; }
+		public function offsetSet($offset, $value)
+		{
+			$value->set_tableview($this);
+			if($offset===null)
+				$this->columns[] = $value;
+			else
+				$this->columns[$offset] = $value;
+		}
+		public function offsetUnset($offset) { unset($this->columns[$offset]); }
 	}
 
 	abstract class TableViewColumn {
@@ -108,9 +122,15 @@
 		public function name()		{ return $this->column; }
 		public function set_title($t)	{ $this->title = $t; }
 
+		public function set_tableview(&$tableview)
+		{
+			$this->tableview = $tableview;
+		}
+
 		protected $column;
 		protected $title;
 		protected $args;
+		protected $tableview;
 	}
 
 	/**
@@ -217,9 +237,12 @@
 		public function html(&$data)
 		{
 			$id = $data[$this->column];
+			$gid = guardToken('delete');
 			$html =<<<EOD
-<a href="{$this->title}_edit/$id">edit</a><br />
-<a href="{$this->title}_delete/$id">delete</a>
+<a href="{$this->title}_edit/$id"><img src="/images/icons/database_edit.png" alt="edit" /></a>
+<a onclick="if(confirm('Really delete?')){window.location.href='{$this->title}_delete/$id?guard=$gid';}" href="#">
+	<img src="/images/icons/database_delete.png" alt="delete" />
+</a>
 EOD;
 			return $html;
 		}

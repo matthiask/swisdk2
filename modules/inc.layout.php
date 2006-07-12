@@ -102,7 +102,7 @@
 				$html .= $this->item;
 			else
 				$html .= $this->item->html();
-			$html .= '</td>';
+			$html .= "</td>\n";
 			return $html;
 		}
 		
@@ -125,6 +125,8 @@
 	}
 	
 	class Layout_Grid implements Layout_Item {
+		protected $row_class = array();
+
 		public function __construct()
 		{
 			$this->h = 0;
@@ -143,15 +145,26 @@
 				}
 			}
 		}
+
+		public function row_class($y)
+		{
+			return isset($this->row_class[$y])?$this->row_class[$y]:null;
+		}
+
+		public function set_row_class($y, $class=null)
+		{
+			$this->row_class[$y] = $class;
+		}
 		
 		public function html()
 		{
 			if(!$this->w && !$this->h)
 				return null;
 			$empty = new Layout_EmptyGridItem();
-			$html = '<table>';
+			$html = "<table>\n";
 			for($j=0; $j<$this->h; ++$j) {
-				$html .= '<tr>';
+				$html .= '<tr'.(isset($this->row_class[$j])?
+					' class="'.$this->row_class[$j].'"':'').">\n";
 				for($i=0; $i<$this->w; ++$i) {
 					$item =& $empty;
 					if(isset($this->items[$j][$i]))
@@ -164,7 +177,7 @@
 				}
 				$html .= "</tr>\n";
 			}
-			return $html . '</table>';
+			return $html . "</table>\n";
 		}
 		
 		public function set_column_class($column, $class)

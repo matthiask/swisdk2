@@ -108,6 +108,7 @@
 		 */
 		public function init()
 		{
+			$this->data = array();
 			$args = func_get_args();
 			array_unshift($args, $this->joins);
 			$sql = call_user_func_array(array(&$this->obj, '_select_sql'), $args)
@@ -237,19 +238,23 @@
 		/**
 		 * $doc->add_order_column('news_start_dttm', 'DESC');
 		 */
-		public function add_order_column($column, $dir=null)
+		public function add_order_column($column, $dir=null, $prepend=false)
 		{
-			if( $column == "rand" ) {
-				$this->order_columns[] = " rand()";
+			if($column == 'rand') {
+				$this->order_columns[] = ' rand()';
 				return;
 			}
-			
-			if($column && !preg_match('/[^A-Za-z0-9_\.]/', $column))
-				$this->order_columns[] = 
-					((strpos($column, '.')===false)?
+
+			if($column && !preg_match('/[^A-Za-z0-9_\.]/', $column)) {
+				$col = ((strpos($column, '.')===false)?
 						$this->obj->table().'.':'')
 					.$column
 					.($dir=='DESC'?' DESC':' ASC');
+				if($prepend)
+					array_unshift($this->order_columns, $col);
+				else
+					$this->order_columns[] = $col;
+			}
 		}
 
 		/**

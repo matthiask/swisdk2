@@ -324,8 +324,6 @@
 		 * this helper should always be executed inside a transaction (that
 		 * is actually the case when you use update() or insert(), the only
 		 * place where this helper is used right now)
-		 *
-		 * TODO need to check this function for sql injection safety
 		 */
 		protected function _update_relations()
 		{
@@ -343,15 +341,22 @@
 						$this->db_connection_id);
 					if($res===false)
 						return false;
-					if(count($this->data[$field])) {
+					if(is_array($this->data[$field])
+							&& count($this->data[$field])) {
+						$ids = array();
+						foreach($this->data[$field] as $id)
+							if($id = intval($id))
+								$ids[] = $id;
+						if(!count($ids))
+							return true;
 						$sql = 'INSERT INTO '.$rel['table']
 							.' ('.$this->primary.','
 							.$rel['foreign'].') VALUES ('
 							.$this->id().','
 							.implode('),('.$this->id().',',
-							$this->data[$field]).')';
+							$ids).')';
 						if(DBObject::db_query($sql,
-							$this->db_connection_id)===false)
+								$this->db_connection_id)===false)
 							return false;
 					}
 				} else if($rel['type']==DB_REL_3WAY) {
@@ -365,24 +370,26 @@
 						$this->db_connection_id);
 					if($res===false)
 						return false;
-					if(count($this->data[$field])) {
+					if(is_array($this->data[$field])
+							&& count($this->data[$field])) {
 						$frags = array();
 						foreach($this->data[$field] as $v1 => $v2)
-							if($v1 && $v2)
-								$frags[] = $v1.','.$v2;
-						if(count($frags)) {
-							$o3 = DBObject::create($rel['choices']);
-							$sql = 'INSERT INTO '.$rel['table']
-								.' ('.$this->primary.','
-								.$rel['foreign'].','
-								.$o3->primary().') VALUES ('
-								.$this->id().','
-								.implode('),('.$this->id().',',
-								$frags).')';
-							if(DBObject::db_query($sql,
+							if(($id1 = intval($v1))
+									&& ($id2 = intval($v2)))
+								$frags[] = $id1.','.$id2;
+						if(!count($frags))
+							return true;
+						$o3 = DBObject::create($rel['choices']);
+						$sql = 'INSERT INTO '.$rel['table']
+							.' ('.$this->primary.','
+							.$rel['foreign'].','
+							.$o3->primary().') VALUES ('
+							.$this->id().','
+							.implode('),('.$this->id().',',
+							$frags).')';
+						if(DBObject::db_query($sql,
 								$this->db_connection_id)===false)
-								return false;
-						}
+							return false;
 					}
 				}
 			}
@@ -439,10 +446,29 @@
 		{
 			if(!$this->id())
 				return true;
-			// TODO remove n-to-m relation links
+			DBObject::db_start_transaction($this->db_connection_id);
+			$id = $this->id();
 			$ret = DBObject::db_query('DELETE FROM ' . $this->table
-				. ' WHERE ' . $this->primary . '=' . $this->id());
+				. ' WHERE ' . $this->primary . '=' . $id,
+				$this->db_connection_id);
 			$this->unset_primary();
+			if(isset(DBObject::$relations[$this->class])) {
+				foreach(DBObject::$relations[$this->class] as &$rel) {
+					if($rel['type']==DB_REL_N_TO_M
+							|| $rel['type']==DB_REL_3WAY) {
+						if(!DBObject::db_query('DELETE FROM '
+								.$rel['table'].' WHERE '
+								.$this->primary
+								.'='.$id,
+								$this->db_connection_id)) {
+							DBObject::db_rollback(
+								$this->db_connection_id);
+							return false;
+						}
+					}
+				}
+			}
+			DBObject::db_commit($this->db_connection_id);
 			return $ret;
 		}
 
@@ -553,20 +579,25 @@
 		/**
 		 * DBObject::threeway('Article', 'Realm', 'Role');
 		 */
-		public static function threeway($c1, $c2, $c3)
+		public static function threeway($c1, $c2, $c3, $options = null)
 		{
 			$o1 = DBObject::create($c1);
 			$o2 = DBObject::create($c2);
 
+			$rel = $c2;
+			if($options!==null)
+				$rel = $options;
+
 			$table = 'tbl_'.$o1->name('to_'.$o2->name(''));
 			$table = substr($table, 0, strlen($table)-1);
 
-			DBObject::$relations[$c1][$c2] = array(
+			DBObject::$relations[$c1][$rel] = array(
 				'type' => DB_REL_3WAY, 'table' => $table,
 				'join' => $o2->table().'.'.$o2->primary().'='
 					.$table.'.'.$o2->primary(),
 				'class' => $c2, 'choices' => $c3,
-				'foreign' => $o2->primary());
+				'foreign' => $o2->primary(),
+				'field' => $rel);
 		}
 
 		/**
@@ -709,11 +740,12 @@
 		protected static function &db($connection_id = DB_CONNECTION_DEFAULT)
 		{
 			if(!isset(DBObject::$dbhandle[$connection_id])) {
+				$prefix = 'db'.($connection_id=='db'?'':'.'.$connection_id);
 				DBObject::$dbhandle[$connection_id] = new mysqli(
-					Swisdk::config_value($connection_id.'.host'),
-					Swisdk::config_value($connection_id.'.username'),
-					Swisdk::config_value($connection_id.'.password'),
-					Swisdk::config_value($connection_id.'.database')
+					Swisdk::config_value($prefix.'.host'),
+					Swisdk::config_value($prefix.'.username'),
+					Swisdk::config_value($prefix.'.password'),
+					Swisdk::config_value($prefix.'.database')
 				);
 				if(mysqli_connect_errno())
 					SwisdkError::handle(new DBError('Connect failed: '
@@ -747,6 +779,15 @@
 				return false;
 			}
 			return $result;
+		}
+
+		public static function db_create_temporary_table($class, $fields)
+		{
+			$dbo = DBObject::create($class);
+			$p = $dbo->_prefix();
+			$sql = 'CREATE TEMPORARY TABLE '.$dbo->table().' ('
+				.$p.implode(' INT(11), '.$p, $fields).' INT(11))';
+			return DBObject::db_query($sql);
 		}
 
 		/**
@@ -924,6 +965,7 @@
 
 		public function unset_primary()
 		{
+			$this->dirty = true;
 			unset($this->data[$this->primary]);
 		}
 

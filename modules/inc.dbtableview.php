@@ -105,7 +105,7 @@
 	/**
 	 * display records in a searchable and sortable table
 	 */
-	class DBTableView extends TableView implements ArrayAccess {
+	class DBTableView extends TableView {
 
 		/**
 		 * DBOContainer instance
@@ -151,6 +151,19 @@
 				$this->form = new $form();
 		}
 
+		public function append_auto($field, $title=null)
+		{
+			require_once MODULE_ROOT.'inc.builder.php';
+			static $builder = null;
+			if($builder===null)
+				$builder = new TableViewBuilder();
+			if(is_array($field)) {
+				foreach($field as $f)
+					$builder->create_auto($this, $f, null);
+			} else
+				return $builder->create_auto($this, $field, $title);
+		}
+
 		/**
 		 * you need to call init() prior to adding any columns 
 		 */
@@ -162,20 +175,29 @@
 			if(!$this->form)
 				$this->form = new DBTableViewForm();
 
-			$obj = $this->obj;
-			$dbo = $obj->dbobj_clone();
+			$dbo = $this->obj->dbobj_clone();
 
-			$dbo->order = $dbo->primary();
-			$dbo->dir = 'ASC';
-			$dbo->start = 0;
-			$dbo->limit = $this->items_on_page;
+			$dbo->order = isset($this->form_defaults['order'])?
+				$this->form_defaults['order']:$dbo->primary();
+			$dbo->dir = isset($this->form_defaults['dir'])?
+				$this->form_defaults['dir']:'ASC';
+			$dbo->start = isset($this->form_defaults['start'])?
+				$this->form_defaults['start']:0;
+			$dbo->limit = isset($this->form_defaults['limit'])?
+				$this->form_defaults['limit']:$this->items_on_page;
 
 			$this->form->bind($dbo);
 
 			$this->form->setup();
 			$this->form->set_clauses($this->obj);
 			$this->obj->init();
-			$this->set_data($this->obj->all_data());
+		}
+
+		protected $form_defaults = array();
+
+		public function set_form_defaults($defaults)
+		{
+			$this->form_defaults = $defaults;
 		}
 
 		/**
@@ -201,7 +223,7 @@
 		{
 			$order = $this->form->dbobj()->order;
 			$dir = $this->form->dbobj()->dir;
-			$html = '<thead><tr>';
+			$html = "<table class=\"s-table\">\n<thead>\n<tr>\n";
 			foreach($this->columns as &$col) {
 				$html .= '<th>';
 				if($col instanceof NoDataTableViewColumn) {
@@ -214,10 +236,10 @@
 					}
 					$html .= '</a>';
 				}
-				$html .= '</th>';
+				$html .= "</th>\n";
 			}
 
-			$html .= "</tr></thead>\n";
+			$html .= "</tr>\n</thead>\n";
 			return $html;
 		}
 
@@ -227,17 +249,55 @@
 			list($first, $count, $last) = $this->list_position();
 
 			$str = 'displaying '.$first.'&ndash;'.$last.' of '.$count;
-			return '<tfoot><tr><td colspan="'.$colcount.'">'
+			return "<tfoot>\n<tr>\n<td colspan=\"".$colcount.'">'
 				.$this->multi_foot()
 				.$str.' | skim '
 				.'<a href="javascript:skim(-'.$this->items_on_page.')">backwards</a> or '
 				.'<a href="javascript:skim('.$this->items_on_page.')">forwards</a>'
-				.'</td></tr></tfoot>';
+				."</td>\n</tr>\n</tfoot>\n</table>".<<<EOD
+<script type="text/javascript">
+//<![CDATA[
+function init_tableview()
+{
+	var tables = document.getElementsByTagName('table');
+	for(i=0; i<tables.length; i++) {
+		if(tables[i].className=='s-table') {
+			var rows = tables[i].getElementsByTagName('tr');
+			for(j=0; j<rows.length; j++) {
+				rows[j].onclick = function(){
+					var cb = this.getElementsByTagName('input')[0];
+					cb.checked = !cb.checked;
+					cb.onchange();
+				}
+				var cb = rows[j].getElementsByTagName('input')[0];
+				cb.onchange = function(){
+					var row = this.parentNode.parentNode;
+					if(this.checked)
+						row.className = 'checked';
+					else
+						row.className = '';
+				}
+				cb.onclick = function(){
+					// hack. revert toggle effect of tr.onclick
+					this.checked = !this.checked;
+				}
+				if(cb.checked)
+					rows[j].className = 'checked';
+			}
+		}
+	}
+}
+add_event(window, 'load', init_tableview);
+//]]>
+</script>
+
+EOD;
 		}
 
 		protected function multi_foot()
 		{
 			$id = $this->form->id();
+			$gid = guardToken('delete');
 			return '<div style="float:left">'
 				.'<a href="javascript:tv_edit()">edit</a>'
 				.' or '
@@ -246,24 +306,28 @@
 				.'</div>'
 				.<<<EOD
 <script type="text/javascript">
+//<![CDATA[
 function tv_edit()
 {
-	document.forms.$id.action = document.forms.$id.action.replace(/\/_list/, '/_edit/multiple');
-	document.forms.$id.submit();
+	var form = document.getElementById('$id');
+	form.action = form.action.replace(/\/_list/, '/_edit/multiple');
+	form.submit();
 }
 function tv_delete()
 {
 	if(!confirm('Really delete?'))
 		return;
-	document.forms.$id.action = document.forms.$id.action.replace(/\/_list/, '/_delete/multiple');
-	document.forms.$id.submit();
+	var form = document.getElementById('$id');
+	form.action = form.action.replace(/\/_list/, '/_delete/multiple?guard=$gid');
+	form.submit();
 }
 function tv_toggle(elem)
 {
-	var elems = document.forms.$id.getElementsByTagName('input');
+	var elems = document.getElementById('$id').getElementsByTagName('input');
 	for(i=0; i<elems.length; i++)
 		elems[i].checked = elem.checked;
 }
+//]]>
 </script>
 EOD;
 		}
@@ -281,6 +345,7 @@ EOD;
 
 		public function html()
 		{
+			$this->set_data($this->obj->all_data());
 			$this->prepend_column(new IDTableViewColumn(
 				$this->dbobj()->dbobj()->primary()));
 			$renderer = new TableViewFormRenderer();
@@ -297,40 +362,30 @@ EOD;
 			$p = $this->form->dbobj()->_prefix();
 			return <<<EOD
 <script type="text/javascript">
+//<![CDATA[
 function order(col) {
-	var order = document.forms.$id.{$p}order;
-	var dir = document.forms.$id.{$p}dir;
+	var form = document.getElementById('$id');
+	var order = form.{$p}order;
+	var dir = form.{$p}dir;
 	if(order.value==col) {
 		dir.value=(dir.value=='DESC'?'ASC':'DESC');
 	} else {
 		dir.value='ASC';
 		order.value=col;
 	}
-	document.forms.$id.submit();
+	form.submit();
 }
 function skim(step)
 {
-	var start = document.forms.$id.{$p}start;
+	var form = document.getElementById('$id');
+	var start = form.{$p}start;
 	start.value=parseInt(start.value)+step;
-	document.forms.$id.submit();
+	form.submit();
 }
+//]]>
 </script>
 EOD;
 		}
-
-		/**
-		 * ArrayAccess implementation (see PHP SPL)
-		 */
-		public function offsetExists($offset) { return isset($this->columns[$offset]); }
-		public function offsetGet($offset) { return $this->columns[$offset]; }
-		public function offsetSet($offset, $value)
-		{
-			if($offset===null)
-				$this->columns[] = $value;
-			else
-				$this->columns[$offset] = $value;
-		}
-		public function offsetUnset($offset) { unset($this->columns[$offset]); }
 	}
 
 	class IDTableViewColumn extends NoDataTableViewColumn {

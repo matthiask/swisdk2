@@ -22,15 +22,17 @@
 			$er = error_reporting(E_ALL^E_NOTICE);
 			require_once SWISDK_ROOT . 'lib/smarty/libs/Smarty.class.php';
 			$this->smarty = new Smarty();
-			$this->smarty->compile_dir = SWISDK_ROOT . 'lib/smarty/templates_c';
-			$this->smarty->cache_dir = SWISDK_ROOT . 'lib/smarty/cache';
+			$this->smarty->compile_dir = CACHE_ROOT.'smarty';
 			$this->smarty->template_dir = CONTENT_ROOT;
+			//$this->smarty->cache_dir = CACHE_ROOT.'smarty';
 			//$this->config_dir
 			$this->caching = false;
 			$this->security = false;
 			error_reporting($er);
-			$this->register_function('swisdk_config_value',
-				'_smarty_swisdk_config_value');
+			$this->register_function('swisdk_runtime_value',
+				'_smarty_swisdk_runtime_value');
+
+			Swisdk::require_data_directory($this->smarty->compile_dir);
 		}
 
 		public function __call($method, $args)
@@ -62,12 +64,12 @@
 		protected $smarty;
 	}
 
-	function _smarty_swisdk_config_value($params, &$smarty)
+	function _smarty_swisdk_runtime_value($params, &$smarty)
 	{
-		if(isset($params['format']))
-			return sprintf($params['format'],
-				Swisdk::config_value($params['key']));
-		return Swisdk::config_value($params['key']);
+		$val = Swisdk::config_value('runtime.'.$params['key']);
+		if(isset($params['format']) && $val)
+			return sprintf($params['format'], $val);
+		return $val;
 	}
 
 	class SmartyMaster {

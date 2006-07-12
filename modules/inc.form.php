@@ -194,7 +194,14 @@
 		 */
 		public function accept($renderer)
 		{
-			$this->add(new HiddenInput($this->id()))->set_value(1);
+			//
+			// this guard entry serves two purposes
+			// 1. When there are more than one form on one page, this entry
+			//    can be used to tell, which form was submitted.
+			// 2. The ID should be unique and not predictable. This is used
+			//    as a safeguard against CSRF attacks
+			//
+			$this->add(new HiddenInput('__guard_'.$this->id()))->set_value(guardToken());
 
 			$renderer->visit($this, FORMRENDERER_VISIT_START);
 			foreach($this->boxes as &$box)
@@ -208,7 +215,8 @@
 		public function is_valid()
 		{
 			// has this form been submitted (or was it another form on the same page)
-			if(!isset($_REQUEST[$this->id()]))
+			if(!isset($_REQUEST['__guard_'.$this->id()])
+					|| $_REQUEST['__guard_'.$this->id()]!=guardToken())
 				return false;
 
 			$valid = true;
@@ -414,7 +422,11 @@
 			static $builder = null;
 			if($builder===null)
 				$builder = new FormBuilder();
-			return $builder->create_auto($this, $field, $title);
+			if(is_array($field)) {
+				foreach($field as $f)
+					$builder->create_auto($this, $f, null);
+			} else
+				return $builder->create_auto($this, $field, $title);
 		}
 
 		/**
@@ -493,7 +505,6 @@
 							$items[$o->id()] = $o->title();
 						}
 						$f->set_items($items);
-						$f->set_form_box($this);
 						break;
 					case DB_REL_N_TO_M:
 						$f = $this->add_obj($title, new Multiselect(),
@@ -505,7 +516,6 @@
 							$items[$o->id()] = $o->title();
 						}
 						$f->set_items($items);
-						$f->set_form_box($this);
 						break;
 					case DB_REL_MANY:
 						SwisdkError::handle(new BasicSwisdkError(

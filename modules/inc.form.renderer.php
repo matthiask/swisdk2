@@ -13,8 +13,8 @@
 		protected $file_upload = false;
 		protected $js_validation = true;
 
-		abstract protected function _render($obj, $field_html);
-		abstract protected function _render_bar($obj, $html);
+		abstract protected function _render($obj, $field_html, $row_class = null);
+		abstract protected function _render_bar($obj, $html, $row_class = null);
 
 		public function add_html($html)
 		{
@@ -97,7 +97,8 @@
 		{
 			if($title = $obj->title())
 				$this->_render_bar($obj,
-					'<big><strong>'.$title.'</strong></big>');
+					'<big><strong>'.$title.'</strong></big>',
+					'sf-form-title');
 		}
 
 		protected function visit_Form_end($obj)
@@ -107,15 +108,15 @@
 			$upload = '';
 			$valid = '';
 			if($this->file_upload)
-				$upload = ' enctype="multipart/form-data">'
+				$upload = 'enctype="multipart/form-data">'."\n"
 					.'<input type="hidden" name="MAX_FILE_SIZE" '
 					.'value="2000000"';
 			list($html, $js) = $this->_validation_html($obj);
 			$this->add_html_start(
 				'<form method="post" action="'.$_SERVER['REQUEST_URI']
-				.'" name="'.$obj->id()."\" $html $upload>\n".$js);
-			$this->add_html_end('<span style="color:red" id="'.$obj->id().'_span"> </span>');
-			$this->add_html_end('</form>');
+				.'" id="'.$obj->id()."\" $html class=\"sf-form\" $upload>\n<div>\n".$js);
+			$this->add_html_end('<span style="color:red" id="'.$obj->id()."_span\"> </span>\n");
+			$this->add_html_end("</div></form>\n");
 		}
 
 		protected function _validation_html($obj)
@@ -127,12 +128,14 @@
 				return null;
 			$id = $obj->id();
 			$js = '<script type="text/javascript">
+//<![CDATA[
 function validate_'.$id.'()
 {
 	var valid = true;
 	if(!'.implode("()) valid = false;\n\tif(!", $this->functions).'()) valid = false;
 	return valid;
 }
+//]]>
 </script>';
 			return array('onsubmit="return validate_'.$id.'()"', $js);
 		}
@@ -159,9 +162,10 @@ function validate_'.$id.'()
 		{
 			$message = $obj->message();
 			$this->add_html_end('<span style="color:red">'
-				.($message?$message:' ').'</span>');
+				.($message?$message:' ')."</span>\n");
 			if($title = $obj->title())
-				$this->_render_bar($obj, '<strong>'.$title.'</strong>');
+				$this->_render_bar($obj, '<strong>'.$title.'</strong>',
+					'sf-box-title');
 		}
 
 		protected function visit_FormBox_end($obj)
@@ -171,7 +175,7 @@ function validate_'.$id.'()
 		protected function visit_HiddenInput($obj)
 		{
 			$this->_collect_javascript($obj);
-			$this->add_html($this->_simpleinput_html($obj));
+			$this->add_html($this->_simpleinput_html($obj)."\n");
 		}
 
 		protected function visit_SimpleInput($obj)
@@ -205,6 +209,7 @@ function validate_'.$id.'()
 			$this->_collect_javascript($obj);
 			static $js = "
 <script type=\"text/javascript\">
+//<![CDATA[
 function formitem_tristate(elem)
 {
 	var value = document.getElementById(elem.id.replace(/^__cont_/, ''));
@@ -230,6 +235,7 @@ function formitem_tristate(elem)
 
 	return false;
 }
+//]]>
 </script>";
 			$name = $obj->iname();
 			$value = $obj->value();
@@ -244,7 +250,7 @@ function formitem_tristate(elem)
 		id="__cont_%s" onclick="formitem_tristate(this)"></div>
 	<input type="checkbox" name="__cb_%s" id="__cb_%s" %s />
 	<input type="hidden" name="%s" id="%s" value="%s" />
-</span>', $name, $name, $name, $cb_html, $name, $name, $value));
+</span>'."\n", $name, $name, $name, $cb_html, $name, $name, $value));
 
 			// only send the javascript once
 			$js = '';
@@ -271,6 +277,7 @@ function formitem_tristate(elem)
 <script type="text/javascript" src="/scripts/util.js"></script>
 <script type="text/javascript" src="/scripts/fckeditor/fckeditor.js"></script>
 <script type="text/javascript">
+//<![CDATA[
 function load_editor_$name(){
 var oFCKeditor = new FCKeditor('$name');
 oFCKeditor.BasePath = '/scripts/fckeditor/';
@@ -279,7 +286,9 @@ oFCKeditor.Width = 750;
 oFCKeditor.ReplaceTextarea();
 }
 add_event(window,'load',load_editor_$name);
+//]]>
 </script>
+
 EOD;
 			$this->_render($obj, $html);
 		}
@@ -289,7 +298,7 @@ EOD;
 			$this->_collect_javascript($obj);
 			$name = $obj->iname();
 			$html = '<select name="'.$name.'" id="'.$name.'"'
-				.$obj->attribute_html().'>';
+				.$obj->attribute_html().">\n";
 			$value = $obj->value();
 			$items = $obj->items();
 			foreach($items as $id => $title) {
@@ -297,9 +306,9 @@ EOD;
 				if((is_numeric($id) && $id===intval($value))
 						|| (!is_numeric($id) && $id==="$value"))
 					$html .= 'selected="selected" ';
-				$html .= 'value="'.$id.'">'.$title.'</option>';
+				$html .= 'value="'.$id.'">'.$title."</option>\n";
 			}
-			$html .= '</select>';
+			$html .= "</select>\n";
 			$this->_render($obj, $html);
 		}
 
@@ -308,7 +317,7 @@ EOD;
 			$this->_collect_javascript($obj);
 			$name = $obj->iname();
 			$html = '<select name="'.$name.'[]" id="'.$name
-				.'" multiple="multiple"'.$obj->attribute_html().'>';
+				.'" multiple="multiple"'.$obj->attribute_html().">\n";
 			$value = $obj->value();
 			if(!$value)
 				$value = array();
@@ -317,9 +326,9 @@ EOD;
 				$html .= '<option ';
 				if(in_array($k,$value))
 					$html .= 'selected="selected" ';
-				$html .= 'value="'.$k.'">'.$v.'</option>';
+				$html .= 'value="'.$k.'">'.$v."</option>\n";
 			}
-			$html .= '</select>';
+			$html .= "</select>\n";
 			$this->_render($obj, $html);
 		}
 
@@ -335,21 +344,21 @@ EOD;
 					.$this->threeway_helper_choice($obj, $values[$k]),
 					$name, $v, $name, $name);
 			}
-			$this->_render($obj, implode('<br />', $html));
+			$this->_render($obj, implode("<br />\n", $html));
 		}
 
 		protected function threeway_helper_choice($obj, $value=null)
 		{
 			$choices = $obj->choices();
-			$html = '<select name="%s" id="%s"><option value="0"> -- </option>';
+			$html = "<select name=\"%s\" id=\"%s\">\n"
+				."<option value=\"0\"> -- </option>";
 			foreach($choices as $k => $v)
 				$html .= '<option value="'.$k.'"'
 					.($k==$value?' selected="selected"':'')
-					.'>'.$v.'</option>';
-			$html .= '</select>';
+					.'>'.$v."</option>\n";
+			$html .= "</select>\n";
 			return $html;
 		}
-
 
 		protected function visit_DateInput($obj)
 		{
@@ -383,6 +392,7 @@ EOD;
 	style="cursor: pointer; border: 1px solid red;" title="Date selector"
 	onmouseover="this.style.background='red';" onmouseout="this.style.background=''" />
 <script type="text/javascript">
+//<![CDATA[
 Calendar.setup({
 	inputField  : "$name",
 	ifFormat    : "%s",
@@ -393,7 +403,9 @@ Calendar.setup({
 	showsTime   : true,
 	step        : 1
 });
+//]]>
 </script>
+
 EOD;
 			$this->_render($obj, $html);
 		}
@@ -408,7 +420,8 @@ EOD;
 			$this->_render_bar($obj,
 				'<input type="submit" '.$obj->attribute_html()
 				.($name?' name="'.$name.'"':'')
-				.' value="'.$value.'" />');
+				.' value="'.$value.'" />',
+				'sf-button');
 		}
 
 		protected function _title_html($obj)
@@ -420,13 +433,14 @@ EOD;
 		{
 			$msg = $obj->message();
 			$name = $obj->iname();
-			return '<div id="'.$name.'_span" style="clear:both;color:red">'.($msg?$msg:' ').'</div>';
+			return '<div id="'.$name.'_span" style="clear:both;color:red">'
+				.($msg?$msg:' ')."</div>\n";
 		}
 
 		protected function _info_html($obj)
 		{
 			$msg = $obj->info();
-			return $msg?'<div style="float:left;">'.$msg.'</div>':'';
+			return $msg?'<div style="float:left;">'.$msg."</div>\n":'';
 		}
 
 		protected function _simpleinput_html($obj)
@@ -440,7 +454,13 @@ EOD;
 
 		protected function javascript()
 		{
-			return '<script type="text/javascript">'.$this->javascript.'</script>';
+			if(!$this->javascript)
+				return;
+			return '<script type="text/javascript">'
+				."\n//<![CDATA[\n"
+				.$this->javascript
+				."\n//]]>\n"
+				.'</script>';
 		}
 	}
 
@@ -462,19 +482,26 @@ EOD;
 			return $this->grid;
 		}
 
-		protected function _render($obj, $field_html)
+		protected function _render($obj, $field_html, $row_class = null)
 		{
-			$y = $this->grid()->height();
-			$this->grid()->add_item(0, $y, $this->_title_html($obj));
-			$this->grid()->add_item(1, $y,
-				'<div style="float:left;">'.$field_html.'</div>'
+			$grid = $this->grid();
+			$y = $grid->height();
+			if($row_class)
+				$grid->set_row_class($y, $row_class);
+			$grid->add_item(0, $y, $this->_title_html($obj));
+			$grid->add_item(1, $y,
+				'<div style="float:left;">'.$field_html."</div>\n"
 				.$this->_info_html($obj)
 				.$this->_message_html($obj));
 		}
 
-		protected function _render_bar($obj, $html)
+		protected function _render_bar($obj, $html, $row_class = null)
 		{
-			$this->grid()->add_item(0, $this->grid()->height(), $html, 2, 1);
+			$grid = $this->grid();
+			$y = $grid->height();
+			if($row_class)
+				$grid->set_row_class($y, $row_class);
+			$grid->add_item(0, $y, $html, 2, 1);
 		}
 	}
 
