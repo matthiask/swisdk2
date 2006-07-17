@@ -24,7 +24,7 @@
 	*/
 	function getInputRaw($var, $default = null)
 	{
-		return isset($_REQUEST[$var])?$_REQUEST[$var]:null;
+		return isset($_REQUEST[$var])?$_REQUEST[$var]:$default;
 	}
 
 	/**
