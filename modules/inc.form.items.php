@@ -371,7 +371,12 @@
 	class SelectionFormItem extends FormItem {
 		public function set_items($items)
 		{
-			$this->items = $items;
+			if($items instanceof DBOContainer) {
+				$this->items = array();
+				foreach($items as $item)
+					$this->items[$item->id()] = $item->title();
+			} else
+				$this->items = $items;
 		}
 
 		public function items()

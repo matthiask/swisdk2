@@ -237,12 +237,7 @@
 		public function create_rel_single($fname, $title, $class)
 		{
 			$obj = new DropdownInput();
-			$dc = DBOContainer::find($class);
-			$choices = array();
-			foreach($dc as $o) {
-				$items[$o->id()] = $o->title();
-			}
-			$obj->set_items($items);
+			$obj->set_items(DBOContainer::find($class));
 			if(strpos($fname, '_parent_id')==strlen($fname)-10)
 				$obj->add_null_item();
 			return $this->form->add($fname, $obj, $title);
@@ -254,12 +249,7 @@
 		public function create_rel_manytomany($fname, $title, $class)
 		{
 			$obj = new Multiselect();
-			$dc = DBOContainer::find($class);
-			$items = array();
-			foreach($dc as $o) {
-				$items[$o->id()] = $o->title();
-			}
-			$obj->set_items($items);
+			$obj->set_items(DBOContainer::find($class));
 			return $this->form->add($fname, $obj, $title);
 		}
 

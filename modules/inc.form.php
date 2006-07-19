@@ -498,24 +498,14 @@
 					case DB_REL_SINGLE:
 						$f = $this->add_obj($title, new DropdownInput(),
 							$relations[$relspec]['field']);
-						$dc = DBOContainer::find(
-							$relations[$relspec]['class']);
-						$choices = array();
-						foreach($dc as $o) {
-							$items[$o->id()] = $o->title();
-						}
-						$f->set_items($items);
+						$f->set_items(DBOContainer::find(
+							$relations[$relspec]['class']));
 						break;
 					case DB_REL_N_TO_M:
 						$f = $this->add_obj($title, new Multiselect(),
 							$relations[$relspec]['field']);
-						$dc = DBOContainer::find(
-							$relations[$relspec]['class']);
-						$items = array();
-						foreach($dc as $o) {
-							$items[$o->id()] = $o->title();
-						}
-						$f->set_items($items);
+						$f->set_items(DBOContainer::find(
+							$relations[$relspec]['class']));
 						break;
 					case DB_REL_MANY:
 						SwisdkError::handle(new BasicSwisdkError(
