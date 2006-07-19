@@ -427,12 +427,10 @@
 	 * display all enum choices for a given SQL field
 	 */
 	class EnumMultiInput extends Multiselect {
-
-		/**
-		 * ATTENTION! $table _cannot_ be escaped
-		 */
 		public function __construct($table, $field)
 		{
+			if(preg_match('/[^a-z_\.]/', $table))
+				SwisdkError::handle(new FatalError('Invalid table name: '.$table));
 			$fs = DBObject::db_get_array('SHOW COLUMNS FROM '
 				.$table, 'Field');
 			$field = $fs[$field];
@@ -443,12 +441,10 @@
 	}
 
 	class EnumInput extends DropdownInput {
-
-		/**
-		 * ATTENTION! $table _cannot_ be escaped
-		 */
 		public function __construct($table, $field)
 		{
+			if(preg_match('/[^a-z_\.]/', $table))
+				SwisdkError::handle(new FatalError('Invalid table name: '.$table));
 			$fs = DBObject::db_get_array('SHOW COLUMNS FROM '
 				.$table, 'Field');
 			$field = $fs[$field];
