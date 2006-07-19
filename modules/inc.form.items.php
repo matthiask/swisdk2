@@ -388,6 +388,17 @@
 	}
 
 	class DropdownInput extends SelectionFormItem {
+		public function init_value($dbobj)
+		{
+			// only allow values from the items array
+			$name = $this->name();
+			$value = $dbobj->get($name);
+			parent::init_value($dbobj);
+			if(!isset($this->items[$this->value()])) {
+				$dbobj->set($name, $value);
+				$this->refresh($dbobj);
+			}
+		}
 	}
 
 	class Multiselect extends SelectionFormItem {
@@ -403,8 +414,12 @@
 		{
 			parent::init_value($dbobj);
 			$name = $this->name();
-			if(!$dbobj->get($name))
-				$dbobj->set($name, array());
+			$newvalue = $dbobj->get($name);
+			if(is_array($newvalue)) {
+				$dbobj->set($name, array_intersect($newvalue,
+					array_keys($this->items)));
+				$this->refresh($dbobj);
+			}
 		}
 	}
 
