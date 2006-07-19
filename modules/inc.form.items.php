@@ -29,6 +29,7 @@
 		 * the value (ooh!)
 		 */
 		protected $value;
+		protected $default_value;
 
 		/**
 		 * info text
@@ -99,8 +100,7 @@
 		public function set_preinitialized() { $this->preinitialized = true; }
 		public function set_default_value($value)
 		{
-			if($this->value===null)
-				$this->value = $value;
+			$this->default_value = $value;
 		}
 
 
@@ -168,6 +168,8 @@
 						$dbobj->set($pname, $array);
 					} else
 						$array = $dbobj->get($pname);
+					if(!$array)
+						$array = $this->default_value;
 
 					$this->set_value($array[$idx]);
 				}
@@ -177,7 +179,8 @@
 						$dbobj->set($name, $val);
 					else
 						$dbobj->set($name, stripslashes($val));
-				}
+				} else if(!$dbobj->get($name))
+					$dbobj->set($name, $this->default_value);
 
 				$this->set_value($dbobj->get($name));
 			}
