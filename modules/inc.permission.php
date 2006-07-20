@@ -14,7 +14,7 @@
 	define('ROLE_MANAGER', 4);		// view, comment, create, edit, delete
 	define('ROLE_ADMINISTRATOR', 5);	// view, comment, create, edit, delete,
 						// permissions
-	define('ROLE_SITEADMIN', 6);		// everything!
+	define('ROLE_SITEADMIN', 6);		// everything! Will be inherited.
 
 	class PermissionManager {
 		public static function &instance()
@@ -24,6 +24,49 @@
 				$instance = new PermissionManager();
 			
 			return $instance;
+		}
+
+		/**
+		 * every realm the user has siteadmin role for (either through
+		 * his user groups or directly)
+		 */
+		protected static $siteadmin_realms = array();
+
+		/**
+		 * return all realms the user has siteadmin role for
+		 */
+		public static function siteadmin_realms($uid=null)
+		{
+			if(!$uid=intval($uid))
+				$uid = SessionHandler::user()->id();
+			
+			if(isset(PermissionManager::$siteadmin_realms[$uid]))
+				return PermissionManager::$siteadmin_realms[$uid];
+
+			$sql = 'SELECT tbl_realm.realm_id, realm_url FROM tbl_realm '
+				.'JOIN tbl_user_to_realm '
+					.'ON tbl_user_to_realm.realm_id=tbl_realm.realm_id '
+				.'WHERE user_id='.$uid.' AND role_id>='.ROLE_SITEADMIN
+				.' UNION '
+				.'SELECT tbl_realm.realm_id, realm_url FROM tbl_realm '
+				.'JOIN tbl_user_group_to_realm '
+					.'ON tbl_user_group_to_realm.realm_id=tbl_realm.realm_id '
+				.'LEFT JOIN tbl_user_to_user_group '
+					.'ON tbl_user_group_to_realm.user_group_id='
+						.'tbl_user_to_user_group.user_group_id '
+				.'WHERE user_id='.$uid.' AND role_id>='.ROLE_SITEADMIN;
+			$urls = DBObject::db_get_array($sql, array('realm_id', 'realm_url'));
+			if(count($urls)) {
+				$sql = 'SELECT * FROM tbl_realm WHERE ';
+				$clauses = array();
+				foreach($urls as $url)
+					$clauses[] = 'realm_url LIKE \''.$url.'%\'';
+				$sql .= implode(' OR ', $clauses);
+			}
+
+			PermissionManager::$siteadmin_realms[$uid] =
+				DBObject::db_get_array($sql, 'realm_id');
+			return PermissionManager::$siteadmin_realms[$uid];
 		}
 
 		public static function check($role=null, $url=null)
@@ -80,12 +123,17 @@
 
 		public static function check_realm_role($realm, $role, $uid=null)
 		{
-			$realm = DBObject::db_escape($realm);
+			$realm = intval($realm);
+			$role = intval($role);
 			$user = null;
 			if(is_null($uid))
 				$user = SessionHandler::user();
 			else
 				$user = DBObject::find('User', $uid);
+
+			$siteadmin_realms = PermissionManager::siteadmin_realms($user->id());
+			if(isset($siteadmin_realms[$realm]))
+				return true;
 
 			$perms = DBObject::db_get_row('SELECT role_id '
 				.'FROM tbl_user_to_realm WHERE user_id='
