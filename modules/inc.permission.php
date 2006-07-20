@@ -125,19 +125,16 @@
 		{
 			$realm = intval($realm);
 			$role = intval($role);
-			$user = null;
 			if(is_null($uid))
-				$user = SessionHandler::user();
-			else
-				$user = DBObject::find('User', $uid);
+				$uid = SessionHandler::user()->id();
 
-			$siteadmin_realms = PermissionManager::siteadmin_realms($user->id());
+			$siteadmin_realms = PermissionManager::siteadmin_realms($uid);
 			if(isset($siteadmin_realms[$realm]))
 				return true;
 
 			$perms = DBObject::db_get_row('SELECT role_id '
 				.'FROM tbl_user_to_realm WHERE user_id='
-				.$user->id().' AND realm_id='.$realm);
+				.$uid.' AND realm_id='.$realm);
 
 			//
 			// the user must have an entry in the permission table, even
@@ -154,15 +151,12 @@
 			//
 			// check user's groups for sufficient permissions
 			//
-			$groups = $user->related('UserGroup')->ids();
-			if(!count($groups))
-				return false;
-
 			$perms = DBObject::db_get_array('SELECT role_id '
 				.'FROM tbl_user_group_to_realm '
-				.'WHERE user_group_id IN ('
-				.implode(',', $groups).') AND realm_id='
-				.$realm);
+				.'LEFT JOIN tbl_user_to_user_group '
+					.'ON tbl_user_group_to_realm.user_group_id='
+						.'tbl_user_to_user_group.user_group_id '
+				.'WHERE user_id='.$uid.' AND realm_id='.$realm);
 			foreach($perms as &$p)
 				if($p['role_id']>=$role)
 					return true;
