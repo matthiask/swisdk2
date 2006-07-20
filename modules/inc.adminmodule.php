@@ -19,6 +19,7 @@
 		protected $dbo_class;
 		protected $arguments;
 		protected $multilanguage = false;
+		protected $role = ROLE_MANAGER;
 
 		/**
 		 * this function tries to find a AdminComponent to handle the
@@ -72,7 +73,7 @@
 
 		public function run()
 		{
-			PermissionManager::check_throw();
+			PermissionManager::check_throw($this->role);
 			$cmp = $this->component_dispatch();
 			$cmp->run();
 
