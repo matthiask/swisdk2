@@ -379,7 +379,10 @@ function skim(step)
 {
 	var form = document.getElementById('$id');
 	var start = form.{$p}start;
-	start.value=parseInt(start.value)+step;
+	var sv = parseInt(start.value);
+	if(isNaN(sv))
+		sv = 0;
+	start.value=sv+step;
 	form.submit();
 }
 //]]>
