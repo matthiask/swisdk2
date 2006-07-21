@@ -116,6 +116,11 @@
 		 */
 		protected $auto_update_fields = true;
 
+		public function disable_auto_update()
+		{
+			$this->auto_update_fields = false;
+		}
+
 		/**
 		 * DB Connection ID (only used if you want multiple DB connections)
 		 */
