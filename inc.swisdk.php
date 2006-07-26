@@ -151,23 +151,24 @@
 
 		public static function website_config_value($key)
 		{
-			if(strpos($key, 'website.')!==0)
-				$key = 'website.'
-					.Swisdk::config_value('runtime.website').'.'.$key;
-			if($value = Swisdk::config_value($key))
-				return $value;
-			$tokens = explode('.', $key);
-			$i = count($tokens);
-			while($i) {
-				$left = implode('.', array_slice($tokens, 0, $i)).'.';
-				if(isset(Swisdk::$config[$left.'inherit']))
-					return Swisdk::website_config_value(
-						implode('.', array_slice($tokens, 0, $i-1))
-						.'.'.Swisdk::config_value($left.'inherit')
-						.'.'.implode('.', array_slice($tokens, $i)));
-				$i--;
+			if(isset(Swisdk::$config[$key]))
+				return Swisdk::$config[$key];
+			$website = null;
+			if(strpos($key, 'website.')===0) {
+				$matches = array();
+				preg_match('/^website\.([^\.]+)\.(.*)$/', $key, $matches);
+				$key = $matches[2];
+				$website = $matches[1];
 			}
-			$w = 'website.'.Swisdk::config_value('runtime.website').'.';
+			if(!$website)
+				$website = Swisdk::config_value('runtime.website');
+			while(!isset(Swisdk::$config['website.'.$website.'.'.$key])) {
+				if(isset(Swisdk::$config['website.'.$website.'.inherit']))
+					$website = Swisdk::$config['website.'.$website.'.inherit'];
+				else
+					return null;
+			}
+			return Swisdk::$config['website.'.$website.'.'.$key];
 		}
 
 		public static function language($key=null)
