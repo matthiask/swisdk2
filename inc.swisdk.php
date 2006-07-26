@@ -97,7 +97,8 @@
 				foreach($cfg as $section => $array) {
 					if(($pos=strpos($section, '.'))!==false) {
 						$name = 'runtime.parser.'.substr($section, 0, $pos);
-						if(!is_array(Swisdk::$config[$name]))
+						if(!isset(Swisdk::$config[$name])
+								|| !is_array(Swisdk::$config[$name]))
 							Swisdk::$config[$name] = array();
 						array_unshift(Swisdk::$config[$name],
 							substr($section, $pos+1));
@@ -146,6 +147,27 @@
 			if(isset(Swisdk::$config[$key]))
 				return Swisdk::$config[$key];
 			return null;
+		}
+
+		public static function website_config_value($key)
+		{
+			if(strpos($key, 'website.')!==0)
+				$key = 'website.'
+					.Swisdk::config_value('runtime.website').'.'.$key;
+			if($value = Swisdk::config_value($key))
+				return $value;
+			$tokens = explode('.', $key);
+			$i = count($tokens);
+			while($i) {
+				$left = implode('.', array_slice($tokens, 0, $i)).'.';
+				if(isset(Swisdk::$config[$left.'inherit']))
+					return Swisdk::website_config_value(
+						implode('.', array_slice($tokens, 0, $i-1))
+						.'.'.Swisdk::config_value($left.'inherit')
+						.'.'.implode('.', array_slice($tokens, $i)));
+				$i--;
+			}
+			$w = 'website.'.Swisdk::config_value('runtime.website').'.';
 		}
 
 		public static function language($key=null)

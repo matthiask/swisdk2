@@ -119,12 +119,12 @@
 		 */
 		private function __construct()
 		{
-			$w = 'website.'.Swisdk::config_value('runtime.website').'.';
+			$dir = Swisdk::website_config_value('template_dir').'/';
 			$this->mTemplates = array(
-				'fullTemplate' => Swisdk::config_value($w.'fullTemplate'),
-				'header' => Swisdk::config_value($w.'header'),
-				'footer' => Swisdk::config_value($w.'footer'));
-			$this->mTitle = Swisdk::config_value($w.'title');
+				'fullTemplate' => $dir.Swisdk::website_config_value('template.base.full'),
+				'header' => $dir.Swisdk::website_config_value('template.base.header'),
+				'footer' => $dir.Swisdk::website_config_value('template.base.footer'));
+			$this->mTitle = Swisdk::website_config_value('title');
 		}
 
 		/**
@@ -227,9 +227,9 @@
 			foreach($this->mHtmlFragments as $name => &$html)
 				$smarty->assign($name, $html);
 
-			if($section == STREGION_NONE)
+			if($region == STREGION_NONE)
 				return true;
-			else if($section == STREGION_ALL)
+			else if($region == STREGION_ALL)
 				return $this->generate_section_helper($smarty, STREGION_FULL)
 					&& $this->generate_section_helper($smarty, STREGION_HEADER)
 					&& $this->generate_section_helper($smarty, STREGION_FOOTER);
