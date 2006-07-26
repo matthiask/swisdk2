@@ -233,7 +233,7 @@
 		/**
 		 * various helper functions
 		 */
-		public function set_realm_clause(&$dboc, $realm_link = 'RealmLink')
+		public static function set_realm_clause(&$dboc, $realm_link = 'RealmLink')
 		{
 			$dbo = $dboc->dbobj();
 			$relations = $dbo->relations();

@@ -88,7 +88,7 @@
 		 * This function should also be used to create FormBoxes (FormML
 		 * returns FormMLBox)
 		 */
-		public function &box($id=null)
+		public function box($id=null)
 		{
 			if(!$id && count($this->boxes))
 				return reset($this->boxes);

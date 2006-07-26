@@ -18,7 +18,7 @@
 			$sitemap = SwisdkSitemap::sitemap();
 			$ref =& $sitemap[$site];
 			if(array_keys($ref)==array(''))
-				$ref =& reset($ref);
+				$ref = reset($ref);
 			$tokens = explode('/', substr($url, 1));
 
 			// drill down until there are no more URL tokens
