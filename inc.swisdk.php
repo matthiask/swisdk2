@@ -73,9 +73,8 @@
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
 
-			Swisdk::require_data_directory(CACHE_ROOT);
-
 			SwisdkError::setup();
+			Swisdk::require_data_directory(CACHE_ROOT);
 			Swisdk::read_configfile();
 		}
 
