@@ -195,6 +195,18 @@
 				return;
 			}
 
+			$relations = $this->dbobj()->relations();
+			if(isset($relations[$clause])) {
+				$rel = $relations[$clause];
+				$this->add_join($clause);
+				$this->add_clause($rel['foreign'].'=', $data);
+				return;
+			}
+
+			if(!preg_match('/^([\(]|'.$this->dbobj()->_prefix().')/',
+					$clause))
+				$clause = $p.$clause;
+
 			$binding = ' '.$binding.' ';
 			if(is_null($data)) {
 				$this->clause_sql .= $binding.$clause;
@@ -225,14 +237,8 @@
 
 		public function add_clause_array($params)
 		{
-			$p = $this->dbobj()->_prefix();
-			$regex = '/^([:\(]|'.$p.')/';
-			
 			foreach($params as $k => $v)
-				if(preg_match($regex, $k))
-					$this->add_clause($k, $v);
-				else
-					$this->add_clause($p.$k, $v);
+				$this->add_clause($k, $v);
 		}
 
 		/**
