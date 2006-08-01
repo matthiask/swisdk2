@@ -285,7 +285,10 @@
 		{
 			$this->auto_update_fields();
 			DBObject::db_start_transaction($this->db_connection_id);
-			$res = $this->_store_values();
+			$res = DBObject::db_query('UPDATE ' . $this->table . ' SET '
+				. $this->_vals_sql() . ' WHERE '
+				. $this->primary . '=' . $this->id(),
+				$this->db_connection_id);
 			if($res===false || !$this->_update_relations()) {
 				DBObject::db_rollback($this->db_connection_id);
 				return false;
@@ -304,7 +307,9 @@
 			DBObject::db_start_transaction($this->db_connection_id);
 			if(!$force_primary)
 				$this->unset_primary();
-			$res = $this->_store_values(true);
+			$res = DBObject::db_query('INSERT INTO ' . $this->table
+				. ' SET ' . $this->_vals_sql(),
+				$this->db_connection_id);
 			if($res===false) {
 				DBObject::db_rollback($this->db_connection_id);
 				return false;
@@ -318,38 +323,6 @@
 			DBObject::db_commit($this->db_connection_id);
 			$this->dirty = false;
 			return true;
-		}
-
-		/**
-		 * internal hack
-		 */
-		protected function _store_values($insert=false)
-		{
-			$fields = $this->field_list();
-			$vals_sql = array();
-			$bind_args = array('');
-			foreach($fields as &$field) {
-				if(strpos($field['Type'], 'int')!==false)
-					$bind_args[0] .= 'i';
-				elseif(strpos($field['Type'], 'float')!==false
-						|| strpos($field['Type'], 'double')!==false)
-					$bind_args[0] .= 'd';
-				else
-					$bind_args[0] .= 's';
-				$bind_args[] = $this->data[$field['Field']];
-				$vals_sql[] = $field['Field'].'=?';
-			}
-
-			$sql = ($insert?'INSERT INTO ':'UPDATE ')
-				.$this->table.' SET '.implode(',', $vals_sql)
-				.($insert?'':' WHERE '.$this->primary.'='.$this->id());
-
-			$db = DBObject::db($this->db_connection_id);
-			$stmt = $db->prepare($sql);
-			call_user_func_array(array(&$stmt, 'bind_param'), $bind_args);
-			$res = $stmt->execute();
-			$stmt->close();
-			return $res;
 		}
 
 		/**
@@ -427,6 +400,28 @@
 			}
 
 			return true;
+		}
+
+		/**
+		 * Private helper for update() and insert(). This function takes care
+		 * of SQL injections by properly escaping every string that hits the
+		 * database.
+		 *
+		 * We do not need to truncate the data as long as the maximal POST
+		 * size (default 2MB) is smaller than the mysql packet size (default 16MB).
+		 */
+		protected function _vals_sql()
+		{
+			$dbh = DBObject::db($this->db_connection_id);
+			$vals = array();
+			$fields = array_keys($this->field_list());
+			foreach($fields as $field) {
+				if(isset($this->data[$field]))
+					$vals[] = $field.'=\''
+						.$dbh->escape_string($this->data[$field])
+						.'\'';
+			}
+			return implode(',', $vals);
 		}
 
 		/**
