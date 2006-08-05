@@ -60,7 +60,7 @@
 	}
 
 	/**
-	* Generates a string of random numbers and characters. 
+	* Generates a string of random numbers and characters.
 	*/
 	function randomKeys($length)
   	{

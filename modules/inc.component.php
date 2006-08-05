@@ -68,7 +68,7 @@
 		public function getSmartyRef()
 		{
 			if( $this->mSmarty === null ) {
-				require_once SWISDK_ROOT . "modules/inc.smarty.php";		
+				require_once SWISDK_ROOT . "modules/inc.smarty.php";
 				$this->mSmarty = new SwisdkSmarty();
 			}
 

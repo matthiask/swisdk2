@@ -15,7 +15,7 @@
 				$this->set_output(implode('/', $tokens));
 			}
 		}
-		
+
 	}
 
 ?>

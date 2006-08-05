@@ -117,7 +117,7 @@
 		{
 			return $this->box()->dbobj();
 		}
-		
+
 		protected $dbobj_tmp;
 
 		public function bind($dbobj)
@@ -226,7 +226,7 @@
 					$valid = false;
 			return $valid;
 		}
-			
+
 		/**
 		 * Iterator implementation (see PHP Object Iteration)
 		 */
@@ -565,7 +565,7 @@
 					$valid = false;
 			return $valid;
 		}
-		
+
 		/**
 		 * @return the formitem with name $name
 		 */
@@ -593,7 +593,7 @@
 		/**
 		 * ArrayAccess implementation (see PHP SPL)
 		 */
-		
+
 		public function offsetExists($offset) { return isset($this->items[$offset]); }
 		public function offsetGet($offset) { return $this->items[$offset]; }
 		public function offsetSet($offset, $value)

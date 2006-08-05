@@ -10,7 +10,7 @@
 	*/
 	function swisdk_php_error_handler( $errno, $errstr, $file, $line, $context )
 	{
-		SwisdkError::handle( new PHPError( $errno, $errstr, $file, $line, $context ) );	
+		SwisdkError::handle( new PHPError( $errno, $errstr, $file, $line, $context ) );
 	}
 
 	function swisdk_php_exception_handler( $exception )
@@ -59,7 +59,7 @@
 		}
 	}
 
-	/** 
+	/**
 	 * - logging to file and email notification (configurable)
 	 *
 	 * see
@@ -176,7 +176,7 @@
 
 	/**
 	*	TODO add a check if the file which was not found just isnt readable for
-	*	the webserver user... 
+	*	the webserver user...
 	*/
 	class FileNotFoundError extends NotificationError {
 	}
@@ -205,7 +205,7 @@
 			if($debug_mode)
 				return __CLASS__.": {$this->args[0]} ({$this->args[1]}) in"
 					." {$this->args[2]} at line {$this->args[3]}";
-			
+
 			return 'An unexpected error occurred.';
 		}
 	}

@@ -1,4 +1,4 @@
-<?php	
+<?php
 	/*
 	*	Project: SWISDK 2
 	*	Author: Matthias Kestenholz < mk@irregular.ch >
@@ -13,11 +13,11 @@
 
 	// Many thanks to the sajax project http://www.modernmethod.com/sajax/
 	// This is basically a copy-shuffle-pasted and objectified version of sajax v0.10
-	// which was licensed under the new BSD license. 
+	// which was licensed under the new BSD license.
 
 	/*
 	Example usage:
-	
+
 	// interface declaration
 	interface ITest {
 		// NOTE! the "method_"-prefix is mandatory for ajax request method
@@ -26,38 +26,38 @@
 		// ajax requests.
 		public function method_hello_world($your_name);
 	}
-	
+
 	// server class
 	class TestImpl extends Ajax_Server implements ITest {
 		public function method_hello_world($your_name) {
 			return "Hello, $your_name!";
 		}
 	}
-	
+
 	// usage on server side
 	$server = new TestImpl();
 	$server->handle_request();
-	
+
 	// usage on client side
 	$client = new Ajax_Client(ITest);
 	// or
 	$client = new Ajax_Client(ITest, 'http://host/path/to/server.php');
-	
+
 	then, inside the <head> section of your html page:
-	
+
 	<script type="text/javascript">
 	// show main ajax code
 	<?php $client->show_javascript(); ?>
-	
+
 	function hello_world_callback(retval)
 	{
 		// do something with the returned value
 	}
-	
+
 	function hello_world()
 	{
 		// do something, f.e. get values from a form
-		
+
 		// execute the ajax request passing the parameter as specified
 		// in the interface.
 		// The callback which will be called upon completion of the ajax
@@ -65,18 +65,18 @@
 		// NOTE! the "x_"-prefixed function is generated automatically
 		x_hello_world(name, hello_world_callback);
 	}
-	</script> 
-		
+	</script>
+
 	*/
 
-	
+
 	class Ajax_Server {
 		// updates the method list using introspection
 		protected function update_export_list()
 		{
 			$this->export_list = array();
 			$methods = get_class_methods(get_class($this));
-			
+
 			foreach($methods as &$method) {
 				if(substr($method, 0, 7)=='method_' && $m = substr($method, 7)) {
 					$this->export_list[] = $m;
@@ -91,13 +91,13 @@
 				echo "-:cannot execute request: forbidden strings found";
 				exit();
 			}*/
-			
+
 			$func_name = $_POST['rs'];
 			$args = $_POST['rsargs'];
 			if(empty($args)) {
 				$args = array();
 			}
-			
+
 			if($this->export_list===null) {
 				$this->update_export_list();
 			}
@@ -118,7 +118,7 @@
 		{
 			$this->export_list = array();
 			$methods = get_class_methods($interface);
-			
+
 			foreach($methods as &$method) {
 				if(substr($method, 0, 7)=='method_' && $m = substr($method, 7)) {
 					$this->export_list[] = $m;
@@ -130,13 +130,13 @@
 			} else {
 				$this->remote_uri = $remote_uri;
 			}
-			
+
 			$this->debug_mode = $debug_mode;
 		}
-		
+
 		protected $remote_uri = null;
 		protected $debug_mode = 0;
-		
+
 		// javascript escape a value
 		public function escape($val)
 		{
@@ -169,12 +169,12 @@ EOD;
 
 		protected $export_list = null;
 		protected $javascript_shown = false;
-		
+
 		protected function get_common_js() {
-			
-			
+
+
 			$debug_mode_bool = $this->debug_mode?'true':'false';
-			
+
 			return <<<EOD
 // remote scripting library
 // (c) copyright 2005 modernmethod, inc
@@ -217,6 +217,6 @@ function sajax_do_call(func_name, args) {
 EOD;
 		}
 	}
-		
-		
+
+
 ?>

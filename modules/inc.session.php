@@ -44,7 +44,7 @@
 				}
 			}
 
-			if((isset($_SESSION['swisdk2']['user_hash']) 
+			if((isset($_SESSION['swisdk2']['user_hash'])
 					&& $_SESSION['swisdk2']['user_hash']!=$user_hash)
 					|| isset($_REQUEST['logout'])) {
 				if(isset($_COOKIE[session_name()]))
@@ -68,10 +68,10 @@
 			if( $instance === null ) {
 				$instance = new SessionHandler();
 			}
-			
+
 			return $instance;
 		}
-		
+
 		public static function authenticated()
 		{
 			return SessionHandler::instance()->user->id()!=SWISDK2_VISITOR;

@@ -341,7 +341,7 @@
 		{
 			if($this->fulltext_search
 				&& count($fields = $this->obj->_fulltext_fields())) {
-				
+
 				$sql = ' AND (';
 				$search = DBObject::db_escape($this->fulltext_search, false,
 					$this->obj->db_connection());
@@ -381,7 +381,7 @@
 		{
 			return array_keys($this->data);
 		}
-		
+
 		public function collect($key, $value)
 		{
 			$array = array();
@@ -463,7 +463,7 @@
 		/**
 		 * ArrayAccess implementation (see PHP SPL)
 		 */
-		
+
 		public function offsetExists($offset) { return isset($this->data[$offset]); }
 		public function offsetGet($offset) { return $this->data[$offset]; }
 		public function offsetSet($offset, $value)

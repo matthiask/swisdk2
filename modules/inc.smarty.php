@@ -44,7 +44,7 @@
 			error_reporting($er);
 			return $ret;
 		}
-	
+
 		public function __get($var)
 		{
 			$er = error_reporting(E_ALL^E_NOTICE);

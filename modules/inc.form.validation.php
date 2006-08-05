@@ -243,7 +243,7 @@ EOD;
 			$this->regex = $regex;
 			parent::__construct($message);
 		}
-		
+
 		protected function is_valid_impl(FormItem &$item)
 		{
 			$value = $item->value();

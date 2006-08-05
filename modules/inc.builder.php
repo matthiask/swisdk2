@@ -10,7 +10,7 @@
 	require_once MODULE_ROOT.'inc.tableview.php';
 
 	abstract class BuilderBase {
-		
+
 		/**
 		 * this function tries to handle everything that gets thrown at it
 		 *

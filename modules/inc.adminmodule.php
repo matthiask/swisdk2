@@ -49,7 +49,7 @@
 						.'_edit'))
 					$cmp = new $cmp_class;
 				else if(class_exists($cmp_class = 'AdminComponent'
-						.$args[0])) 
+						.$args[0]))
 					$cmp = new $cmp_class;
 				else if($args[0]=='_new')
 					$cmp = new AdminComponent_edit();
@@ -140,7 +140,7 @@
 		}
 
 		/**
-		 * @return a FormBuilder instance 
+		 * @return a FormBuilder instance
 		 *
 		 * If a class FormBuilder_DBObjectClass exists, it will be
 		 * created and returned, otherwise the default FormBuilder

@@ -22,7 +22,7 @@
 			static $instance = null;
 			if( $instance === null )
 				$instance = new PermissionManager();
-			
+
 			return $instance;
 		}
 
@@ -39,7 +39,7 @@
 		{
 			if(!$uid=intval($uid))
 				$uid = SessionHandler::user()->id();
-			
+
 			if(isset(PermissionManager::$siteadmin_realms[$uid]))
 				return PermissionManager::$siteadmin_realms[$uid];
 
@@ -251,7 +251,7 @@
 					OR $t.{$p}id IN (
 						SELECT DISTINCT {$p}id FROM tbl_{$p}to_realm
 						WHERE realm_id={realm_id} AND role_id<={user_role_id}
-					) 
+					)
 				)";
 			$dboc->add_clause($sql, $params);
 

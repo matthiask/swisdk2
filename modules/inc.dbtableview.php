@@ -165,7 +165,7 @@
 		}
 
 		/**
-		 * you need to call init() prior to adding any columns 
+		 * you need to call init() prior to adding any columns
 		 */
 		public function init()
 		{

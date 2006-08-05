@@ -6,29 +6,29 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
-	
+
 	abstract class SwisdkSiteHandler {
-		
+
 		/* check if enough information are avaible to instance the controler */
 		/* instance handler and run the party! */
-		
+
 		public static function run()
-		{		
+		{
 			// at least we need the include file of the controller...
 			$includefile = Swisdk::config_value('runtime.includefile');
 			if( !$includefile )
 				SwisdkError::handle( new SiteNotFoundError() );
-			
-			// get the type of the controller and instance it 
+
+			// get the type of the controller and instance it
 			$type = substr( $includefile, strrpos( $includefile, '_' )+1 );
-			
+
 			$handler = SwisdkSiteHandler::get_type_handler_instance( $type );
 			if( SwisdkError::is_error( $handler ) )
 				SwisdkError::handle( $handler );
-			
+
 			return $handler->handle();
 		}
-		
+
 		public static function get_type_handler_instance( $type )
 		{
 			$classname = Swisdk::config_value( "dispatcher." . $type );
@@ -39,34 +39,34 @@
 					. $type );
 			}
 		}
-		
+
 		abstract public function handle();
 	}
-	
-	
+
+
 	class PhpSiteHandler extends SwisdkSiteHandler
 	{
 		public function handle()
 		{
 			$includefile = Swisdk::config_value('runtime.includefile');
 			require_once $includefile;
-		
+
 			// get the controller class  out of the config , the include file
 			// sets the class name with Swisdk::register()
-			
+
 			$class = Swisdk::config_value('runtime.controller.class');
-			
+
 			if( !$class ) {
 				SwisdkError::handle( new FatalError( "SiteController class is"
 					." empty in registry! Be sure that you register"
 					." your controller!" ) );
 			}
-			
+
 			if( !class_exists( $class) ) {
 				SwisdkError::handle( new FatalError( "SiteController $class"
 					." could not be found" ) );
 			}
-			
+
 			$ctrl = new $class;
 			if( $ctrl instanceof Site )
 			{
@@ -78,8 +78,8 @@
 			}
 		}
 	}
-		
-		
+
+
 	/**
 	*	Just send the file to the client... no fun just raw sending...
 	*/
@@ -90,7 +90,7 @@
 		}
 	}
 
-	/** 
+	/**
 	*	Send the file to client using the smarty engine.
 	*/
 	class SmartySiteHandler extends SwisdkSiteHandler
@@ -108,8 +108,8 @@
 	*	Send first the header template of the website, then the include file and
 	*	in the end the footer template.
 	*/
-	class EmbeddedSmartySiteHandler extends SwisdkSiteHandler	
-	{	
+	class EmbeddedSmartySiteHandler extends SwisdkSiteHandler
+	{
 		public function handle()
 		{
 			require_once MODULE_ROOT.'inc.smarty.php';
@@ -130,5 +130,5 @@
 			$sm->display();
 		}
 	}
-	
+
 ?>

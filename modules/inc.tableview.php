@@ -6,7 +6,7 @@
 	*/
 
 	class TableView implements Iterator, ArrayAccess {
-		
+
 		/**
 		 * TableViewColumn instances
 		 */

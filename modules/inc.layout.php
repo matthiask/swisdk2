@@ -8,11 +8,11 @@
 	interface Layout_Item {
 		public function html();
 	}
-	
+
 	// bah... enums
 	define('SL_HORIZONTAL', 1);
 	define('SL_VERTICAL', 2);
-	
+
 	class Layout_Box implements Layout_Item {
 		public function __construct($orientation)
 		{
@@ -22,12 +22,12 @@
 		{
 			array_unshift($this->items, $item);
 		}
-		
+
 		public function pack_end(Layout_Item &$item)
 		{
 			array_push($this->items, $item);
 		}
-		
+
 		public function html()
 		{
 			if(!count($this->items))
@@ -39,7 +39,7 @@
 				}
 				return $html . '</tr></table>';
 			}
-			
+
 			// vertical
 			$html = '<table>';
 			foreach($this->items as &$item) {
@@ -47,25 +47,25 @@
 			}
 			return $html . '</table>';
 		}
-		
+
 		protected $orientation = 0;
 		protected $items = array();
 	}
-	
+
 	class Layout_HBox extends Layout_Box {
 		public function __construct()
 		{
 			parent::__construct(SL_HORIZONTAL);
 		}
 	}
-	
+
 	class Layout_VBox extends Layout_Box {
 		public function __construct()
 		{
 			parent::__construct(SL_VERTICAL);
 		}
 	}
-	
+
 	// this is a simple wrapper around an SF_Item class which
 	// handles the adversities of a Grid Layout_. Its implementation
 	// is of no interest to the developer.
@@ -77,10 +77,10 @@
 			$this->item = $item;
 			$this->w = $w;
 			$this->h = $h;
-			
+
 			$this->called = false;
 		}
-		
+
 		// will get called multiple times if either
 		// width or height is different from 1
 		public function html($columnclass='')
@@ -105,16 +105,16 @@
 			$html .= "</td>\n";
 			return $html;
 		}
-		
+
 		protected $x,$y,$item,$w,$h;
 		protected $called;
 	}
-	
+
 	// Sets the correct class name on a empty table cell
 	class Layout_EmptyGridItem extends Layout_GridItem {
 		public function __construct()
 		{}
-		
+
 		public function html($columnclass='')
 		{
 			if($columnclass) {
@@ -123,7 +123,7 @@
 			return '<td>&nbsp;</td>';
 		}
 	}
-	
+
 	class Layout_Grid implements Layout_Item {
 		protected $row_class = array();
 
@@ -132,12 +132,12 @@
 			$this->h = 0;
 			$this->w = 0;
 		}
-		
+
 		public function add_item($x, $y, $item, $w=1, $h=1)
 		{
 			$this->w = max($this->w, $x+$w);
 			$this->h = max($this->h, $y+$h);
-			
+
 			$gi = new Layout_GridItem($x,$y,$item,$w,$h);
 			for($j=$y; $j<$y+$h; ++$j) {
 				for($i=$x; $i<$x+$w; ++$i) {
@@ -155,7 +155,7 @@
 		{
 			$this->row_class[$y] = $class;
 		}
-		
+
 		public function html()
 		{
 			if(!$this->w && !$this->h)
@@ -179,23 +179,23 @@
 			}
 			return $html . "</table>\n";
 		}
-		
+
 		public function set_column_class($column, $class)
 		{
 			$this->columnclass[$column] = $class;
 			$this->w = max($this->w, $column);
 		}
-		
+
 		public function width()
 		{
 			return $this->w;
 		}
-		
+
 		public function height()
 		{
 			return $this->h;
 		}
-		
+
 		protected $items = array();
 		protected $w, $h;
 		protected $columnclass = array();

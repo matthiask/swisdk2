@@ -80,13 +80,13 @@
 		 * accessors and mutators
 		 */
 		public function value()			{ return $this->value; }
-		public function set_value($value)	{ $this->value = $value; } 
+		public function set_value($value)	{ $this->value = $value; }
 		public function name()			{ return $this->name; }
-		public function set_name($name)		{ $this->name = $name; } 
+		public function set_name($name)		{ $this->name = $name; }
 		public function title()			{ return $this->title; }
-		public function set_title($title)	{ $this->title = $title; } 
+		public function set_title($title)	{ $this->title = $title; }
 		public function info()			{ return $this->info; }
-		public function set_info($info)		{ $this->info = $info; } 
+		public function set_info($info)		{ $this->info = $info; }
 		public function message()		{ return $this->message; }
 		public function set_message($message)	{ $this->message = $message; }
 		public function add_message($message)
@@ -131,7 +131,7 @@
 
 		public function set_attributes($attributes)
 		{
-			$this->attributes = array_merge($this->attributes, $attributes); 
+			$this->attributes = array_merge($this->attributes, $attributes);
 		}
 
 		/**
@@ -269,7 +269,7 @@
 	class FileUpload extends SimpleInput {
 		protected $type = 'file';
 		protected $attributes = array('size' => 60);
-		
+
 		protected $files_data;
 		protected $no_upload = true;
 

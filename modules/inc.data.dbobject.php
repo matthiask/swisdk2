@@ -125,7 +125,7 @@
 		 * DB Connection ID (only used if you want multiple DB connections)
 		 */
 		protected $db_connection_id = DB_CONNECTION_DEFAULT;
-		
+
 		public function db_connection()
 		{
 			return $this->db_connection_id;
@@ -183,7 +183,7 @@
 		 * factory function
 		 *
 		 * @return: DBObject of type $class
-		 * 
+		 *
 		 * Use this function or DBObject::find
 		 *
 		 * If you have no special needs (DB not implementing my naming scheme,
@@ -247,7 +247,7 @@
 				$this->id = $params;
 				if($this->refresh())
 					return true;
-			} 
+			}
 		}
 
 		/**
@@ -489,7 +489,7 @@
 		 * values to provide the following syntax to the user:
 		 *
 		 * Example:
-		 * 
+		 *
 		 * An event has both an author and a contact person. They are both
 		 * stored in tbl_user. We cannot use event_user_id because we have
 		 * two referred users for every record.
@@ -502,7 +502,7 @@
 		 * $event = DBObject::find('Event', 42);
 		 * $author = $event->related('event_author_id');
 		 * $author = $event->related('event_contact_id');
-		 * 
+		 *
 		 * Note! See how you are passing the field name instead of a DBObject
 		 * class name now.
 		 *
@@ -806,7 +806,7 @@
 				return $res;
 			return $res->fetch_assoc();
 		}
-		
+
 		/**
 		 * Return multiple rows as a nested array.
 		 *
@@ -874,15 +874,15 @@
 		}
 
 		/**
-		*	Wraps the mysqli_insert_id of mysqli. 
+		*	Wraps the mysqli_insert_id of mysqli.
 		*   "Returns the auto generated id used in the last query"
 		*	@see http://www.php.net/manual-lookup.php?pattern=mysqli_insert_id
 		*/
-		public static function db_insert_id($connection_id = DB_CONNECTION_DEFAULT) 
+		public static function db_insert_id($connection_id = DB_CONNECTION_DEFAULT)
 		{
 			return DBObject::db($connection_id)->insert_id;
 		}
-		
+
 		/**
 		 * Wrap DB transaction functions
 		 */
@@ -1061,7 +1061,7 @@
 			$relations = $this->relations();
 			return isset($this->data[$var]) || isset($relations[$var]);
 		}
-		
+
 		public function offsetGet($var)
 		{
 			return $this->get($var);
@@ -1099,7 +1099,7 @@
 			}
 			return DBObject::$fulltext_fields[$this->class];
 		}
-		
+
 		public function &field_list($field = null)
 		{
 			if(!isset(DBObject::$field_list[$this->class])) {

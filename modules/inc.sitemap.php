@@ -93,7 +93,7 @@
 				}
 				$sitemap = $_swisdk2_sitemap;
 			}
-			
+
 			return $sitemap;
 		}
 

@@ -14,7 +14,7 @@
 			$this->set_output( $matches[4] );
 			Swisdk::set_config_value('runtime.request.host', $matches[2]);
 			Swisdk::set_config_value('runtime.request.uri', $matches[4]);
-						
+
 		}
 	}
 ?>
