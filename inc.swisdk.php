@@ -1,14 +1,11 @@
 <?php
 	/*
-	*	Project: SWISDK 2
-	*	Author: Matthias Kestenholz < mk@irregular.ch >, Moritz Zumbühl < mail@momoetomo.ch >
-	*	Copyright (c) 2004, ProjectPflanzschulstrasse (http://pflanzschule.irregular.ch/)
-	*	Distributed under the GNU Lesser General Public License.
-	*	Read the entire license text here: http://www.gnu.org/licenses/lgpl.html
+	*	Copyright (c) 2006, Matthias Kestenholz and Moritz Zumbuehl
+	*	Distributed under the GNU General Public License
+	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
 	class Swisdk {
-
 		public static function runFromHttpRequest()
 		{
 			Swisdk::run(array('REQUEST_URI' =>
@@ -22,7 +19,7 @@
 		public static function runFromCommandLine()
 		{
 			/**
-			 * the $_Server[Document_root] is not set when the call comes from the
+			 * $_SERVER[DOCUMENT_ROOT] is not set when the call comes from the
 			 * commandline.
 			 * so we use the SCRIPT_NAME and assume that the file is in
 			 * APP_ROOT/swisdk/commandline.php
