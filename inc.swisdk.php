@@ -193,6 +193,41 @@
 			Swisdk::set_config_value('runtime.controller.class', $class);
 		}
 
+		public static function load($class, $stage = null)
+		{
+			if($stage===null)
+				$stage = Swisdk::config_value('runtime.stage');
+
+			$path = sprintf('%s/inc.%s.php', $stage, strtolower($class));
+
+			$bases = array(SWISDK_ROOT, CONTENT_ROOT);
+
+			while(count($bases)) {
+				$base = array_shift($bases);
+				if(file_exists($base.$path)) {
+					require_once $base.$path;
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		public static function load_instance($class, $stage = null)
+		{
+			if(class_exists($class))
+				return new $class;
+
+			if($stage===null)
+				$stage = Swisdk::config_value('runtime.stage');
+			if(Swisdk::load($class, $stage)
+					&& class_exists($class))
+				return new $class;
+			else
+				SwisdkError::handle(new FatalError(
+					'Could not load '.$class.', stage '.$stage));
+		}
+
 		/**
 		*	Load a "module" (actually a module is just a php-file with a class inside).
 		*	A module can exist in the swisdk-dir or the content dir. The parameter
