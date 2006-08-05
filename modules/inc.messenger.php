@@ -29,9 +29,12 @@
 	}
 
 	class EmailMessage extends Message {
-		public function __construct()
+		public function __construct($dbo = null)
 		{
-			$this->dbobj = DBObject::create('Email');
+			if($dbo)
+				$this->dbobj = $dbo;
+			else
+				$this->dbobj = DBObject::create('Email');
 		}
 
 		public function send()
@@ -70,10 +73,10 @@
 	class SmartyEmailMessage extends EmailMessage {
 		protected $template;
 
-		public function __construct($template)
+		public function __construct($template, $dbo = null)
 		{
 			$this->template = $template;
-			parent::__construct();
+			parent::__construct($dbo);
 		}
 
 		public function send()
