@@ -15,6 +15,8 @@
 	{
 		static public function dispatch( $url )
 		{
+			Swisdk::set_config_value('runtime.stage', 'dispatcher');
+
 			$modules = explode( "," , Swisdk::config_value( "dispatcher.modules" ) );
 
 			if( count( $modules ) )
@@ -25,8 +27,7 @@
 					$class = trim($class);
 
 					// load the dispatcher
-					$instance = Swisdk::load_module( $class ,
-						"dispatcher/" );
+					$instance = Swisdk::load_instance($class);
 					if( SwisdkError::is_error( $instance ) )
 						SwisdkError::handle( $instance );
 

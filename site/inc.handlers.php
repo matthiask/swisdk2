@@ -23,9 +23,6 @@
 			$type = substr( $includefile, strrpos( $includefile, '_' )+1 );
 
 			$handler = SwisdkSiteHandler::get_type_handler_instance( $type );
-			if( SwisdkError::is_error( $handler ) )
-				SwisdkError::handle( $handler );
-
 			return $handler->handle();
 		}
 
@@ -33,7 +30,7 @@
 		{
 			$classname = Swisdk::config_value( "dispatcher." . $type );
 			if( $classname != null ) {
-				return Swisdk::load_module( $classname , "sitehandlers/" );
+				return Swisdk::load_instance($classname, 'site');
 			} else {
 				return new FatalError( "Could not find the config-entry runtime."
 					. $type );
