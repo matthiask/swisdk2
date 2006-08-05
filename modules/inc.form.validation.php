@@ -234,6 +234,42 @@ EOD;
 		}
 	}
 
+	class RangeRule extends FormItemRule {
+		protected $min;
+		protected $max;
+
+		public function __construct($min, $max, $message = null)
+		{
+			if($message)
+				$this->message = $message;
+			else
+				$this->message = 'Number must be between '.$min.' and '.$max;
+			$this->min = $min;
+			$this->max = $max;
+		}
+
+		protected function is_valid_impl(FormItem &$item)
+		{
+			$value = $item->value();
+			return $value>=$this->min && $value<=$this->max;
+		}
+
+		protected function validation_js_impl(FormItem &$item)
+		{
+			$name = $item->iname();
+			$min = $this->min;
+			$max = $this->max;
+			$js = <<<EOD
+function formitem_range_rule_$name()
+{
+	var value = parseInt(document.getElementById('$name').value);
+	return value>=$min && value<=$max;
+}
+EOD;
+			return array('formitem_range_rule_'.$name, $js);
+		}
+	}
+
 	class RegexRule extends FormItemRule {
 		protected $message = 'Value does not validate';
 		protected $empty_valid = true;
