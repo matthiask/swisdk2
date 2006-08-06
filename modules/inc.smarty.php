@@ -33,6 +33,7 @@
 				'_smarty_swisdk_runtime_value');
 
 			Swisdk::require_data_directory($this->smarty->compile_dir);
+			$this->assign('swisdk_user', SessionHandler::user()->data());
 		}
 
 		public function __call($method, $args)
