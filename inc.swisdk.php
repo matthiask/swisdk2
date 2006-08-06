@@ -169,8 +169,8 @@
 
 		public static function language($key=null)
 		{
+			require_once MODULE_ROOT.'inc.data.php';
 			if($key) {
-				require_once MODULE_ROOT.'inc.data.php';
 				$l = DBObject::db_get_array('SELECT * FROM tbl_language',
 					array('language_key', 'language_id'));
 				if(isset($l[$key]))
