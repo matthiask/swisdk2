@@ -58,11 +58,6 @@
 		public function table()		{ return $this->table; }
 		public function primary()	{ return $this->primary; }
 		public function name($tok)	{ return $this->prefix . $tok; }
-		public function unname($tok)
-		{
-			return preg_replace('/^'.$this->prefix.'/', '', $tok);
-		}
-
 		public function pretty($field)
 		{
 			if($field == $this->primary)
