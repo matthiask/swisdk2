@@ -199,11 +199,12 @@
 			if(isset($relations[$clause])) {
 				$rel = $relations[$clause];
 				$this->add_join($clause);
-				$this->add_clause($rel['foreign'].'=', $data);
+				$this->clause_sql .= $binding.' '.$rel['foreign'].'='
+					.DBObject::db_escape($data);
 				return;
 			}
 
-			if(!preg_match('/^([\(]|'.$this->dbobj()->_prefix().')/',
+			if(!preg_match('/^([\(]|'.($p=$this->dbobj()->_prefix()).')/',
 					$clause))
 				$clause = $p.$clause;
 

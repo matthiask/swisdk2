@@ -100,7 +100,9 @@
 			$str = "<pre><b>Backtrace:</b>\n";
 			$disp = false;
 			foreach($bt as $frame) {
-				if($frame['class']=='SwisdkError' && $frame['function']=='handle')
+				if(!$disp && isset($frame['class'])
+						&& $frame['class']=='SwisdkError'
+						&& $frame['function']=='handle')
 					$disp = true;
 				if(!$disp)
 					continue;
