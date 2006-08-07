@@ -613,7 +613,7 @@
 	 */
 
 	class FormML extends Form {
-		public function &box($id=0)
+		public function box($id=null)
 		{
 			if(!$id && count($this->boxes))
 				return reset($this->boxes);
