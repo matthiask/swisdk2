@@ -200,13 +200,10 @@
 				$rel = $relations[$clause];
 				$this->add_join($clause);
 				$this->clause_sql .= $binding.' '.$rel['foreign'].'='
-					.DBObject::db_escape($data);
+					.DBObject::db_escape($data, true,
+						$this->obj->db_connection());
 				return;
 			}
-
-			if(!preg_match('/^([\(]|'.($p=$this->dbobj()->_prefix()).')/',
-					$clause))
-				$clause = $p.$clause;
 
 			$binding = ' '.$binding.' ';
 			if(is_null($data)) {
