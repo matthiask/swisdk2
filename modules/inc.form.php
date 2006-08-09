@@ -215,9 +215,12 @@
 		public function is_valid()
 		{
 			// has this form been submitted (or was it another form on the same page)
-			if(!isset($_REQUEST['__guard_'.$this->id()])
-					|| $_REQUEST['__guard_'.$this->id()]!=guardToken())
+			if(!isset($_REQUEST['__guard_'.$this->id()]))
 				return false;
+			if($_REQUEST['__guard_'.$this->id()]!=guardToken()) {
+				$this->box()->add_message('Could not validate form submission');
+				return false;
+			}
 
 			$valid = true;
 			// loop over all FormBox es
