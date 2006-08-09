@@ -215,8 +215,12 @@
 		public function is_valid()
 		{
 			// has this form been submitted (or was it another form on the same page)
+			/*
 			if(!isset($_REQUEST['__guard_'.$this->id()])
 					|| $_REQUEST['__guard_'.$this->id()]!=guardToken())
+				return false;
+			*/
+			if(!isset($_REQUEST['__guard_'.$this->id()]))
 				return false;
 
 			$valid = true;
