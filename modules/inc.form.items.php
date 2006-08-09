@@ -409,6 +409,10 @@
 		}
 	}
 
+	class ComboBox extends SelectionFormItem {
+		protected $attributes = array('style' => 'width:250px');
+	}
+
 	class Multiselect extends SelectionFormItem {
 		public function value()
 		{

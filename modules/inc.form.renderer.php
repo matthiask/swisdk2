@@ -312,6 +312,41 @@ EOD;
 			$this->_render($obj, $html);
 		}
 
+		protected function visit_Combobox($obj)
+		{
+			$this->_collect_javascript($obj);
+			$name = $obj->iname();
+			$html = '<select name="'.$name.'" id="'.$name.'"'
+				.$obj->attribute_html().">\n";
+			$value = $obj->value();
+			$items = $obj->items();
+			foreach($items as $id => $title) {
+				$html .= '<option ';
+				if((is_numeric($id) && $id===intval($value))
+						|| (!is_numeric($id) && $id==="$value"))
+					$html .= 'selected="selected" ';
+				$html .= 'value="'.$id.'">'.$title."</option>\n";
+			}
+			$html .= "</select>\n";
+			$html .= '<input type="button" name="'.$name.'_button"'
+				.'id="'.$name.'_button" value=" + " />';
+			$js = '';
+			static $js_sent = false;
+			if(!$js_sent) {
+				$js_sent = true;
+				$js = file_get_contents(SWISDK_ROOT
+					.'lib/contrib/combobox.js')."\n";
+			}
+			$html .= <<<EOD
+<script type="text/javascript">
+//<![CDATA[
+$js	toCombo("$name","{$name}_button");
+//]]>
+</script>
+EOD;
+			$this->_render($obj, $html);
+		}
+
 		protected function visit_Multiselect($obj)
 		{
 			$this->_collect_javascript($obj);
