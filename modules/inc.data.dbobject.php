@@ -750,6 +750,7 @@
 				if(mysqli_connect_errno())
 					SwisdkError::handle(new DBError('Connect failed: '
 						.mysqli_connect_error()));
+				DBObject::$dbhandle[$connection_id]->query('SET NAMES \'UTF-8\'');
 			}
 
 			return DBObject::$dbhandle[$connection_id];
