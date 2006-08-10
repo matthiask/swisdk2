@@ -302,7 +302,6 @@ EOD;
 				.'<a href="javascript:tv_edit()">edit</a>'
 				.' or '
 				.'<a href="javascript:tv_delete()">delete</a> checked'
-				. ($a_html?'<br />'.$a_html:'')
 				.'</div>'
 				.<<<EOD
 <script type="text/javascript">
