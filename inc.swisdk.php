@@ -109,7 +109,7 @@
 
 		public static function require_data_directory($dir)
 		{
-			if(preg_match('/[^A-Za-z0-9\.-_\/]/', $dir)
+			if(preg_match('/[^A-Za-z0-9\.-_\/\-]/', $dir)
 					|| strpos($dir, '..')!==false)
 				SwisdkError::handle(new FatalError(
 					'Invalid path passed to require_data_directory:'
