@@ -38,9 +38,10 @@
 		/**
 		 * add fulltext search field to form
 		 */
-		protected function add_fulltext_field()
+		protected function add_fulltext_field($title=null)
 		{
-			$this->box('search')->add($this->dbobj()->name('query'));
+			$this->box('search')->add($this->dbobj()->name('query'),
+				new TextInput(), $title);
 		}
 
 		public function name()
