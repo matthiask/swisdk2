@@ -429,7 +429,7 @@
 				return;
 			$fields = array_keys($this->field_list());
 			$dttm_regex = '/_('.($new?'creation|':'').'update)_dttm$/';
-			$author_regex = '/_author_id$/';
+			$author_regex = '/_(author|creator)_id$/';
 			foreach($fields as $field) {
 				if(preg_match($dttm_regex, $field))
 					$this->set($field, time());
