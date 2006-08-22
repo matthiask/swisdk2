@@ -175,7 +175,7 @@
 		{
 			if($this->vars === null) {
 				$matches = array();
-				preg_match_all('/\{([A-Za-z_0-9]+)}/', $this->column,
+				preg_match_all('/\{([A-Za-z_0-9]+)}/', $this->args[0],
 					$matches, PREG_PATTERN_ORDER);
 				if(isset($matches[1]))
 					$this->vars = $matches[1];
@@ -187,7 +187,7 @@
 			foreach($this->vars as $v)
 				$vals[] = $data[$v];
 
-			return preg_replace($this->patterns, $vals, $this->column);
+			return preg_replace($this->patterns, $vals, $this->args[0]);
 		}
 
 		protected $vars = null;
