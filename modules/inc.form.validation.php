@@ -395,6 +395,8 @@ EOD;
 			$data = $item->files_data();
 			$mime = $data['type'];
 			if(in_array($data['type'], $this->image_mimetypes)
+					&& preg_match('/\.(png|jpg|jpeg|gif)$/',
+						strtolower($data['name']))
 					&& @getimagesize($data['path'])!==false)
 				return true;
 
