@@ -70,6 +70,11 @@
 		 */
 		protected $javascript = '';
 
+		/**
+		 * current validation status
+		 */
+		protected $valid = null;
+
 		public function __construct($name=null)
 		{
 			if($name)
@@ -210,11 +215,14 @@
 
 		public function is_valid()
 		{
-			$valid = true;
+			if($this->valid!==null)
+				return $this->is_valid();
+
+			$this->valid = true;
 			foreach($this->rules as &$rule)
 				if(!$rule->is_valid($this))
-					$valid = false;
-			return $valid;
+					$this->valid = false;
+			return $this->valid;
 		}
 
 		public function accept($renderer)
@@ -263,7 +271,7 @@
 
 	/**
 	 * you will get a filename relative to CACHE_ROOT.'upload/'. If you want
-	 * to store the file permanently, you have to move it to UPLOAD_ROOT
+	 * to store the file permanently, you have to move it somewhere else
 	 * yourself!
 	 */
 	class FileUpload extends SimpleInput {
@@ -294,6 +302,7 @@
 						$this->files_data['path'])) {
 					$dbobj->set($this->name(), $fname);
 					$this->no_upload = false;
+					$this->files_data['cache_file'] = $fname;
 				}
 			}
 		}
@@ -324,6 +333,34 @@
 		public function __destruct()
 		{
 			$this->unlink_cachefile();
+		}
+	}
+
+	class DBFileUpload extends FileUpload {
+		public function init_value($dbobj)
+		{
+			parent::init_value($dbobj);
+			if(!$this->no_upload) {
+				$name = $this->name();
+				$dbobj[$name.'_file'] = $dbobj[$name];
+				$dbobj[$name.'_name'] = $this->files_data['name'];
+				$dbobj[$name.'_mimetype'] = $this->files_data['type'];
+				$dbobj[$name.'_size'] = $this->files_data['size'];
+				unset($dbobj[$name]);
+
+				// automatically call $this->store_file() while
+				// storing the DBObject. Magic!
+				$dbobj->listener_add('store', array($this, 'store_file'));
+			}
+		}
+
+		public function store_file($dbobj)
+		{
+			if($this->valid && !$this->no_upload) {
+				Swisdk::require_data_directory('upload');
+				copy($this->files_data['path'],
+					DATA_ROOT.'upload/'.$this->files_data['cache_file']);
+			}
 		}
 	}
 
