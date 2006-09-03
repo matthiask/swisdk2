@@ -15,7 +15,9 @@
 	 * it only uses SwisdkError::handle for error conditions.
 	 */
 
-	class DBObject implements Iterator, ArrayAccess {
+	require_once MODULE_ROOT.'inc.event-broadcaster.php';
+
+	class DBObject extends Broadcaster implements Iterator, ArrayAccess {
 
 		/**
 		 * The PHP __CLASS__ macro is near to useless. It would be worth something
@@ -250,6 +252,7 @@
 		 */
 		public function refresh()
 		{
+			$this->listener_call('refresh');
 			if($this->id())
 				$this->data = DBObject::db_get_row('SELECT * FROM '
 					.$this->table.' WHERE '.$this->primary.'='.$this->id(),
@@ -278,6 +281,7 @@
 		 */
 		public function update()
 		{
+			$this->listener_call('store');
 			$this->auto_update_fields();
 			DBObject::db_start_transaction($this->db_connection_id);
 			$res = DBObject::db_query('UPDATE ' . $this->table . ' SET '
@@ -298,6 +302,7 @@
 		 */
 		public function insert($force_primary = false)
 		{
+			$this->listener_call('store');
 			$this->auto_update_fields(true);
 			DBObject::db_start_transaction($this->db_connection_id);
 			if(!$force_primary)
@@ -444,6 +449,7 @@
 		 */
 		public function delete()
 		{
+			$this->listener_call('delete');
 			if(!$this->id())
 				return true;
 			DBObject::db_start_transaction($this->db_connection_id);
@@ -960,6 +966,7 @@
 		 */
 		public function clear()
 		{
+			$this->listener_call('clear');
 			$this->dirty = false;
 			$this->data = array();
 		}
