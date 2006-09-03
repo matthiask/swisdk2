@@ -284,7 +284,7 @@
 		public function init_value($dbobj)
 		{
 			$name = $this->iname();
-			if(isset($_FILES[$name])) {
+			if(isset($_FILES[$name]) && $_FILES[$name]['size']) {
 				$this->files_data = $_FILES[$name];
 				// TODO error checking
 				$fname = preg_replace('/[^A-Za-z0-9\.-_]+/', '_',
@@ -337,9 +337,12 @@
 	}
 
 	class DBFileUpload extends FileUpload {
+		protected $current_value = null;
+
 		public function init_value($dbobj)
 		{
 			parent::init_value($dbobj);
+			$this->current_value = $dbobj->get($this->name().'_name');
 			if(!$this->no_upload) {
 				$name = $this->name();
 				$dbobj[$name.'_file'] = $dbobj[$name];
@@ -361,6 +364,11 @@
 				copy($this->files_data['path'],
 					DATA_ROOT.'upload/'.$this->files_data['cache_file']);
 			}
+		}
+
+		public function current_value()
+		{
+			return $this->current_value;
 		}
 	}
 

@@ -192,6 +192,22 @@ function validate_'.$id.'()
 			$this->visit_SimpleInput($obj);
 		}
 
+		protected function visit_DBFileUpload($obj)
+		{
+			$this->_collect_javascript($obj);
+			$this->file_upload = true;
+			$name = $obj->iname();
+			$current = $obj->current_value();
+			$this->_render($obj, sprintf(
+				'%s<input type="%s" name="%s" id="%s" value="%s" %s />',
+				($current
+					?sprintf('Current: <a href="/download/%s">%s</a><br />',
+						$current, $current)
+					:''),
+				$obj->type(), $name, $name, $obj->value(),
+				$obj->attribute_html()));
+		}
+
 		protected function visit_CheckboxInput($obj)
 		{
 			$this->_collect_javascript($obj);
