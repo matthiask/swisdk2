@@ -131,12 +131,24 @@
 			$id = $obj->id();
 			$js = '<script type="text/javascript">
 //<![CDATA[
+function swisdk_form_do_validate(valid, field, message)
+{
+	document.getElementById(field+\'_span\').firstChild.data =
+		document.getElementById(field+\'_span\').firstChild.data.replace(new RegExp(message), \' \');
+	if(!valid) {
+		document.getElementById(field+\'_span\').firstChild.data += message;
+		return false;
+	}
+	return true;
+}
+
 function validate_'.$id.'()
 {
 	var valid = true;
-	if(!'.implode("()) valid = false;\n\tif(!", $this->functions).'()) valid = false;
+	if(!'.implode(") valid = false;\n\tif(!", $this->functions).') valid = false;
 	return valid;
 }
+'.$this->javascript.'
 //]]>
 </script>';
 			return array('onsubmit="return validate_'.$id.'()"', $js);
@@ -154,9 +166,9 @@ function validate_'.$id.'()
 			// add validation rule javascript
 			$rules = $obj->rules();
 			foreach($rules as &$rule) {
-				list($funcname, $js) = $rule->validation_javascript($obj);
+				list($funccall, $js) = $rule->validation_javascript($obj);
 				$this->javascript .= $js;
-				$this->add_validation_function($funcname);
+				$this->add_validation_function($funccall);
 			}
 		}
 
@@ -504,17 +516,6 @@ EOD;
 				$obj->type(), $name, $name, $obj->value(),
 				$obj->attribute_html());
 		}
-
-		protected function javascript()
-		{
-			if(!$this->javascript)
-				return;
-			return '<script type="text/javascript">'
-				."\n//<![CDATA[\n"
-				.$this->javascript
-				."\n//]]>\n"
-				.'</script>';
-		}
 	}
 
 	class TableFormRenderer extends FormRenderer {
@@ -524,7 +525,6 @@ EOD;
 		{
 			return $this->html_start
 				.$this->grid()->html()
-				.$this->javascript()
 				.$this->html_end;
 		}
 

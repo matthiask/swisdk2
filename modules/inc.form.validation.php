@@ -27,26 +27,15 @@
 
 		public function validation_javascript(&$form)
 		{
-			return null;
-			if(!list($rulefunc, $rulejs) = $this->validation_js_impl($item))
+			if(!list($rulefunc, $rulejs) = $this->validation_js_impl($form))
 				return null;
-			$id = uniqid();
-			$message = $this->message;
-			$funcname = 'form_validate_'.$id;
-			$js = <<<EOD
+			$id = $form->id();
+			return array(
+				"swisdk_form_do_validate($rulefunc, '$id', '{$this->message}')", $rulejs);
+		}
 
-function $funcname()
-{
-	if(!$rulefunc()) {
-		document.getElementById('{$name}_span').firstChild.data = '$message';
-		return false;
-	}
-	document.getElementById('{$name}_span').firstChild.data = ' ';
-	return true;
-}
-$rulejs;
-EOD;
-			return array($funcname, $js);
+		protected function validation_js_impl(&$form)
+		{
 		}
 
 		protected $message;
@@ -69,26 +58,25 @@ EOD;
 				== $dbobj->get($this->field2->name());
 		}
 
-		public function validation_javascript(&$form)
+		protected function validation_js_impl(&$form)
 		{
-			static $sent_func = false;
-			$funcname = 'form_validate_equal_'.uniqid();
 			$id = $form->id();
 			$in1 = $this->field1->iname();
 			$in2 = $this->field2->iname();
-			$js = <<<EOD
-
-function $funcname()
+			static $sent = false;
+			if(!$sent) {
+				$sent = true;
+				$js = <<<EOD
+function form_validate_equal_fields(field1, field2)
 {
-	if(document.getElementById('$in1').value==document.getElementById('$in2').value) {
-		document.getElementById('{$id}_span').firstChild.data = ' ';
-		return true;
-	}
-	document.getElementById('{$id}_span').firstChild.data = '{$this->message}';
-	return false;
+	return document.getElementById(field1).value==document.getElementById(field2).value;
 }
+
 EOD;
-			return array($funcname, $js);
+			}
+			return array(
+				"form_validate_equal_fields('$in1', '$in2')",
+				$js);
 		}
 
 		protected $field1;
@@ -122,23 +110,8 @@ EOD;
 				return null;
 			$name = $item->iname();
 			$message = $this->message;
-			$id = uniqid();
-			$funcname = 'formitem_validate_'.$name.'_'.$id;
-			$js = <<<EOD
-
-function $funcname()
-{
-	document.getElementById('{$name}_span').firstChild.data =
-		document.getElementById('{$name}_span').firstChild.data.replace(/$message/, ' ');
-	if(!$rulefunc('$name')) {
-		document.getElementById('{$name}_span').firstChild.data += '$message';
-		return false;
-	}
-	return true;
-}
-$rulejs;
-EOD;
-			return array($funcname, $js);
+			return array(
+				"swisdk_form_do_validate($rulefunc('$name'), '$name', '{$this->message}')", $rulejs);
 		}
 
 		protected function validation_js_impl(FormItem &$item)
@@ -167,6 +140,7 @@ function formitem_required_rule(id)
 {
 	return document.getElementById(id).value!='';
 }
+
 EOD;
 			}
 			return array('formitem_required_rule', $js);
@@ -202,6 +176,7 @@ function formitem_user_required_rule(id)
 	var user = document.getElementById(id).value;
 	return user!='' && user!=$visitor;
 }
+
 EOD;
 			}
 			return array('formitem_user_required_rule', $js);
@@ -228,6 +203,7 @@ function formitem_numeric_rule(id)
 	var user = document.getElementById(id).value;
 	return value.match(/[0-9]*/);
 }
+
 EOD;
 			}
 			return array('formitem_numeric_rule', $js);
@@ -265,6 +241,7 @@ function formitem_range_rule_$name()
 	var value = parseInt(document.getElementById('$name').value);
 	return value>=$min && value<=$max;
 }
+
 EOD;
 			return array('formitem_range_rule_'.$name, $js);
 		}
@@ -301,6 +278,7 @@ function formitem_regex_rule_$id(id)
 	var value = document.getElementById(id).value;
 	return {$empty_valid}value.match({$this->regex});
 }
+
 EOD;
 			return array('formitem_regex_rule_'.$id, $js);
 		}
