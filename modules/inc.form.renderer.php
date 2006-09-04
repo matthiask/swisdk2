@@ -78,7 +78,8 @@
 				call_user_func(array($this, $method), $obj);
 				return;
 			} else {
-				$parents = class_parents($class);
+				// beginning with PHP5.1, we can pass a string here
+				$parents = class_parents(new $class);
 				foreach($parents as $p) {
 					$method = 'visit_'.$p.$suffix;
 					if(method_exists($this, $method)) {
