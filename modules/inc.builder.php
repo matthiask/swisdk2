@@ -20,51 +20,37 @@
 		public function create_field($field, $title = null)
 		{
 			$dbobj = $this->dbobj();
+			list($type,$fname) = $dbobj->field_type($field);
 			if($title === null)
 				$title = $this->pretty_title($field, $dbobj);
-			$relations = $dbobj->relations();
 
-			if(isset($relations[$fname=$field])
-					||isset($relations[$fname=$dbobj->name($field)])) {
-				switch($relations[$fname]['type']) {
-					case DB_REL_SINGLE:
-						return $this->create_rel_single($fname, $title,
-							$relations[$fname]['class']);
-					case DB_REL_N_TO_M:
-						return $this->create_rel_manytomany($fname, $title,
-							$relations[$fname]['class']);
-					case DB_REL_3WAY:
-						return $this->create_rel_3way($fname, $title,
-							$relations[$fname]['class'],
-							$relations[$fname]['choices']);
-					default:
-						SwisdkError::handle(new FatalError(
-							'Cannot handle'));
-				}
-			}
-
-			$fields = $dbobj->field_list();
-
-			if(isset($fields[$fname=$field])
-					||isset($fields[$fname=$dbobj->name($field)])) {
-				$finfo = $fields[$fname];
-
-				// set default value if it was set in database
-				if($dbobj->get($fname)===null && ($d = $fields[$fname]['Default']))
-					$dbobj->set($fname, $d);
-
-				if(strpos($fname,'dttm')!==false) {
-					return $this->create_date($fname, $title);
-				} else if(strpos($finfo['Type'], 'text')!==false) {
-					return $this->create_textarea($fname, $title);
-				} else if($finfo['Type']=='tinyint(1)') {
+			switch($type) {
+				case DB_FIELD_BOOL:
 					return $this->create_bool($fname, $title);
-				} else if(strpos($finfo['Type'], 'enum')===0) {
+				case DB_FIELD_STRING:
+				case DB_FIELD_INTEGER:
+					return $this->create_text($fname, $title);
+				case DB_FIELD_LONGTEXT:
+					return $this->create_textarea($fname, $title);
+				case DB_FIELD_DATE:
+					return $this->create_date($fname, $title);
+				case DB_FIELD_ENUM:
+					// FIXME this is MySQL dependant (format of enum field)
+					$finfo = $dbobj->field_list($fname);
 					return $this->create_enum($fname, $title,
 						$this->_extract_enum_values($finfo['Type']));
-				} else {
-					return $this->create_text($fname, $title);
-				}
+				case DB_FIELD_FOREIGN_KEY|(DB_REL_SINGLE<<10):
+					$relations = $dbobj->relations();
+					return $this->create_rel_single($fname, $title,
+						$relations[$fname]['class']);
+				case DB_FIELD_FOREIGN_KEY|(DB_REL_N_TO_M<<10):
+					$relations = $dbobj->relations();
+					return $this->create_rel_manytomany($fname, $title,
+						$relations[$fname]['class']);
+				case DB_FIELD_FOREIGN_KEY|(DB_REL_3WAY<<10):
+					$relations = $dbobj->relations();
+					return $this->create_rel_manytomany($fname, $title,
+						$relations[$fname]['class']);
 			}
 		}
 

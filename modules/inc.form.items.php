@@ -488,6 +488,7 @@
 		{
 			if(preg_match('/[^a-z_\.]/', $table))
 				SwisdkError::handle(new FatalError('Invalid table name: '.$table));
+			// FIXME remove hard MySQL dependency
 			$fs = DBObject::db_get_array('SHOW COLUMNS FROM '
 				.$table, 'Field');
 			$field = $fs[$field];
@@ -502,6 +503,7 @@
 		{
 			if(preg_match('/[^a-z_\.]/', $table))
 				SwisdkError::handle(new FatalError('Invalid table name: '.$table));
+			// FIXME remove hard MySQL dependency
 			$fs = DBObject::db_get_array('SHOW COLUMNS FROM '
 				.$table, 'Field');
 			$field = $fs[$field];

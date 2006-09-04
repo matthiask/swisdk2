@@ -1116,6 +1116,43 @@
 			return DBObject::$field_list[$this->class];
 		}
 
+		public function field_type($field)
+		{
+			static $fields = null;
+			static $relations = null;
+			if(!$fields) {
+				$fields = $this->field_list();
+				$relations = $this->relations();
+			}
+
+			if(isset($relations[$fname=$field])
+					||isset($relations[$fname=$this->name($field)])) {
+				return array(DB_FIELD_FOREIGN_KEY | ($relations[$fname]['type']<<10),
+					$fname);
+			}
+
+			if(isset($fields[$fname=$field])
+					||isset($fields[$fname=$this->name($field)])) {
+				$finfo = DBObject::$field_list[$this->class][$fname];
+				$type = 0;
+				if(strpos($fname,'dttm')!==false) {
+					$type = DB_FIELD_DATE;
+				} else if(strpos($finfo['Type'], 'text')!==false) {
+					$type = DB_FIELD_LONGTEXT;
+				} else if($finfo['Type']=='tinyint(1)') {
+					$type = DB_FIELD_BOOL;
+				} else if(strpos($finfo['Type'], 'enum')===0) {
+					$type = DB_FIELD_ENUM;
+				} else if(strpos($finfo['Type'], 'int')!==false) {
+					$type = DB_FIELD_INTEGER;
+				} else {
+					$type = DB_FIELD_STRING;
+				}
+
+				return array($type, $fname);
+			}
+		}
+
 		public static function &tables()
 		{
 			if(DBObject::$_tables===null)

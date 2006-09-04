@@ -17,6 +17,15 @@
 	// this string denotes the section name in the config file!
 	define('DB_CONNECTION_DEFAULT', 'db');
 
+	define('DB_FIELD_INTEGER', 1);
+	define('DB_FIELD_BOOL', 2);
+	define('DB_FIELD_STRING', 4);
+	define('DB_FIELD_LONGTEXT', 8);
+	define('DB_FIELD_DATE', 16);
+	define('DB_FIELD_ENUM', 32);
+	// DB_FIELD_FOREIGN_KEY may be OR'ed with DB_REL_*<<10
+	define('DB_FIELD_FOREIGN_KEY', 64);
+
 	require_once MODULE_ROOT.'inc.data.dbobject.php';
 	require_once MODULE_ROOT.'inc.data.dbocontainer.php';
 	require_once MODULE_ROOT.'inc.data.dbobjectml.php';
