@@ -56,7 +56,9 @@
 		public function set_clauses(DBOContainer &$container)
 		{
 			$obj = $this->box('search')->dbobj();
-			$container->add_order_column($obj->order, $obj->dir);
+			$fields = $obj->field_list();
+			if(isset($fields[$obj->order]))
+				$container->add_order_column($obj->order, $obj->dir);
 			$container->set_limit($obj->start, $obj->limit);
 			if($query = $obj->query)
 				$container->set_fulltext($query);
@@ -266,7 +268,7 @@ function init_tableview()
 	var tables = document.getElementsByTagName('table');
 	for(i=0; i<tables.length; i++) {
 		if(tables[i].className=='s-table') {
-			var rows = tables[i].getElementsByTagName('tr');
+			var rows = tables[i].getElementsByTagName('tbody')[0].getElementsByTagName('tr');
 			for(j=0; j<rows.length; j++) {
 				rows[j].onclick = function(){
 					var cb = this.getElementsByTagName('input')[0];
