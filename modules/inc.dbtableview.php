@@ -80,7 +80,10 @@
 		public function html_end()
 		{
 			return $this->grid('action')->html()
-				.$this->javascript()
+				.'<script type="text/javascript">'."\n"
+				."//<![CDATA[\n"
+				.$this->javascript
+				."\n//]]>\n</script>\n"
 				.$this->html_end;
 		}
 
