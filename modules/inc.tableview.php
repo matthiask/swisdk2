@@ -240,7 +240,7 @@
 			$gid = guardToken('delete');
 			$html =<<<EOD
 <a href="{$this->title}_edit/$id"><img src="/images/icons/database_edit.png" alt="edit" /></a>
-<a onclick="if(confirm('Really delete?')){window.location.href='{$this->title}_delete/$id?guard=$gid';}" href="#">
+<a href="{$this->title}_delete/$id" onclick="if(confirm('Really delete?')){this.href+='?guard=$gid';}else{return false;}">
 	<img src="/images/icons/database_delete.png" alt="delete" />
 </a>
 EOD;

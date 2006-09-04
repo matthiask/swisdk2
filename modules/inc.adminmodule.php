@@ -376,9 +376,6 @@
 	class AdminComponent_delete extends AdminComponent {
 		public function run()
 		{
-			if(getInput('guard')!=guardToken('delete'))
-				$this->goto('_index');
-
 			if($this->args[0]=='multiple')
 				$this->delete_multiple();
 			else
@@ -387,6 +384,9 @@
 
 		protected function delete_multiple()
 		{
+			if(getInput('guard')!=guardToken('delete'))
+				$this->goto('_index');
+
 			$dbo = null;
 
 			if($this->multilanguage)
@@ -407,6 +407,15 @@
 
 		protected function delete_single()
 		{
+			if(getInput('delete_confirmation_page')
+					&& (strtolower(getInput('confirmation_command'))!='delete'))
+				$this->goto('_index');
+
+			if(getInput('guard')!=guardToken('delete')) {
+				$this->display_confirmation_page();
+				return;
+			}
+
 			$dbo = null;
 			if($this->multilanguage)
 				$dbo = DBObjectML::find($this->dbo_class, $this->args[0]);
@@ -421,6 +430,48 @@
 
 			$dbo->delete();
 			$this->goto('_index');
+		}
+
+		protected function display_confirmation_page()
+		{
+			$dbo = null;
+			if($this->multilanguage)
+				$dbo = DBObjectML::find($this->dbo_class, $this->args[0]);
+			else
+				$dbo = DBObject::find($this->dbo_class, $this->args[0]);
+			if(!$dbo)
+				SwisdkError::handle(new FatalError(
+					'AdminComponent_delete::run() - Can\'t find '
+					.'the data.'
+					.' Class is: '.$this->dbo_class.' Argument is: '
+					.intval($this->args[0])));
+
+			$token = guardToken('delete');
+			$class = $dbo->_class();
+			$id = $dbo->id();
+			$title = $dbo->title();
+			$name = $dbo->file_name;
+
+			$this->html = <<<EOD
+<form method="post" action="?delete_confirmation_page=1" class="sf-form" accept-charset="utf-8">
+<input type="hidden" name="guard" value="$token" />
+<table>
+<tr class="sf-form-title">
+	<td colspan="2"><big><strong>Confirmation required</strong></big></td>
+</tr>
+<tr>
+	<td></td>
+	<td>Do you really want to delete $class $id (<a href="/download/$name">$title</a>)?</td>
+</tr>
+<tr class="sf-button">
+	<td colspan="2">
+		<input type="submit" name="confirmation_command" value="Delete" />
+		<input type="submit" name="confirmation_command" value="Cancel" />
+	</td>
+</tr>
+</table>
+</form>
+EOD;
 		}
 	}
 
