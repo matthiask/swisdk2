@@ -120,13 +120,10 @@
 		 */
 		private function __construct()
 		{
-			$dir = Swisdk::website_config_value('template_dir');
-			if($dir)
-				$dir .= '/';
 			$this->mTemplates = array(
-				'fullTemplate' => $dir.Swisdk::website_config_value('template.base.full'),
-				'header' => $dir.Swisdk::website_config_value('template.base.header'),
-				'footer' => $dir.Swisdk::website_config_value('template.base.footer'));
+				'fullTemplate' => Swisdk::template('base.full'),
+				'header' => Swisdk::template('base.header'),
+				'footer' => Swisdk::template('base.footer'));
 			$this->mTitle = Swisdk::website_config_value('title');
 		}
 

@@ -140,6 +140,7 @@
 
 		public static function config_value($key)
 		{
+			$key = strtolower($key);
 			if(isset(Swisdk::$config[$key]))
 				return Swisdk::$config[$key];
 			return null;
@@ -147,6 +148,7 @@
 
 		public static function website_config_value($key)
 		{
+			$key = strtolower($key);
 			if(isset(Swisdk::$config[$key]))
 				return Swisdk::$config[$key];
 			$website = null;
@@ -165,6 +167,16 @@
 					return null;
 			}
 			return Swisdk::$config['website.'.$website.'.'.$key];
+		}
+
+		public static function template($key)
+		{
+			$key = strtolower($key);
+			$dir = Swisdk::website_config_value('template_dir');
+			if($dir)
+				$dir = str_replace('//', '/', $dir.'/');
+
+			return $dir.Swisdk::website_config_value('template.'.$key);
 		}
 
 		public static function language($key=null)
