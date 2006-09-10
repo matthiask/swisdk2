@@ -84,8 +84,7 @@
 		public function dirty()		{ return $this->dirty; }
 
 		/**
-		 * main DB handle (holds the mysqli instance in the current version
-		 * of DBObject)
+		 * main DB handle (holds the PDO instances)
 		 */
 		protected static $dbhandle = null;
 
@@ -283,9 +282,22 @@
 		{
 			$this->listener_call('store');
 			$this->auto_update_fields();
+
+			$dbh = DBObject::db($this->db_connection_id);
+			$vals = array();
+			$fields = array_keys($this->field_list());
+			foreach($fields as $field) {
+				if($field==$this->primary)
+					continue;
+				if(isset($this->data[$field]))
+					$vals[] = $field.'='
+						.$dbh->quote($this->data[$field]);
+			}
+			$vals_sql = implode(',', $vals);
+
 			DBObject::db_start_transaction($this->db_connection_id);
 			$res = DBObject::db_query('UPDATE ' . $this->table . ' SET '
-				. $this->_vals_sql() . ' WHERE '
+				. $vals_sql . ' WHERE '
 				. $this->primary . '=' . $this->id(),
 				$this->db_connection_id);
 			if($res===false || !$this->_update_relations()) {
@@ -304,11 +316,23 @@
 		{
 			$this->listener_call('store');
 			$this->auto_update_fields(true);
+
+			$dbh = DBObject::db($this->db_connection_id);
+			$keys = array();
+			$vals = array();
+			$fields = array_keys($this->field_list());
+			foreach($fields as $field) {
+				if($field==$this->primary && !$force_primary)
+					continue;
+				if(isset($this->data[$field])) {
+					$keys[] = $field;
+					$vals[] = $dbh->quote($this->data[$field]);
+				}
+			}
+			$vals_sql = '('.implode(',', $keys).') VALUES ('.implode(',', $vals).')';
+
 			DBObject::db_start_transaction($this->db_connection_id);
-			if(!$force_primary)
-				$this->unset_primary();
-			$res = DBObject::db_query('INSERT INTO ' . $this->table
-				. ' SET ' . $this->_vals_sql(),
+			$res = DBObject::db_query('INSERT INTO ' . $this->table . $vals_sql,
 				$this->db_connection_id);
 			if($res===false) {
 				DBObject::db_rollback($this->db_connection_id);
@@ -400,28 +424,6 @@
 			}
 
 			return true;
-		}
-
-		/**
-		 * Private helper for update() and insert(). This function takes care
-		 * of SQL injections by properly escaping every string that hits the
-		 * database.
-		 *
-		 * We do not need to truncate the data as long as the maximal POST
-		 * size (default 2MB) is smaller than the mysql packet size (default 16MB).
-		 */
-		protected function _vals_sql()
-		{
-			$dbh = DBObject::db($this->db_connection_id);
-			$vals = array();
-			$fields = array_keys($this->field_list());
-			foreach($fields as $field) {
-				if(isset($this->data[$field]))
-					$vals[] = $field.'=\''
-						.$dbh->escape_string($this->data[$field])
-						.'\'';
-			}
-			return implode(',', $vals);
 		}
 
 		/**
@@ -747,16 +749,12 @@
 		{
 			if(!isset(DBObject::$dbhandle[$connection_id])) {
 				$prefix = 'db'.($connection_id=='db'?'':'.'.$connection_id);
-				DBObject::$dbhandle[$connection_id] = new mysqli(
-					Swisdk::config_value($prefix.'.host'),
-					Swisdk::config_value($prefix.'.username'),
-					Swisdk::config_value($prefix.'.password'),
-					Swisdk::config_value($prefix.'.database')
-				);
-				if(mysqli_connect_errno())
-					SwisdkError::handle(new DBError('Connect failed: '
-						.mysqli_connect_error()));
-				DBObject::$dbhandle[$connection_id]->query('SET NAMES \'UTF-8\'');
+				DBObject::$dbhandle[$connection_id] = new PDO(
+					Swisdk::config_value($prefix.'.dso'));
+				if(Swisdk::config_value('error.debug_mode'))
+					DBObject::$dbhandle[$connection_id]->setAttribute(
+					PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+				DBObject::$dbhandle[$connection_id]->setFetchMode(PDO::FETCH_ASSOC);
 			}
 
 			return DBObject::$dbhandle[$connection_id];
@@ -774,17 +772,21 @@
 		 */
 		public static function db_query($sql, $connection_id = DB_CONNECTION_DEFAULT)
 		{
+			Swisdk::log($sql, 'db');
 			$dbh = DBObject::db($connection_id);
 			$result = $dbh->query($sql);
 			DBObject::$error_obj = null;
-			if($dbh->errno) {
-				$error = new DBError("Database error: ".$dbh->error, $sql);
+			if($result===false) {
+				$error = new DBError("Database error: "
+					.implode(', ', $dbh->errorInfo()), $sql);
 				if(DBObject::$handle_error)
 					SwisdkError::handle($error);
 				else
 					DBObject::$error_obj = $error;
 				return false;
 			}
+			if($result instanceof PDOStatement)
+				$result->setFetchMode(PDO::FETCH_ASSOC);
 			return $result;
 		}
 
@@ -806,7 +808,7 @@
 			$res = DBObject::db_query($sql, $connection_id);
 			if($res===false)
 				return $res;
-			return $res->fetch_assoc();
+			return $res->fetch();
 		}
 
 		/**
@@ -834,14 +836,14 @@
 			if($result_key) {
 				if(is_array($result_key) && (($key = $result_key[0])
 						&& ($val = $result_key[1]))) {
-					while($row = $res->fetch_assoc())
+					while($row = $res->fetch())
 						$array[$row[$key]] = $row[$val];
 				} else {
-					while($row = $res->fetch_assoc())
+					while($row = $res->fetch())
 						$array[$row[$result_key]] = $row;
 				}
 			} else {
-				while($row = $res->fetch_assoc())
+				while($row = $res->fetch())
 					$array[] = $row;
 			}
 			return $array;
@@ -855,22 +857,21 @@
 		 * though. Perl does only now two escape functions and they work for
 		 * everything...)
 		 */
-		public static function db_escape($str, $quote = true,
+		public static function db_escape($str,
 			$connection_id = DB_CONNECTION_DEFAULT)
 		{
 			if($quote!==false)
-				return '\''.DBObject::db($connection_id)
-					->escape_string($str).'\'';
-			return DBObject::db($connection_id)->escape_string($str);
+				return DBObject::db($connection_id)->quote($str);
+			return DBObject::db($connection_id)->quote($str);
 		}
 
 		/**
 		 * this function is used internally by DBOContainer::add_cl
 		 */
-		public static function db_escape_ref(&$str, $quote = true,
+		public static function db_escape_ref(&$str,
 			$connection_id = DB_CONNECTION_DEFAULT)
 		{
-			$str = DBObject::db($connection_id)->escape_string($str);
+			$str = DBObject::db($connection_id)->quote($str);
 			if($quote!==false)
 				$str = '\''.$str.'\'';
 		}
@@ -882,7 +883,7 @@
 		*/
 		public static function db_insert_id($connection_id = DB_CONNECTION_DEFAULT)
 		{
-			return DBObject::db($connection_id)->insert_id;
+			return DBObject::db($connection_id)->lastInsertId();
 		}
 
 		/**
@@ -894,7 +895,7 @@
 		public static function db_start_transaction($connection_id = DB_CONNECTION_DEFAULT)
 		{
 			if(DBObject::$in_transaction[$connection_id]==0)
-				DBObject::db($connection_id)->autocommit(false);
+				DBObject::db($connection_id)->beginTransaction();
 			DBObject::$in_transaction[$connection_id]++;
 		}
 
@@ -904,7 +905,6 @@
 			if(DBObject::$in_transaction[$connection_id]<=0) {
 				$dbh = DBObject::db($connection_id);
 				$dbh->commit();
-				$dbh->autocommit(true);
 				DBObject::$in_transaction[$connection_id] = 0;
 			}
 		}
@@ -914,8 +914,7 @@
 			DBObject::$in_transaction[$connection_id]--;
 			if(DBObject::$in_transaction[$connection_id]<=0) {
 				$dbh = DBObject::db($connection_id);
-				$dbh->rollback();
-				$dbh->autocommit(true);
+				$dbh->rollBack();
 				DBObject::$in_transaction[$connection_id] = 0;
 			}
 		}
@@ -1106,9 +1105,25 @@
 		public function &field_list($field = null)
 		{
 			if(!isset(DBObject::$field_list[$this->class])) {
-				$rows = DBObject::db_get_array('SHOW COLUMNS FROM '
-					.$this->table(), 'Field');
-				DBObject::$field_list[$this->class] = $rows;
+				$dbh = DBObject::db($this->db_connection_id);
+				$driver = $dbh->getAttribute(PDO::ATTR_DRIVER_NAME);
+				if($driver=='mysql') {
+					$rows = DBObject::db_get_array('SHOW COLUMNS FROM '
+						.$this->table(), 'Field');
+					DBObject::$field_list[$this->class] = $rows;
+				} else if($driver=='sqlite') {
+					$columns = DBObject::db_get_array('PRAGMA table_info(\''.$this->table().'\')');
+					$fl = array();
+					foreach($columns as $column) {
+						$fl[$column['name']] = array(
+							'Field' => $column['name'],
+							'Type' => $column['type']);
+					}
+					DBObject::$field_list[$this->class] = $fl;
+				} else {
+					SwisdkError::handle(new FatalError('Cannot act on PDO DB type '
+						.$driver));
+				}
 			}
 			if($field!==null
 				&& isset(DBObject::$field_list[$this->class][$field]))

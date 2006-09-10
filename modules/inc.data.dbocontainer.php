@@ -122,13 +122,13 @@
 				return false;
 
 			if($this->init_index!==null) {
-				while($row = $res->fetch_assoc()) {
+				while($row = $res->fetch()) {
 					$obj = clone $this->obj;
 					$obj->set_data($row);
 					$this->data[$obj->{$this->init_index}] = $obj;
 				}
 			} else {
-				while($row = $res->fetch_assoc()) {
+				while($row = $res->fetch()) {
 					$obj = clone $this->obj;
 					$obj->set_data($row);
 					$this->data[$obj->id()] = $obj;
@@ -200,7 +200,7 @@
 				$rel = $relations[$clause];
 				$this->add_join($clause);
 				$this->clause_sql .= $binding.' '.$rel['foreign'].'='
-					.DBObject::db_escape($data, true,
+					.DBObject::db_escape($data,
 						$this->obj->db_connection());
 				return;
 			}
@@ -229,7 +229,7 @@
 				}
 			} else {
 				$this->clause_sql .= $binding.$clause
-					.DBObject::db_escape($data, true, $this->obj->db_connection());
+					.DBObject::db_escape($data, $this->obj->db_connection());
 			}
 		}
 
@@ -341,8 +341,9 @@
 				&& count($fields = $this->obj->_fulltext_fields())) {
 
 				$sql = ' AND (';
-				$search = DBObject::db_escape($this->fulltext_search, false,
-					$this->obj->db_connection());
+				$search = preg_replace('/^\'(.*)\'$/', '\1',
+					DBObject::db_escape($this->fulltext_search,
+					$this->obj->db_connection()));
 				$sql .= implode(' LIKE \'%' . $search . '%\' OR ', $fields);
 				$sql .= ' LIKE \'%' . $search . '%\')';
 				return $sql;
