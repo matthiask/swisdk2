@@ -123,6 +123,17 @@
 						'Could not create data directory '.$dir));
 		}
 
+		public static function log($message, $log='error')
+		{
+			Swisdk::require_data_directory('log');
+			$fname = Swisdk::config_value($log.'.logfile');
+			if(!$fname)
+				return;
+			$fp = @fopen(DATA_ROOT.'log/'.$fname, 'a');
+			@fwrite($fp, date(DATE_W3C).' '.$message."\n");
+			@fclose($fp);
+		}
+
 		public static function dump()
 		{
 			if(!Swisdk::config_value('error.debug_mode'))
