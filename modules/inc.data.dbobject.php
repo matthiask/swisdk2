@@ -749,12 +749,25 @@
 		{
 			if(!isset(DBObject::$dbhandle[$connection_id])) {
 				$prefix = 'db'.($connection_id=='db'?'':'.'.$connection_id);
-				DBObject::$dbhandle[$connection_id] = new PDO(
-					Swisdk::config_value($prefix.'.dso'));
+				$driver = Swisdk::config_value($prefix.'.driver');
+				if($driver=='sqlite') {
+					DBObject::$dbhandle[$connection_id] = new PDO('sqlite:'
+						.Swisdk::config_value($prefix.'.dbfile'));
+				} else if($driver=='mysql') {
+					$dbname = Swisdk::config_value($prefix.'.dbname');
+					// backward compatibility:
+					if(!$dbname)
+						$dbname = Swisdk::config_value($prefix.'.database');
+					DBObject::$dbhandle[$connection_id] = new PDO(
+						sprintf('mysql:host=%s;dbname=%s',
+							Swisdk::config_value($prefix.'.host'),
+							$dbname),
+						Swisdk::config_value($prefix.'.username'),
+						Swisdk::config_value($prefix.'.password'));
+				}
 				if(Swisdk::config_value('error.debug_mode'))
 					DBObject::$dbhandle[$connection_id]->setAttribute(
 					PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
-				DBObject::$dbhandle[$connection_id]->setFetchMode(PDO::FETCH_ASSOC);
 			}
 
 			return DBObject::$dbhandle[$connection_id];
