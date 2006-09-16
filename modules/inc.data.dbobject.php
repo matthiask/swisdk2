@@ -1144,8 +1144,6 @@
 						$fl[$field] = DB_FIELD_LONGTEXT;
 					} else if($type=='tinyint(1)') {
 						$fl[$field] = DB_FIELD_BOOL;
-					} else if(stripos($type, 'enum')===0) {
-						$fl[$field] = DB_FIELD_ENUM;
 					} else if(stripos($type, 'int')!==false) {
 						$fl[$field] = DB_FIELD_INTEGER;
 					} else {
@@ -1172,8 +1170,6 @@
 						$fl[$field] = DB_FIELD_LONGTEXT;
 					} else if($type=='BOOL') {
 						$fl[$field] = DB_FIELD_BOOL;
-					} else if(stripos($type, 'enum')===0) {
-						$fl[$field] = DB_FIELD_ENUM;
 					} else if(stripos($type, 'INTEGER')!==false) {
 						$fl[$field] = DB_FIELD_INTEGER;
 					} else {

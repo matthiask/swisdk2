@@ -154,19 +154,6 @@
 	}
 
 	/**
-	 * pass the enum values array as third parameter, or not...
-	 */
-	class EnumTableViewColumn extends TableViewColumn {
-		public function html(&$data)
-		{
-			$str = $data[$this->column];
-			if(isset($this->args[0][$str]))
-				return $this->args[0][$str];
-			return $str;
-		}
-	}
-
-	/**
 	 * Example template:
 	 * <a href="/overview/{item_id}">{item_title}</a>
 	 */

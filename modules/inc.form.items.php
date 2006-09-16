@@ -480,39 +480,6 @@
 		}
 	}
 
-	/**
-	 * display all enum choices for a given SQL field
-	 */
-	class EnumMultiInput extends Multiselect {
-		public function __construct($table, $field)
-		{
-			if(preg_match('/[^a-z_\.]/', $table))
-				SwisdkError::handle(new FatalError('Invalid table name: '.$table));
-			// FIXME remove hard MySQL dependency
-			$fs = DBObject::db_get_array('SHOW COLUMNS FROM '
-				.$table, 'Field');
-			$field = $fs[$field];
-			$array = explode('\',\'', substr($field['Type'], 6,
-				strlen($field['Type'])-8));
-			$this->set_items(array_combine($array, $array));
-		}
-	}
-
-	class EnumInput extends DropdownInput {
-		public function __construct($table, $field)
-		{
-			if(preg_match('/[^a-z_\.]/', $table))
-				SwisdkError::handle(new FatalError('Invalid table name: '.$table));
-			// FIXME remove hard MySQL dependency
-			$fs = DBObject::db_get_array('SHOW COLUMNS FROM '
-				.$table, 'Field');
-			$field = $fs[$field];
-			$array = explode('\',\'', substr($field['Type'], 6,
-				strlen($field['Type'])-8));
-			$this->set_items(array_combine($array, $array));
-		}
-	}
-
 	class ThreewayInput extends FormItem {
 		protected $relation;
 

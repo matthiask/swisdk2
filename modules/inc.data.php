@@ -22,7 +22,6 @@
 	define('DB_FIELD_STRING', 4);
 	define('DB_FIELD_LONGTEXT', 8);
 	define('DB_FIELD_DATE', 16);
-	define('DB_FIELD_ENUM', 32);
 	// DB_FIELD_FOREIGN_KEY may be OR'ed with DB_REL_*<<10
 	define('DB_FIELD_FOREIGN_KEY', 64);
 

@@ -36,12 +36,6 @@
 					return $this->create_textarea($field, $title);
 				case DB_FIELD_DATE:
 					return $this->create_date($field, $title);
-				case DB_FIELD_ENUM:
-					die('Enums are not supported by all databases');
-					// FIXME this is MySQL dependant (format of enum field)
-					$finfo = $dbobj->field_list($field);
-					return $this->create_enum($field, $title,
-						$this->_extract_enum_values($finfo['Type']));
 				case DB_FIELD_FOREIGN_KEY|(DB_REL_SINGLE<<10):
 					$relations = $dbobj->relations();
 					return $this->create_rel_single($field, $title,
@@ -106,31 +100,13 @@
 		abstract public function create_bool($fname, $title);
 
 		/**
-		 * special handling of enum fields
-		 */
-		abstract public function create_enum($fname, $title, $values);
-
-		/**
 		 * everything else
 		 */
 		abstract public function create_text($fname, $title);
-
-		/**
-		 * helper which parses the MySQL enum field type description
-		 * and returns an array of all enums
-		 *
-		 * enum('a','b','c') => array('a'=>'a', 'b'=>'b', 'c'=>'c')
-		 */
-		protected function _extract_enum_values($string)
-		{
-			$array = explode('\',\'', substr($string, 6,
-				strlen($string)-8));
-			return array_combine($array, $array);
-		}
 	}
 
 	/**
-	 * TODO use default value from DB when constructing form? (not only for enums)
+	 * TODO use default value from DB when constructing form?
 	 */
 
 	class FormBuilder extends BuilderBase {
@@ -267,13 +243,6 @@
 			return $this->form->add($fname, new CheckboxInput(), $title);
 		}
 
-		public function create_enum($fname, $title, $values)
-		{
-			$obj = new DropdownInput();
-			$obj->set_items($values);
-			return $this->form->add($fname, $obj, $title);
-		}
-
 		public function create_text($fname, $title)
 		{
 			return $this->form->add($fname, new TextInput(), $title);
@@ -406,12 +375,6 @@
 		{
 			$this->tv->append_column(
 				new BoolTableViewColumn($fname, $title));
-		}
-
-		public function create_enum($fname, $title, $values)
-		{
-			$this->tv->append_column(
-				new EnumTableViewColumn($fname, $title, $values));
 		}
 
 		public function create_text($fname, $title)
