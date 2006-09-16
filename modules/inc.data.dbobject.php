@@ -773,6 +773,11 @@
 			return DBObject::$dbhandle[$connection_id];
 		}
 
+		public function db_driver()
+		{
+			return DBObject::db($this->db_connection_id)->getAttribute(PDO::ATTR_DRIVER_NAME);
+		}
+
 		/**
 		 * Use the following functions if you need raw DB access or if the DBObject
 		 * interface would be to cumbersome to do what you need to do.
@@ -1121,8 +1126,7 @@
 			if(isset(DBObject::$_field_list[$this->db_connection_id][$this->class]))
 				return DBObject::$_field_list[$this->db_connection_id][$this->class];
 			$fl = array();
-			$dbh = DBObject::db($this->db_connection_id);
-			$driver = $dbh->getAttribute(PDO::ATTR_DRIVER_NAME);
+			$driver = $this->db_driver();
 			$relations = $this->relations();
 
 			if($driver=='mysql') {
