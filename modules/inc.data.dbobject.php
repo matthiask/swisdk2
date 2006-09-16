@@ -886,12 +886,10 @@
 		/**
 		 * this function is used internally by DBOContainer::add_cl
 		 */
-		public static function db_escape_ref(&$str,
+		public static function db_escape_ref($key, &$str,
 			$connection_id = DB_CONNECTION_DEFAULT)
 		{
 			$str = DBObject::db($connection_id)->quote($str);
-			if($quote!==false)
-				$str = '\''.$str.'\'';
 		}
 
 		/**
