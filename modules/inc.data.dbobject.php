@@ -434,10 +434,10 @@
 		{
 			if(!$this->auto_update_fields)
 				return;
-			$fields = array_keys($this->field_list());
+			$fields = $this->field_list();
 			$dttm_regex = '/_('.($new?'creation|':'').'update)_dttm$/';
 			$author_regex = '/_(author|creator)_id$/';
-			foreach($fields as $field) {
+			foreach($fields as $field => $type) {
 				if(preg_match($dttm_regex, $field))
 					$this->set($field, time());
 				else if($new && preg_match($author_regex, $field)
@@ -808,7 +808,7 @@
 			$dbo = DBObject::create($class);
 			$p = $dbo->_prefix();
 			$sql = 'CREATE TEMPORARY TABLE '.$dbo->table().' ('
-				.$p.implode(' INT(11), '.$p, $fields).' INT(11))';
+				.$p.implode(' INTEGER, '.$p, $fields).' INTEGER)';
 			return DBObject::db_query($sql);
 		}
 
@@ -890,9 +890,7 @@
 		}
 
 		/**
-		*	Wraps the mysqli_insert_id of mysqli.
-		*   "Returns the auto generated id used in the last query"
-		*	@see http://www.php.net/manual-lookup.php?pattern=mysqli_insert_id
+		* returns the primary key value of the last inserted row
 		*/
 		public static function db_insert_id($connection_id = DB_CONNECTION_DEFAULT)
 		{
@@ -1096,89 +1094,101 @@
 		 * Various helpers
 		 */
 
-		protected static $fulltext_fields = array();
-		protected static $field_list = array();
+		protected static $_fulltext_fields = array();
+		protected static $_field_list = array();
 		protected static $_tables = array();
 
 		public function &_fulltext_fields()
 		{
-			if(!isset(DBObject::$fulltext_fields[$this->class])) {
-				DBObject::$fulltext_fields[$this->class] = array();
+			if(!isset(DBObject::$_fulltext_fields[$this->db_connection_id]))
+				DBObject::$_fulltext_fields[$this->db_connection_id] = array();
+			$fulltext_fields =& DBObject::$_fulltext_fields[$this->db_connection_id];
+			if(!isset($fulltext_fields[$this->class])) {
+				$fulltext_fields[$this->class] = array();
 				$rows = $this->field_list();
-				foreach($rows as &$row) {
-					if(stripos($row['Type'], 'char')!==false
-						|| stripos($row['Type'], 'text')!==false)
-						DBObject::$fulltext_fields[$this->class][] =
-							$row['Field'];
+				foreach($rows as $field => &$row) {
+					list($type,$fname) = $this->field_type($field);
+					if(in_array($type, array(
+							DB_FIELD_STRING, DB_FIELD_LONGTEXT)))
+						$fulltext_fields[] = $field;
 				}
 			}
-			return DBObject::$fulltext_fields[$this->class];
+			return $fulltext_fields[$this->class];
 		}
 
-		public function &field_list($field = null)
+		public function &field_list()
 		{
-			if(!isset(DBObject::$field_list[$this->class])) {
-				$dbh = DBObject::db($this->db_connection_id);
-				$driver = $dbh->getAttribute(PDO::ATTR_DRIVER_NAME);
-				if($driver=='mysql') {
-					$rows = DBObject::db_get_array('SHOW COLUMNS FROM '
-						.$this->table(), 'Field');
-					DBObject::$field_list[$this->class] = $rows;
-				} else if($driver=='sqlite') {
-					$columns = DBObject::db_get_array('PRAGMA table_info(\''.$this->table().'\')');
-					$fl = array();
-					foreach($columns as $column) {
-						$fl[$column['name']] = array(
-							'Field' => $column['name'],
-							'Type' => $column['type']);
+			if(isset(DBObject::$_field_list[$this->db_connection_id][$this->class]))
+				return DBObject::$_field_list[$this->db_connection_id][$this->class];
+			$fl = array();
+			$dbh = DBObject::db($this->db_connection_id);
+			$driver = $dbh->getAttribute(PDO::ATTR_DRIVER_NAME);
+			$relations = $this->relations();
+
+			if($driver=='mysql') {
+				$columns = DBObject::db_get_array('SHOW COLUMNS FROM '
+					.$this->table(), array('Field','Type'));
+				$fl = array();
+				foreach($columns as $field => $type) {
+					// relations?
+					if(isset($relations[$field])) {
+						$fl[$field] = DB_FIELD_FOREIGN_KEY
+							|($relations[$field]['type']<<10);
+						continue;
 					}
-					DBObject::$field_list[$this->class] = $fl;
-				} else {
-					SwisdkError::handle(new FatalError('Cannot act on PDO DB type '
-						.$driver));
+
+					// determine field type
+					if(stripos($field,'dttm')!==false) {
+						$fl[$field] = DB_FIELD_DATE;
+					} else if(stripos($type, 'text')!==false) {
+						$fl[$field] = DB_FIELD_LONGTEXT;
+					} else if($type=='tinyint(1)') {
+						$fl[$field] = DB_FIELD_BOOL;
+					} else if(stripos($type, 'enum')===0) {
+						$fl[$field] = DB_FIELD_ENUM;
+					} else if(stripos($type, 'int')!==false) {
+						$fl[$field] = DB_FIELD_INTEGER;
+					} else {
+						$fl[$field] = DB_FIELD_STRING;
+					}
 				}
-			}
-			if($field!==null
-				&& isset(DBObject::$field_list[$this->class][$field]))
-				return DBObject::$field_list[$this->class][$field];
-			return DBObject::$field_list[$this->class];
-		}
+				$field_list[$this->class] = $fl;
 
-		public function field_type($field)
-		{
-			static $fields = null;
-			static $relations = null;
-			if(!$fields) {
-				$fields = $this->field_list();
-				$relations = $this->relations();
-			}
+			} else if($driver=='sqlite') {
+				$columns = DBObject::db_get_array('PRAGMA table_info(\''
+					.$this->table().'\')', array('name', 'type'));
+				foreach($columns as $field => $type) {
+					// relations?
+					if(isset($relations[$field])) {
+						$fl[$field] = DB_FIELD_FOREIGN_KEY
+							|($relations[$field]['type']<<10);
+						continue;
+					}
 
-			if(isset($relations[$fname=$field])
-					||isset($relations[$fname=$this->name($field)])) {
-				return array(DB_FIELD_FOREIGN_KEY | ($relations[$fname]['type']<<10),
-					$fname);
-			}
+					// determine field type
+					if(stripos($field,'dttm')!==false) {
+						$fl[$field] = DB_FIELD_DATE;
+					} else if(stripos($type, 'BLOB')!==false) {
+						$fl[$field] = DB_FIELD_LONGTEXT;
+					} else if($type=='BOOL') {
+						$fl[$field] = DB_FIELD_BOOL;
+					} else if(stripos($type, 'enum')===0) {
+						$fl[$field] = DB_FIELD_ENUM;
+					} else if(stripos($type, 'INTEGER')!==false) {
+						$fl[$field] = DB_FIELD_INTEGER;
+					} else {
+						$fl[$field] = DB_FIELD_STRING;
+					}
 
-			if(isset($fields[$fname=$field])
-					||isset($fields[$fname=$this->name($field)])) {
-				$finfo = DBObject::$field_list[$this->class][$fname];
-				$type = 0;
-				if(strpos($fname,'dttm')!==false) {
-					$type = DB_FIELD_DATE;
-				} else if(strpos($finfo['Type'], 'text')!==false) {
-					$type = DB_FIELD_LONGTEXT;
-				} else if($finfo['Type']=='tinyint(1)') {
-					$type = DB_FIELD_BOOL;
-				} else if(strpos($finfo['Type'], 'enum')===0) {
-					$type = DB_FIELD_ENUM;
-				} else if(strpos($finfo['Type'], 'int')!==false) {
-					$type = DB_FIELD_INTEGER;
-				} else {
-					$type = DB_FIELD_STRING;
 				}
-
-				return array($type, $fname);
+				$field_list[$this->class] = $fl;
+			} else {
+				SwisdkError::handle(new FatalError('Cannot act on PDO DB type '
+					.$driver));
 			}
+
+			DBObject::$_field_list[$this->db_connection_id][$this->class] = $fl;
+			return DBObject::$_field_list[$this->db_connection_id][$this->class];
 		}
 
 		public static function &tables()

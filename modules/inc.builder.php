@@ -20,37 +20,45 @@
 		public function create_field($field, $title = null)
 		{
 			$dbobj = $this->dbobj();
-			list($type,$fname) = $dbobj->field_type($field);
+			$field_list = $dbobj->field_list();
+			if(!isset($field_list[$field])&&isset($field_list[$tmp=$dbobj->name($field)]))
+				$field = $tmp;
 			if($title === null)
 				$title = $this->pretty_title($field, $dbobj);
 
-			switch($type) {
+			switch($field_list[$field]) {
 				case DB_FIELD_BOOL:
-					return $this->create_bool($fname, $title);
+					return $this->create_bool($field, $title);
 				case DB_FIELD_STRING:
 				case DB_FIELD_INTEGER:
-					return $this->create_text($fname, $title);
+					return $this->create_text($field, $title);
 				case DB_FIELD_LONGTEXT:
-					return $this->create_textarea($fname, $title);
+					return $this->create_textarea($field, $title);
 				case DB_FIELD_DATE:
-					return $this->create_date($fname, $title);
+					return $this->create_date($field, $title);
 				case DB_FIELD_ENUM:
+					die('Enums are not supported by all databases');
 					// FIXME this is MySQL dependant (format of enum field)
-					$finfo = $dbobj->field_list($fname);
-					return $this->create_enum($fname, $title,
+					$finfo = $dbobj->field_list($field);
+					return $this->create_enum($field, $title,
 						$this->_extract_enum_values($finfo['Type']));
 				case DB_FIELD_FOREIGN_KEY|(DB_REL_SINGLE<<10):
 					$relations = $dbobj->relations();
-					return $this->create_rel_single($fname, $title,
-						$relations[$fname]['class']);
-				case DB_FIELD_FOREIGN_KEY|(DB_REL_N_TO_M<<10):
-					$relations = $dbobj->relations();
-					return $this->create_rel_manytomany($fname, $title,
-						$relations[$fname]['class']);
-				case DB_FIELD_FOREIGN_KEY|(DB_REL_3WAY<<10):
-					$relations = $dbobj->relations();
-					return $this->create_rel_manytomany($fname, $title,
-						$relations[$fname]['class']);
+					return $this->create_rel_single($field, $title,
+						$relations[$field]['class']);
+			}
+
+			$relations = $dbobj->relations();
+			if(isset($relations[$field]['type'])) {
+				switch($relations[$field]['type']) {
+					case DB_REL_N_TO_M:
+						return $this->create_rel_manytomany($field, $title,
+							$relations[$field]['class']);
+					case DB_REL_3WAY:
+						return $this->create_rel_3way($field, $title,
+							$relations[$field]['class'],
+							$relations[$field]['foreign']);
+				}
 			}
 		}
 
