@@ -764,8 +764,6 @@
 							$dbname),
 						Swisdk::config_value($prefix.'.username'),
 						Swisdk::config_value($prefix.'.password'));
-					DBObject::$dbhandle[$connection_id]->query(
-						'SET NAMES \'utf8\'');
 				}
 				if(Swisdk::config_value('error.debug_mode'))
 					DBObject::$dbhandle[$connection_id]->setAttribute(
