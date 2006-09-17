@@ -182,8 +182,8 @@
 			else if(class_exists($arg))
 				$renderer = new $arg;
 			else
-				SwisdkError::handle(new FatalError(
-					'Invalid renderer specification: '.$arg));
+				SwisdkError::handle(new FatalError(sprintf(
+					_('Invalid renderer specification: %s'), $arg)));
 			$this->accept($renderer);
 
 			return $renderer->html();
@@ -218,7 +218,7 @@
 			if(!isset($_POST['__guard_'.$this->id()]))
 				return false;
 			if($_POST['__guard_'.$this->id()]!=guardToken()) {
-				$this->box()->add_message('Could not validate form submission');
+				$this->box()->add_message(_('Could not validate form submission'));
 				return false;
 			}
 
@@ -511,12 +511,12 @@
 							$relations[$relspec]['class']));
 						break;
 					case DB_REL_MANY:
-						SwisdkError::handle(new BasicSwisdkError(
-							'Cannot edit relation of type DB_REL_MANY!'
-							.' relspec: '.$relspec));
+						SwisdkError::handle(new BasicSwisdkError(sprintf(
+							_('Cannot edit relation of type DB_REL_MANY! relspec: %s'),
+							$relspec)));
 					default:
-						SwisdkError::handle(new BasicSwisdkError(
-							'Oops. Unknown relation type '.$relspec));
+						SwisdkError::handle(new BasicSwisdkError(sprintf(
+							_('Oops. Unknown relation type %s'), $relspec)));
 				}
 			}
 		}
@@ -534,8 +534,8 @@
 			else if(class_exists($arg))
 				$renderer = new $arg;
 			else
-				SwisdkError::handle(new FatalError(
-					'Invalid renderer specification: '.$arg));
+				SwisdkError::handle(new FatalError(sprintf(
+					_('Invalid renderer specification: %s'), $arg)));
 			$this->accept($renderer);
 
 			return $renderer->html();

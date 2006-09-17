@@ -154,8 +154,8 @@
 				if($this->generate_sections($generate))
 					$smarty->display($template);
 			} else {
-				SwisdkError::handle(new FatalError(
-					'Smarty template '.$template.' does not exist'));
+				SwisdkError::handle(new FatalError(sprintf(
+					_('Smarty template %s does not exist'), $template)));
 			}
 		}
 

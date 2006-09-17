@@ -314,7 +314,7 @@
 			foreach($relations as $key => &$data) {
 				if($data['type']==DB_REL_N_TO_M
 						||$data['type']==DB_REL_3WAY)
-					$this->create_field($key, 'blah');
+					$this->create_field($key);
 			}
 
 			// FIXME do not autogenerate fields which were

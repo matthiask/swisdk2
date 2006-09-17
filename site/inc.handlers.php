@@ -33,8 +33,8 @@
 			if( $classname != null ) {
 				return Swisdk::load_instance($classname);
 			} else {
-				return new FatalError( "Could not find the config-entry runtime."
-					. $type );
+				return new FatalError(sprintf(
+					_('No handler defined for %s suffix'), $type));
 			}
 		}
 
@@ -55,14 +55,13 @@
 			$class = Swisdk::config_value('runtime.controller.class');
 
 			if( !$class ) {
-				SwisdkError::handle( new FatalError( "SiteController class is"
-					." empty in registry! Be sure that you register"
-					." your controller!" ) );
+				SwisdkError::handle(new FatalError(
+					_('No site controller registered. Did you forget Swisdk::register()?')));
 			}
 
 			if( !class_exists( $class) ) {
-				SwisdkError::handle( new FatalError( "SiteController $class"
-					." could not be found" ) );
+				SwisdkError::handle(new FatalError(sprintf(
+					_('Site controller %s could not be found'), $class)));
 			}
 
 			$ctrl = new $class;
@@ -71,8 +70,8 @@
 				$ctrl->run();
 				return;
 			} else {
-				SwisdkError::handle( new FatalError( "Controller is not subclass"
-					." of Site!" ) );
+				SwisdkError::handle(new FatalError(
+					_('Site controller has to be subclass of Site')));
 			}
 		}
 	}

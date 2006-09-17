@@ -513,7 +513,7 @@
 	class SubmitButton extends FormBar {
 		public function init_value($dbobj)
 		{
-			// i have no value
+			$this->value = _('Submit');
 		}
 	}
 

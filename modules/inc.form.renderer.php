@@ -89,8 +89,8 @@
 				}
 			}
 
-			SwisdkError::handle(new FatalError(
-				'FormRenderer::visit: Cannot visit '.$class));
+			SwisdkError::handle(new FatalError(sprintf(
+				_('FormRenderer: Cannot visit %s'), $class)));
 		}
 
 		protected function visit_Form_start($obj)

@@ -42,13 +42,12 @@
 	}
 
 	class EqualFieldsRule extends FormRule {
-		protected $message = 'The two related fields are not equal';
-
 		public function __construct($field1, $field2, $message = null)
 		{
 			$this->field1 = $field1;
 			$this->field2 = $field2;
 			parent::__construct($message);
+			$this->message = _('The two related fields are not equal');
 		}
 
 		protected function is_valid_impl(&$form)
@@ -89,6 +88,8 @@ EOD;
 		{
 			if($message)
 				$this->message = $message;
+			else
+				$this->message = _('Value does not validate');
 		}
 
 		public function is_valid(FormItem &$item)
@@ -122,7 +123,13 @@ EOD;
 	}
 
 	class RequiredRule extends FormItemRule {
-		protected $message = 'Value required';
+		public function __construct($message=null)
+		{
+			if($message)
+				$this->message = $message;
+			else
+				$this->message = _('Value required');
+		}
 
 		protected function is_valid_impl(FormItem &$item)
 		{
@@ -154,7 +161,13 @@ EOD;
 	 * It will still be displayed in the DropdownInput (or whatever)!
 	 */
 	class UserRequiredRule extends RequiredRule {
-		protected $message = 'User required';
+		public function __construct($message=null)
+		{
+			if($message)
+				$this->message = $message;
+			else
+				$this->message = _('User required');
+		}
 
 		protected function is_valid_impl(FormItem &$item)
 		{
@@ -184,7 +197,13 @@ EOD;
 	}
 
 	class NumericRule extends FormItemRule {
-		protected $message = 'Value must be numeric';
+		public function __construct($message=null)
+		{
+			if($message)
+				$this->message = $message;
+			else
+				$this->message = _('Value must be numeric');
+		}
 
 		protected function is_valid_impl(FormItem &$item)
 		{
@@ -219,7 +238,8 @@ EOD;
 			if($message)
 				$this->message = $message;
 			else
-				$this->message = 'Number must be between '.$min.' and '.$max;
+				$this->message = sprintf(_('Number must be between %s and %s'),
+					$min, $max);
 			$this->min = $min;
 			$this->max = $max;
 		}
@@ -248,7 +268,6 @@ EOD;
 	}
 
 	class RegexRule extends FormItemRule {
-		protected $message = 'Value does not validate';
 		protected $empty_valid = true;
 
 		public function __construct($regex, $message = null)
@@ -287,7 +306,6 @@ EOD;
 	}
 
 	class EmailRule extends RegexRule {
-		protected $message = 'Please enter a valid email address';
 		public function __construct($message = null)
 		{
 			parent::__construct(
@@ -298,18 +316,24 @@ EOD;
 . '|([0-1]?[0-9]?[0-9])))\])|(((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))'
 . '\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])'
 . '|([0-1]?[0-9]?[0-9]))\.((25[0-5])|(2[0-4][0-9])|([0-1]?[0-9]?[0-9])))|'
-. '((([A-Za-z0-9\-])+\.)+[A-Za-z\-]+))$/',
-				$message);
+. '((([A-Za-z0-9\-])+\.)+[A-Za-z\-]+))$/', 'dummy');
+			if($message)
+				$this->message = $message;
+			else
+				$this->message = _('Please enter a valid email address');
 		}
 	}
 
 	class UrlRule extends RegexRule {
-		protected $message = 'Please enter a valid URL';
 		public function __construct($message = null)
 		{
 			parent::__construct(
 				'/^(http|https):\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*'
-				.'\.[a-z]{2,5}((:[0-9]{1,5})?\/.*)?$/i', $message);
+				.'\.[a-z]{2,5}((:[0-9]{1,5})?\/.*)?$/i', 'dummy');
+			if($message)
+				$this->message = $message;
+			else
+				$this->message = _('Please enter a valid URL');
 		}
 	}
 
@@ -329,8 +353,6 @@ EOD;
 	}
 
 	class EqualsRule extends FormItemRule {
-		protected $message = 'Value does not validate';
-
 		public function __construct($compare_value, $message = null)
 		{
 			$this->compare_value = $compare_value;
@@ -353,7 +375,13 @@ EOD;
 	}
 
 	class UploadedFileRule extends FormItemRule {
-		protected $message = 'Please provide a file';
+		public function __construct($message=null)
+		{
+			if($message)
+				$this->message = $message;
+			else
+				$this->message = _('Please provide a file');
+		}
 
 		protected function is_valid_impl(FormItem &$item)
 		{
@@ -362,9 +390,16 @@ EOD;
 	}
 
 	class ImageFileRule extends FormItemRule {
-		protected $message = 'Please provide a valid image file';
 		protected $image_mimetypes = array('image/png', 'image/gif',
 			'image/jpg', 'image/jpeg', 'image/pjpeg');
+
+		public function __construct($message=null)
+		{
+			if($message)
+				$this->message = $message;
+			else
+				$this->message = _('Please provide a valid image file');
+		}
 
 		protected function is_valid_impl(FormItem &$item)
 		{

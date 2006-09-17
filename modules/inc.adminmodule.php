@@ -280,7 +280,8 @@
 			if(!$this->editmode) {
 				for($i=1; $i<=3; $i++) {
 					$box = $this->form->box($this->dbo_class.'_'.$i);
-					$box->set_title('New '.$this->dbo_class);
+					$box->set_title(sprintf(
+						_('New %s'), $this->dbo_class));
 					$obj = $this->get_dbobj();
 					$obj->id = -$i;
 					$box->bind($obj);
@@ -291,8 +292,9 @@
 				foreach($this->obj as $obj) {
 					$box = $this->form->box($this->dbo_class
 						.'_'.$obj->id());
-					$box->set_title('Edit '.$this->dbo_class
-						.' '.$obj->id());
+					$box->set_title(sprintf(
+						_('Edit %s'),
+						$this->dbo_class.' '.$obj->id()));
 					$box->bind($obj);
 					$box->add(new HiddenInput($obj->primary().'[]'))
 						->set_value($obj->id());
@@ -311,10 +313,12 @@
 			$this->init_form();
 			$this->form->bind($this->obj);
 			if($this->editmode)
-				$this->form->set_title('Edit '.$this->dbo_class
-					.' '.$this->obj->id());
+				$this->form->set_title(sprintf(
+					_('Edit %s'),
+					$this->dbo_class.' '.$this->obj->id()));
 			else
-				$this->form->set_title('New '.$this->dbo_class);
+				$this->form->set_title(sprintf(
+					_('New %s'), $this->dbo_class));
 			$this->build_form($this->form);
 
 			$this->execute();
@@ -354,7 +358,8 @@
 			$this->html = ($this->creation_enabled?'<button type="button" '
 				.'onclick="window.location.href=\''.$this->module_url
 					.'_new\'">'
-				.'Create '.$this->dbo_class."</button>\n":'')
+				.sprintf(_('Create %s'), $this->dbo_class)
+				."</button>\n":'')
 				.$this->tableview->html();
 		}
 
@@ -422,11 +427,9 @@
 			else
 				$dbo = DBObject::find($this->dbo_class, $this->args[0]);
 			if(!$dbo)
-				SwisdkError::handle(new FatalError(
-					'AdminComponent_delete::run() - Can\'t find '
-					.'the data.'
-					.' Class is: '.$this->dbo_class.' Argument is: '
-					.intval($this->args[0])));
+				SwisdkError::handle(new FatalError(sprintf(
+					_('Can\'t find the data. Class: %s. Argument: %s'),
+					$this->dbo_class, intval($this->args[0]))));
 
 			$dbo->delete();
 			$this->goto('_index');
@@ -440,11 +443,9 @@
 			else
 				$dbo = DBObject::find($this->dbo_class, $this->args[0]);
 			if(!$dbo)
-				SwisdkError::handle(new FatalError(
-					'AdminComponent_delete::run() - Can\'t find '
-					.'the data.'
-					.' Class is: '.$this->dbo_class.' Argument is: '
-					.intval($this->args[0])));
+				SwisdkError::handle(new FatalError(sprintf(
+					_('Can\'t find the data. Class: %s. Argument: %s'),
+					$this->dbo_class, intval($this->args[0]))));
 
 			$token = guardToken('delete');
 			$class = $dbo->_class();
@@ -452,21 +453,27 @@
 			$title = $dbo->title();
 			$name = $dbo->file_name;
 
+			$question_title = _('Confirmation required');
+			$question_text = sprintf(_('Do you really want to delete %s?'),
+				$class.' '.$id);
+			$delete = _('Delete');
+			$cancel = _('Cancel');
+
 			$this->html = <<<EOD
 <form method="post" action="?delete_confirmation_page=1" class="sf-form" accept-charset="utf-8">
 <input type="hidden" name="guard" value="$token" />
 <table>
 <tr class="sf-form-title">
-	<td colspan="2"><big><strong>Confirmation required</strong></big></td>
+	<td colspan="2"><big><strong>$question_title</strong></big></td>
 </tr>
 <tr>
 	<td></td>
-	<td>Do you really want to delete $class $id (<a href="/download/$name">$title</a>)?</td>
+	<td>$question_text (<a href="/download/$name">$title</a>)?</td>
 </tr>
 <tr class="sf-button">
 	<td colspan="2">
-		<input type="submit" name="confirmation_command" value="Delete" />
-		<input type="submit" name="confirmation_command" value="Cancel" />
+		<input type="submit" name="confirmation_command" value="$delete" />
+		<input type="submit" name="confirmation_command" value="$cancel" />
 	</td>
 </tr>
 </table>
