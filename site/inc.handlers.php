@@ -33,7 +33,7 @@
 				return Swisdk::load_instance($classname, 'site');
 			} else {
 				return new FatalError(sprintf(
-					_('No handler defined for %s suffix'), $type));
+					dgettext('swisdk', 'No handler defined for %s suffix'), $type));
 			}
 		}
 
@@ -55,12 +55,12 @@
 
 			if( !$class ) {
 				SwisdkError::handle(new FatalError(
-					_('No site controller registered. Did you forget Swisdk::register()?')));
+					dgettext('swisdk', 'No site controller registered. Did you forget Swisdk::register()?')));
 			}
 
 			if( !class_exists( $class) ) {
 				SwisdkError::handle(new FatalError(sprintf(
-					_('Site controller %s could not be found'), $class)));
+					dgettext('swisdk', 'Site controller %s could not be found'), $class)));
 			}
 
 			$ctrl = new $class;
@@ -70,7 +70,7 @@
 				return;
 			} else {
 				SwisdkError::handle(new FatalError(
-					_('Site controller has to be subclass of Site')));
+					dgettext('swisdk', 'Site controller has to be subclass of Site')));
 			}
 		}
 	}

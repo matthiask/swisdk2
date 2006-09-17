@@ -155,7 +155,7 @@
 					$smarty->display($template);
 			} else {
 				SwisdkError::handle(new FatalError(sprintf(
-					_('Smarty template %s does not exist'), $template)));
+					dgettext('swisdk', 'Smarty template %s does not exist'), $template)));
 			}
 		}
 

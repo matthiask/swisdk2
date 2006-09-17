@@ -513,7 +513,7 @@
 	class SubmitButton extends FormBar {
 		public function init_value($dbobj)
 		{
-			$this->value = _('Submit');
+			$this->value = dgettext('swisdk', 'Submit');
 		}
 	}
 

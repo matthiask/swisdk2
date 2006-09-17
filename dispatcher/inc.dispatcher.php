@@ -43,7 +43,7 @@
 
 			} else {
 				SwisdkError::handle( new FatalError(
-					_('Dispatcher configuration incomplete. No dispatcher modules')));
+					dgettext('swisdk', 'Dispatcher configuration incomplete. No dispatcher modules')));
 			}
 		}
 	}

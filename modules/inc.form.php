@@ -183,7 +183,7 @@
 				$renderer = new $arg;
 			else
 				SwisdkError::handle(new FatalError(sprintf(
-					_('Invalid renderer specification: %s'), $arg)));
+					dgettext('swisdk', 'Invalid renderer specification: %s'), $arg)));
 			$this->accept($renderer);
 
 			return $renderer->html();
@@ -218,7 +218,7 @@
 			if(!isset($_POST['__guard_'.$this->id()]))
 				return false;
 			if($_POST['__guard_'.$this->id()]!=guardToken()) {
-				$this->box()->add_message(_('Could not validate form submission'));
+				$this->box()->add_message(dgettext('swisdk', 'Could not validate form submission'));
 				return false;
 			}
 
@@ -512,11 +512,11 @@
 						break;
 					case DB_REL_MANY:
 						SwisdkError::handle(new BasicSwisdkError(sprintf(
-							_('Cannot edit relation of type DB_REL_MANY! relspec: %s'),
+							dgettext('swisdk', 'Cannot edit relation of type DB_REL_MANY! relspec: %s'),
 							$relspec)));
 					default:
 						SwisdkError::handle(new BasicSwisdkError(sprintf(
-							_('Oops. Unknown relation type %s'), $relspec)));
+							dgettext('swisdk', 'Oops. Unknown relation type %s'), $relspec)));
 				}
 			}
 		}
@@ -535,7 +535,7 @@
 				$renderer = new $arg;
 			else
 				SwisdkError::handle(new FatalError(sprintf(
-					_('Invalid renderer specification: %s'), $arg)));
+					dgettext('swisdk', 'Invalid renderer specification: %s'), $arg)));
 			$this->accept($renderer);
 
 			return $renderer->html();

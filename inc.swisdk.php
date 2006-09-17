@@ -74,8 +74,7 @@
 			Swisdk::require_data_directory(CACHE_ROOT);
 			Swisdk::read_configfile();
 
-			bindtextdomain('messages', SWISDK_ROOT.'i18n/locale');
-			textdomain('messages');
+			bindtextdomain('swisdk', SWISDK_ROOT.'i18n/locale');
 		}
 
 		public static function run($arguments)
@@ -107,7 +106,7 @@
 				}
 			} else {
 				SwisdkError::handle(new FatalError(
-					_('No configuration file found')));
+					dgettext('swisdk', 'No configuration file found')));
 			}
 		}
 
@@ -116,7 +115,7 @@
 			if(preg_match('/[^A-Za-z0-9\.-_\/\-]/', $dir)
 					|| strpos($dir, '..')!==false)
 				SwisdkError::handle(new FatalError(sprintf(
-					_('Invalid path passed to require_data_directory: %s'),
+					dgettext('swisdk', 'Invalid path passed to require_data_directory: %s'),
 					$dir)));
 			if($dir{0}!='/')
 				$dir = DATA_ROOT.$dir;
@@ -124,7 +123,7 @@
 			if(!file_exists($dir))
 				if(!@mkdir($dir, 0775, true))
 					SwisdkError::handle(new FatalError(sprintf(
-						_('Could not create data directory %s'),
+						dgettext('swisdk', 'Could not create data directory %s'),
 						$dir)));
 		}
 
@@ -254,7 +253,7 @@
 				return new $class;
 			else
 				SwisdkError::handle(new FatalError(sprintf(
-					_('Could not load %s, stage %s'),
+					dgettext('swisdk', 'Could not load %s, stage %s'),
 					$class, $stage)));
 		}
 

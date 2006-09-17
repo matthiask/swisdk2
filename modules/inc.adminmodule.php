@@ -281,7 +281,7 @@
 				for($i=1; $i<=3; $i++) {
 					$box = $this->form->box($this->dbo_class.'_'.$i);
 					$box->set_title(sprintf(
-						_('New %s'), $this->dbo_class));
+						dgettext('swisdk', 'New %s'), $this->dbo_class));
 					$obj = $this->get_dbobj();
 					$obj->id = -$i;
 					$box->bind($obj);
@@ -293,7 +293,7 @@
 					$box = $this->form->box($this->dbo_class
 						.'_'.$obj->id());
 					$box->set_title(sprintf(
-						_('Edit %s'),
+						dgettext('swisdk', 'Edit %s'),
 						$this->dbo_class.' '.$obj->id()));
 					$box->bind($obj);
 					$box->add(new HiddenInput($obj->primary().'[]'))
@@ -314,11 +314,11 @@
 			$this->form->bind($this->obj);
 			if($this->editmode)
 				$this->form->set_title(sprintf(
-					_('Edit %s'),
+					dgettext('swisdk', 'Edit %s'),
 					$this->dbo_class.' '.$this->obj->id()));
 			else
 				$this->form->set_title(sprintf(
-					_('New %s'), $this->dbo_class));
+					dgettext('swisdk', 'New %s'), $this->dbo_class));
 			$this->build_form($this->form);
 
 			$this->execute();
@@ -358,7 +358,7 @@
 			$this->html = ($this->creation_enabled?'<button type="button" '
 				.'onclick="window.location.href=\''.$this->module_url
 					.'_new\'">'
-				.sprintf(_('Create %s'), $this->dbo_class)
+				.sprintf(dgettext('swisdk', 'Create %s'), $this->dbo_class)
 				."</button>\n":'')
 				.$this->tableview->html();
 		}
@@ -428,7 +428,7 @@
 				$dbo = DBObject::find($this->dbo_class, $this->args[0]);
 			if(!$dbo)
 				SwisdkError::handle(new FatalError(sprintf(
-					_('Can\'t find the data. Class: %s. Argument: %s'),
+					dgettext('swisdk', 'Can\'t find the data. Class: %s. Argument: %s'),
 					$this->dbo_class, intval($this->args[0]))));
 
 			$dbo->delete();
@@ -444,7 +444,7 @@
 				$dbo = DBObject::find($this->dbo_class, $this->args[0]);
 			if(!$dbo)
 				SwisdkError::handle(new FatalError(sprintf(
-					_('Can\'t find the data. Class: %s. Argument: %s'),
+					dgettext('swisdk', 'Can\'t find the data. Class: %s. Argument: %s'),
 					$this->dbo_class, intval($this->args[0]))));
 
 			$token = guardToken('delete');
@@ -453,11 +453,11 @@
 			$title = $dbo->title();
 			$name = $dbo->file_name;
 
-			$question_title = _('Confirmation required');
-			$question_text = sprintf(_('Do you really want to delete %s?'),
+			$question_title = dgettext('swisdk', 'Confirmation required');
+			$question_text = sprintf(dgettext('swisdk', 'Do you really want to delete %s?'),
 				$class.' '.$id);
-			$delete = _('Delete');
-			$cancel = _('Cancel');
+			$delete = dgettext('swisdk', 'Delete');
+			$cancel = dgettext('swisdk', 'Cancel');
 
 			$this->html = <<<EOD
 <form method="post" action="?delete_confirmation_page=1" class="sf-form" accept-charset="utf-8">
