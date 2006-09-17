@@ -73,17 +73,20 @@
 			SwisdkError::setup();
 			Swisdk::require_data_directory(CACHE_ROOT);
 			Swisdk::read_configfile();
-
-			bindtextdomain('swisdk', SWISDK_ROOT.'i18n/locale');
-			bindtextdomain('webapp', WEBAPP_ROOT.'i18n/locale');
-			textdomain('webapp');
+			Swisdk::init_language();
 		}
 
 		public static function run($arguments)
 		{
+			// initialize core components
 			Swisdk::init();
+
+			// run dispatcher
 			require_once SWISDK_ROOT . "dispatcher/inc.dispatcher.php";
 			SwisdkControllerDispatcher::dispatch( $arguments['REQUEST_URI'] );
+
+			// Everything is ready to really rock now. Generate and display
+			// the response
 			require_once SWISDK_ROOT . 'site/inc.handlers.php';
 			SwisdkSiteHandler::run();
 		}
@@ -95,6 +98,12 @@
 			if(file_exists(APP_ROOT.'webapp/config.ini')) {
 				$cfg = parse_ini_file(APP_ROOT.'webapp/config.ini', true);
 				foreach($cfg as $section => $array) {
+					// special handling for sections which have a dot
+					// in their name, f.e. db.second, db.third for multiple
+					// db connections
+					//
+					// Use Swisdk::dump() to see what this piece of code
+					// does
 					if(($pos=strpos($section, '.'))!==false) {
 						$name = 'runtime.parser.'.substr($section, 0, $pos);
 						if(!isset(Swisdk::$config[$name])
@@ -112,6 +121,9 @@
 			}
 		}
 
+		/**
+		 * create a subdirectory below DATA_ROOT for caching, uploads etc.
+		 */
 		public static function require_data_directory($dir)
 		{
 			if(preg_match('/[^A-Za-z0-9\.-_\/\-]/', $dir)
@@ -128,6 +140,10 @@
 						dgettext('swisdk', 'Could not create data directory %s'),
 						$dir)));
 		}
+
+		/**
+		 * debugging functions
+		 */
 
 		public static function log($message, $log='error')
 		{
@@ -149,6 +165,11 @@
 			print_r(Swisdk::$config);
 			echo '</pre>';
 		}
+
+
+		/**
+		 * configuration functions
+		 */
 
 		public static function set_config_value($key, $value)
 		{
@@ -186,6 +207,9 @@
 			return Swisdk::$config['website.'.$website.'.'.$key];
 		}
 
+		/**
+		 * returns the path to a smarty template for the current website
+		 */
 		public static function template($key)
 		{
 			$key = strtolower($key);
@@ -196,6 +220,47 @@
 			return $dir.Swisdk::website_config_value('template.'.$key);
 		}
 
+
+		/**
+		 * i18n support
+		 */
+
+		/**
+		 * initialize gettext and set the current locale
+		 *
+		 * This function might get called more than once;
+		 */
+		protected static function init_language()
+		{
+			static $gettext_initialized = false;
+			if(!$gettext_initialized) {
+				// initialize gettext textdomains
+				bindtextdomain('swisdk', SWISDK_ROOT.'i18n/locale');
+				bindtextdomain('webapp', WEBAPP_ROOT.'i18n/locale');
+				textdomain('webapp');
+				$gettext_initialized = true;
+			}
+
+			// use the current language to find locale strings and apply
+			// them to LC_ALL until the first match
+			//
+			// Example for language_locale: 'en;en_US;en_US.UTF-8'
+			if(($language = Swisdk::language())
+					&& ($dbo = DBObject::find('Language', $language))
+					&& ($locale = $dbo->locale)) {
+				$locales = explode(';', $locale);
+				foreach($locales as $l) {
+					$l = trim($l);
+					if(stripos(setlocale(LC_ALL, $l), $l)===0)
+						break;
+				}
+			}
+		}
+
+		/**
+		 * get the current language id or the language id which has the
+		 * given key
+		 */
 		public static function language($key=null)
 		{
 			require_once MODULE_ROOT.'inc.data.php';
@@ -203,7 +268,7 @@
 				$l = DBObject::db_get_array('SELECT * FROM tbl_language',
 					array('language_key', 'language_id'));
 				if(isset($l[$key]))
-					return $l[$key];
+					return intval($l[$key]);
 			}
 
 			if($val = Swisdk::config_value('runtime.language_id'))
@@ -213,16 +278,34 @@
 					array('language_key', 'language_id'));
 				if(isset($l[$val]) && ($val = $l[$val])) {
 					Swisdk::set_config_value('runtime.language_id', $val);
-					return $val;
+					return intval($val);
 				}
 			}
 		}
 
+		/**
+		 * set new language
+		 */
+		public static function set_language($key)
+		{
+			Swisdk::set_config_value('runtime.language', $key);
+			Swisdk::set_config_value('runtime.language_id', Swisdk::language($key));
+			Swisdk::init_language();
+		}
+
+		/**
+		 * register the site controller class which handles the current
+		 * website
+		 */
 		public static function register($class)
 		{
 			Swisdk::set_config_value('runtime.controller.class', $class);
 		}
 
+		/**
+		 * load a module taking into account the current stage of request
+		 * handling we are in
+		 */
 		public static function load($class, $stage = null)
 		{
 			if($stage===null)
@@ -243,6 +326,9 @@
 			return false;
 		}
 
+		/**
+		 * load and instanciate a module
+		 */
 		public static function load_instance($class, $stage = null)
 		{
 			if(class_exists($class))
