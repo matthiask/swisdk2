@@ -277,7 +277,7 @@
 				}
 			}
 
-			return null;
+			return 0;
 		}
 
 		/**
