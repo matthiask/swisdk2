@@ -9,7 +9,8 @@
 		public function collect_informations()
 		{
 			$tokens = explode('/', substr($this->input(), 1));
-			if(isset($tokens[0]) && ($id = Swisdk::language($tokens[0])))
+			if(isset($tokens[0]) && $tokens[0]
+					&& ($id = Swisdk::language($tokens[0])))
 				Swisdk::set_language($tokens[0]);
 		}
 
