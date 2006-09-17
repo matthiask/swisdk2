@@ -371,6 +371,7 @@ EOD;
 		{
 			$id = $this->form->id();
 			$p = $this->form->dbobj()->_prefix();
+			list($first, $count, $last) = $this->list_position();
 			return <<<EOD
 <script type="text/javascript">
 //<![CDATA[
@@ -394,6 +395,8 @@ function skim(step)
 	if(isNaN(sv))
 		sv = 0;
 	start.value=sv+step;
+	start.value = Math.min(Math.max(start.value,0),
+		$count-($count%parseInt(form.{$p}limit.value)));
 	form.submit();
 }
 //]]>
