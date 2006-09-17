@@ -75,6 +75,8 @@
 			Swisdk::read_configfile();
 
 			bindtextdomain('swisdk', SWISDK_ROOT.'i18n/locale');
+			bindtextdomain('webapp', WEBAPP_ROOT.'i18n/locale');
+			textdomain('webapp');
 		}
 
 		public static function run($arguments)
