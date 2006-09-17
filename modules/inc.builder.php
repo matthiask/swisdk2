@@ -343,20 +343,20 @@
 		public function create_rel_single($fname, $title, $class)
 		{
 			$this->tv->append_column(new DBTableViewColumn(
-				$fname, $title, $class, $this->dbobj->primary()));
+				$fname, $title, $class, $this->dbobj));
 		}
 
 		public function create_rel_manytomany($fname, $title, $class)
 		{
-			$this->tv->append_column(new DBTableViewColumn(
-				$fname, $title, $class, $this->dbobj->primary()));
+			$this->tv->append_column(new ManyToManyDBTableViewColumn(
+				$fname, $title, $class, $this->dbobj));
 		}
 
 		public function create_rel_3way($fname, $title, $class, $field)
 		{
 			// TODO show information from choices ($field) too
-			$this->tv->append_column(new DBTableViewColumn(
-				$fname, $title, $class, $this->dbobj->primary()));
+			$this->tv->append_column(new ManyToManyDBTableViewColumn(
+				$fname, $title, $class, $this->dbobj));
 		}
 
 		public function create_date($fname, $title)

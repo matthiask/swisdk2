@@ -244,34 +244,23 @@ EOD;
 	 * pass a DBObject class as third parameter
 	 */
 	class DBTableViewColumn extends TableViewColumn {
-		public function html(&$data)
+		protected function init_column()
 		{
-			if($this->db_class===null)
+			if($this->db_class===null) {
 				$this->db_class = $this->args[0];
-			$val = $data[$this->column];
+				$this->dbobj = $this->args[1];
+			}
 			if($this->db_data===null) {
 				$doc = DBOContainer::find($this->db_class);
 				foreach($doc as $id => &$obj)
 					$this->db_data[$id] = $obj->title();
 			}
+		}
 
-			if(is_array($val)) {
-				if(isset($val[$this->column])) {
-					if(isset($val[$this->args[1]])) {
-						$key = $val[$this->args[1]];
-						if(isset($this->db_data[$key]))
-							return $this->db_data[$key];
-					}
-					return null;
-				}
-				$keys = array_keys($val);
-				$vals = array();
-				foreach($keys as $key)
-					if(isset($this->db_data[$key]))
-						$vals[] = $this->db_data[$key];
-				return implode(', ', $vals);
-			}
-
+		public function html(&$data)
+		{
+			$this->init_column();
+			$val = $data[$this->column];
 			if(!isset($this->db_data[$val]))
 				return null;
 			return $this->db_data[$val];
@@ -279,6 +268,36 @@ EOD;
 
 		protected $db_data = null;
 		protected $db_class = null;
+		protected $dbobj = null;
+	}
+
+	class ManyToManyDBTableViewColumn extends DBTableViewColumn {
+		public function html(&$data)
+		{
+			$this->init_column();
+			$p = $this->dbobj->primary();
+			if($this->reldata===null) {
+				$relations = $this->dbobj->relations();
+				$rel = $relations[$this->db_class];
+				print_r($this->relation);
+				$data = DBObject::db_get_array(sprintf(
+					'SELECT %s,%s FROM %s',	$p,$rel['foreign'], $rel['table']));
+				$this->reldata = array();
+				foreach($data as $row)
+					$this->reldata[$row[$p]][] = $row[$rel['foreign']];
+			}
+
+			if(!isset($this->reldata[$data[$p]]))
+				return;
+			$vals = $this->reldata[$data[$p]];
+			$tokens = array();
+			foreach($vals as $v)
+				if(isset($this->db_data[$v]))
+					$tokens[] = $this->db_data[$v];
+			return implode(', ', $tokens);
+		}
+
+		protected $reldata = null;
 	}
 
 ?>
