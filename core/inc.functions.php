@@ -82,4 +82,23 @@
 		return sha1(session_id().Swisdk::config_value('core.token').$token);
 	}
 
+	/**
+	 * return the backtrace as a string
+	 */
+	function backtrace()
+	{
+		$bt = debug_backtrace();
+		$str = "<pre><b>Backtrace:</b>\n";
+		foreach($bt as $frame) {
+			$str .= sprintf("%s() called at [%s]\n",
+				(isset($frame['class'])?
+				$frame['class'].$frame['type']:'').
+				$frame['function'],
+				isset($frame['file'])?$frame['file'].':'
+				.$frame['line']:'');
+		}
+		$str .= '</pre>';
+		return $str;
+	}
+
 ?>

@@ -95,25 +95,7 @@
 
 		protected function debug_string()
 		{
-			$bt = debug_backtrace();
-			$str = "<pre><b>Backtrace:</b>\n";
-			$disp = false;
-			foreach($bt as $frame) {
-				if(!$disp && isset($frame['class'])
-						&& $frame['class']=='SwisdkError'
-						&& $frame['function']=='handle')
-					$disp = true;
-				if(!$disp)
-					continue;
-				$str .= sprintf("%s() called at [%s]\n",
-					(isset($frame['class'])?
-					$frame['class'].$frame['type']:'').
-					$frame['function'],
-					isset($frame['file'])?$frame['file'].':'
-					.$frame['line']:'');
-			}
-			$str .= '</pre>';
-			return $str;
+			return backtrace();
 		}
 
 		public function append_log_message($message)
