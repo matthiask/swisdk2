@@ -251,3 +251,78 @@ msgstr "Konnte %s nicht laden"
 msgid "Could not create instance of class %s"
 msgstr "Konnte %s nicht instanziieren"
 
+msgid "Title"
+msgstr "Titel"
+
+msgid "Author"
+msgstr "Autor"
+
+msgid "Teaser"
+msgstr "Einleitung"
+
+msgid "Role"
+msgstr "Rolle"
+
+msgid "Language"
+msgstr "Sprache"
+
+msgid "Publication date"
+msgstr "Veröffentlichung"
+
+msgid "Parent"
+msgstr "Übergeordnet"
+
+msgid "User"
+msgstr "Benutzer"
+
+msgid "File"
+msgstr "Datei"
+
+msgid "Size"
+msgstr "Grösse"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Forename"
+msgstr "Vorname"
+
+msgid "Zip"
+msgstr "PLZ"
+
+msgid "City"
+msgstr "Ort"
+
+msgid "Mobile"
+msgstr "Handy"
+
+msgid "Description"
+msgstr "Beschreibung"
+
+msgid "Disabled"
+msgstr "Deaktiviert"
+
+msgid "Creation"
+msgstr "Erstellt"
+
+msgid "Groups"
+msgstr "Gruppen"
+
+msgid "Street"
+msgstr "Adresse"
+
+msgid "Phone"
+msgstr "Telefon"
+
+msgid "Start"
+msgstr "Beginn"
+
+msgid "End"
+msgstr "Ende"
+
+msgid "Openend"
+msgstr "Kein Ende"
+
+msgid "Location"
+msgstr "Ort"
+
