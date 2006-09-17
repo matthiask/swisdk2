@@ -225,6 +225,8 @@
 		 * i18n support
 		 */
 
+		protected static $_languages;
+
 		/**
 		 * initialize gettext and set the current locale
 		 *
@@ -245,10 +247,8 @@
 			// them to LC_ALL until the first match
 			//
 			// Example for language_locale: 'en;en_US;en_US.UTF-8'
-			if(($language = Swisdk::language())
-					&& ($dbo = DBObject::find('Language', $language))
-					&& ($locale = $dbo->locale)) {
-				$locales = explode(';', $locale);
+			if($language = Swisdk::language(null, true)) {
+				$locales = explode(';', $language['language_locale']);
 				foreach($locales as $l) {
 					$l = trim($l);
 					if(stripos(setlocale(LC_ALL, $l), $l)===0)
@@ -261,26 +261,23 @@
 		 * get the current language id or the language id which has the
 		 * given key
 		 */
-		public static function language($key=null)
+		public static function language($key=null, $array=false)
 		{
 			require_once MODULE_ROOT.'inc.data.php';
-			if($key) {
-				$l = DBObject::db_get_array('SELECT * FROM tbl_language',
-					array('language_key', 'language_id'));
-				if(isset($l[$key]))
-					return intval($l[$key]);
+			if(!Swisdk::$_languages) {
+				Swisdk::$_languages = DBObject::db_get_array(
+					'SELECT * FROM tbl_language', 'language_key');
 			}
-
-			if($val = Swisdk::config_value('runtime.language_id'))
-				return $val;
-			else if($val = Swisdk::config_value('runtime.language')) {
-				$l = DBObject::db_get_array('SELECT * FROM tbl_language',
-					array('language_key', 'language_id'));
-				if(isset($l[$val]) && ($val = $l[$val])) {
-					Swisdk::set_config_value('runtime.language_id', $val);
-					return intval($val);
+			if($key || $key=Swisdk::config_value('runtime.language')) {
+				if(isset(Swisdk::$_languages[$key])) {
+					if($array)
+						return Swisdk::$_languages[$key];
+					else
+						return intval(Swisdk::$_languages[$key]['language_id']);
 				}
 			}
+
+			return null;
 		}
 
 		/**
@@ -289,7 +286,6 @@
 		public static function set_language($key)
 		{
 			Swisdk::set_config_value('runtime.language', $key);
-			Swisdk::set_config_value('runtime.language_id', Swisdk::language($key));
 			Swisdk::init_language();
 		}
 
