@@ -170,7 +170,7 @@
 		public static function access_denied()
 		{
 			header('HTTP/1.0 401 Unauthorized');
-			die(_('Access denied'));
+			die(dgettext('swisdk', 'Access denied'));
 		}
 
 		public static function login_form()
@@ -179,7 +179,7 @@
 			require_once MODULE_ROOT . 'inc.smarty.php';
 			$form = new Form();
 			$form->bind(DBObject::create('Login'));
-			$form->set_title(_('Login'));
+			$form->set_title(dgettext('swisdk', 'Login'));
 			$form->add('login_username');
 			$form->add('login_password', new PasswordInput());
 			$form->add(new SubmitButton());

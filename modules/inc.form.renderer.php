@@ -90,7 +90,7 @@
 			}
 
 			SwisdkError::handle(new FatalError(sprintf(
-				_('FormRenderer: Cannot visit %s'), $class)));
+				dgettext('swisdk', 'FormRenderer: Cannot visit %s'), $class)));
 		}
 
 		protected function visit_Form_start($obj)

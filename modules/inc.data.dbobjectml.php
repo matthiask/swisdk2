@@ -35,7 +35,7 @@
 		{
 			if($this->language == LANGUAGE_ALL)
 				SwisdkError::handle(new FatalError(
-					_('Cannot assign language to DBObjectML in LANGUAGE_ALL mode')));
+					dgettext('swisdk', 'Cannot assign language to DBObjectML in LANGUAGE_ALL mode')));
 			if($language == LANGUAGE_DEFAULT)
 				$this->language = Swisdk::language();
 			$this->language = $language;

@@ -16,7 +16,7 @@
 			header('Location: '.$url);
 		} else
 			SwisdkError::handle(new FatalError(sprintf(
-				_('Invalid location specification: %s'), $url)));
+				dgettext('swisdk', 'Invalid location specification: %s'), $url)));
 	}
 
 	/**
