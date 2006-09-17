@@ -14,6 +14,7 @@
 
 		public static function run()
 		{
+			Swisdk::set_config_value('runtime.stage', 'site');
 			// at least we need the include file of the controller...
 			$includefile = Swisdk::config_value('runtime.includefile');
 			if( !$includefile )
@@ -30,7 +31,7 @@
 		{
 			$classname = Swisdk::config_value( "dispatcher." . $type );
 			if( $classname != null ) {
-				return Swisdk::load_instance($classname, 'site');
+				return Swisdk::load_instance($classname);
 			} else {
 				return new FatalError( "Could not find the config-entry runtime."
 					. $type );

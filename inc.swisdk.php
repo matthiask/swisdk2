@@ -251,65 +251,6 @@
 				SwisdkError::handle(new FatalError(
 					'Could not load '.$class.', stage '.$stage));
 		}
-
-		/**
-		*	Load a "module" (actually a module is just a php-file with a class inside).
-		*	A module can exist in the swisdk-dir or the content dir. The parameter
-		*	$dir is the ref path to the file.
-		*/
-		public static function load_module( $class , $dir , $instance = true )
-		{
-			if(class_exists($class)) {
-				if($instance)
-					return new $class;
-				return true;
-			}
-
-			$filenotfound = false;
-
-			// the file name is inc.classname_lowercase.php
-			$file = "inc." . strtolower( $class ) . ".php";
-
-			// now try to include the file in the dir unter swisdk
-			$swisdkpath = SWISDK_ROOT . $dir . "/" . $file;
-
-			if(file_exists($swisdkpath)) {
-				require_once $swisdkpath;
-
-				if( $instance )
-					return Swisdk::module_instance( $class );
-				else
-					return true;
-			}
-
-			// now search under content
-			$path = CONTENT_ROOT . $dir . "/" . $file;
-			if(file_exists($path)) {
-				require_once $path;
-
-				if( $instance )
-					return Swisdk::module_instance( $class );
-				else
-					return true;
-			}
-
-			// ok we just didnt find a file in the include path... return
-			// error and say goodbye! :(
-
-			return new FileNotFoundError("Could not load the module $class!"
-				." Could not find the include-file and the class does"
-				." not exist!", $dir);
-		}
-
-		public static function module_instance( $class )
-		{
-			if(class_exists($class))
-				return new $class;
-			else
-				return CouldNotInstanceClassError(
-					"Could no load the module $class!"
-					." Class doesnt exist!", $class);
-		}
 	}
 
 ?>

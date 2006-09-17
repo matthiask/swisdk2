@@ -296,7 +296,7 @@
 			if( $sender instanceof IEMailMessageSender ) {
 				$this->email_sender = $sender;
 			} else {
-				$this->email_sender = Swisdk::load_module( $sender , "messenger/engine" );
+				$this->email_sender = Swisdk::load_instance( $sender , "messenger/engine" );
 			}
 			if( !( $this->email_sender instanceof IEMailMessageSender) ) {
 				 $error = new FatalError( "EMail::send_email() - sender is not instance of IEMailMessageSender" );
@@ -370,7 +370,7 @@
 			if( $parammessage instanceof EMailMessage ) {
 				return $parammessage;
 			} else {
-				$msg = Swisdk::load_module( $parammessage , "messenger/messages" );
+				$msg = Swisdk::load_instance( $parammessage , "messenger/messages" );
 			}
 			if( !($msg instanceof EMailMessage) ) {
 				return new FatalError( "EMail::instance_message() -
