@@ -368,16 +368,6 @@
 			return $array;
 		}
 
-		public function &all_data()
-		{
-			$array = array();
-			foreach($this->data as $key => &$obj) {
-				$array[$key] = $obj->all_data();
-			}
-			return $array;
-		}
-
-
 		/**
 		 * return an array of ids
 		 */

@@ -671,41 +671,6 @@
 			return $this->related_many_to_many($rel, $params);
 		}
 
-		public function all_related()
-		{
-			if(!isset(DBObject::$relations[$this->class]))
-				return array();
-			$data = array();
-			$rels =& DBObject::$relations[$this->class];
-			foreach($rels as $class => &$rel) {
-				switch($rel['type']) {
-					case DB_REL_SINGLE:
-						if($this->class == $rel['class'])
-							$data[$class] = $this->related($class)->data();
-						else
-							$data = array_merge($data,
-								$this->related($class)->data());
-						break;
-					case DB_REL_MANY:
-						$data[$class] = $this->related_many($rel)->data();
-						break;
-					case DB_REL_N_TO_M:
-						$data[$class] =
-							$this->related_many_to_many($rel)->data();
-						break;
-					case DB_REL_3WAY:
-						$data[$class] =
-							$this->related_3way($rel)->data();
-				}
-			}
-			return $data;
-		}
-
-		public function all_data()
-		{
-			return array_merge($this->data(), $this->all_related());
-		}
-
 		/**
 		 * functions to bind objects to each other without setting relations data
 		 */
