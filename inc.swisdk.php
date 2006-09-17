@@ -73,6 +73,9 @@
 			SwisdkError::setup();
 			Swisdk::require_data_directory(CACHE_ROOT);
 			Swisdk::read_configfile();
+
+			bindtextdomain('messages', SWISDK_ROOT.'i18n/locale');
+			textdomain('messages');
 		}
 
 		public static function run($arguments)
@@ -103,7 +106,8 @@
 						Swisdk::$config[$section.'.'.$key] = $value;
 				}
 			} else {
-				SwisdkError::handle(new FatalError('No configuration file'));
+				SwisdkError::handle(new FatalError(
+					_('No configuration file found')));
 			}
 		}
 
@@ -111,16 +115,17 @@
 		{
 			if(preg_match('/[^A-Za-z0-9\.-_\/\-]/', $dir)
 					|| strpos($dir, '..')!==false)
-				SwisdkError::handle(new FatalError(
-					'Invalid path passed to require_data_directory:'
-					.$dir));
+				SwisdkError::handle(new FatalError(sprintf(
+					_('Invalid path passed to require_data_directory: %s'),
+					$dir)));
 			if($dir{0}!='/')
 				$dir = DATA_ROOT.$dir;
 			umask(0002);
 			if(!file_exists($dir))
 				if(!@mkdir($dir, 0775, true))
-					SwisdkError::handle(new FatalError(
-						'Could not create data directory '.$dir));
+					SwisdkError::handle(new FatalError(sprintf(
+						_('Could not create data directory %s'),
+						$dir)));
 		}
 
 		public static function log($message, $log='error')
@@ -248,8 +253,9 @@
 					&& class_exists($class))
 				return new $class;
 			else
-				SwisdkError::handle(new FatalError(
-					'Could not load '.$class.', stage '.$stage));
+				SwisdkError::handle(new FatalError(sprintf(
+					_('Could not load %s, stage %s'),
+					$class, $stage)));
 		}
 
 		/**
@@ -257,6 +263,11 @@
 		*	A module can exist in the swisdk-dir or the content dir. The parameter
 		*	$dir is the ref path to the file.
 		*/
+
+
+		// BIG FIXME: remove load_module, load_instance in favor of load
+		// (used in emailer, dispatcher and site handlers)
+
 		public static function load_module( $class , $dir , $instance = true )
 		{
 			if(class_exists($class)) {
@@ -296,9 +307,9 @@
 			// ok we just didnt find a file in the include path... return
 			// error and say goodbye! :(
 
-			return new FileNotFoundError("Could not load the module $class!"
-				." Could not find the include-file and the class does"
-				." not exist!", $dir);
+			return new FileNotFoundError(sprintf(
+				_('Could not load %s'), $class),
+				$dir);
 		}
 
 		public static function module_instance( $class )
@@ -306,9 +317,8 @@
 			if(class_exists($class))
 				return new $class;
 			else
-				return CouldNotInstanceClassError(
-					"Could no load the module $class!"
-					." Class doesnt exist!", $class);
+				return CouldNotInstanceClassError(sprintf(
+					_('Could not create instance of class %s'), $class));
 		}
 	}
 

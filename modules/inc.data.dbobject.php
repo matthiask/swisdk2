@@ -795,8 +795,8 @@
 			$result = $dbh->query($sql);
 			DBObject::$error_obj = null;
 			if($result===false) {
-				$error = new DBError("Database error: "
-					.implode(', ', $dbh->errorInfo()), $sql);
+				$error = new DBError(sprintf(_('Database error: %s'),
+					implode(', ', $dbh->errorInfo())), $sql);
 				if(DBObject::$handle_error)
 					SwisdkError::handle($error);
 				else
@@ -1181,8 +1181,8 @@
 				}
 				$field_list[$this->class] = $fl;
 			} else {
-				SwisdkError::handle(new FatalError('Cannot act on PDO DB type '
-					.$driver));
+				SwisdkError::handle(new FatalError(sprintf(
+					_('Cannot act on PDO DB type %s'), $driver)));
 			}
 
 			DBObject::$_field_list[$this->db_connection_id][$this->class] = $fl;

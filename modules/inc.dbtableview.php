@@ -21,7 +21,7 @@
 			$box->add($p.'start', new HiddenInput());
 			$box->add($p.'limit', new HiddenInput());
 			if($this->setup_additional()!==false) {
-				$this->set_title('Search form');
+				$this->set_title(_('Search form'));
 				$this->box('search')->add(new SubmitButton());
 			}
 		}
@@ -41,7 +41,8 @@
 		protected function add_fulltext_field($title=null)
 		{
 			$this->box('search')->add($this->dbobj()->name('query'),
-				new TextInput(), $title);
+				new TextInput(),
+				($title?$title:_('Search')));
 		}
 
 		public function name()
@@ -177,7 +178,7 @@
 		{
 			if(!$this->obj)
 				SwisdkError::handle(new FatalError(
-					'Cannot use DBTableView without DBOContainer'));
+					_('Cannot use DBTableView without DBOContainer')));
 			if(!$this->form)
 				$this->form = new DBTableViewForm();
 
@@ -254,12 +255,15 @@
 			$colcount = count($this->columns);
 			list($first, $count, $last) = $this->list_position();
 
-			$str = 'displaying '.$first.'&ndash;'.$last.' of '.$count;
+			$str = sprintf(_('displaying %s &ndash; %s of %s'), $first, $last, $count);
+			$skim = sprintf(_('skim %s backwards %s or %s forwards %s'),
+				'<a href="javascript:skim(-'.$this->items_on_page.')">',
+				'</a>',
+				'<a href="javascript:skim('.$this->items_on_page.')">',
+				'</a>');
 			return "<tfoot>\n<tr>\n<td colspan=\"".$colcount.'">'
 				.$this->multi_foot()
-				.$str.' | skim '
-				.'<a href="javascript:skim(-'.$this->items_on_page.')">backwards</a> or '
-				.'<a href="javascript:skim('.$this->items_on_page.')">forwards</a>'
+				.$str.' | '.$skim
 				."</td>\n</tr>\n</tfoot>\n</table>".<<<EOD
 <script type="text/javascript">
 //<![CDATA[
@@ -305,9 +309,11 @@ EOD;
 			$id = $this->form->id();
 			$gid = guardToken('delete');
 			return '<div style="float:left">'
-				.'<a href="javascript:tv_edit()">edit</a>'
-				.' or '
-				.'<a href="javascript:tv_delete()">delete</a> checked'
+				.sprintf(_('%s edit %s or %s delete %s checked'),
+					'<a href="javascript:tv_edit()">',
+					'</a>',
+					'<a href="javascript:tv_delete()">',
+					'</a>')
 				.'</div>'
 				.<<<EOD
 <script type="text/javascript">

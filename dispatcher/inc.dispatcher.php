@@ -43,8 +43,7 @@
 
 			} else {
 				SwisdkError::handle( new FatalError(
-					"There are no controller dispatch modules!"
-					." At least give me one - please!" ) );
+					_('Dispatcher configuration incomplete. No dispatcher modules')));
 			}
 		}
 	}

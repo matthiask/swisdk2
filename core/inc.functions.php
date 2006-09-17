@@ -15,8 +15,8 @@
 			session_write_close();
 			header('Location: '.$url);
 		} else
-			SwisdkError::handle(new FatalError(
-				'Invalid location specification: '.$url));
+			SwisdkError::handle(new FatalError(sprintf(
+				_('Invalid location specification: %s'), $url)));
 	}
 
 	/**

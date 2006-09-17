@@ -26,9 +26,8 @@
 				$eObj->run();
 				return $eObj;
 			} else {
-				SwisdkError::handle(new FatalError(
-					'SwisdkError::handle: argument has not type'
-					.' BasicSwisdkError'));
+				SwisdkError::handle(new FatalError(sprintf(
+					_('SwisdkError::handle: Argument must be of type BasicSwisdkError'))));
 			}
 		}
 
@@ -208,7 +207,7 @@
 				return __CLASS__.": {$this->args[0]} ({$this->args[1]}) in"
 					." {$this->args[2]} at line {$this->args[3]}";
 
-			return 'An unexpected error occurred.';
+			return _('An unexpected error occurred.');
 		}
 	}
 
@@ -224,7 +223,7 @@
 		public function __construct($exception)
 		{
 			parent::__construct();
-			$this->args[0] = "Uncaught exception: " . $exception->getMessage();
+			$this->args[0] = sprintf(_('Uncaught exception: %s'), $exception->getMessage());
 		}
 	}
 
@@ -236,7 +235,7 @@
 		public function run()
 		{
 			header('HTTP/1.0 404 Not Found');
-			echo 'Site not found';
+			echo _('Site not found');
 			exit();
 		}
 	}
