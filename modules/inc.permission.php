@@ -62,10 +62,11 @@
 				foreach($urls as $url)
 					$clauses[] = 'realm_url LIKE \''.$url.'%\'';
 				$sql .= implode(' OR ', $clauses);
+				PermissionManager::$siteadmin_realms[$uid] = $urls;
+			} else {
+				PermissionManager::$siteadmin_realms[$uid] = array();
 			}
 
-			PermissionManager::$siteadmin_realms[$uid] =
-				DBObject::db_get_array($sql, 'realm_id');
 			return PermissionManager::$siteadmin_realms[$uid];
 		}
 
