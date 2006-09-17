@@ -112,7 +112,7 @@
 		{
 			$this->args = func_get_args();
 			$this->column = array_shift($this->args);
-			$this->title = array_shift($this->args);
+			$this->set_title(array_shift($this->args));
 		}
 
 		abstract public function html(&$data);
@@ -120,7 +120,10 @@
 		public function column()	{ return $this->column; }
 		public function title()		{ return $this->title; }
 		public function name()		{ return $this->column; }
-		public function set_title($t)	{ $this->title = $t; }
+		public function set_title($t)
+		{
+			$this->title = dgettext('swisdk', $t);
+		}
 
 		public function set_tableview(&$tableview)
 		{

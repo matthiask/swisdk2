@@ -89,7 +89,6 @@
 		public function name()			{ return $this->name; }
 		public function set_name($name)		{ $this->name = $name; }
 		public function title()			{ return $this->title; }
-		public function set_title($title)	{ $this->title = $title; }
 		public function info()			{ return $this->info; }
 		public function set_info($info)		{ $this->info = $info; }
 		public function message()		{ return $this->message; }
@@ -108,6 +107,10 @@
 			$this->default_value = $value;
 		}
 
+		public function set_title($title)
+		{
+			$this->title = dgettext('swisdk', $title);
+		}
 
 		/**
 		 * return a unique name for this FormItem
@@ -434,7 +437,8 @@
 
 		public function add_null_item()
 		{
-			$this->items = array_merge(array(0 => ' -- select -- '), $this->items);
+			$this->items = array_merge(array(0 => '-- '.dgettext('swisdk', 'select').' --'),
+				$this->items);
 		}
 
 		protected $items=array();
