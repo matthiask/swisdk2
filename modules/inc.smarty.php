@@ -26,11 +26,14 @@
 			$this->smarty->template_dir = CONTENT_ROOT;
 			//$this->smarty->cache_dir = CACHE_ROOT.'smarty';
 			//$this->config_dir
-			$this->caching = false;
-			$this->security = false;
-			error_reporting($er);
-			$this->register_function('swisdk_runtime_value',
+			$this->smarty->caching = false;
+			$this->smarty->security = false;
+			$this->smarty->register_function('swisdk_runtime_value',
 				'_smarty_swisdk_runtime_value');
+			$this->smarty->register_block('block', '_smarty_swisdk_process_block');
+			$this->smarty->register_function('extends', '_smarty_swisdk_extends');
+			$this->smarty->assign_by_ref('_swisdk_smarty_instance', $this);
+			error_reporting($er);
 
 			Swisdk::require_data_directory($this->smarty->compile_dir);
 			$this->assign('swisdk_user', SessionHandler::user()->data());
@@ -62,7 +65,26 @@
 			return $ret;
 		}
 
+		public function display($resource_name)
+		{
+			echo $this->fetch($resource_name);
+		}
+
+		public function fetch($resource_name)
+		{
+			$ret = $this->smarty->fetch($resource_name);
+			while($resource = $this->_derived) {
+				$this->_derived = null;
+				$ret = $this->smarty->fetch($resource);
+			}
+			return $ret;
+		}
+
 		protected $smarty;
+
+		// template inheritance
+		public $_blocks = array();
+		public $_derived = null;
 	}
 
 	function _smarty_swisdk_runtime_value($params, &$smarty)
@@ -71,6 +93,23 @@
 		if(isset($params['format']) && $val)
 			return sprintf($params['format'], $val);
 		return $val;
+	}
+
+	function _smarty_swisdk_process_block($params, $content, &$smarty, &$repeat)
+	{
+		if($content===null)
+			return;
+		$name = $params['name'];
+		$ss = $smarty->get_template_vars('_swisdk_smarty_instance');
+		if(!isset($ss->_blocks[$name]))
+			$ss->_blocks[$name] = $content;
+		return $ss->_blocks[$name];
+	}
+
+	function _smarty_swisdk_extends($params, &$smarty)
+	{
+		$ss = $smarty->get_template_vars('_swisdk_smarty_instance');
+		$ss->_derived = $params['file'];
 	}
 
 	class SmartyMaster {
