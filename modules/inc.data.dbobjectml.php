@@ -104,7 +104,7 @@
 			$obj = DBObjectML::create($class, $language);
 
 			foreach($data as $k => $v)
-				$obj->$k = $v;
+				$obj->set($k, $v);
 			return $obj;
 		}
 
@@ -258,30 +258,40 @@
 
 		public function __get($var)
 		{
-			if($var=='id') {
+			return $this->get($this->name($var));
+		}
+
+		public function __set($var, $value)
+		{
+			return $this->set($this->name($var), $value);
+		}
+
+		public function get($var)
+		{
+			if($var==$this->primary) {
 				if(isset($this->data[$this->primary]))
 					return $this->data[$this->primary];
 				return null;
 			}
 			$dbo = $this->dbobj();
 			$fields = $dbo->field_list();
-			if(isset($fields[$name = $dbo->name($var)]))
-				return $dbo->get($name);
-			if(isset($this->data[$name = $this->name($var)]))
-				return $this->data[$name];
+			if(isset($fields[$var]))
+				return $dbo->get($var);
+			if(isset($this->data[$var]))
+				return $this->data[$var];
 			return null;
 		}
 
-		public function __set($var, $value)
+		public function set($var, $value)
 		{
-			if($var=='id')
+			if($var==$this->primary)
 				return ($this->data[$this->primary] = $value);
 			$dbo = $this->dbobj();
 			$fields = $dbo->field_list();
-			if(isset($fields[$name = $dbo->name($var)]))
-				return $dbo->set($name, $value);
+			if(isset($fields[$var]))
+				return $dbo->set($var, $value);
 			else
-				return $this->data[$this->name($var)] = $value;
+				return $this->data[$var] = $value;
 		}
 	}
 

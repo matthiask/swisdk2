@@ -203,7 +203,7 @@
 			$obj = DBObject::create($class);
 
 			foreach($data as $k => $v)
-				$obj->$k = $v;
+				$obj->set($k, $v);
 			return $obj;
 		}
 
