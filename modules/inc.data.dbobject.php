@@ -989,7 +989,7 @@
 		/**
 		 * if you really want to use the long names...
 		 */
-		public function get($var, $default=null)
+		public function get($var)
 		{
 			if(isset($this->data[$var])) {
 				return $this->data[$var];
