@@ -843,8 +843,6 @@
 		public static function db_escape($str,
 			$connection_id = DB_CONNECTION_DEFAULT)
 		{
-			if($quote!==false)
-				return DBObject::db($connection_id)->quote($str);
 			return DBObject::db($connection_id)->quote($str);
 		}
 
