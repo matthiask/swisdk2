@@ -116,7 +116,7 @@
 				'<form method="post" action="'.$_SERVER['REQUEST_URI']
 				.'" id="'.$obj->id()."\" $html class=\"sf-form\" "
 				."accept-charset=\"utf-8\" $upload>\n<div>\n".$js);
-			$this->add_html_end('<span style="color:red" id="'.$obj->id()."_span\"> </span>\n");
+			$this->add_html_end('<span style="color:red" id="'.$obj->id()."_message_span\"> </span>\n");
 			$this->add_html_end("</div></form>\n");
 		}
 
@@ -132,10 +132,8 @@
 //<![CDATA[
 function swisdk_form_do_validate(valid, field, message)
 {
-	document.getElementById(field+\'_span\').firstChild.data =
-		document.getElementById(field+\'_span\').firstChild.data.replace(new RegExp(message), \' \');
 	if(!valid) {
-		document.getElementById(field+\'_span\').firstChild.data += message;
+		document.getElementById(field+\'_message_span\').innerHTML += message;
 		return false;
 	}
 	return true;
@@ -144,6 +142,13 @@ function swisdk_form_do_validate(valid, field, message)
 function validate_'.$id.'()
 {
 	var valid = true;
+	var form = document.getElementById(\''.$id.'\');
+	for(var i=0; i<form.elements.length; i++) {
+		spanElem = document.getElementById(form.elements[i].id+\'_message_span\');
+		if(spanElem)
+			spanElem.innerHTML = \' \';
+	}
+	document.getElementById(\''.$id.'_message_span\').innerHTML = \' \';
 	if(!'.implode(") valid = false;\n\tif(!", $this->functions).') valid = false;
 	return valid;
 }
@@ -173,9 +178,9 @@ function validate_'.$id.'()
 
 		protected function visit_FormBox_start($obj)
 		{
-			$message = $obj->message();
-			$this->add_html_end('<span style="color:red">'
-				.($message?$message:' ')."</span>\n");
+			// FIXME placement of message div should not always be at the
+			// end of form (end of FormBox!)
+			$this->add_html_end($this->_message_html($obj));
 			if($title = $obj->title())
 				$this->_render_bar($obj, '<strong>'.$title.'</strong>',
 					'sf-box-title');
@@ -496,15 +501,19 @@ EOD;
 		protected function _message_html($obj)
 		{
 			$msg = $obj->message();
-			$name = $obj->iname();
-			return '<div id="'.$name.'_span" style="clear:both;color:red">'
-				.($msg?$msg:' ')."</div>\n";
+			$name = $obj->id();
+			return '<div id="'.$name.'_message_span" style="clear:both;color:red">'
+				.($msg?
+				'<img style="position:relative;top:4px" src="/images/icons/error.png" alt="error" />'
+				.$msg:' ')."</div>\n";
 		}
 
 		protected function _info_html($obj)
 		{
 			$msg = $obj->info();
-			return $msg?'<div style="float:left;">'.$msg."</div>\n":'';
+			return $msg?'<div style="float:left;clear:both;font-size:80%">'
+				.'<img style="position:relative;top:4px;" src="/images/icons/information.png" alt="info" /> '
+				.$msg."</div>\n":'';
 		}
 
 		protected function _simpleinput_html($obj)

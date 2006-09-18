@@ -115,9 +115,14 @@
 		/**
 		 * return a unique name for this FormItem
 		 */
-		public function iname() {
+		public function id() {
 			return ((!$this->preinitialized&&$this->unique)?
 				$this->box_name:'').$this->name;
+		}
+
+		public function iname()
+		{
+			return $this->id();
 		}
 
 		/**

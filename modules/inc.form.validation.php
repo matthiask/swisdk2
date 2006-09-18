@@ -30,8 +30,9 @@
 			if(!list($rulefunc, $rulejs) = $this->validation_js_impl($form))
 				return null;
 			$id = $form->id();
+			$message = '<img style="position:relative;top:3px" "src="/images/icons/error.png" /> '.$this->message;
 			return array(
-				"swisdk_form_do_validate($rulefunc, '$id', '{$this->message}')", $rulejs);
+				"swisdk_form_do_validate($rulefunc, '$id', '$message')", $rulejs);
 		}
 
 		protected function validation_js_impl(&$form)
@@ -110,9 +111,9 @@ EOD;
 			if(!list($rulefunc, $rulejs) = $this->validation_js_impl($item))
 				return null;
 			$name = $item->iname();
-			$message = $this->message;
+			$message = '<img style="position:relative;top:3px" "src="/images/icons/error.png" /> '.$this->message;
 			return array(
-				"swisdk_form_do_validate($rulefunc('$name'), '$name', '{$this->message}')", $rulejs);
+				"swisdk_form_do_validate($rulefunc('$name'), '$name', '$message')", $rulejs);
 		}
 
 		protected function validation_js_impl(FormItem &$item)

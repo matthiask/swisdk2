@@ -88,7 +88,7 @@
 		 * This function should also be used to create FormBoxes (FormML
 		 * returns FormMLBox)
 		 */
-		public function box($id=null)
+		public function box($id=0)
 		{
 			if(!$id && count($this->boxes))
 				return reset($this->boxes);
@@ -319,7 +319,7 @@
 		 */
 		public function bind($dbobj)
 		{
-			$this->formbox_id = Form::to_form_id($dbobj);
+			$this->formbox_id = Form::to_form_id($dbobj).'_formbox_'.$this->name;
 			$this->dbobj = $dbobj;
 		}
 
