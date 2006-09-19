@@ -433,25 +433,6 @@
 		}
 
 		/**
-		 * return a prettyfied title for this formitem name
-		 *
-		 * Examples:
-		 *
-		 * DBObject class: News
-		 *
-		 * news_title => Title
-		 * news_creation_dttm => Creation
-		 * news_description => Description
-		 * news_xy_zx => Xy Zx
-		 */
-		protected function pretty_title($fname)
-		{
-			return ucwords(str_replace('_', ' ',
-				preg_replace('/^('.$this->dbobj()->_prefix()
-					.')?(.*?)(_id|_dttm)?$/', '\2', $fname)));
-		}
-
-		/**
 		 * handle add(FormItem) case
 		 */
 		protected function add_initialized_obj($obj)
@@ -476,7 +457,7 @@
 			$dbobj = $this->dbobj();
 
 			if($title===null)
-				$title = $this->pretty_title($field);
+				$title = $dbobj->pretty($field);
 
 			$obj->set_title($title);
 			$obj->set_name($field);

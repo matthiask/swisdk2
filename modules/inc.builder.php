@@ -24,7 +24,7 @@
 			if(!isset($field_list[$field])&&isset($field_list[$tmp=$dbobj->name($field)]))
 				$field = $tmp;
 			if($title === null)
-				$title = $this->pretty_title($field, $dbobj);
+				$title = $dbobj->pretty($field);
 
 			switch($field_list[$field]) {
 				case DB_FIELD_BOOL:
@@ -54,13 +54,6 @@
 							$relations[$field]['foreign']);
 				}
 			}
-		}
-
-		public function pretty_title($field, &$dbobj)
-		{
-			return ucwords(str_replace('_', ' ',
-				preg_replace('/^('.$dbobj->_prefix()
-					.')?(.*?)(_id|_dttm)?$/', '\2', $field)));
 		}
 
 		/**
