@@ -26,7 +26,7 @@
 			if($title === null)
 				$title = $dbobj->pretty($field);
 
-			switch($field_list[$field]) {
+			switch(isset($field_list[$field])?$field_list[$field]:null) {
 				case DB_FIELD_BOOL:
 					return $this->create_bool($field, $title);
 				case DB_FIELD_STRING:

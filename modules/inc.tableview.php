@@ -282,7 +282,6 @@ EOD;
 			if($this->reldata===null) {
 				$relations = $this->dbobj->relations();
 				$rel = $relations[$this->db_class];
-				print_r($this->relation);
 				$data = DBObject::db_get_array(sprintf(
 					'SELECT %s,%s FROM %s',	$p,$rel['foreign'], $rel['table']));
 				$this->reldata = array();
@@ -290,7 +289,7 @@ EOD;
 					$this->reldata[$row[$p]][] = $row[$rel['foreign']];
 			}
 
-			if(!isset($this->reldata[$data[$p]]))
+			if(!isset($data[$p]) || !isset($this->reldata[$data[$p]]))
 				return;
 			$vals = $this->reldata[$data[$p]];
 			$tokens = array();
