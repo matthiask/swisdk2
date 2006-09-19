@@ -80,6 +80,16 @@
 			return $ret;
 		}
 
+		public function block_content($block)
+		{
+			return $this->_blocks[$block];
+		}
+
+		public function set_block_content($block, $content)
+		{
+			$this->_blocks[$block] = $content;
+		}
+
 		protected $smarty;
 
 		// template inheritance
