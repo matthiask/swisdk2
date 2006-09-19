@@ -282,10 +282,12 @@ EOD;
 			if($this->reldata===null) {
 				$relations = $this->dbobj->relations();
 				$rel = $relations[$this->db_class];
-				$data = DBObject::db_get_array(sprintf(
-					'SELECT %s,%s FROM %s',	$p,$rel['foreign'], $rel['table']));
+				$rdata = DBObject::db_get_array(sprintf(
+					'SELECT %s,%s FROM %s WHERE %s IN (%s)',
+					$p,$rel['foreign'], $rel['table'], $p,
+					implode(',', $this->tableview->dbobj()->ids())));
 				$this->reldata = array();
-				foreach($data as $row)
+				foreach($rdata as $row)
 					$this->reldata[$row[$p]][] = $row[$rel['foreign']];
 			}
 
