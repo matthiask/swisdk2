@@ -31,14 +31,15 @@
 			$this->html_end .= $html;
 		}
 
+		/**
+		 * Array of javascript validation functions
+		 */
 		protected $functions = array();
 
-		public function add_validation_function($func)
-		{
-			if($func)
-				$this->functions[] = $func;
-		}
-
+		/**
+		 * Enable/disable validation javascript output (has no effect on
+		 * the server side of validation)
+		 */
 		public function set_javascript_validation($enabled = true)
 		{
 			$this->js_validation = $enabled;
@@ -167,7 +168,8 @@ function validate_'.$id.'()
 			foreach($rules as &$rule) {
 				list($funccall, $js) = $rule->validation_javascript($obj);
 				$this->javascript .= $js;
-				$this->add_validation_function($funccall);
+				if($funccall)
+					$this->functions[] = $funccall;
 			}
 		}
 
