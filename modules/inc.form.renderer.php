@@ -68,11 +68,6 @@
 				$suffix = '_end';
 
 			$class = get_class($obj);
-			if($obj instanceof Form)
-				$class = 'Form';
-			else if($obj instanceof FormBox)
-				$class = 'FormBox';
-
 			$method = 'visit_'.$class.$suffix;
 			if(method_exists($this, $method)) {
 				call_user_func(array($this, $method), $obj);
