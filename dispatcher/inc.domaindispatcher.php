@@ -5,6 +5,9 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
+	/**
+	 * strips the host part from the request and sets runtime.request.host
+	 */
 	class DomainDispatcher extends ControllerDispatcherModule {
 		public function collect_informations()
 		{

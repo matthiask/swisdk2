@@ -384,6 +384,9 @@
 			return $array;
 		}
 
+		/**
+		 * might be expensive because get() does more than __get()
+		 */
 		public function collect_full($key, $value)
 		{
 			$array = array();
@@ -429,6 +432,10 @@
 		{
 			return clone $this->obj;
 		}
+
+		/**
+		 * get or set a value on all DBObjects
+		 */
 
 		public function __get($var)
 		{

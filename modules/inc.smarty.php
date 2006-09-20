@@ -97,6 +97,10 @@
 		public $_derived = null;
 	}
 
+	/**
+	 * {swisdk_runtime_value key="request.host"}  inserts the value of
+	 * runtime.request.host
+	 */
 	function _smarty_swisdk_runtime_value($params, &$smarty)
 	{
 		$val = Swisdk::config_value('runtime.'.$params['key']);
@@ -104,6 +108,31 @@
 			return sprintf($params['format'], $val);
 		return $val;
 	}
+
+	/**
+	 * Template inheritance
+	 *
+	 * Base template example:
+	 * --8<--
+	 * Content here is used verbatim
+	 * 
+	 * {block name="test-block"}
+	 * Here, you may insert default content for the block
+	 * {/block}
+	 * --8<--
+	 * 
+	 * 
+	 * Derived template example:
+	 * --8<--
+	 * {extends file="base.tpl"}
+	 * 
+	 * Content here is ignored
+	 * 
+	 * {block name="test-block"}
+	 * The content here replaces everything in the test-block of the base template
+	 * {/block}
+	 * --8<--
+	 */
 
 	function _smarty_swisdk_process_block($params, $content, &$smarty, &$repeat)
 	{

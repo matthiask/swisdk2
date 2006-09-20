@@ -13,9 +13,37 @@
 		protected $file_upload = false;
 		protected $js_validation = true;
 
+		/**
+		 * Render the HTML of an input field
+		 */
 		abstract protected function _render($obj, $field_html, $row_class = null);
+
+		/**
+		 * Render the HTML of a bar which (normally) spans the whole width of the
+		 * form, f.e. a form title or a section title
+		 */
 		abstract protected function _render_bar($obj, $html, $row_class = null);
 
+		/**
+		 * Add a HTML fragment
+		 *
+		 * <form> (added by call to add_html_start() in visit_Form_end)
+		 *
+		 * add_html_start()
+		 *
+		 * 	head
+		 *
+		 * add_html()
+		 *
+		 * 	body (input elements)
+		 *
+		 * 	foot
+		 *
+		 * add_html_end()
+		 *
+		 * </form> (added by call to add_html_end() in visit_Form_end)
+		 *
+		 */
 		public function add_html($html)
 		{
 			$this->html_start .= $html;

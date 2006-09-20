@@ -6,6 +6,13 @@
 	*/
 
 	class Broadcaster {
+		/**
+		 * listener_add($action, $callback, ...)
+		 *
+		 * On $action, the $callback gets executed. First argument is the
+		 * Broadcaster itself, further arguments to listener_add are
+		 * passed on unmodified.
+		 */
 		public function listener_add()
 		{
 			$args = func_get_args();
@@ -18,6 +25,9 @@
 				'args' => $args);
 		}
 
+		/**
+		 * Removes a callback from the Broadcaster
+		 */
 		public function listener_remove($action, $callback)
 		{
 			if(!isset($this->listeners[$action]))
@@ -27,6 +37,10 @@
 					unset($this->listeners[$action][$key]);
 		}
 
+		/**
+		 * Whenever you execute an action you want listeners to hook in,
+		 * you need to call this function.
+		 */
 		public function listener_call($action)
 		{
 			if(!isset($this->listeners[$action]))
@@ -35,6 +49,9 @@
 				call_user_func_array($l['callback'], $l['args']);
 		}
 
+		/**
+		 * Clear listener list for $action
+		 */
 		public function listener_clear($action)
 		{
 			if(isset($this->listeners[$action]))

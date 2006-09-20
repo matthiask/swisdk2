@@ -6,6 +6,23 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
+	/**
+	 * tries to find a file below CONTENT_ROOT which would be suitable to handle
+	 * the incoming request
+	 *
+	 * Rules:
+	 *
+	 * Incoming: /request/path/
+	 *
+	 * Checks for (always prepend CONTENT_ROOT):
+	 * 
+	 * 1. request/path/Index_*
+	 * 2. request/path/All_*
+	 * 3. request/path_*
+	 * 4. request/All_*
+	 * 5. request_*
+	 * 6. All_*
+	 */
 	class ControllerDispatcher extends ControllerDispatcherModule {
 		public function collect_informations()
 		{

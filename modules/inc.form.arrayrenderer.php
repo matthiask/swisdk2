@@ -5,6 +5,9 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
+	/**
+	 * Returns the Form as a nested array
+	 */
 	class ArrayFormRenderer extends FormRenderer {
 		protected $array = array();
 		protected $stack = array();

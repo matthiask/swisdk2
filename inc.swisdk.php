@@ -112,6 +112,7 @@
 						array_unshift(Swisdk::$config[$name],
 							substr($section, $pos+1));
 					}
+					// flatten config hierarchy
 					foreach($array as $key => $value)
 						Swisdk::$config[$section.'.'.$key] = $value;
 				}
@@ -145,6 +146,14 @@
 		 * debugging functions
 		 */
 
+		/**
+		 * add log message
+		 *
+		 * uses the configuration variable $log.logfile as logfile
+		 *
+		 * Example: If you want Swisdk::log($sql, 'db') to work, you need
+		 * to define the configuration variable db.logfile
+		 */
 		public static function log($message, $log='error')
 		{
 			Swisdk::require_data_directory('log');
@@ -156,6 +165,11 @@
 			@fclose($fp);
 		}
 
+		/**
+		 * dump static Swisdk variables' content
+		 *
+		 * Only enabled when in debug mode (Might show DB passwords!)
+		 */
 		public static function dump()
 		{
 			if(!Swisdk::config_value('error.debug_mode'))
@@ -173,17 +187,30 @@
 
 		public static function set_config_value($key, $value)
 		{
-			Swisdk::$config[$key] = $value;
+			Swisdk::$config[strtolower($key)] = $value;
 		}
 
-		public static function config_value($key)
+		public static function config_value($key, $default = null)
 		{
 			$key = strtolower($key);
 			if(isset(Swisdk::$config[$key]))
 				return Swisdk::$config[$key];
-			return null;
+			return $default;
 		}
 
+		/**
+		 * returns a website config value, for example the website title
+		 *
+		 * Follows the website inheritance chain
+		 *
+		 * Example:
+		 *
+		 * [website.default]
+		 * title = Default title
+		 *
+		 * [website.something]
+		 * inherit = default
+		 */
 		public static function website_config_value($key)
 		{
 			$key = strtolower($key);

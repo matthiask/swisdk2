@@ -5,6 +5,11 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
+	/**
+	 * Sets the current Framework language if the first token is a valid language key
+	 *
+	 * Does not modify the request
+	 */
 	class LanguageDispatcher extends ControllerDispatcherModule {
 		public function collect_informations()
 		{

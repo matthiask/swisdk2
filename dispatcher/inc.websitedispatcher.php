@@ -6,6 +6,12 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
+	/**
+	 * Checks if the website name (the second part of the website config section
+	 * titles) matches the first part of the request OR checks if the website
+	 * match regex matches the request and if so, sets the current website and
+	 * website title.
+	 */
 	class WebsiteDispatcher extends ControllerDispatcherModule {
 		public function collect_informations()
 		{

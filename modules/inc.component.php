@@ -5,6 +5,9 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
+	/**
+	 * nearly all classes implement IComponent
+	 */
 	interface IComponent {
 		public function run();
 	}

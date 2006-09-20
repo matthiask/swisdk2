@@ -108,11 +108,18 @@
 	}
 
 	abstract class AdminComponent implements IHtmlComponent {
+		/**
+		 * these variables are all initialized in AdminComponent::set_module
+		 */
 		protected $module_url;
 		protected $dbo_class;
 		protected $args;
-		protected $html;
 		protected $multilanguage;
+
+		/**
+		 * resulting HTML code
+		 */
+		protected $html;
 
 		public function html()
 		{
@@ -178,6 +185,7 @@
 	class AdminComponent_index extends AdminComponent {
 		public function run()
 		{
+			// default component is list view
 			$this->goto('_list');
 		}
 	}
@@ -190,6 +198,8 @@
 
 		public function run()
 		{
+			// if multiple is passed, the IDs of the records which should
+			// be edited are passed via $_POST
 			if($this->args[0]=='multiple')
 				$this->multiple = true;
 			if($this->multiple)
@@ -198,6 +208,9 @@
 				$this->edit_single();
 		}
 
+		/**
+		 * return a single DBObject[ML] of the correct type
+		 */
 		public function get_dbobj($val = null)
 		{
 			if($this->multiple && $this->obj)
@@ -215,6 +228,9 @@
 			}
 		}
 
+		/**
+		 * initialize the DBObject or DBOContainer
+		 */
 		public function init_dbobj()
 		{
 			if($this->multiple) {
@@ -236,6 +252,9 @@
 			}
 		}
 
+		/**
+		 * init Form or FormML
+		 */
 		public function init_form()
 		{
 			if($this->multilanguage)
@@ -244,6 +263,9 @@
 				$this->form = new Form();
 		}
 
+		/**
+		 * build the Form or FormBox using the default FormBuilder
+		 */
 		public function build_form($box = null)
 		{
 			$builder = $this->form_builder();
@@ -253,6 +275,9 @@
 				$builder->build($this->form);
 		}
 
+		/**
+		 * stop talking (initializing) and DO IT
+		 */
 		public function execute()
 		{
 			if($this->form->is_valid()) {
@@ -412,10 +437,12 @@
 
 		protected function delete_single()
 		{
+			// has aready been on confirmation page?
 			if(getInput('delete_confirmation_page')
 					&& (strtolower(getInput('confirmation_command'))!='delete'))
 				$this->goto('_index');
 
+			// invalid guard token? show confirmation page
 			if(getInput('guard')!=guardToken('delete')) {
 				$this->display_confirmation_page();
 				return;

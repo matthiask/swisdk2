@@ -71,6 +71,7 @@
 			)));
 		}
 
+		// reverse of DBObject::name()
 		public function shortname($tok)	{ return str_replace($this->prefix,'',$tok); }
 		public function _class()	{ return $this->class; }
 		public function _prefix()	{ return $this->prefix; }

@@ -28,6 +28,15 @@
 		abstract public function send();
 	}
 
+	/**
+	 * EmailMessage needs at least the following DBObject properties to
+	 * function properly:
+	 *
+	 * email_recipient
+	 * email_subject
+	 * email_message
+	 *
+	 */
 	class EmailMessage extends Message {
 		public function __construct($dbo = null)
 		{

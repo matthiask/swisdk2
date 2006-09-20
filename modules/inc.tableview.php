@@ -17,6 +17,9 @@
 		 */
 		protected $data = array();
 
+		/**
+		 * Append or prepend TableViewColumn (column renderers) to the tableview
+		 */
 		public function append_column(TableViewColumn $column)
 		{
 			$column->set_tableview($this);
@@ -40,6 +43,9 @@
 				.$this->render_foot();
 		}
 
+		/**
+		 * @param data: nested array
+		 */
 		public function set_data($data)
 		{
 			$this->data = $data;
@@ -152,7 +158,9 @@
 	class BoolTableViewColumn extends TableViewColumn {
 		public function html(&$data)
 		{
-			return $data[$this->column]?'true':'false';
+			return $data[$this->column]
+				?dgettext('swisdk', 'true')
+				:dgettext('swisdk', 'false');
 		}
 	}
 
@@ -223,6 +231,9 @@
 		}
 	}
 
+	/**
+	 * displays edit and delete links by default
+	 */
 	class CmdsTableViewColumn extends NoDataTableViewColumn {
 		public function html(&$data)
 		{
@@ -274,6 +285,9 @@ EOD;
 		protected $dbobj = null;
 	}
 
+	/**
+	 * TableViewColumn for data from n-to-m or 3way relations
+	 */
 	class ManyToManyDBTableViewColumn extends DBTableViewColumn {
 		public function html(&$data)
 		{

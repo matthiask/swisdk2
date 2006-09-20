@@ -231,6 +231,9 @@
 			$renderer->visit($this);
 		}
 
+		/**
+		 * Add static javascript fragments specific to this FormItem
+		 */
 		public function add_javascript($js)
 		{
 			$this->javascript .= $js;
@@ -285,9 +288,9 @@
 		public function init_value($dbobj)
 		{
 			$name = $this->iname();
-			if(isset($_FILES[$name]) && $_FILES[$name]['size']) {
-				$this->files_data = $_FILES[$name];
-				// TODO error checking
+			if(isset($_FILES[$name])
+					&& ($this->files_data = $_FILES[$name])
+					&& $this->check_upload()) {
 				$fname = preg_replace('/[^A-Za-z0-9\.-_]+/', '_',
 					$this->files_data['name']);
 				$pos = strrpos($fname, '.');
@@ -306,6 +309,37 @@
 					$this->files_data['cache_file'] = $fname;
 				}
 			}
+		}
+
+		protected function check_upload()
+		{
+			if(!$this->files_data['size'])
+				return false;
+			switch($this->files_data['error']) {
+				case UPLOAD_ERR_OK:
+					break;
+				case UPLOAD_ERR_INI_SIZE:  // upload_max_filesize in php.ini
+				case UPLOAD_ERR_FORM_SIZE: // MAX_FILE_SIZE hidden input field
+					$this->add_message(
+						dgettext('swisdk', 'The uploaded file exceeds the allowed filesize'));
+					break;
+				case UPLOAD_ERR_PARTIAL:
+					$this->add_message(
+						dgettext('swisdk', 'The uploaded file was only partially uploaded'));
+					break;
+				case UPLOAD_ERR_NO_FILE:
+					$this->add_message(
+						dgettext('swisdk', 'No file was uploaded'));
+				case UPLOAD_ERR_NO_TMP_DIR:
+					SwisdkError::handle(new FatalError(
+						dgettext('swisdk', 'FileUpload: Missing a temporary folder')));
+					break;
+				case UPLOAD_ERR_CANT_WRITE:
+					SwisdkError::handle(new FatalError(
+						dgettext('swisdk', 'FileUpload: Failed to write file to disk')));
+					break;
+			}
+
 		}
 
 		/**

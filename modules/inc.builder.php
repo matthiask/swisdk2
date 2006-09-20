@@ -9,6 +9,19 @@
 	require_once MODULE_ROOT.'inc.form.php';
 	require_once MODULE_ROOT.'inc.tableview.php';
 
+	/**
+	 * Form and TableView builder
+	 *
+	 * use informations from the database to automatically add FormItems resp.
+	 * TableViewColumns
+	 *
+	 * NOTE! You can customize the Builders here, but it's probably easier to
+	 * modify add your modifications in your own AdminModules or AdminComponents
+	 *
+	 * You can still use the autodetection features of the BuilderBase with
+	 * Form::add_auto or TableView::append_auto
+	 */
+
 	abstract class BuilderBase {
 
 		/**
@@ -26,6 +39,7 @@
 			if($title === null)
 				$title = $dbobj->pretty($field);
 
+			// field from main table
 			switch(isset($field_list[$field])?$field_list[$field]:null) {
 				case DB_FIELD_BOOL:
 					return $this->create_bool($field, $title);
@@ -42,6 +56,7 @@
 						$relations[$field]['class']);
 			}
 
+			// field from a related table
 			$relations = $dbobj->relations();
 			if(isset($relations[$field]['type'])) {
 				switch($relations[$field]['type']) {
@@ -120,6 +135,9 @@
 			return $this->create_field($field, $title);
 		}
 
+		/**
+		 * default builder function
+		 */
 		public function build_simple(&$form, $submitbtn = true)
 		{
 			$this->form = $form;
@@ -145,13 +163,16 @@
 				$this->form->add(new SubmitButton());
 		}
 
+		/**
+		 * builder function for multilanguage forms
+		 */
 		public function build_ml(&$form)
 		{
 			$this->build_simple($form, false);
 
 			$dbobj =& $form->dbobj();
 			$box = null;
-			// FIXME this is hacky. FormBox should have a box() method too?:w
+			// FIXME this is hacky. FormBox should have a box() method too?
 			if($form instanceof FormBox)
 				$box = $form->add(new FormMLBox());
 			else
@@ -257,6 +278,9 @@
 				return $this->build_simple();
 		}
 
+		/**
+		 * mainly used by TableView::append_auto
+		 */
 		public function create_auto(&$tableview, $field, $title = null)
 		{
 			$this->tv = $tableview;
@@ -282,7 +306,7 @@
 			}
 
 			// FIXME do not autogenerate fields which were
-			// created inside form_hook
+			// created inside tableview hook
 			$this->tableview_hook($form);
 			if($finalize)
 				$this->tv->append_column(new CmdsTableViewColumn(
@@ -311,7 +335,7 @@
 			}
 
 			// FIXME do not autogenerate fields which were
-			// created inside form_hook
+			// created inside tableview hook
 			$this->tableview_hook_ml($form);
 			$this->tv->append_column(new CmdsTableViewColumn($primary,
 				Swisdk::config_value('runtime.controller.url')));

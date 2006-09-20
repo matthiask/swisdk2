@@ -304,6 +304,10 @@ add_event(window, 'load', init_tableview);
 EOD;
 		}
 
+		/**
+		 * Renders the footer of a TableView where multiple rows can be
+		 * selected.
+		 */
 		protected function multi_foot()
 		{
 			$id = $this->form->id();
@@ -405,6 +409,10 @@ EOD;
 		}
 	}
 
+	/**
+	 * Displays a column consisting only of checkboxes. You can use that to execute
+	 * actions on multiple rows at once.
+	 */
 	class IDTableViewColumn extends NoDataTableViewColumn {
 		public function html(&$data)
 		{
