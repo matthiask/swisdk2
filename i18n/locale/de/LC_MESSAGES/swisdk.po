@@ -9,29 +9,29 @@ msgid ""
 msgstr ""
 "Project-Id-Version: SWISDK 2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-09-17 13:40+0200\n"
+"POT-Creation-Date: 2006-09-21 09:24+0200\n"
 "PO-Revision-Date: 2006-09-17 13:49+0200\n"
 "Last-Translator: mk <mk@spinlock.ch>\n"
 "Language-Team: German <mk@spinlock.ch>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit"
+"Content-Transfer-Encoding: 8bit\n"
 
 #: core/inc.error.php:30
 #, php-format
 msgid "SwisdkError::handle: Argument must be of type BasicSwisdkError"
 msgstr "SwisdkError::handle: Argument muss Typ BasicSwisdkError haben"
 
-#: core/inc.error.php:210
+#: core/inc.error.php:192
 msgid "An unexpected error occurred."
 msgstr "Unerwarteter Fehler"
 
-#: core/inc.error.php:226
+#: core/inc.error.php:208
 #, php-format
 msgid "Uncaught exception: %s"
 msgstr "Unbehandelter Fehler: %s"
 
-#: core/inc.error.php:238
+#: core/inc.error.php:220
 msgid "Site not found"
 msgstr "Seite konnte nicht gefunden werden"
 
@@ -42,51 +42,52 @@ msgstr "Ungültige Weiterleitung: %s"
 
 #: dispatcher/inc.dispatcher.php:46
 msgid "Dispatcher configuration incomplete. No dispatcher modules"
-msgstr "Dispatcher-Konfiguration unvollständig. Keine Dispatcher-Module definiert"
+msgstr ""
+"Dispatcher-Konfiguration unvollständig. Keine Dispatcher-Module definiert"
 
-#: modules/inc.adminmodule.php:284 modules/inc.adminmodule.php:321
+#: modules/inc.adminmodule.php:309 modules/inc.adminmodule.php:346
 #, php-format
 msgid "New %s"
 msgstr "Neuer %s"
 
-#: modules/inc.adminmodule.php:296 modules/inc.adminmodule.php:317
+#: modules/inc.adminmodule.php:321 modules/inc.adminmodule.php:342
 #, php-format
 msgid "Edit %s"
 msgstr "Bearbeite %s"
 
-#: modules/inc.adminmodule.php:361
+#: modules/inc.adminmodule.php:386
 #, php-format
 msgid "Create %s"
 msgstr "Erstelle %s"
 
-#: modules/inc.adminmodule.php:431 modules/inc.adminmodule.php:447
+#: modules/inc.adminmodule.php:458 modules/inc.adminmodule.php:474
 #, php-format
 msgid "Can't find the data. Class: %s. Argument: %s"
 msgstr "Keine passenden Daten gefunden. Klasse: %s. Argument: %s"
 
-#: modules/inc.adminmodule.php:456
+#: modules/inc.adminmodule.php:483
 msgid "Confirmation required"
 msgstr "Bestätigung notwendig"
 
-#: modules/inc.adminmodule.php:457
+#: modules/inc.adminmodule.php:484
 #, fuzzy, php-format
 msgid "Do you really want to delete %s?"
 msgstr "Wollen sie %s wirklich löschen?"
 
-#: modules/inc.adminmodule.php:459
+#: modules/inc.adminmodule.php:486
 msgid "Delete"
 msgstr "Löschen"
 
-#: modules/inc.adminmodule.php:460
+#: modules/inc.adminmodule.php:487
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: modules/inc.data.dbobject.php:798
+#: modules/inc.data.dbobject.php:764
 #, php-format
 msgid "Database error: %s"
 msgstr "Datenbank-Fehler: %s"
 
-#: modules/inc.data.dbobject.php:1185
+#: modules/inc.data.dbobject.php:1149
 #, php-format
 msgid "Cannot act on PDO DB type %s"
 msgstr "Kann nicht mit PDO Datenbank-Typ %s umgehen"
@@ -117,16 +118,41 @@ msgstr "zeige %s &ndash; %s von %s"
 msgid "skim %s backwards %s or %s forwards %s"
 msgstr "%s rückwärts %s oder %s vorwärts %s"
 
-#: modules/inc.dbtableview.php:312
+#: modules/inc.dbtableview.php:316
 #, php-format
 msgid "%s edit %s or %s delete %s checked"
 msgstr "%s bearbeite %s oder %s lösche %s markierte"
 
-#: modules/inc.form.items.php:516
+#: modules/inc.form.items.php:324
+msgid "The uploaded file exceeds the allowed filesize"
+msgstr "Die hochgeladene Datei ist zu gross"
+
+#: modules/inc.form.items.php:328
+msgid "The uploaded file was only partially uploaded"
+msgstr "Die Datei wurde nur teilweise hochgeladen"
+
+#: modules/inc.form.items.php:332
+msgid "No file was uploaded"
+msgstr "Keine Datei wurde hochgeladen"
+
+#: modules/inc.form.items.php:335
+msgid "FileUpload: Missing a temporary folder"
+msgstr "FileUpload: Temporäres Verzeichnis fehlt"
+
+#: modules/inc.form.items.php:339
+msgid "FileUpload: Failed to write file to disk"
+msgstr "FileUpload: Konnte nicht auf Festplatte schreiben"
+
+#: modules/inc.form.items.php:472
+#, fuzzy
+msgid "select"
+msgstr "Auswahl"
+
+#: modules/inc.form.items.php:552
 msgid "Submit"
 msgstr "Abschicken"
 
-#: modules/inc.form.php:186 modules/inc.form.php:538
+#: modules/inc.form.php:186 modules/inc.form.php:519
 #, php-format
 msgid "Invalid renderer specification: %s"
 msgstr "Ungültige Renderer-Spezifizierung: %s"
@@ -135,119 +161,124 @@ msgstr "Ungültige Renderer-Spezifizierung: %s"
 msgid "Could not validate form submission"
 msgstr "Konnte Formular nicht auf Gültigkeit überprüfen"
 
-#: modules/inc.form.php:515
+#: modules/inc.form.php:496
 #, php-format
 msgid "Cannot edit relation of type DB_REL_MANY! relspec: %s"
 msgstr "Kann Beziehung vom Typ DB_REL_MANY nicht bearbeiten. relspec: %s"
 
-#: modules/inc.form.php:519
+#: modules/inc.form.php:500
 #, php-format
 msgid "Oops. Unknown relation type %s"
 msgstr "Oops. Unbekannter Beziehungs-Typ: %s"
 
-#: modules/inc.form.renderer.php:93
+#: modules/inc.form.renderer.php:117
 #, php-format
 msgid "FormRenderer: Cannot visit %s"
 msgstr "FormRenderer: Konnte %s nicht zeichnen"
 
-#: modules/inc.form.validation.php:50
+#: modules/inc.form.validation.php:51
 msgid "The two related fields are not equal"
 msgstr "Die zwei Felder haben nicht denselben Wert"
 
-#: modules/inc.form.validation.php:92
+#: modules/inc.form.validation.php:93
 msgid "Value does not validate"
 msgstr "Wert ist ungültig"
 
-#: modules/inc.form.validation.php:131
+#: modules/inc.form.validation.php:132
 msgid "Value required"
 msgstr "Wert fehlt"
 
-#: modules/inc.form.validation.php:169
+#: modules/inc.form.validation.php:170
 msgid "User required"
 msgstr "Benutzer ungültig"
 
-#: modules/inc.form.validation.php:205
+#: modules/inc.form.validation.php:206
 msgid "Value must be numeric"
 msgstr "Wert muss eine Zahl sein"
 
-#: modules/inc.form.validation.php:241
+#: modules/inc.form.validation.php:242
 #, php-format
 msgid "Number must be between %s and %s"
 msgstr "Zahl muss einen Wert zwischen %s und %s haben"
 
-#: modules/inc.form.validation.php:323
+#: modules/inc.form.validation.php:324
 msgid "Please enter a valid email address"
 msgstr "Emailadresse ungültig"
 
-#: modules/inc.form.validation.php:336
+#: modules/inc.form.validation.php:337
 msgid "Please enter a valid URL"
 msgstr "URL ungültig"
 
-#: modules/inc.form.validation.php:383
+#: modules/inc.form.validation.php:384
 msgid "Please provide a file"
 msgstr "Datei fehlt"
 
-#: modules/inc.form.validation.php:401
+#: modules/inc.form.validation.php:402
 msgid "Please provide a valid image file"
 msgstr "Datei ist kein gültiges Bild"
 
-#: modules/inc.permission.php:173
+#: modules/inc.permission.php:174
 msgid "Access denied"
 msgstr "Zugriff verweigert"
 
-#: modules/inc.permission.php:182
+#: modules/inc.permission.php:183
 msgid "Login"
 msgstr "Anmeldung"
 
-#: modules/inc.smarty.php:158
+#: modules/inc.smarty.php:236
 #, php-format
 msgid "Smarty template %s does not exist"
 msgstr "Smarty Template %s existiert nicht"
 
-#: site/inc.handlers.php:36
+#: modules/inc.tableview.php:162
+#, fuzzy
+msgid "true"
+msgstr "ja"
+
+#: modules/inc.tableview.php:163
+msgid "false"
+msgstr "nein"
+
+#: site/inc.handlers.php:37
 #, php-format
 msgid "No handler defined for %s suffix"
 msgstr "Kein Handler für %s Suffix definiert"
 
-#: site/inc.handlers.php:58
+#: site/inc.handlers.php:59
 msgid "No site controller registered. Did you forget Swisdk::register()?"
 msgstr "Kein Site Controller registriert. Vergassen Sie Swisdk::register()?"
 
-#: site/inc.handlers.php:63
+#: site/inc.handlers.php:64
 #, php-format
 msgid "Site controller %s could not be found"
 msgstr "Site Controller %s konnte nicht gefunden werden"
 
-#: site/inc.handlers.php:73
+#: site/inc.handlers.php:74
 msgid "Site controller has to be subclass of Site"
 msgstr "Site Controller muss von Site abgeleitet werden"
 
-#: inc.swisdk.php:110
+#: inc.swisdk.php:121
 msgid "No configuration file found"
 msgstr "Konfigurationsdatei konnte nicht gefunden werden"
 
-#: inc.swisdk.php:119
+#: inc.swisdk.php:133
 #, php-format
 msgid "Invalid path passed to require_data_directory: %s"
 msgstr "Ungültiger Pfad für require_data_directory: %s"
 
-#: inc.swisdk.php:127
+#: inc.swisdk.php:141
 #, php-format
 msgid "Could not create data directory %s"
 msgstr "Konnte Daten-Verzeichnis %s nicht erstellen"
 
-#: inc.swisdk.php:257
+#: inc.swisdk.php:367
 #, php-format
 msgid "Could not load %s, stage %s"
 msgstr "Konnte %s nicht laden, Stage %s"
 
-#: inc.swisdk.php:311
-#, php-format
 msgid "Could not load %s"
 msgstr "Konnte %s nicht laden"
 
-#: inc.swisdk.php:321
-#, php-format
 msgid "Could not create instance of class %s"
 msgstr "Konnte %s nicht instanziieren"
 
@@ -293,6 +324,9 @@ msgstr "PLZ"
 msgid "City"
 msgstr "Ort"
 
+msgid "Address"
+msgstr "Adresse"
+
 msgid "Mobile"
 msgstr "Handy"
 
@@ -307,9 +341,6 @@ msgstr "Erstellt"
 
 msgid "Groups"
 msgstr "Gruppen"
-
-msgid "Street"
-msgstr "Adresse"
 
 msgid "Phone"
 msgstr "Telefon"
@@ -326,3 +357,26 @@ msgstr "Kein Ende"
 msgid "Location"
 msgstr "Ort"
 
+msgid "Really delete?"
+msgstr "Wirklich löschen?"
+
+msgid "Customer"
+msgstr "Kunde"
+
+msgid "Priority"
+msgstr "Priorität"
+
+msgid "Owner"
+msgstr "Besitzer"
+
+msgid "Creator"
+msgstr "Erstellt von"
+
+msgid "Update"
+msgstr "Aktualisiert"
+
+msgid "Project"
+msgstr "Projekt"
+
+msgid "Duration"
+msgstr "Dauer"
