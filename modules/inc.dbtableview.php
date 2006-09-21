@@ -312,6 +312,7 @@ EOD;
 		{
 			$id = $this->form->id();
 			$gid = guardToken('delete');
+			$delete = dgettext('swisdk', 'Really delete?');
 			return '<div style="float:left">'
 				.sprintf(dgettext('swisdk', '%s edit %s or %s delete %s checked'),
 					'<a href="javascript:tv_edit()">',
@@ -330,7 +331,7 @@ function tv_edit()
 }
 function tv_delete()
 {
-	if(!confirm('Really delete?'))
+	if(!confirm('$delete'))
 		return;
 	var form = document.getElementById('$id');
 	form.action = form.action.replace(/\/_list/, '/_delete/multiple?guard=$gid');

@@ -239,9 +239,10 @@
 		{
 			$id = $data[$this->column];
 			$gid = guardToken('delete');
+			$delete = dgettext('swisdk', 'Really delete?');
 			$html =<<<EOD
 <a href="{$this->title}_edit/$id"><img src="/images/icons/database_edit.png" alt="edit" /></a>
-<a href="{$this->title}_delete/$id" onclick="if(confirm('Really delete?')){this.href+='?guard=$gid';}else{this.parentNode.parentNode.onclick();return false;}">
+<a href="{$this->title}_delete/$id" onclick="if(confirm('$delete')){this.href+='?guard=$gid';}else{this.parentNode.parentNode.onclick();return false;}">
 	<img src="/images/icons/database_delete.png" alt="delete" />
 </a>
 EOD;
