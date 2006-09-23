@@ -1,0 +1,39 @@
+	SWISDK release 2.x <http://spinlock.ch/projects/swisdk/>
+		Simple Website Infrastructure SDK
+
+  SWISDK 2 is a web application framework which serves as a building base for
+  content management systems, web applications, web services and more.
+
+   The framework has been written with security in mind from day one and
+  offers integrated protection from XSS, CSRF and SQL injection attacks.
+
+   Other frameworks are most often lacking in the area of form handling
+  and validation -- this is the place where SWISDK shines the most.
+
+WHAT ARE THE PLATFORMS SWISDK 2 SUPPORTS?
+
+   It was built on a standard PHP5 and MySQL 4.1 stack, but has since gained
+  support for SQLite, and support for other database engines can be easily
+  added.
+
+   Development and deployment has been done on Linux x86 and Mac OS X machines
+  until now.
+
+DOCUMENTATION
+
+   There is some documentation available in the Documentation/ directory,
+  the most up-to-date documenation can be found on the project website:
+  http://spinlock.ch/projects/swisdk/
+
+
+INSTALLATION AND CONFIGURATION
+
+   See the installation instructions either in the Documentation directory
+  or on the website.
+
+DOES NOT WORK?
+
+   Is something not working as expected? Send an email to the developers:
+
+   Matthias Kestenholz <mk@spinlock.ch>
+   Moritz Zumbühl <mail@momoetomo.ch>
