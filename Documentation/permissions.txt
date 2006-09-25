@@ -26,4 +26,8 @@ This is an example how you might restrict access to news items:
     }
     // else continue
 
+## Example Realm/Usergroup tree with role associations
+
+![Access control diagram](/images/access-control.png)
+
 [[projects/swisdk|back to SWISDK]]

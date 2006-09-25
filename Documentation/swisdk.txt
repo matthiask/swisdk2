@@ -7,7 +7,7 @@ web application development. Its core is very small and easily understandable.
 The extension modules enable the developer to easily create multilingual
 websites with lots of forms and complex data models.
 
-The developers are currently [Moritz Zumb&uuml;hl](mailto:mail_@_momoetomo.ch)
+The developers are currently [Moritz Zumbühl](mailto:mail_@_momoetomo.ch)
 and myself - [Matthias Kestenholz](mailto:mk_@_spinlock.ch).
 
 ## Why another web application framework?
@@ -20,21 +20,34 @@ complexity.
 
 ## What are the main features of SWISDK?
 
+* *Written with security in mind*
 * Multi-lingual from the ground up
 * Easy and automated form and data handling
 * Permission system
 * Uses smarty as template system (but does not depend heavily on it)
+* SwisdkSmarty supports template inheritance (similar to the [Django templates](http://www.djangoproject.com/documentation/templates/))
 * Configurable error handling
 * Creating a new page is as easy as it should be: Just drop a controller
 file in the correct place.
 * Many building blocks for web applications
+* The interdependencies of the modules (permission handling, forms, etc.)
+are kept as small as possible without sacrificing functionality
+* It is developed with E_ALL and E_STRICT PHP error reporting
+* Uses [git](http://git.or.cz/) as SCM :-)
+* GPLv2-licensed
+* Components output valid XHTML 1.0 Strict
+* Currently supports MySQL and SQLite via PDO
+* *A developer which would be happy to answer your questions concerning
+SWISDK! :-)*
 
 ## What are the current restrictions?
 
 * Only runs on PHP5-enabled servers
-* For now, the only supported RDBMS is MySQL (using the mysqli interface). Support for other RDBMS can be easily added, since all accesses on the RDBMS
-are hidden from the user.
-* Poor documentation (somewhat mitigated by clean code and lots of comments)
+* Documentation-in-progress (somewhat mitigated by clean code and lots of comments)
+* No support for workflows or multi-stage-publishing. This is not planned,
+but because SWISDK is more of a SDK than a CMS, it does not impose a
+workflow on you! One CMS can't solve all publishing problems, a SDK however,
+can ease the realization of a solution.
 
 ## More documentation
 
@@ -50,11 +63,26 @@ are hidden from the user.
 ## Where can I download it?
 
 There are no tarballs available, but you can use [git](http://git.or.cz/) or [cogito](http://kernel.org/pub/software/scm/cogito/) to checkout the
-source from our repository.
+source from our repository. The framework is still in heavy development,
+but there are nevertheless multiple websites already running on this
+foundation which thereby proves itself solid enough for real use. I expect
+to make a real release once I finish my current community website project.
 
 The following two commands should do the trick:
 
     $ git clone http://spinlock.ch/pub/git/swisdk2/swisdk.git swisdk
     $ git clone http://spinlock.ch/pub/git/swisdk2/wiki.git webapp
 
-You can also browse our [gitweb](http://spinlock.ch/cgi-bin/gitweb.pl)
+**Browse the source online:** [git web interface](http://spinlock.ch/pub/git/) (modules swisdk2/swisdk.git and swisdk2/webapp.git)
+
+## Websites using SWISDK 2
+
+* [Totalsanierung Jetzt!](http://www.totalsanieren.ch/) - a Greenpeace
+campaign against the chemical polluters in Basel, Switzerland
+* [Stop Offroader](http://stopoffroader.ch/) - a campaign against the
+needlessly heavy and fuel-wasting Sport Utility Vehicles
+* [22september.ch](http://www.22september.ch/) - we want swiss towns
+to take part in the [European Mobility Week](http://www.mobilityweek-europe.org/) too!
+* Some web applications which I cannot link to here, because they contain
+sensitive information. <a href="/images/webapp.png" target="_blank">A screenshot should do, though</a>
+* I also migrated my wordpress blog: [Go to my weblog](/blog/ )
