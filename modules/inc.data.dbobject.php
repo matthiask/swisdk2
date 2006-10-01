@@ -1073,11 +1073,10 @@
 			if(!isset($fulltext_fields[$this->class])) {
 				$fulltext_fields[$this->class] = array();
 				$rows = $this->field_list();
-				foreach($rows as $field => &$row) {
-					list($type,$fname) = $this->field_type($field);
+				foreach($rows as $field => $type) {
 					if(in_array($type, array(
 							DB_FIELD_STRING, DB_FIELD_LONGTEXT)))
-						$fulltext_fields[] = $field;
+						$fulltext_fields[$this->class][] = $field;
 				}
 			}
 			return $fulltext_fields[$this->class];
