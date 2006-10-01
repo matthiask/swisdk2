@@ -1,6 +1,6 @@
 -- insert default set of values into database
 
-INSERT INTO `tbl_language` VALUES (1,'de','deutsch'),(2,'fr','fran&ccedil;ais'),(3,'en','english');
+INSERT INTO `tbl_language` VALUES (1,'d','deutsch','de_CH.UTF-8;de_CH;de'),(2,'e','english','en_US.UTF-8;en_US;en');
 INSERT INTO `tbl_realm` VALUES (1,'Root','',1),(2,'Administration','admin',4);
 INSERT INTO `tbl_role` VALUES (1,'Visitor'),(2,'Authenticated'),(3,'Member'),(4,'Manager'),(5,'Administrator'),(6,'SiteAdministrator');
 INSERT INTO `tbl_user` VALUES (1,'Visitor','','','visitor@spinlock.ch','',''),(2,'Admin','','Admin','admin@example.com','admin',MD5('password'));

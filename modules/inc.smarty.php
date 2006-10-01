@@ -125,6 +125,8 @@
 	 * Derived template example:
 	 * --8<--
 	 * {extends file="base.tpl"}
+	 * OR
+	 * {extends template="article.list"}
 	 * 
 	 * Content here is ignored
 	 * 
@@ -148,7 +150,10 @@
 	function _smarty_swisdk_extends($params, &$smarty)
 	{
 		$ss = $smarty->get_template_vars('_swisdk_smarty_instance');
-		$ss->_derived = $params['file'];
+		if(isset($params['template']))
+			$ss->_derived = Swisdk::template($params['template']);
+		else
+			$ss->_derived = $params['file'];
 	}
 
 	class SmartyMaster {
