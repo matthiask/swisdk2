@@ -11,6 +11,8 @@
 	define( 'STREGION_HEADER' , 2 );
 	define( 'STREGION_FOOTER' , 3 );
 
+	require_once MODULE_ROOT.'inc.session.php';
+
 	/**
 	 * E_STRICT wrapper for PHP4 compatible Smarty code!
 	 */
