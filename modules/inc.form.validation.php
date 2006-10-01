@@ -220,7 +220,7 @@ EOD;
 				$js = <<<EOD
 function formitem_numeric_rule(id)
 {
-	var user = document.getElementById(id).value;
+	var value = document.getElementById(id).value;
 	return value.match(/[0-9]*/);
 }
 

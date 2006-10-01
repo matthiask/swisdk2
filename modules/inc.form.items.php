@@ -340,6 +340,7 @@
 					break;
 			}
 
+			return true;
 		}
 
 		/**
