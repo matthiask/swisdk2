@@ -283,16 +283,17 @@ function init_tableview()
 				cb.onchange = function(){
 					var row = this.parentNode.parentNode;
 					if(this.checked)
-						row.className = 'checked';
+						row.className += ' checked';
 					else
-						row.className = '';
+						row.className =
+							row.className.replace(/ checked/, '');
 				}
 				cb.onclick = function(){
 					// hack. revert toggle effect of tr.onclick
 					this.checked = !this.checked;
 				}
 				if(cb.checked)
-					rows[j].className = 'checked';
+					rows[j].className += ' checked';
 			}
 		}
 	}
