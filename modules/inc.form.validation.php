@@ -174,7 +174,7 @@ EOD;
 		{
 			require_once MODULE_ROOT.'inc.session.php';
 			$value = $item->value();
-			return $value!='' && $value!=SWISDK2_VISITOR;
+			return $value!='' && $value>0 && $value!=SWISDK2_VISITOR;
 		}
 
 		protected function validation_js_impl(FormItem &$item)
@@ -188,7 +188,7 @@ EOD;
 function formitem_user_required_rule(id)
 {
 	var user = document.getElementById(id).value;
-	return user!='' && user!=$visitor;
+	return user!='' && user>0 && user!=$visitor;
 }
 
 EOD;
