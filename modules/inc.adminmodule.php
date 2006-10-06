@@ -190,6 +190,18 @@
 		}
 	}
 
+	class AdminComponent_ajax extends AdminComponent {
+		public function run()
+		{
+			$server_class = 'AdminComponent_'.$this->dbo_class.'_Ajax_Server';
+			if(class_exists($server_class)) {
+				$server = new $server_class();
+				$server->handle_request();
+			} else
+				$this->goto('_index');
+		}
+	}
+
 	class AdminComponent_edit extends AdminComponent {
 		protected $form;
 		protected $obj;
