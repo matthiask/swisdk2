@@ -97,8 +97,15 @@
 			if(!in_array($func_name, $this->export_list)) {
 				echo "-:$func_name not callable";
 			} else {
-				$method = 'method_' . $func_name;
-				echo "+:" . call_user_func_array(array(&$this, $method), $args);
+				$method = 'method_'.$func_name;
+				$resp = call_user_func_array(array(&$this, $method), $args);
+				if(is_array($resp) || is_object($resp)) {
+					require_once SWISDK_ROOT.'lib/contrib/json.php';
+					$json = new HTML_AJAX_JSON();
+					// different separator for JSON encoded data
+					echo '+|'.$json->encode($resp);
+				} else
+					echo '+:'.$resp;
 			}
 			exit();
 		}
@@ -151,6 +158,7 @@
 function x_{$func_name}() {
 	sajax_do_call('{$func_name}',x_{$func_name}.arguments);
 }
+
 EOD;
 			}
 			return $html;
@@ -194,14 +202,19 @@ function sajax_do_call(func_name, args) {
 		data=x.responseText.substring(2);
 		if(status=="-")
 			alert("Error: " + data);
-		else
-			args[args.length-1](data);
+		else {
+			if(x.responseText.charAt(1)=='|')
+				args[args.length-1](eval('('+data+')'))
+			else
+				args[args.length-1](data);
+		}
 	}
 	x.send(post_data);
 	sajax_debug(func_name + " uri = " + uri + "/post = " + post_data);
 	sajax_debug(func_name + " waiting..");
 	delete x;
 }
+
 EOD;
 		}
 	}
