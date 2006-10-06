@@ -26,10 +26,16 @@
 			$id = uniqid();
 			$n1 = $this->item->iname();
 			$n2 = $this->args[0]->iname();
+			$ruleobjs = $this->item->rules();
+			$rules = '';
+			foreach($ruleobjs as $rule) {
+				$rules[] = $rule->javascript_rule_name($this->item);
+			}
+			$valid = implode('(\''.$n1.'\') && ', $rules).'(\''.$n1.'\')';
 			$js = <<<EOD
 function enable_on_valid_behavior_handler_$id()
 {
-	if(formitem_required_rule('$n1'))
+	if($valid)
 		document.getElementById('$n2').disabled = false;
 	else
 		document.getElementById('$n2').disabled = true;

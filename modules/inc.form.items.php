@@ -41,6 +41,15 @@
 		protected $rules = array();
 
 		/**
+		 * behaviors array
+		 *
+		 * these are client side javascript behaviors which allow
+		 * extended interactions between form items and/or
+		 * rpc/ajax calls to the server
+		 */
+		protected $behaviors = array();
+
+		/**
 		 * additional html attributes
 		 */
 		protected $attributes = array();
@@ -213,8 +222,6 @@
 		{
 			return $this->rules;
 		}
-
-		protected $behaviors = array();
 
 		public function add_behavior($behavior)
 		{

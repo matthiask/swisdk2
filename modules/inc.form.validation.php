@@ -116,6 +116,12 @@ EOD;
 				"swisdk_form_do_validate($rulefunc('$name'), '$name', '$message')", $rulejs);
 		}
 
+		public function  javascript_rule_name(FormItem &$item)
+		{
+			list($name, $tmp) = $this->validation_js_impl($item);
+			return $name;
+		}
+
 		protected function validation_js_impl(FormItem &$item)
 		{
 		}
