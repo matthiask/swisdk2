@@ -10,6 +10,7 @@
 		protected $html_start = '';
 		protected $html_end = '';
 		protected $javascript = '';
+		protected $validation_javascript = '';
 		protected $file_upload = false;
 		protected $js_validation = true;
 
@@ -156,7 +157,7 @@
 				return array(null, $js.$end);
 
 			$id = $obj->id();
-			$js .= '
+			$js .= $this->validation_javascript.'
 function swisdk_form_do_validate(valid, field, message)
 {
 	if(!valid) {
@@ -195,7 +196,7 @@ function validate_'.$id.'()
 			$rules = $obj->rules();
 			foreach($rules as &$rule) {
 				list($funccall, $js) = $rule->validation_javascript($obj);
-				$this->javascript .= $js;
+				$this->validation_javascript .= $js;
 				if($funccall)
 					$this->functions[] = $funccall;
 			}
