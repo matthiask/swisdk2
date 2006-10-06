@@ -134,7 +134,11 @@ EOD;
 
 		protected function is_valid_impl(FormItem &$item)
 		{
-			return $item->value()!='';
+			$v = trim($item->value());
+			if($item instanceof SelectionFormItem) {
+				return $v!='' && $v!=0 && $v!=array();
+			} else
+				return $v!='';
 		}
 
 		protected function validation_js_impl(FormItem &$item)
@@ -146,7 +150,12 @@ EOD;
 				$js = <<<EOD
 function formitem_required_rule(id)
 {
-	return document.getElementById(id).value!='';
+	var elem = document.getElementById(id);
+	var v = elem.value.replace(/^\s+|\s+$/g, '');
+	if(elem.tagName=='SELECT') {
+		return v!='' && v!=0;
+	} else
+		return v!='';
 }
 
 EOD;
