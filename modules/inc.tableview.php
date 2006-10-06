@@ -74,9 +74,9 @@
 			return $html;
 		}
 
-		protected function render_row(&$row)
+		protected function render_row(&$row, $rowattr=null)
 		{
-			$html = "<tr>\n";
+			$html = "<tr{$rowattr}>\n";
 			foreach($this->columns as &$col)
 				$html .= '<td>'.$col->html($row)."</td>\n";
 			$html .= "</tr>\n";
