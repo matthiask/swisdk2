@@ -48,7 +48,7 @@ msgstr ""
 #: modules/inc.adminmodule.php:309 modules/inc.adminmodule.php:346
 #, php-format
 msgid "New %s"
-msgstr "Neuer %s"
+msgstr "%s erstellen"
 
 #: modules/inc.adminmodule.php:321 modules/inc.adminmodule.php:342
 #, php-format
