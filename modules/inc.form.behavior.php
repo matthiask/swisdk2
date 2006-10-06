@@ -49,6 +49,7 @@ EOD;
 			$id = uniqid();
 			$n1 = $this->item->iname();
 			$n2 = $this->args[0]->iname();
+			$method = $this->args[2];
 
 			$client = new Ajax_Client($this->args[1],
 				sprintf('%s//%s%s_ajax',
@@ -77,7 +78,7 @@ function update_owner_list_cb(items)
 
 function update_on_change_ajax_behavior_handler_$id()
 {
-	x_possible_owners(document.getElementById('$n1').value, update_owner_list_cb);
+	x_$method(document.getElementById('$n1').value, update_owner_list_cb);
 }
 
 EOD;
