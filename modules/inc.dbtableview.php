@@ -286,7 +286,7 @@ function init_tableview()
 						row.className += ' checked';
 					else
 						row.className =
-							row.className.replace(/ checked/, '');
+							row.className.replace(/checked/, '');
 				}
 				cb.onclick = function(){
 					// hack. revert toggle effect of tr.onclick
