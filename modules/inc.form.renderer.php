@@ -146,14 +146,17 @@
 
 		protected function _validation_html($obj)
 		{
-			if(!$this->js_validation)
-				return;
-
-			if(!count($this->functions))
-				return null;
-			$id = $obj->id();
 			$js = '<script type="text/javascript">
 //<![CDATA[
+'.$this->javascript;
+			$end = '
+//]]>
+</script>';
+			if(!$this->js_validation || !count($this->functions))
+				return array(null, $js.$end);
+
+			$id = $obj->id();
+			$js .= '
 function swisdk_form_do_validate(valid, field, message)
 {
 	if(!valid) {
@@ -175,11 +178,8 @@ function validate_'.$id.'()
 	document.getElementById(\''.$id.'_message_span\').innerHTML = \' \';
 	if(!'.implode(") valid = false;\n\tif(!", $this->functions).') valid = false;
 	return valid;
-}
-'.$this->javascript.'
-//]]>
-</script>';
-			return array('onsubmit="return validate_'.$id.'()"', $js);
+}';
+			return array('onsubmit="return validate_'.$id.'()"', $js.$end);
 		}
 
 		protected function _collect_javascript($obj)
