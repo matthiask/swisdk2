@@ -1,0 +1,91 @@
+<?php
+	/*
+	*	Copyright (c) 2006, Matthias Kestenholz <mk@spinlock.ch>
+	*	Distributed under the GNU General Public License.
+	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
+	*/
+
+	abstract class FormItemBehavior {
+		protected $item;
+		protected $args;
+
+		public function __construct()
+		{
+			$this->args = func_get_args();
+		}
+
+		public function set_form_item($item)
+		{
+			$this->item = $item;
+		}
+	}
+
+	class EnableOnValidBehavior extends FormItemBehavior {
+		public function javascript()
+		{
+			$id = uniqid();
+			$n1 = $this->item->iname();
+			$n2 = $this->args[0]->iname();
+			$js = <<<EOD
+function enable_on_valid_behavior_handler_$id()
+{
+	if(formitem_required_rule('$n1'))
+		document.getElementById('$n2').disabled = false;
+	else
+		document.getElementById('$n2').disabled = true;
+}
+
+EOD;
+			return array(
+				"add_event(document.getElementById('$n1'), 'change',"
+					." enable_on_valid_behavior_handler_$id);",
+				$js);
+		}
+	}
+
+	class UpdateOnChangeAjaxBehavior extends FormItemBehavior {
+		public function javascript()
+		{
+			$id = uniqid();
+			$n1 = $this->item->iname();
+			$n2 = $this->args[0]->iname();
+
+			$client = new Ajax_Client($this->args[1],
+				sprintf('%s//%s%s_ajax',
+					Swisdk::config_value('runtime.request.protocol'),
+					Swisdk::config_value('runtime.request.host'),
+					Swisdk::config_value('runtime.controller.url')));
+			$js = $client->javascript();
+
+			$js .= <<<EOD
+// SWISDk2 Forms AJAX helpers
+function update_selection_box(elem, items)
+{
+	var options = document.getElementById(elem).options;
+	while(options.length)
+		options[0] = null;
+	for(var key in items) {
+		var opt = new Option(items[key], key);
+		options[options.length] = opt;
+	}
+}
+
+function update_owner_list_cb(items)
+{
+	update_selection_box('$n2', items);
+}
+
+function update_on_change_ajax_behavior_handler_$id()
+{
+	x_possible_owners(document.getElementById('$n1').value, update_owner_list_cb);
+}
+
+EOD;
+			return array(
+				"add_event(document.getElementById('$n1'), 'change',"
+					." update_on_change_ajax_behavior_handler_$id);",
+				$js);
+		}
+	}
+
+?>

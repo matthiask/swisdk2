@@ -214,6 +214,14 @@
 			return $this->rules;
 		}
 
+		protected $behaviors = array();
+
+		public function add_behavior($behavior)
+		{
+			$behavior->set_form_item($this);
+			$this->behaviors[] = $behavior;
+		}
+
 		public function is_valid()
 		{
 			if($this->valid!==null)
@@ -241,7 +249,28 @@
 
 		public function javascript()
 		{
-			return $this->javascript;
+			if(!count($this->behaviors))
+				return $this->javascript;
+			$behavior_js = '';
+			$behavior_init_js = '';
+			foreach($this->behaviors as &$behavior) {
+				list($init,$js) = $behavior->javascript();
+
+				$behavior_js .= $js;
+				$behavior_init_js .= $init."\n\t";
+
+			}
+			$iname = $this->iname();
+			return $this->javascript.<<<EOD
+$behavior_js
+
+function init_$iname()
+{
+	$behavior_init_js
+}
+add_event(window, 'load', init_$iname);
+
+EOD;
 		}
 	}
 

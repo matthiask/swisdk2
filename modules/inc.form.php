@@ -626,5 +626,6 @@
 	require_once MODULE_ROOT.'inc.form.items.php';
 	require_once MODULE_ROOT.'inc.form.validation.php';
 	require_once MODULE_ROOT.'inc.form.renderer.php';
+	require_once MODULE_ROOT.'inc.form.behavior.php';
 
 ?>
