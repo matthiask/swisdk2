@@ -86,21 +86,13 @@
 
 		public function handle_request()
 		{
-			/*preg_match_all('/O:[0-9]+:"(.*)"/U', $string, $matches, PREG_PATTERN_ORDER);
-   			if(preg_match('(^|:|\{)O:\d+:(.*?):', $serializedString)) {
-				echo "-:cannot execute request: forbidden strings found";
-				exit();
-			}*/
-
 			$func_name = $_POST['rs'];
 			$args = $_POST['rsargs'];
-			if(empty($args)) {
+			if(empty($args))
 				$args = array();
-			}
 
-			if($this->export_list===null) {
+			if($this->export_list===null)
 				$this->update_export_list();
-			}
 
 			if(!in_array($func_name, $this->export_list)) {
 				echo "-:$func_name not callable";
@@ -113,23 +105,20 @@
 	}
 
 	class Ajax_Client {
-
 		public function __construct($interface, $remote_uri = null, $debug_mode = 0)
 		{
 			$this->export_list = array();
 			$methods = get_class_methods($interface);
 
 			foreach($methods as &$method) {
-				if(substr($method, 0, 7)=='method_' && $m = substr($method, 7)) {
+				if(substr($method, 0, 7)=='method_' && $m = substr($method, 7))
 					$this->export_list[] = $m;
-				}
 			}
 
-			if($remote_uri==null) {
+			if($remote_uri==null)
 				$this->remote_uri = $_SERVER['REQUEST_URI'];
-			} else {
+			else
 				$this->remote_uri = $remote_uri;
-			}
 
 			$this->debug_mode = $debug_mode;
 		}
@@ -145,10 +134,10 @@
 
 		public function show_javascript()
 		{
-			echo $this->get_javascript();
+			echo $this->javascript();
 		}
 
-		public function get_javascript()
+		public function javascript()
 		{
 			$html = '';
 			if (!$this->javascript_shown) {
@@ -170,9 +159,8 @@ EOD;
 		protected $export_list = null;
 		protected $javascript_shown = false;
 
-		protected function get_common_js() {
-
-
+		protected function get_common_js()
+		{
 			$debug_mode_bool = $this->debug_mode?'true':'false';
 
 			return <<<EOD
@@ -217,6 +205,5 @@ function sajax_do_call(func_name, args) {
 EOD;
 		}
 	}
-
 
 ?>
