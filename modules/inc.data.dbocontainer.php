@@ -191,6 +191,12 @@
 						call_user_func_array(array(
 							$this, 'add_join'),
 							$data);
+						break;
+					case ':fulltext':
+						call_user_func_array(array(
+							$this, 'set_fulltext'),
+							$data);
+						break;
 				}
 				return;
 			}
