@@ -132,11 +132,11 @@ EOD;
 
 		public function  javascript_rule_name()
 		{
-			list($name, $tmp) = $this->validation_js_impl();
+			list($name, $tmp) = $this->validation_js_impl(false);
 			return $name;
 		}
 
-		protected function validation_js_impl()
+		protected function validation_js_impl($set_sent=true)
 		{
 		}
 
@@ -169,12 +169,13 @@ EOD;
 				return $v!='';
 		}
 
-		protected function validation_js_impl()
+		protected function validation_js_impl($set_sent=true)
 		{
 			static $sent = false;
 			$js = '';
 			if(!$sent) {
-				$sent = true;
+				if($set_sent)
+					$sent = true;
 				$js = <<<EOD
 function formitem_required_rule(id)
 {
@@ -214,12 +215,13 @@ EOD;
 			return $value!='' && $value>0 && $value!=SWISDK2_VISITOR;
 		}
 
-		protected function validation_js_impl()
+		protected function validation_js_impl($set_sent=true)
 		{
 			static $sent = false;
 			$js = '';
 			if(!$sent) {
-				$sent = true;
+				if($set_sent)
+					$sent = true;
 				$visitor = SWISDK2_VISITOR;
 				$js = <<<EOD
 function formitem_user_required_rule(id)
@@ -248,12 +250,13 @@ EOD;
 			return is_numeric($this->item->value());
 		}
 
-		protected function validation_js_impl()
+		protected function validation_js_impl($set_sent=true)
 		{
 			static $sent = false;
 			$js = '';
 			if(!$sent) {
-				$sent = true;
+				if($set_sent)
+					$sent = true;
 				$js = <<<EOD
 function formitem_numeric_rule(id)
 {
@@ -288,7 +291,7 @@ EOD;
 			return $value>=$this->min && $value<=$this->max;
 		}
 
-		protected function validation_js_impl()
+		protected function validation_js_impl($set_sent=true)
 		{
 			$name = $this->item->iname();
 			$min = $this->min;
@@ -321,11 +324,9 @@ EOD;
 				|| preg_match($this->regex, $value);
 		}
 
-		protected function validation_js_impl()
+		protected function validation_js_impl($set_sent=true)
 		{
-			static $sent = false;
 			$id = $this->item->iname();
-			$sent = true;
 			$empty_valid = '';
 			if($this->empty_valid)
 				$empty_valid = 'value==\'\' || ';
