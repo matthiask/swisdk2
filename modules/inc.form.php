@@ -352,6 +352,7 @@
 
 		public function add_rule(FormRule $rule)
 		{
+			$rule->set_form($this);
 			$this->rules[] = $rule;
 			return $this;
 		}

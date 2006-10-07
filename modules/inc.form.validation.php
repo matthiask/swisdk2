@@ -12,34 +12,41 @@
 				$this->message = $message;
 		}
 
-		public function is_valid(&$form)
+		public function set_form(&$form)
 		{
-			if($this->is_valid_impl($form))
+			$this->form =& $form;
+		}
+
+		public function is_valid()
+		{
+			if($this->is_valid_impl())
 				return true;
 			$form->add_message($this->message);
 			return false;
 		}
 
-		protected function is_valid_impl(&$form)
+		protected function is_valid_impl()
 		{
 			return false;
 		}
 
-		public function validation_javascript(&$form)
+		public function validation_javascript()
 		{
-			if(!list($rulefunc, $rulejs) = $this->validation_js_impl($form))
+			if(!list($rulefunc, $rulejs) = $this->validation_js_impl())
 				return null;
 			$id = $form->id();
-			$message = '<img style="position:relative;top:3px" "src="/images/icons/error.png" /> '.$this->message;
+			$message = '<img style="position:relative;top:3px"'
+				.' "src="/images/icons/error.png" /> '.$this->message;
 			return array(
 				"swisdk_form_do_validate($rulefunc, '$id', '$message')", $rulejs);
 		}
 
-		protected function validation_js_impl(&$form)
+		protected function validation_js_impl()
 		{
 		}
 
 		protected $message;
+		protected $form;
 	}
 
 	class EqualFieldsRule extends FormRule {
@@ -51,16 +58,16 @@
 			$this->message = dgettext('swisdk', 'The two related fields are not equal');
 		}
 
-		protected function is_valid_impl(&$form)
+		protected function is_valid_impl()
 		{
-			$dbobj = $form->dbobj();
+			$dbobj = $this->form->dbobj();
 			return $dbobj->get($this->field1->name())
 				== $dbobj->get($this->field2->name());
 		}
 
-		protected function validation_js_impl(&$form)
+		protected function validation_js_impl()
 		{
-			$id = $form->id();
+			$id = $this->form->id();
 			$in1 = $this->field1->iname();
 			$in2 = $this->field2->iname();
 			static $sent = false;
@@ -93,40 +100,48 @@ EOD;
 				$this->message = dgettext('swisdk', 'Value does not validate');
 		}
 
-		public function is_valid(FormItem &$item)
+		public function set_form_item(&$item)
 		{
-			if($this->is_valid_impl($item))
+			$this->item =& $item;
+		}
+
+		public function is_valid()
+		{
+			if($this->is_valid_impl())
 				return true;
-			$item->add_message($this->message);
+			$this->item->add_message($this->message);
 			return false;
 		}
 
-		protected function is_valid_impl(FormItem &$item)
+		protected function is_valid_impl()
 		{
 			return false;
 		}
 
-		public function validation_javascript(FormItem &$item)
+		public function validation_javascript()
 		{
-			if(!list($rulefunc, $rulejs) = $this->validation_js_impl($item))
+			if(!list($rulefunc, $rulejs) = $this->validation_js_impl())
 				return null;
-			$name = $item->iname();
-			$message = '<img style="position:relative;top:3px" "src="/images/icons/error.png" /> '.$this->message;
+			$name = $this->item->iname();
+			$message = '<img style="position:relative;top:3px"'
+				.' "src="/images/icons/error.png" /> '.$this->message;
 			return array(
-				"swisdk_form_do_validate($rulefunc('$name'), '$name', '$message')", $rulejs);
+				"swisdk_form_do_validate($rulefunc('$name'), '$name', '$message')",
+				$rulejs);
 		}
 
-		public function  javascript_rule_name(FormItem &$item)
+		public function  javascript_rule_name()
 		{
-			list($name, $tmp) = $this->validation_js_impl($item);
+			list($name, $tmp) = $this->validation_js_impl();
 			return $name;
 		}
 
-		protected function validation_js_impl(FormItem &$item)
+		protected function validation_js_impl()
 		{
 		}
 
 		protected $message;
+		protected $item;
 	}
 
 	class RequiredRule extends FormItemRule {
@@ -138,16 +153,23 @@ EOD;
 				$this->message = dgettext('swisdk', 'Value required');
 		}
 
-		protected function is_valid_impl(FormItem &$item)
+		public function set_form_item(&$item)
 		{
-			$v = trim($item->value());
-			if($item instanceof SelectionFormItem) {
+			parent::set_form_item($item);
+			$item->set_title($item->title()
+				.'<span style="color:red">*</span>');
+		}
+
+		protected function is_valid_impl()
+		{
+			$v = trim($this->item->value());
+			if($this->item instanceof SelectionFormItem) {
 				return $v!='' && $v!=0 && $v!=array();
 			} else
 				return $v!='';
 		}
 
-		protected function validation_js_impl(FormItem &$item)
+		protected function validation_js_impl()
 		{
 			static $sent = false;
 			$js = '';
@@ -185,14 +207,14 @@ EOD;
 				$this->message = dgettext('swisdk', 'User required');
 		}
 
-		protected function is_valid_impl(FormItem &$item)
+		protected function is_valid_impl()
 		{
 			require_once MODULE_ROOT.'inc.session.php';
-			$value = $item->value();
+			$value = $this->item->value();
 			return $value!='' && $value>0 && $value!=SWISDK2_VISITOR;
 		}
 
-		protected function validation_js_impl(FormItem &$item)
+		protected function validation_js_impl()
 		{
 			static $sent = false;
 			$js = '';
@@ -221,12 +243,12 @@ EOD;
 				$this->message = dgettext('swisdk', 'Value must be numeric');
 		}
 
-		protected function is_valid_impl(FormItem &$item)
+		protected function is_valid_impl()
 		{
-			return is_numeric($item->value());
+			return is_numeric($this->item->value());
 		}
 
-		protected function validation_js_impl(FormItem &$item)
+		protected function validation_js_impl()
 		{
 			static $sent = false;
 			$js = '';
@@ -260,15 +282,15 @@ EOD;
 			$this->max = $max;
 		}
 
-		protected function is_valid_impl(FormItem &$item)
+		protected function is_valid_impl()
 		{
-			$value = $item->value();
+			$value = $this->item->value();
 			return $value>=$this->min && $value<=$this->max;
 		}
 
-		protected function validation_js_impl(FormItem &$item)
+		protected function validation_js_impl()
 		{
-			$name = $item->iname();
+			$name = $this->item->iname();
 			$min = $this->min;
 			$max = $this->max;
 			$js = <<<EOD
@@ -292,17 +314,17 @@ EOD;
 			parent::__construct($message);
 		}
 
-		protected function is_valid_impl(FormItem &$item)
+		protected function is_valid_impl()
 		{
-			$value = $item->value();
+			$value = $this->item->value();
 			return (!$value && $this->empty_valid)
 				|| preg_match($this->regex, $value);
 		}
 
-		protected function validation_js_impl(FormItem &$item)
+		protected function validation_js_impl()
 		{
 			static $sent = false;
-			$id = $item->iname();
+			$id = $this->item->iname();
 			$sent = true;
 			$empty_valid = '';
 			if($this->empty_valid)
@@ -360,9 +382,9 @@ EOD;
 			parent::__construct($message);
 		}
 
-		protected function is_valid_impl(FormItem &$item)
+		protected function is_valid_impl()
 		{
-			return call_user_func($this->callback, $item);
+			return call_user_func($this->callback, $this->item);
 		}
 
 		protected $callback;
@@ -375,18 +397,18 @@ EOD;
 			parent::__construct($message);
 		}
 
-		protected function is_valid_impl(FormItem &$item)
+		protected function is_valid_impl()
 		{
-			return $this->compare_value == $item->value();
+			return $this->compare_value == $this->item->value();
 		}
 
 		protected $compare_value;
 	}
 
 	class MD5EqualsRule extends EqualsRule {
-		protected function is_valid_impl(FormItem &$item)
+		protected function is_valid_impl()
 		{
-			return $this->compare_value == md5($item->value());
+			return $this->compare_value == md5($this->item->value());
 		}
 	}
 
@@ -399,9 +421,9 @@ EOD;
 				$this->message = dgettext('swisdk', 'Please provide a file');
 		}
 
-		protected function is_valid_impl(FormItem &$item)
+		protected function is_valid_impl()
 		{
-			return !$item->no_upload();
+			return !$this->item->no_upload();
 		}
 	}
 
@@ -417,11 +439,11 @@ EOD;
 				$this->message = dgettext('swisdk', 'Please provide a valid image file');
 		}
 
-		protected function is_valid_impl(FormItem &$item)
+		protected function is_valid_impl()
 		{
 			// NOTE! you could probably stuff more checks in here. I
 			// hope these should be enough
-			$data = $item->files_data();
+			$data = $this->item->files_data();
 			$mime = $data['type'];
 			if(in_array($data['type'], $this->image_mimetypes)
 					&& preg_match('/\.(png|jpg|jpeg|gif)$/',
@@ -429,7 +451,7 @@ EOD;
 					&& @getimagesize($data['path'])!==false)
 				return true;
 
-			$item->unlink_cachefile();
+			$this->item->unlink_cachefile();
 			return false;
 		}
 	}

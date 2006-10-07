@@ -214,6 +214,7 @@
 		 */
 		public function add_rule(FormItemRule $rule)
 		{
+			$rule->set_form_item($this);
 			$this->rules[] = $rule;
 			return $this;
 		}
