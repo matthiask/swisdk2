@@ -212,7 +212,7 @@
 		{
 			// if multiple is passed, the IDs of the records which should
 			// be edited are passed via $_POST
-			if($this->args[0]=='multiple')
+			if(isset($this->args[0]) && $this->args[0]=='multiple')
 				$this->multiple = true;
 			if($this->multiple)
 				$this->edit_multiple();

@@ -109,6 +109,8 @@
 			}
 			exit();
 		}
+
+		protected $export_list = null;
 	}
 
 	class Ajax_Client {
