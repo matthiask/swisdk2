@@ -276,15 +276,30 @@ EOD;
 
 	/**
 	 * pass a DBObject class as third parameter
+	 *
+	 * DBTableViewColumn(field, title, DBObject-class, DBOContainer instance(?), template=null)
 	 */
 	class DBTableViewColumn extends TableViewColumn {
 		protected function init_column()
 		{
-			if($this->db_class===null) {
-				$this->db_class = $this->args[0];
-				$this->dbobj = $this->args[1];
-			}
-			if($this->db_data===null) {
+			if($this->initialized)
+				return;
+			$this->initialized = true;
+
+			$this->db_class = $this->args[0];
+			$this->dbobj = $this->args[1];
+
+			if(isset($this->args[2]) && $t = $this->args[2]) {
+				$matches = array();
+				preg_match_all('/\{([A-Za-z_0-9]+)}/', $t,
+					$matches, PREG_PATTERN_ORDER);
+				if(isset($matches[1]))
+					$this->vars = $matches[1];
+				foreach($this->vars as $v)
+					$this->patterns[] = '/\{' . $v . '\}/';
+
+				$this->db_data = DBOContainer::find($this->db_class)->data();
+			} else {
 				$doc = DBOContainer::find($this->db_class);
 				foreach($doc as $id => &$obj)
 					$this->db_data[$id] = $obj->title();
@@ -294,15 +309,29 @@ EOD;
 		public function html(&$data)
 		{
 			$this->init_column();
-			$val = $data[$this->column];
-			if(!isset($this->db_data[$val]))
-				return null;
-			return $this->db_data[$val];
+			if($this->vars!==null) {
+				$vals = array();
+				$record =& $this->db_data[$data[$this->column]];
+				foreach($this->vars as $v)
+					$vals[] = $record[$v];
+
+				return preg_replace($this->patterns, $vals, $this->args[2]);
+			} else {
+				$val = $data[$this->column];
+				if(!isset($this->db_data[$val]))
+					return null;
+				return $this->db_data[$val];
+			}
 		}
+
+		protected $initialized = false;
 
 		protected $db_data = null;
 		protected $db_class = null;
 		protected $dbobj = null;
+
+		protected $vars = null;
+		protected $patterns = null;
 	}
 
 	/**
@@ -330,8 +359,17 @@ EOD;
 			$vals = $this->reldata[$data[$p]];
 			$tokens = array();
 			foreach($vals as $v)
-				if(isset($this->db_data[$v]))
-					$tokens[] = $this->db_data[$v];
+				if(isset($this->db_data[$v])) {
+					if($this->vars!==null) {
+						$vals = array();
+						$record =& $this->db_data[$v];
+						foreach($this->vars as $var)
+							$vals[] = $record[$var];
+
+						$tokens[] = preg_replace($this->patterns, $vals, $this->args[2]);
+					} else
+						$tokens[] = $this->db_data[$v];
+				}
 			return implode(', ', $tokens);
 		}
 
