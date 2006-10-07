@@ -25,6 +25,15 @@
 		}
 	}
 
+	class GrabFocusBehavior extends FormItemBehavior {
+		public function javascript()
+		{
+			$id = uniqid();
+			$name = $this->item->iname();
+			return array("document.getElementById('$name').focus();", null);
+		}
+	}
+
 	class EnableOnValidBehavior extends FormItemBehavior {
 		protected function setup()
 		{

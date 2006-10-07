@@ -181,7 +181,7 @@
 			$form = new Form();
 			$form->bind(DBObject::create('Login'));
 			$form->set_title(dgettext('swisdk', 'Login'));
-			$form->add('login_username');
+			$form->add('login_username')->add_behavior(new GrabFocusBehavior());
 			$form->add('login_password', new PasswordInput());
 			$form->add(new SubmitButton());
 
