@@ -12,15 +12,25 @@
 		public function __construct()
 		{
 			$this->args = func_get_args();
+			$this->setup();
 		}
 
 		public function set_form_item($item)
 		{
 			$this->item = $item;
 		}
+
+		protected function setup()
+		{
+		}
 	}
 
 	class EnableOnValidBehavior extends FormItemBehavior {
+		protected function setup()
+		{
+			$this->args[0]->set_attributes(array('disabled' => 'disabled'));
+		}
+
 		public function javascript()
 		{
 			$id = uniqid();
