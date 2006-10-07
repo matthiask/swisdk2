@@ -231,6 +231,10 @@
 			$order = $this->form->dbobj()->order;
 			$dir = $this->form->dbobj()->dir;
 			$html = "<table class=\"s-table\">\n<thead>\n<tr>\n";
+			if($t = $this->title())
+				$html .= "<th colspan=\"".count($this->columns)."\">"
+					."<big><strong>"
+					.$t."</strong></big></th>\n</tr>\n<tr>\n";
 			foreach($this->columns as &$col) {
 				$html .= '<th>';
 				if($col instanceof NoDataTableViewColumn) {

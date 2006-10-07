@@ -18,6 +18,21 @@
 		protected $data = array();
 
 		/**
+		 * title
+		 */
+		protected $title;
+
+		public function title()
+		{
+			return $this->title;
+		}
+
+		public function set_title($title)
+		{
+			$this->title = $title;
+		}
+
+		/**
 		 * Append or prepend TableViewColumn (column renderers) to the tableview
 		 */
 		public function append_column(TableViewColumn $column)
@@ -59,6 +74,10 @@
 		protected function render_head()
 		{
 			$html = "<table class=\"s-table\">\n<thead>\n<tr>\n";
+			if($t = $this->title())
+				$html .= "<th colspan=\"".count($this->columns)."\">"
+					."<big><strong>"
+					.$t."</strong></big></th>\n</tr>\n<tr>\n";
 			foreach($this->columns as &$col)
 				$html .= '<th>'.$col->title()."</th>\n";
 			$html .= "</tr>\n</thead>\n";
