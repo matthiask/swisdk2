@@ -436,7 +436,8 @@ EOD;
 				$name = $obj->iname()."[$k]";
 				$html[] = sprintf(
 					'<label for="%s">%s</label>: '
-					.$this->threeway_helper_choice($obj, $values[$k]),
+					.$this->threeway_helper_choice($obj,
+						isset($values[$k])?$values[$k]:null),
 					$name, $v, $name, $name);
 			}
 			$this->_render($obj, implode("<br />\n", $html));
