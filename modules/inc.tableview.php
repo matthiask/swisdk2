@@ -168,7 +168,7 @@
 		public function html(&$data)
 		{
 			$str = strip_tags($data[$this->column]);
-			if($ml = $this->args[0])
+			if(isset($this->args[0]) && $ml = $this->args[0])
 				return substr($str, 0, $ml).(strlen($str)>$ml?'&hellip;':'');
 			return $data[$this->column];
 		}
