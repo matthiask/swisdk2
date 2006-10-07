@@ -60,6 +60,25 @@
 	}
 
 	/**
+	 * Generates a ASCII-clean representation from any string passed in
+	 *
+	 * Good for generating slugs from article titles
+	 *
+	 * Don't rely on the implementation staying the same
+	 */
+	function slugify($string)
+	{
+		$fr = array('ä', 'ö', 'ü', 'ß', 'à','á','è','é','î','ô');
+		$to = array('ae','oe','ue','ss','a','a','e','e','i','o');
+
+		return preg_replace('/[-\s]+/', '-',
+			trim(
+				preg_replace('/[^a-z0-9\s-]/', '',
+					str_replace($fr, $to,
+						strtolower($string)))));
+	}
+
+	/**
 	* Generates a string of random numbers and characters.
 	*/
 	function randomKeys($length)
