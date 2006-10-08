@@ -577,6 +577,22 @@ EOD;
 		}
 	}
 
+	class TagInput extends TextInput {
+		public function init_value($dbobj)
+		{
+			parent::init_value($dbobj);
+			if(is_array($this->value)) {
+				$this->real_value = $this->value;
+				$this->value = implode(', ', $this->real_value);
+			} else {
+				$this->real_value = array_map('trim', explode(',', $this->value));
+				$dbobj->set($this->name(), $this->real_value);
+			}
+		}
+
+		protected $real_value;
+	}
+
 	/**
 	 * base class for all FormItems which want to occupy a whole
 	 * line (no title, no message)

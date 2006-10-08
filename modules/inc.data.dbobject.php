@@ -421,6 +421,48 @@
 								$this->db_connection_id)===false)
 							return false;
 					}
+				} else if($rel['type']==DB_REL_TAGS) {
+					$field = $rel['field'];
+					if(!$field||!isset($this->data[$field]))
+						$field = $rel['class'];
+					if(!isset($this->data[$field]))
+						continue;
+					$res = DBObject::db_query('DELETE FROM '.$rel['table']
+						.' WHERE '.$this->primary.'='.$this->id(),
+						$this->db_connection_id);
+					if($res===false)
+						return false;
+					if(is_array($this->data[$field])
+							&& count($this->data[$field])) {
+						$input_tags = array_map('strtolower', $this->data[$field]);
+						$query = 'SELECT tag_id,tag_title FROM tbl_tag WHERE ';
+						$ids = array();
+						$esc_tags = array();
+						foreach($input_tags as $tag)
+							$esc_tags[] = DBObject::db_escape($tag);
+						$query .= 'tag_title='.implode(' OR tag_title=', $esc_tags);
+						$db_tags = DBObject::db_get_array($query,
+							array('tag_id', 'tag_title'), $this->db_connection_id);
+						$new_tags = array_diff($input_tags, $db_tags);
+						$ids = array_keys($db_tags);
+						foreach($new_tags as $tag) {
+							$dbo = DBObject::create_with_data('Tag', array(
+								'tag_title' => $tag));
+							$dbo->store();
+							$ids[] = $dbo->id();
+						}
+						if(!count($ids))
+							return true;
+						$sql = 'INSERT INTO '.$rel['table']
+							.' ('.$this->primary.',tag_id'
+							.') VALUES ('
+							.$this->id().','
+							.implode('),('.$this->id().',',
+							$ids).')';
+						if(DBObject::db_query($sql,
+								$this->db_connection_id)===false)
+							return false;
+					}
 				}
 			}
 
@@ -464,7 +506,8 @@
 			if(isset(DBObject::$relations[$this->class])) {
 				foreach(DBObject::$relations[$this->class] as &$rel) {
 					if($rel['type']==DB_REL_N_TO_M
-							|| $rel['type']==DB_REL_3WAY) {
+							|| $rel['type']==DB_REL_3WAY
+							|| $rel['type']==DB_REL_TAGS) {
 						if(!DBObject::db_query('DELETE FROM '
 								.$rel['table'].' WHERE '
 								.$this->primary
@@ -610,6 +653,27 @@
 		}
 
 		/**
+		 * DBObject::has_tags('Item');
+		 */
+		public static function has_tags($class)
+		{
+			$obj = DBObject::create($class);
+			$table = 'tbl_'.$obj->name('to_tag');
+
+			DBObject::$relations[$class]['Tag'] = array(
+				'type' => DB_REL_TAGS, 'table' => $table,
+				'join' => 'tbl_tag.tag_id='.$table.'.tag_id',
+				'field' => 'Tag', 'class' => 'Tag',
+				'foreign' => 'tag_id');
+			DBObject::$relations['Tag'][$class] = array(
+				'type' => DB_REL_N_TO_M, 'table' => $table,
+				'join' => $obj->table().'.'.$obj->primary.'='
+					.$table.'.'.$obj->primary(),
+				'field' => $obj->_class(), 'class' => $obj->_class(),
+				'foreign' => $obj->primary());
+		}
+
+		/**
 		 * get related DBObject or DBOContainer (depending on relation type)
 		 *
 		 * @param class: class of related object OR name given to the relation (n-to-m)
@@ -637,6 +701,8 @@
 					return $this->related_many_to_many($rel, $params);
 				case DB_REL_3WAY:
 					return $this->related_3way($rel, $params);
+				case DB_REL_TAGS:
+					return $this->related_many_to_many($rel, $params);
 			}
 		}
 
@@ -1013,6 +1079,9 @@
 							DBObject::create($relations[$var]['class'])->primary(),
 							DBObject::create($relations[$var]['choices'])->primary());
 						break;
+					case DB_REL_TAGS:
+						$this->data[$var] = $obj->collect_full(
+							'tag_id', 'tag_title');
 				}
 				return $this->data[$var];
 			}
