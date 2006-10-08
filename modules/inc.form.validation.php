@@ -35,8 +35,9 @@
 			if(!list($rulefunc, $rulejs) = $this->validation_js_impl())
 				return null;
 			$id = $form->id();
+			$prefix = Swisdk::config_value('runtime.webroot.img', '/images');
 			$message = '<img style="position:relative;top:3px"'
-				.' "src="/images/icons/error.png" /> '.$this->message;
+				.' "src="'.$prefix.'/icons/error.png" /> '.$this->message;
 			return array(
 				"swisdk_form_do_validate($rulefunc, '$id', '$message')", $rulejs);
 		}
@@ -123,8 +124,9 @@ EOD;
 			if(!list($rulefunc, $rulejs) = $this->validation_js_impl())
 				return null;
 			$name = $this->item->iname();
+			$prefix = Swisdk::config_value('runtime.webroot.img', '/images');
 			$message = '<img style="position:relative;top:3px"'
-				.' "src="/images/icons/error.png" /> '.$this->message;
+				.' "src="'.$prefix.'/icons/error.png" /> '.$this->message;
 			return array(
 				"swisdk_form_do_validate($rulefunc('$name'), '$name', '$message')",
 				$rulejs);

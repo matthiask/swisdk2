@@ -93,9 +93,16 @@
 			return $html;
 		}
 
-		protected function render_row(&$row, $rowattr=null)
+		protected $odd = false;
+
+		protected function render_row(&$row, $class=null)
 		{
-			$html = "<tr{$rowattr}>\n";
+			$this->odd = !$this->odd;
+			if($this->odd)
+				$class .= ' odd';
+			if($class)
+				$class = " class=\"$class\"";
+			$html = "<tr{$class}>\n";
 			foreach($this->columns as &$col)
 				$html .= '<td>'.$col->html($row)."</td>\n";
 			$html .= "</tr>\n";
@@ -259,10 +266,11 @@
 			$id = $data[$this->column];
 			$gid = guardToken('delete');
 			$delete = dgettext('swisdk', 'Really delete?');
+			$prefix = Swisdk::config_value('runtime.webroot.img', '/images');
 			$html =<<<EOD
-<a href="{$this->title}_edit/$id"><img src="/images/icons/database_edit.png" alt="edit" /></a>
+<a href="{$this->title}_edit/$id"><img src="$prefix/icons/database_edit.png" alt="edit" /></a>
 <a href="{$this->title}_delete/$id" onclick="if(confirm('$delete')){this.href+='?guard=$gid';}else{this.parentNode.parentNode.onclick();return false;}">
-	<img src="/images/icons/database_delete.png" alt="delete" />
+	<img src="$prefix/icons/database_delete.png" alt="delete" />
 </a>
 EOD;
 			return $html;

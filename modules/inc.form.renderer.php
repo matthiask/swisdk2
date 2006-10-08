@@ -328,19 +328,20 @@ function formitem_tristate(elem)
 
 		protected function visit_RichTextarea($obj)
 		{
+			$prefix = Swisdk::config_value('runtime.webroot.js', '/scripts');
 			$this->_collect_javascript($obj);
 			$name = $obj->iname();
 			$value = $obj->value();
 			$attributes = $obj->attribute_html();
 			$html = <<<EOD
 <textarea name="$name" id="$name" $attributes>$value</textarea>
-<script type="text/javascript" src="/scripts/util.js"></script>
-<script type="text/javascript" src="/scripts/fckeditor/fckeditor.js"></script>
+<script type="text/javascript" src="$prefix/util.js"></script>
+<script type="text/javascript" src="$prefix/fckeditor/fckeditor.js"></script>
 <script type="text/javascript">
 //<![CDATA[
 function load_editor_$name(){
 var oFCKeditor = new FCKeditor('$name');
-oFCKeditor.BasePath = '/scripts/fckeditor/';
+oFCKeditor.BasePath = '$prefix/fckeditor/';
 oFCKeditor.Height = 450;
 oFCKeditor.Width = 750;
 oFCKeditor.ReplaceTextarea();
@@ -458,6 +459,7 @@ EOD;
 
 		protected function visit_DateInput($obj)
 		{
+			$prefix = Swisdk::config_value('runtime.webroot.js', '/scripts');
 			$this->_collect_javascript($obj);
 			$html = '';
 			static $js_sent = false;
@@ -465,10 +467,10 @@ EOD;
 				$js_sent = true;
 				$html.=<<<EOD
 <link rel="stylesheet" type="text/css" media="all"
-	href="/scripts/calendar/calendar-win2k-1.css" title="win2k-cold-1" />
-<script type="text/javascript" src="/scripts/calendar/calendar.js"></script>
-<script type="text/javascript" src="/scripts/calendar/calendar-en.js"></script>
-<script type="text/javascript" src="/scripts/calendar/calendar-setup.js"></script>
+	href="$prefix/calendar/calendar-win2k-1.css" title="win2k-cold-1" />
+<script type="text/javascript" src="$prefix/calendar/calendar.js"></script>
+<script type="text/javascript" src="$prefix/calendar/calendar-en.js"></script>
+<script type="text/javascript" src="$prefix/calendar/calendar-setup.js"></script>
 EOD;
 			}
 
@@ -483,7 +485,7 @@ EOD;
 
 			$html.=<<<EOD
 <input type="hidden" name="$name" id="$name" value="$value" />
-<span id="$span_name">$display_value</span> <img src="/scripts/calendar/img.gif"
+<span id="$span_name">$display_value</span> <img src="$prefix/calendar/img.gif"
 	id="$trigger_name"
 	style="cursor: pointer; border: 1px solid red;" title="Date selector"
 	onmouseover="this.style.background='red';" onmouseout="this.style.background=''" />
@@ -529,17 +531,19 @@ EOD;
 		{
 			$msg = $obj->message();
 			$name = $obj->id();
+			$prefix = Swisdk::config_value('runtime.webroot.img', '/images');
 			return '<div id="'.$name.'_message_span" style="clear:both;color:red">'
 				.($msg?
-				'<img style="position:relative;top:4px" src="/images/icons/error.png" alt="error" />'
+				'<img style="position:relative;top:4px" src="'.$prefix.'/icons/error.png" alt="error" />'
 				.$msg:' ')."</div>\n";
 		}
 
 		protected function _info_html($obj)
 		{
 			$msg = $obj->info();
+			$prefix = Swisdk::config_value('runtime.webroot.img', '/images');
 			return $msg?'<div style="float:left;clear:both;font-size:80%">'
-				.'<img style="position:relative;top:4px;" src="/images/icons/information.png" alt="info" /> '
+				.'<img style="position:relative;top:4px;" src="'.$prefix.'/icons/information.png" alt="info" /> '
 				.$msg."</div>\n":'';
 		}
 
