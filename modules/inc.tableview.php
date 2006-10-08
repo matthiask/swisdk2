@@ -295,7 +295,6 @@ EOD;
 			$this->initialized = true;
 
 			$this->db_class = $this->args[0];
-			$this->dbobj = $this->args[1];
 
 			if(isset($this->args[2]) && $t = $this->args[2]) {
 				$matches = array();
@@ -336,7 +335,6 @@ EOD;
 
 		protected $db_data = null;
 		protected $db_class = null;
-		protected $dbobj = null;
 
 		protected $vars = null;
 		protected $patterns = null;
@@ -346,6 +344,18 @@ EOD;
 	 * TableViewColumn for data from n-to-m or 3way relations
 	 */
 	class ManyToManyDBTableViewColumn extends DBTableViewColumn {
+		protected function init_column()
+		{
+			parent::init_column();
+			if(isset($this->args[1])) {
+				if($this->args[1] instanceof DBObject)
+					$this->dbobj = $this->args[1];
+				else
+					$this->dbobj = DBObject::create($this->args[1]);
+			} else
+				$this->dbobj = DBObject::create(
+					$this->tableview->dbobj()->dbobj()->_class());
+		}
 		public function html(&$data)
 		{
 			$this->init_column();
@@ -382,6 +392,7 @@ EOD;
 		}
 
 		protected $reldata = null;
+		protected $dbobj = null;
 	}
 
 ?>
