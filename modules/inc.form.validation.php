@@ -34,7 +34,7 @@
 		{
 			if(!list($rulefunc, $rulejs) = $this->validation_js_impl())
 				return null;
-			$id = $form->id();
+			$id = $this->form->id();
 			$prefix = Swisdk::config_value('runtime.webroot.img', '/images');
 			$message = '<img style="position:relative;top:3px"'
 				.' "src="'.$prefix.'/icons/error.png" /> '.$this->message;
