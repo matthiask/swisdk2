@@ -67,6 +67,8 @@
 						return $this->create_rel_3way($field, $title,
 							$relations[$field]['class'],
 							$relations[$field]['foreign']);
+					case DB_REL_TAGS:
+						return $this->create_rel_tags($field, $title);
 				}
 			}
 		}
@@ -91,6 +93,11 @@
 		 * create a FormItem/Column for a relation of type 3way
 		 */
 		abstract public function create_rel_3way($fname, $title, $class, $field);
+
+		/**
+		 * create a FormItem/Column for tags
+		 */
+		abstract public function create_rel_tags($fname, $title);
 
 		/**
 		 * create a date widget
@@ -152,7 +159,8 @@
 			$relations = $dbobj->relations();
 			foreach($relations as $key => &$data) {
 				if($data['type']==DB_REL_N_TO_M
-						||$data['type']==DB_REL_3WAY)
+						||$data['type']==DB_REL_3WAY
+						||$data['type']==DB_REL_TAGS)
 					$this->create_field($key);
 			}
 
@@ -242,6 +250,11 @@
 			return $this->form->add($fname, new ThreewayInput(), $title);
 		}
 
+		public function create_rel_tags($fname, $title)
+		{
+			return $this->form->add($fname, new TagInput(), $title);
+		}
+
 		public function create_date($fname, $title)
 		{
 			return $this->form->add($fname, new DateInput(), $title);
@@ -301,7 +314,8 @@
 			$relations = $dbobj->relations();
 			foreach($relations as $key => &$data) {
 				if($data['type']==DB_REL_N_TO_M
-						||$data['type']==DB_REL_3WAY)
+						||$data['type']==DB_REL_3WAY
+						||$data['type']==DB_REL_TAGS)
 					$this->create_field($key, null);
 			}
 
@@ -330,7 +344,8 @@
 			$relations = $this->dbobj->relations();
 			foreach($relations as $key => &$data) {
 				if($data['type']==DB_REL_N_TO_M
-						||$data['type']==DB_REL_3WAY)
+						||$data['type']==DB_REL_3WAY
+						||$data['type']==DB_REL_TAGS)
 					$this->create_field($key);
 			}
 
@@ -374,6 +389,12 @@
 			// TODO show information from choices ($field) too
 			$this->tv->append_column(new ManyToManyDBTableViewColumn(
 				$fname, $title, $class, $this->dbobj));
+		}
+
+		public function create_rel_tags($fname, $title)
+		{
+			$this->tv->append_column(new ManyToManyDBTableViewColumn(
+				$fname, $title, 'Tag', $this->dbobj));
 		}
 
 		public function create_date($fname, $title)

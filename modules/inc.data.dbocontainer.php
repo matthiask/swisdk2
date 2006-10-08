@@ -321,6 +321,7 @@
 							break;
 						case DB_REL_N_TO_M:
 						case DB_REL_3WAY:
+						case DB_REL_TAGS:
 							$this->joins .= ' LEFT JOIN '.$rel['table']
 								.' ON '.$this->obj->table().'.'
 								.$this->obj->primary().'='
