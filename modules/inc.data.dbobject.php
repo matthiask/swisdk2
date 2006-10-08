@@ -443,7 +443,7 @@
 						$query .= 'tag_title='.implode(' OR tag_title=', $esc_tags);
 						$db_tags = DBObject::db_get_array($query,
 							array('tag_id', 'tag_title'), $this->db_connection_id);
-						$new_tags = array_diff($input_tags, $db_tags);
+						$new_tags = array_unique(array_diff($input_tags, $db_tags));
 						$ids = array_keys($db_tags);
 						foreach($new_tags as $tag) {
 							$dbo = DBObject::create_with_data('Tag', array(
