@@ -378,6 +378,18 @@ EOD;
 		}
 	}
 
+	class AlnumRule extends RegexRule {
+		public function __construct($message = null)
+		{
+			parent::__construct('/^[A-Za-z0-9]+$/', 'dummy');
+			if($message)
+				$this->message = $message;
+			else
+				$this->message =
+					dgettext('swisdk', 'Only alphanumeric characters allowed');
+		}
+	}
+
 	class CallbackRule extends FormItemRule {
 		public function __construct($callback, $message = null)
 		{
