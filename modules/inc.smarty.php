@@ -160,11 +160,6 @@
 
 	class SmartyMaster {
 		/**
-		 * array holding the template file paths
-		 */
-		private $mTemplates;
-
-		/**
 		 * what is the title variable for? It does not seem to be used anywhere
 		 */
 		private $mTitle;
@@ -205,10 +200,6 @@
 		 */
 		private function __construct()
 		{
-			$this->mTemplates = array(
-				'fullTemplate' => Swisdk::template('base.full'),
-				'header' => Swisdk::template('base.header'),
-				'footer' => Swisdk::template('base.footer'));
 			$this->mTitle = Swisdk::website_config_value('title');
 		}
 
@@ -232,7 +223,7 @@
 		public function display($template = null, $generate = STREGION_ALL)
 		{
 			if($template===null)
-				$template = $this->mTemplates['fullTemplate'];
+				$template = Swisdk::template('base.full');
 
 			$smarty = $this->smarty();
 			if($smarty->template_exists($template)) {
@@ -249,7 +240,7 @@
 		 */
 		public function display_header($generate = STREGION_HEADER)
 		{
-			$this->display($this->mTemplates['header'], $generate);
+			$this->display(Swisdk::template('base.header'), $generate);
 		}
 
 		/**
@@ -257,7 +248,7 @@
 		 */
 		public function display_footer($generate = STREGION_FOOTER)
 		{
-			$this->display($this->mTemplates['footer'], $generate);
+			$this->display(Swisdk::template('base.footer'), $generate);
 		}
 
 		/**
