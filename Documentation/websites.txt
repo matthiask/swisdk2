@@ -14,19 +14,23 @@ You can set the following values in the website section:
 : Some descriptive title for this section. Might be used as website title
   later.
 
-`fullTemplate`
+`template.base.full`
 
 : path to a website template containing at least a `{$content}` marker.
 
-`header`
+`template.base.header`
 
 : path to a partial template containing everything up to the
   variable content
 
-`footer`
+`template.base.footer`
 
 : path to a partial template containing everything after the
   variable content
+
+`inherit`
+
+: name of another website this website inherits properties from
 
 `match`
 
@@ -45,17 +49,24 @@ You can set the following values in the website section:
   If you don't supply a region name, the lowercased component name
   will be used.
 
+
+You might need to add other template paths here if you use some of the
+SWISDK2 modules, f.e. `template.article.list`, `template.article.single` etc.
+
+
 ## Example website sections
 
     [website.default]
     title = Example.org
-    fullTemplate = path_to_template.html
+    template_dir = templates
+    template.base.full = path_to_template.html
 
 The following section handles everything below `/admin`
 
     [website.admin]
     title = Example.org Administration
-    fullTemplate = path_to_admin_template.html
+    inherit = default
+    template.base.full = path_to_admin_template.html
     components = Navigation
 
 Special section demonstrating the regular expression matching. We
@@ -63,7 +74,8 @@ search for the two paths `/path1.1/path1.2` and `/path2` here.
 
     [website.special]
     title = Example.org Special subsection
-    fullTemplate = path_to_special_template.html
-    match = "/(path1.1\/path1.2|path2)"
+    match = "/(path1.1/path1.2|path2)"
+    inherit = default
+    template.base.full = path_to_special_template.html
 
 [[projects/swisdk|back to SWISDK]]

@@ -16,9 +16,27 @@ This tries to be a complete list of all configuration variables:
   This should be unique; it is prepended to notification emails for easy
   sorting in your mail user agent.
 
-`db.database` (string)
+`core.paranoia` (bool)
 
-: name of MySQL database
+: Flag for extra-careful handling of authentication
+
+`core.token` (string)
+
+: Hashing token which should be unique for every installation
+
+`db.dbfile` (string)
+
+: path to sqlite database (only if you use sqlite driver)
+
+`db.dbname` (string)
+
+: name of MySQL database (only if you use mysql driver)
+
+  Replaces `db.database`, which is still used if driver is mysql and db.dbname is empty
+
+`db.driver` (string)
+
+: One of mysql, sqlite
 
 `db.host` (string)
 
@@ -78,6 +96,26 @@ This tries to be a complete list of all configuration variables:
 
 : default language key
 
+`runtime.webroot.js` (string)
+
+: Base path for javascript files. Defaults to /scripts, but will be changed
+  to /js soon
+
+`runtime.webroot.css` (string)
+
+: Base path for css files. Defaults to /styles, but will be changed to /css
+  soon
+
+`runtime.webroot.feeds` (string)
+
+: Prefix for XML/RSS feeds. Defaults to /feeds, but will be changed to /xml
+  soon
+
+`runtime.webroot.img` (string)
+
+: Base path for image files. Defaults to /images, but will be changed to /img
+  soon
+
 `website.*`
 
 : Configuration for websites. Please see the [[websites]] page.
@@ -129,6 +167,10 @@ away the controller part
 
 : the host part of the request (f.e. `http://www.example.com`)
 
+`runtime.request.protocol` (string)
+
+: Protocol (http or https)
+
 `runtime.request.uri` (string)
 
 : the full URL without host for the current request
@@ -150,6 +192,7 @@ away the controller part
     [core]
     name = Example!
     admin_email = admin@example.com
+    token = "INSERT UNIQUE VALUE HERE"
 
     [dispatcher]
     modules = DomainDispatcher, WebsiteDispatcher, ControllerDispatcher
@@ -165,13 +208,14 @@ away the controller part
     logfile = filename.log
 
     [db]
+    driver = mysql
     host = localhost
     username = db_user
     password = db_pass
-    database = example_org
+    dbname = example_org
 
     [runtime]
-    language = en
+    language = e
     
     [git]
     bindir = /usr/local/bin
@@ -181,5 +225,5 @@ away the controller part
 
     [website.default]
     title = "Example.org - Examples and more"
-    fullTemplate = templates/main.tpl.html
-
+    template_dir = templates
+    template.base.full = base/main.tpl.html
