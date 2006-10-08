@@ -228,6 +228,7 @@
 		{
 			$behavior->set_form_item($this);
 			$this->behaviors[] = $behavior;
+			return $this;
 		}
 
 		public function is_valid()
