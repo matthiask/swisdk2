@@ -67,6 +67,9 @@
 			define('CACHE_ROOT', DATA_ROOT.'cache/');
 			define('UPLOAD_ROOT', DATA_ROOT.'upload/');
 
+			require_once SWISDK_ROOT . 'lib/contrib/utf8/utf8.php';
+			require_once UTF8 . '/utils/validation.php';
+			require_once UTF8 . '/utils/ascii.php';
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
 

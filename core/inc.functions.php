@@ -50,6 +50,10 @@
 	{
 		if(!$value || is_numeric($value))
 			return $value;
+		if(!utf8_is_valid($value)) {
+			require_once UTF8.'/utils/bad.php';
+			$value = utf8_bad_replace($value);
+		}
 		require_once SWISDK_ROOT.'lib/contrib/externalinput.php';
 		return popoon_classes_externalinput::basicClean($value);
 	}
@@ -75,7 +79,7 @@
 			trim(
 				preg_replace('/[^a-z0-9\s-]/', '',
 					str_replace($fr, $to,
-						strtolower($string)))));
+						utf8_strtolower($string)))));
 	}
 
 	/**
