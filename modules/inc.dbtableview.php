@@ -290,7 +290,7 @@ function init_tableview()
 						row.className += ' checked';
 					else
 						row.className =
-							row.className.replace(/checked/, '');
+							row.className.replace(/checked/g, '');
 				}
 				cb.onclick = function(){
 					// hack. revert toggle effect of tr.onclick
@@ -344,9 +344,17 @@ function tv_delete()
 }
 function tv_toggle(elem)
 {
-	var elems = document.getElementById('$id').getElementsByTagName('input');
-	for(i=0; i<elems.length; i++)
+	var elems = document.getElementById('$id').getElementsByTagName('tbody')[1].getElementsByTagName('input');
+	for(i=0; i<elems.length; i++) {
 		elems[i].checked = elem.checked;
+		var node = elems[i].parentNode.parentNode;
+		if(node.tagName=='TR') {
+			if(elems[i].checked)
+				node.className += ' checked';
+			else
+				node.className = node.className.replace(/checked/g, '');
+		}
+	}
 }
 //]]>
 </script>
