@@ -240,7 +240,7 @@
 					.$this->table.implode(' AND ', $where));
 				if($this->data && count($this->data))
 					return true;
-			} else {
+			} else if($params) {
 				$this->id = $params;
 				if($this->refresh())
 					return true;
@@ -253,12 +253,16 @@
 		public function refresh()
 		{
 			$this->listener_call('refresh');
-			if($this->id())
+			if($id = $this->id()) {
 				$this->data = DBObject::db_get_row('SELECT * FROM '
-					.$this->table.' WHERE '.$this->primary.'='.$this->id(),
+					.$this->table.' WHERE '.$this->primary.'='.$id,
 					$this->db_connection_id);
-			$this->dirty = false;
-			return ($this->data && count($this->data));
+				$this->dirty = false;
+				return ($this->data && count($this->data));
+			} else
+				$this->data = array();
+
+			return false;
 		}
 
 		/**
