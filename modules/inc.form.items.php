@@ -148,6 +148,7 @@
 		public function set_attributes($attributes)
 		{
 			$this->attributes = array_merge($this->attributes, $attributes);
+			return $this;
 		}
 
 		/**
@@ -254,6 +255,7 @@
 		public function add_javascript($js)
 		{
 			$this->javascript .= $js;
+			return $this;
 		}
 
 		public function javascript()
@@ -499,6 +501,7 @@ EOD;
 					$this->items[$item->id()] = $item->title();
 			} else
 				$this->items = $items;
+			return $this;
 		}
 
 		public function items()
@@ -510,6 +513,7 @@ EOD;
 		{
 			$this->items = array_merge(array(0 => '-- '.dgettext('swisdk', 'select').' --'),
 				$this->items);
+			return $this;
 		}
 
 		public function remove_visitor()
