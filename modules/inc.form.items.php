@@ -628,7 +628,7 @@ EOD;
 		public function popup_url()
 		{
 			return sprintf('/picker?element=%s&class=%s&%s',
-				$this->iname(), $this->picker_class,
+				$this->id(), $this->picker_class,
 				http_build_query(array('params' => $this->params)));
 		}
 
@@ -654,7 +654,6 @@ EOD;
 				$behavior_js .= $js;
 				$this->funcs .= 'window.setTimeout('.$func.", 0);\n\t";
 			}
-			$iname = $this->iname();
 			return $this->javascript.<<<EOD
 $behavior_js
 

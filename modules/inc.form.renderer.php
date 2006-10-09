@@ -512,7 +512,7 @@ EOD;
 		{
 			$prefix = Swisdk::config_value('runtime.webroot.img', '/images');
 			$this->_collect_javascript($obj);
-			$name = $obj->iname();
+			$name = $obj->id();
 			$value = $obj->value();
 			$display = $obj->display_string();
 			$url = $obj->popup_url();
