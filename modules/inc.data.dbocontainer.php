@@ -241,6 +241,8 @@
 
 		public function add_clause_array($params)
 		{
+			if(!is_array($params))
+				return;
 			foreach($params as $k => $v)
 				$this->add_clause($k, $v);
 		}
