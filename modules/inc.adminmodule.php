@@ -313,7 +313,6 @@
 			if(!$this->obj)
 				$this->goto('_list');
 			$this->init_form();
-			$this->form->enable_unique();
 			if(!$this->editmode) {
 				for($i=1; $i<=3; $i++) {
 					$box = $this->form->box($this->dbo_class.'_'.$i);

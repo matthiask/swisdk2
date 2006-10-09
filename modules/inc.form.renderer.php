@@ -141,7 +141,7 @@
 				'<form method="post" action="'.$_SERVER['REQUEST_URI']
 				.'" id="'.$obj->id()."\" $html class=\"sf-form\" "
 				."accept-charset=\"utf-8\" $upload>\n<div>\n".$js);
-			$this->add_html_end('<span style="color:red" id="'.$obj->id()."_message_span\"> </span>\n");
+			$this->add_html_end('<span style="color:red" id="'.$obj->id()."_msg\"> </span>\n");
 			$this->add_html_end("</div></form>\n");
 		}
 
@@ -161,7 +161,7 @@
 function swisdk_form_do_validate(valid, field, message)
 {
 	if(!valid) {
-		document.getElementById(field+\'_message_span\').innerHTML += message;
+		document.getElementById(field+\'_msg\').innerHTML += message;
 		return false;
 	}
 	return true;
@@ -172,11 +172,11 @@ function validate_'.$id.'()
 	var valid = true;
 	var form = document.getElementById(\''.$id.'\');
 	for(var i=0; i<form.elements.length; i++) {
-		spanElem = document.getElementById(form.elements[i].id+\'_message_span\');
+		spanElem = document.getElementById(form.elements[i].id+\'_msg\');
 		if(spanElem)
 			spanElem.innerHTML = \' \';
 	}
-	document.getElementById(\''.$id.'_message_span\').innerHTML = \' \';
+	document.getElementById(\''.$id.'_msg\').innerHTML = \' \';
 	if(!'.implode(") valid = false;\n\tif(!", $this->functions).') valid = false;
 	return valid;
 }';
@@ -532,7 +532,7 @@ EOD;
 			$msg = $obj->message();
 			$name = $obj->id();
 			$prefix = Swisdk::config_value('runtime.webroot.img', '/images');
-			return '<div id="'.$name.'_message_span" style="clear:both;color:red">'
+			return '<div id="'.$name.'_msg" style="clear:both;color:red">'
 				.($msg?
 				'<img style="position:relative;top:4px" src="'.$prefix.'/icons/error.png" alt="error" />'
 				.$msg:' ')."</div>\n";
