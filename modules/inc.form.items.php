@@ -116,11 +116,6 @@
 				$this->box_name.$this->name;
 		}
 
-		public function iname()
-		{
-			return $this->id();
-		}
-
 		/**
 		 * get some informations from the FormBox containing this
 		 * FormItem
@@ -164,14 +159,14 @@
 		public function init_value($dbobj)
 		{
 			$name = $this->name();
-			$iname = $this->iname();
+			$id = $this->id();
 			$val = null;
 
 			// handle one level of array brackets
-			if(false!==($pos = strpos($iname, '['))) {
-				if($idx = intval(substr($iname, $pos+1, -1))) {
+			if(false!==($pos = strpos($id, '['))) {
+				if($idx = intval(substr($id, $pos+1, -1))) {
 					$array = null;
-					$pname = substr($iname, 0, $pos);
+					$pname = substr($id, 0, $pos);
 					if($val = getInput($pname)) {
 						$array = $dbobj->get($pname);
 						$array[$idx] = $val[$idx];
@@ -184,7 +179,7 @@
 					$this->set_value($array[$idx]);
 				}
 			} else {
-				if(($val = getInput($this->iname()))!==null) {
+				if(($val = getInput($this->id()))!==null) {
 					if(is_array($val))
 						$dbobj->set($name, $val);
 					else
@@ -264,15 +259,15 @@
 				$behavior_init_js .= $init."\n\t";
 
 			}
-			$iname = $this->iname();
+			$id = $this->id();
 			return $this->javascript.<<<EOD
 $behavior_js
 
-function init_$iname()
+function init_$id()
 {
 	$behavior_init_js
 }
-add_event(window, 'load', init_$iname);
+add_event(window, 'load', init_$id);
 
 EOD;
 		}
@@ -320,7 +315,7 @@ EOD;
 
 		public function init_value($dbobj)
 		{
-			$name = $this->iname();
+			$name = $this->id();
 			if(isset($_FILES[$name])
 					&& ($this->files_data = $_FILES[$name])
 					&& $this->check_upload()) {
@@ -450,7 +445,7 @@ EOD;
 
 		public function init_value($dbobj)
 		{
-			$name = $this->iname();
+			$name = $this->id();
 
 			if(isset($_POST['__check_'.$name])) {
 				if(getInput($name))
