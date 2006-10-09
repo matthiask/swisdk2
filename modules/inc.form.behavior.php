@@ -68,8 +68,11 @@
 	class EnableOnValidBehavior extends FormItemBehavior {
 		protected function setup()
 		{
-			foreach($this->args as $item)
-				$item->set_attributes(array('disabled' => 'disabled'));
+			foreach($this->args as $item) {
+				if(!$item->is_valid())
+					$item->set_attributes(array('disabled' => 'disabled'));
+				$item->set_message(null);
+			}
 		}
 
 		public function javascript()
