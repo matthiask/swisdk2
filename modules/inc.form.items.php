@@ -512,6 +512,13 @@ EOD;
 				$this->items);
 		}
 
+		public function remove_visitor()
+		{
+			if(isset($this->items[SWISDK2_VISITOR]))
+				unset($this->items[SWISDK2_VISITOR]);
+			return $this;
+		}
+
 		protected $items=array();
 	}
 
