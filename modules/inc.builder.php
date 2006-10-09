@@ -120,10 +120,6 @@
 		abstract public function create_text($fname, $title);
 	}
 
-	/**
-	 * TODO use default value from DB when constructing form?
-	 */
-
 	class FormBuilder extends BuilderBase {
 		public function build(&$form)
 		{
@@ -164,9 +160,6 @@
 					$this->create_field($key);
 			}
 
-			// FIXME do not autogenerate fields which were
-			// created inside form_hook
-			$this->form_hook($form);
 			if($submitbtn)
 				$this->form->add(new SubmitButton());
 		}
@@ -204,21 +197,7 @@
 				if(!preg_match($ninc_regex, $fname))
 					$this->create_field($fname);
 
-			// FIXME do not autogenerate fields which were
-			// created inside form_hook
-			$this->form_hook_ml($form);
 			$this->form->add(new SubmitButton());
-		}
-
-		public function form_hook(&$form)
-		{
-			// customize that
-			//$this->form->add('item_type_id', new TextInput());
-		}
-
-		public function form_hook_ml(&$form)
-		{
-			// customize that
 		}
 
 		public function dbobj()
@@ -319,9 +298,6 @@
 					$this->create_field($key, null);
 			}
 
-			// FIXME do not autogenerate fields which were
-			// created inside tableview hook
-			$this->tableview_hook($form);
 			if($finalize)
 				$this->tv->append_column(new CmdsTableViewColumn(
 					$this->tv->dbobj()->dbobj()->primary(),
@@ -349,22 +325,8 @@
 					$this->create_field($key);
 			}
 
-			// FIXME do not autogenerate fields which were
-			// created inside tableview hook
-			$this->tableview_hook_ml($form);
 			$this->tv->append_column(new CmdsTableViewColumn($primary,
 				Swisdk::config_value('runtime.controller.url')));
-		}
-
-		public function tableview_hook(&$form)
-		{
-			// customize that
-			//$this->form->add('item_type_id', new TextInput());
-		}
-
-		public function tableview_hook_ml(&$form)
-		{
-			// customize that
 		}
 
 		public function dbobj()

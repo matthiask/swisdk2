@@ -126,7 +126,6 @@
 
 		public function refresh()
 		{
-			// XXX have to think about this a bit...
 			// this is used when freshly initializing a DBObjectML
 			if($this->obj)
 				$this->obj->refresh();
