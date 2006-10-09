@@ -611,4 +611,51 @@ EOD;
 	class DateInput extends FormItem {
 	}
 
+	class PickerBase extends FormItem {
+		public function __construct($class=null)
+		{
+			if($class)
+				$this->picker_class = $class;
+		}
+
+		public function display_string()
+		{
+			if($dbo = DBObject::find($this->picker_class, $this->value()))
+				return $dbo->title();
+			return '&hellip;';
+		}
+
+		public function popup_url()
+		{
+			return sprintf('/picker?element=%s&class=%s',
+				$this->iname(), $this->picker_class);
+		}
+
+		public function behavior_functions()
+		{
+			return $this->funcs;
+		}
+
+		public function javascript()
+		{
+			if(!count($this->behaviors))
+				return $this->javascript;
+			$behavior_js = '';
+			foreach($this->behaviors as &$behavior) {
+				list($init,$js,$func) = $behavior->javascript();
+
+				$behavior_js .= $js;
+				$this->funcs .= 'window.setTimeout('.$func.", 0);\n\t";
+			}
+			$iname = $this->iname();
+			return $this->javascript.<<<EOD
+$behavior_js
+
+EOD;
+		}
+
+		protected $picker_class;
+		protected $funcs;
+	}
+
 ?>

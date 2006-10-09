@@ -508,6 +508,43 @@ EOD;
 			$this->_render($obj, $html);
 		}
 
+		protected function visit_PickerBase($obj)
+		{
+			$prefix = Swisdk::config_value('runtime.webroot.img', '/images');
+			$this->_collect_javascript($obj);
+			$name = $obj->iname();
+			$value = $obj->value();
+			$display = $obj->display_string();
+			$url = $obj->popup_url();
+			$behavior_functions = $obj->behavior_functions();
+			$html = <<<EOD
+<input type="text" id="$name" name="$name" value="$value"
+	style="visibility:hidden;height:0px;width:0px;border:none;" />
+<span id="{$name}_span">$display</span>
+<a href="javascript:open_$name()"><img src="$prefix/icons/database_edit.png" /></a>
+<script type="text/javascript">
+//<![CDATA[
+function open_$name()
+{
+	window.open('$url', '$name', 'width=300,height=300,toolbar=no,location=no');
+}
+
+function select_$name(val, str)
+{
+	var elem = document.getElementById('$name');
+	elem.value = val;
+	if(!str)
+		str = '&hellip;';
+	document.getElementById('{$name}_span').innerHTML = str;
+	$behavior_functions
+}
+//]]>
+</script>
+
+EOD;
+			$this->_render($obj, $html);
+		}
+
 		protected function visit_SubmitButton($obj)
 		{
 			$this->_collect_javascript($obj);

@@ -77,7 +77,6 @@
 
 		public function javascript()
 		{
-			$id = uniqid();
 			$name = $this->item->iname();
 			$elems = array();
 			foreach($this->args as $item)
@@ -90,7 +89,7 @@
 			}
 			$valid = implode('(\''.$name.'\') && ', $rules).'(\''.$name.'\')';
 			$js = <<<EOD
-function enable_on_valid_behavior_handler_$id()
+function enable_on_valid_behavior_handler_$name()
 {
 	var disable = !($valid);
 	var elems = new Array($elems);
@@ -101,10 +100,10 @@ function enable_on_valid_behavior_handler_$id()
 EOD;
 			return array(
 				"add_event(document.getElementById('$name'), 'blur',"
-					." enable_on_valid_behavior_handler_$id);\n\t"
+					." enable_on_valid_behavior_handler_$name);\n\t"
 				."add_event(document.getElementById('$name'), 'change',"
-					." enable_on_valid_behavior_handler_$id);",
-				$js);
+					." enable_on_valid_behavior_handler_$name);",
+				$js, "enable_on_valid_behavior_handler_$name");
 		}
 	}
 
@@ -116,7 +115,6 @@ EOD;
 	class UpdateOnChangeAjaxBehavior extends FormItemBehavior {
 		public function javascript()
 		{
-			$id = uniqid();
 			$n1 = $this->item->iname();
 			$n2 = $this->args[0]->iname();
 			$method = $this->args[2];
@@ -141,21 +139,21 @@ function update_selection_box(elem, items)
 	}
 }
 
-function update_on_change_ajax_behavior_handler_{$id}_callback(items)
+function update_on_change_ajax_behavior_handler_{$n1}_callback(items)
 {
 	update_selection_box('$n2', items);
 }
 
-function update_on_change_ajax_behavior_handler_$id()
+function update_on_change_ajax_behavior_handler_$n1()
 {
-	x_$method(document.getElementById('$n1').value, update_on_change_ajax_behavior_handler_{$id}_callback);
+	x_$method(document.getElementById('$n1').value, update_on_change_ajax_behavior_handler_{$n1}_callback);
 }
 
 EOD;
 			return array(
 				"add_event(document.getElementById('$n1'), 'change',"
-					." update_on_change_ajax_behavior_handler_$id);",
-				$js);
+					." update_on_change_ajax_behavior_handler_$n1);",
+				$js, "update_on_change_ajax_behavior_handler_$n1");
 		}
 	}
 
