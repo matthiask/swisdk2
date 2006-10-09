@@ -319,7 +319,7 @@
 								.' ON '.$this->obj->table().'.'
 								.$rel['field'].'='
 								.$rel['table'].'.'
-								.$rel['foreign_key'];
+								.$rel['foreign'];
 							break;
 						case DB_REL_N_TO_M:
 						case DB_REL_3WAY:

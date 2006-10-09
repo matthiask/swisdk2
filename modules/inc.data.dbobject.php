@@ -592,7 +592,7 @@
 			DBObject::$relations[$c1][$c2] =
 				array('type' => DB_REL_SINGLE, 'field' => $field,
 					'class' => $class, 'table' => $o2->table(),
-					'foreign_key' => $o2->primary());
+					'foreign' => $o2->primary());
 			DBObject::$relations[$c1][$field] = DBObject::$relations[$c1][$c2];
 			// do not set reverse mapping if user passed an explicit field
 			// specification
@@ -601,7 +601,7 @@
 			DBObject::$relations[$c2][$c1] =
 				array('type' => DB_REL_MANY, 'field' => $field,
 					'class' => $c1, 'table' => $o1->table(),
-					'foreign_key' => $o1->primary());
+					'foreign' => $o1->primary());
 			DBObject::$relations[$c2][$field] = DBObject::$relations[$c2][$c1];
 		}
 

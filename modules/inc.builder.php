@@ -60,6 +60,9 @@
 			$relations = $dbobj->relations();
 			if(isset($relations[$field]['type'])) {
 				switch($relations[$field]['type']) {
+					case DB_REL_MANY:
+						return $this->create_rel_many($field, $title,
+							$relations[$field]['class']);
 					case DB_REL_N_TO_M:
 						return $this->create_rel_manytomany($field, $title,
 							$relations[$field]['class']);
@@ -83,6 +86,11 @@
 		 * belongs_to
 		 */
 		abstract public function create_rel_single($fname, $title, $class);
+
+		/**
+		 * create a FormItem/Column for a relation of type has_many
+		 */
+		abstract public function create_rel_many($fname, $title, $class);
 
 		/**
 		 * create a FormItem/Column for a relation of type n-to-m
@@ -214,6 +222,11 @@
 			return $this->form->add($fname, $obj, $title);
 		}
 
+		public function create_rel_many($fname, $title, $class)
+		{
+			// nothing happens, has_many is not handled
+		}
+
 		/**
 		 * you could also display a list of checkboxes here...
 		 */
@@ -337,6 +350,12 @@
 		public function create_rel_single($fname, $title, $class)
 		{
 			$this->tv->append_column(new DBTableViewColumn(
+				$fname, $title, $class, $this->dbobj));
+		}
+
+		public function create_rel_many($fname, $title, $class)
+		{
+			$this->tv->append_column(new ManyDBTableViewColumn(
 				$fname, $title, $class, $this->dbobj));
 		}
 

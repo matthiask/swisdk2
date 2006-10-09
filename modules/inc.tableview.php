@@ -290,8 +290,6 @@ EOD;
 	class DBTableViewColumn extends TableViewColumn {
 		protected function init_column()
 		{
-			if($this->initialized)
-				return;
 			$this->initialized = true;
 
 			$this->db_class = $this->args[0];
@@ -315,7 +313,8 @@ EOD;
 
 		public function html(&$data)
 		{
-			$this->init_column();
+			if(!$this->initialized)
+				$this->init_column();
 			if($this->vars!==null) {
 				$vals = array();
 				$record =& $this->db_data[$data[$this->column]];
@@ -340,6 +339,77 @@ EOD;
 		protected $patterns = null;
 	}
 
+	class ManyDBTableViewColumn extends DBTableViewColumn {
+		protected function init_column()
+		{
+			$this->initialized = true;
+			$this->db_class = $this->args[0];
+
+			if(isset($this->args[1])) {
+				if($this->args[1] instanceof DBObject)
+					$this->dbobj = $this->args[1];
+				else
+					$this->dbobj = DBObject::create($this->args[1]);
+			} else
+				$this->dbobj = DBObject::create(
+					$this->tableview->dbobj()->dbobj()->_class());
+
+			$relations = $this->dbobj->relations();
+			$rel = $relations[$this->db_class];
+			$clause = array($rel['field'].' IN {ids}' => array(
+				'ids' => $this->tableview->dbobj()->ids()));
+
+			if(isset($this->args[2]) && $t = $this->args[2]) {
+				$matches = array();
+				preg_match_all('/\{([A-Za-z_0-9]+)}/', $t,
+					$matches, PREG_PATTERN_ORDER);
+				if(isset($matches[1]))
+					$this->vars = $matches[1];
+				foreach($this->vars as $v)
+					$this->patterns[] = '/\{' . $v . '\}/';
+
+				$doc = DBOContainer::find($this->db_class, $clause);
+				foreach($doc as $id => &$obj)
+					$this->db_data[$obj->get($rel['field'])][] =
+						$obj->data();
+			} else {
+				$doc = DBOContainer::find($this->db_class, $clause);
+				foreach($doc as $id => &$obj)
+					$this->db_data[$obj->get($rel['field'])][] =
+						$obj->title();
+			}
+
+		}
+
+		public function html(&$data)
+		{
+			if(!$this->initialized)
+				$this->init_column();
+			$p = $this->dbobj->primary();
+
+			if(!isset($data[$p]) || !isset($this->db_data[$data[$p]]))
+				return;
+
+			$id = $data[$p];
+			$data =& $this->db_data[$id];
+			$tokens = array();
+
+			if($this->vars!==null) {
+				foreach($data as &$record) {
+					$vals = array();
+					foreach($this->vars as $v)
+						$vals[] = $record[$v];
+
+					$tokens[] = preg_replace($this->patterns, $vals, $this->args[2]);
+				}
+			} else
+				$tokens =& $data;
+			return implode(', ', $tokens);
+		}
+
+		protected $dbobj = null;
+	}
+
 	/**
 	 * TableViewColumn for data from n-to-m or 3way relations
 	 */
@@ -355,22 +425,23 @@ EOD;
 			} else
 				$this->dbobj = DBObject::create(
 					$this->tableview->dbobj()->dbobj()->_class());
+			$p = $this->dbobj->primary();
+			$relations = $this->dbobj->relations();
+			$rel = $relations[$this->db_class];
+			$rdata = DBObject::db_get_array(sprintf(
+				'SELECT %s,%s FROM %s WHERE %s IN (%s)',
+				$p,$rel['foreign'], $rel['table'], $p,
+				implode(',', $this->tableview->dbobj()->ids())));
+			$this->reldata = array();
+			foreach($rdata as $row)
+				$this->reldata[$row[$p]][] = $row[$rel['foreign']];
 		}
+
 		public function html(&$data)
 		{
-			$this->init_column();
+			if(!$this->initialized)
+				$this->init_column();
 			$p = $this->dbobj->primary();
-			if($this->reldata===null) {
-				$relations = $this->dbobj->relations();
-				$rel = $relations[$this->db_class];
-				$rdata = DBObject::db_get_array(sprintf(
-					'SELECT %s,%s FROM %s WHERE %s IN (%s)',
-					$p,$rel['foreign'], $rel['table'], $p,
-					implode(',', $this->tableview->dbobj()->ids())));
-				$this->reldata = array();
-				foreach($rdata as $row)
-					$this->reldata[$row[$p]][] = $row[$rel['foreign']];
-			}
 
 			if(!isset($data[$p]) || !isset($this->reldata[$data[$p]]))
 				return;
