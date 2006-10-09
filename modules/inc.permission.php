@@ -181,10 +181,12 @@
 			$form = new Form();
 			$form->bind(DBObject::create('Login'));
 			$form->set_title(dgettext('swisdk', 'Login'));
-			$form->add('login_username')
+			$form->add(new TextInput('login_username'))
 				->add_rule(new AlnumRule())
-				->add_behavior(new GrabFocusBehavior());
-			$form->add('login_password', new PasswordInput());
+				->add_behavior(new GrabFocusBehavior())
+				->set_title('Username');
+			$form->add(new PasswordInput('login_password'))
+				->set_title('Password');
 			$form->add(new SubmitButton());
 
 			$sm = SmartyMaster::instance();

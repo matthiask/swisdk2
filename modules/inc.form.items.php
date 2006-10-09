@@ -61,15 +61,8 @@
 		protected $box_name = null;
 
 		/**
-		 * is this FormItem part of a Form/FormBox with unique-ness
-		 * enabled?
-		 */
-		protected $unique = false;
-
-		/**
 		 * has this element beed added to the FormBox with
-		 * add_initialized_obj ? If yes, do not mangle the name even
-		 * if $unique is true
+		 * add_initialized_obj ? If yes, do not mangle the name
 		 */
 		protected $preinitialized = false;
 
@@ -108,7 +101,6 @@
 			else
 				$this->message = $message;
 		}
-		public function enable_unique() { $this->unique = true; }
 		public function set_preinitialized() { $this->preinitialized = true; }
 		public function set_title($title)
 		{
@@ -118,9 +110,10 @@
 		/**
 		 * return a unique name for this FormItem
 		 */
-		public function id() {
-			return ((!$this->preinitialized&&$this->unique)?
-				$this->box_name:'').$this->name;
+		public function id()
+		{
+			return $this->preinitialized?$this->name:
+				$this->box_name.$this->name;
 		}
 
 		public function iname()

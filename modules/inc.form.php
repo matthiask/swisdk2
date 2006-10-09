@@ -38,12 +38,6 @@
 		 */
 		protected $form_id;
 
-		/**
-		 * should the FormItem's names be mangled so that they are _really_
-		 * unique (f.e. edit multiple records of the same type on one page)
-		 */
-		protected $unique = false;
-
 		public function __construct($dbobj=null)
 		{
 			if($dbobj)
@@ -52,7 +46,6 @@
 
 		public function title() { return $this->title; }
 		public function set_title($title=null) { $this->title = $title; }
-		public function enable_unique() { $this->unique = true; }
 
 		public function id()
 		{
@@ -78,7 +71,7 @@
 		public static function to_form_id($dbo, $id=0)
 		{
 			$id = $dbo->id();
-			return '__swisdk_form_'.$dbo->table().'_'.($id?$id:0);
+			return '__sf_'.$dbo->table().'_'.($id?$id:0);
 		}
 
 		/**
@@ -96,8 +89,6 @@
 			if(!isset($this->boxes[$id])) {
 				$this->boxes[$id] = new FormBox();
 				$this->boxes[$id]->set_name($id);
-				if($this->unique)
-					$this->boxes[$id]->enable_unique();
 				if($this->dbobj_tmp) {
 					$this->boxes[$id]->bind($this->dbobj_tmp);
 					$this->dbobj_tmp = null;
@@ -271,11 +262,6 @@
 		protected $dbobj;
 
 		/**
-		 * same as comment form Form::$unique
-		 */
-		protected $unique = false;
-
-		/**
 		 * validation message
 		 */
 		protected $message;
@@ -310,7 +296,6 @@
 				$this->bind($dbobj);
 		}
 
-		public function enable_unique() { $this->unique = true; }
 		public function set_title($title=null) { $this->title = $title; }
 		public function title() { return $this->title; }
 
@@ -319,7 +304,7 @@
 		 */
 		public function bind($dbobj)
 		{
-			$this->formbox_id = Form::to_form_id($dbobj).'_formbox_'.$this->name;
+			$this->formbox_id = Form::to_form_id($dbobj).'_box_'.$this->name;
 			$this->dbobj = $dbobj;
 		}
 
@@ -440,8 +425,6 @@
 		{
 			$obj->set_preinitialized();
 			$obj->set_form_box($this);
-			if($this->unique)
-				$obj->enable_unique();
 			$obj->init_value($this->dbobj());
 			if($obj->name())
 				$this->items[$obj->name()] =& $obj;
@@ -463,8 +446,6 @@
 			$obj->set_title($title);
 			$obj->set_name($field);
 			$obj->set_form_box($this);
-			if($this->unique)
-				$obj->enable_unique();
 			$obj->init_value($dbobj);
 
 			$this->items[$field] = $obj;
@@ -606,8 +587,6 @@
 			if(!isset($this->boxes[$id])) {
 				$this->boxes[$id] = new FormMLBox();
 				$this->boxes[$id]->set_name($id);
-				if($this->unique)
-					$this->boxes[$id]->enable_unique();
 				if($this->dbobj_tmp) {
 					$this->boxes[$id]->bind($this->dbobj_tmp);
 					$this->dbobj_tmp = null;
