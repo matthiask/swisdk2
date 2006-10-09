@@ -21,216 +21,9 @@
 	define('FORMRENDERER_VISIT_START', 1);
 	define('FORMRENDERER_VISIT_END', 2);
 
-	class Form implements Iterator {
-
-		/**
-		 * array of formboxes (always at least one)
-		 */
-		protected $boxes = array();
-
-		/**
-		 * main form title
-		 */
-		protected $title;
-
-		/**
-		 * form id. Should be unique for the whole page
-		 */
-		protected $form_id;
-
-		public function __construct($dbobj=null)
-		{
-			if($dbobj)
-				$this->bind($dbobj);
-		}
-
-		public function title() { return $this->title; }
-		public function set_title($title=null) { $this->title = $title; }
-
-		public function id()
-		{
-			if(!$this->form_id)
-				$this->generate_form_id();
-			return $this->form_id;
-		}
-
-		/**
-		 * generate an id for this form
-		 *
-		 * the id is used to track which form has been submitted if there
-		 * were multiple forms on one page. See also is_valid()
-		 */
-		public function generate_form_id()
-		{
-			$this->form_id = Form::to_form_id($this->dbobj());
-		}
-
-		/**
-		 * take a DBObject and return a form id
-		 */
-		public static function to_form_id($dbo, $id=0)
-		{
-			$id = $dbo->id();
-			return '__sf_'.$dbo->table().'_'.($id?$id:0);
-		}
-
-		/**
-		 * return the FormBox with the given ID (this ID has no further
-		 * meaning)
-		 *
-		 * This function should also be used to create FormBoxes (FormML
-		 * returns FormMLBox)
-		 */
-		public function box($id=0)
-		{
-			if(!$id && count($this->boxes))
-				return reset($this->boxes);
-
-			if(!isset($this->boxes[$id])) {
-				$this->boxes[$id] = new FormBox();
-				$this->boxes[$id]->set_name($id);
-				if($this->dbobj_tmp) {
-					$this->boxes[$id]->bind($this->dbobj_tmp);
-					$this->dbobj_tmp = null;
-				} else
-					if($obj = $this->dbobj())
-						$this->boxes[$id]->bind($obj);
-			}
-			return $this->boxes[$id];
-		}
-
-		/**
-		 * easy form usage:
-		 *
-		 * forward these calls to the default FormBox
-		 */
-		public function dbobj()
-		{
-			return $this->box()->dbobj();
-		}
-
-		protected $dbobj_tmp;
-
-		public function bind($dbobj)
-		{
-			if(!count($this->boxes))
-				$this->dbobj_tmp = $dbobj;
-			else
-				$this->box()->bind($dbobj);
-		}
-
-		/**
-		 * refresh all FormItem's values (read values from DBObject)
-		 */
-		public function refresh()
-		{
-			foreach($this->boxes as &$box)
-				$box->refresh();
-		}
-
-		public function add()
-		{
-			$args = func_get_args();
-			return call_user_func_array(array($this->box(), 'add'), $args);
-		}
-
-		public function add_auto()
-		{
-			$args = func_get_args();
-			return call_user_func_array(array($this->box(), 'add_auto'), $args);
-		}
-
-		public function add_rule()
-		{
-			$args = func_get_args();
-			return call_user_func_array(array($this->box(), 'add_rule'), $args);
-		}
-
-		public function rules()
-		{
-			return $this->box()->rules();
-		}
-
-		/**
-		 * search and return a FormItem
-		 */
-		public function item($name)
-		{
-			foreach($this->boxes as &$box)
-				if($item =& $box->item($name))
-					return $item;
-			return null;
-		}
-
-		/**
-		 * @return the Form html
-		 */
-		public function html($arg = 'TableFormRenderer')
-		{
-			$renderer = null;
-			if($arg instanceof FormRenderer)
-				$renderer = $arg;
-			else if(class_exists($arg))
-				$renderer = new $arg;
-			else
-				SwisdkError::handle(new FatalError(sprintf(
-					dgettext('swisdk', 'Invalid renderer specification: %s'), $arg)));
-			$this->accept($renderer);
-
-			return $renderer->html();
-		}
-
-		/**
-		 * accept the FormRenderer
-		 */
-		public function accept($renderer)
-		{
-			//
-			// this guard entry serves two purposes
-			// 1. When there are more than one form on one page, this entry
-			//    can be used to tell, which form was submitted.
-			// 2. The ID should be unique and not predictable. This is used
-			//    as a safeguard against CSRF attacks
-			//
-			$this->add(new HiddenInput('__guard_'.$this->id()))->set_value(guardToken());
-
-			$renderer->visit($this, FORMRENDERER_VISIT_START);
-			foreach($this->boxes as &$box)
-				$box->accept($renderer);
-			$renderer->visit($this, FORMRENDERER_VISIT_END);
-		}
-
-		/**
-		 * validate the form
-		 */
-		public function is_valid()
-		{
-			// has this form been submitted (or was it another form on the same page)
-			if(!isset($_POST['__guard_'.$this->id()]))
-				return false;
-			if($_POST['__guard_'.$this->id()]!=guardToken()) {
-				$this->box()->add_message(dgettext('swisdk', 'Could not validate form submission'));
-				return false;
-			}
-
-			$valid = true;
-			// loop over all FormBox es
-			foreach($this->boxes as &$box)
-				if(!$box->is_valid())
-					$valid = false;
-			return $valid;
-		}
-
-		/**
-		 * Iterator implementation (see PHP Object Iteration)
-		 */
-
-		public function rewind()	{ return reset($this->boxes); }
-		public function current()	{ return current($this->boxes); }
-		public function key()		{ return key($this->boxes); }
-		public function next()		{ return next($this->boxes); }
-		public function valid()		{ return $this->current() !== false; }
-	}
+	/**
+	 * scroll down for Form class definition
+	 */
 
 	/**
 	 * The FormBox is the basic grouping block of a Form
@@ -274,7 +67,7 @@
 		/**
 		 * FormBox Id
 		 */
-		protected $formbox_id;
+		protected $id;
 
 		/**
 		 * FormBox name
@@ -304,7 +97,7 @@
 		 */
 		public function bind($dbobj)
 		{
-			$this->formbox_id = Form::to_form_id($dbobj).'_box_'.$this->name;
+			$this->id = Form::to_form_id($dbobj).'_box_'.$this->name;
 			$this->dbobj = $dbobj;
 		}
 
@@ -318,7 +111,29 @@
 
 		public function id()
 		{
-			return $this->formbox_id;
+			return $this->id;
+		}
+
+		/**
+		 * return the FormBox with the given ID (this ID has no further
+		 * meaning)
+		 *
+		 * This function should also be used to create FormBoxes (FormML
+		 * returns FormMLBox)
+		 */
+		public function box($id=0)
+		{
+			if(!$id && count($this->boxrefs))
+				return reset($this->boxrefs);
+
+			if(!isset($this->boxrefs[$id])) {
+				$this->items[$id] = new FormBox();
+				$this->boxrefs[$id] =& $this->items[$id];
+				$this->boxrefs[$id]->set_name($id);
+				if($obj = $this->dbobj())
+					$this->boxrefs[$id]->bind($obj);
+			}
+			return $this->boxrefs[$id];
 		}
 
 		/**
@@ -572,35 +387,103 @@
 		public function offsetUnset($offset) { unset($this->items[$offset]); }
 	}
 
+	class Form extends FormBox {
+		public function id()
+		{
+			if(!$this->id)
+				$this->generate_form_id();
+			return $this->id;
+		}
+
+		/**
+		 * generate an id for this form
+		 *
+		 * the id is used to track which form has been submitted if there
+		 * were multiple forms on one page. See also is_valid()
+		 */
+		public function generate_form_id()
+		{
+			$this->id = Form::to_form_id($this->dbobj());
+		}
+
+		/**
+		 * take a DBObject and return a form id
+		 */
+		public static function to_form_id($dbo, $id=0)
+		{
+			$id = $dbo->id();
+			return '__sf_'.$dbo->table().'_'.($id?$id:0);
+		}
+
+		/**
+		 * search and return a FormItem
+		 */
+		public function item($name)
+		{
+			foreach($this->boxes as &$box)
+				if($item =& $box->item($name))
+					return $item;
+			return null;
+		}
+
+		/**
+		 * accept the FormRenderer
+		 */
+		public function accept($renderer)
+		{
+			//
+			// this guard entry serves two purposes
+			// 1. When there are more than one form on one page, this entry
+			//    can be used to tell, which form was submitted.
+			// 2. The ID should be unique and not predictable. This is used
+			//    as a safeguard against CSRF attacks
+			//
+			$this->add(new HiddenInput('__guard_'.$this->id()))->set_value(guardToken());
+
+			parent::accept($renderer);
+		}
+
+		/**
+		 * validate the form
+		 */
+		public function is_valid()
+		{
+			// has this form been submitted (or was it another form on the same page)
+			if(!isset($_POST['__guard_'.$this->id()]))
+				return false;
+			if($_POST['__guard_'.$this->id()]!=guardToken()) {
+				$this->box()->add_message(dgettext('swisdk', 'Could not validate form submission'));
+				return false;
+			}
+
+			return parent::is_valid();
+		}
+	}
+
 	/**
 	 * Multi-language forms are implemented by binding the parent DBObject and the
 	 * translation DBObject to two FormBoxes, which are both part of the main
 	 * Form
 	 */
 
-	class FormML extends Form {
-		public function box($id=null)
+	class FormMLBox extends FormBox {
+		public function box($id=0)
 		{
-			if(!$id && count($this->boxes))
-				return reset($this->boxes);
+			if(!$id && count($this->boxrefs))
+				return reset($this->boxrefs);
 
-			if(!isset($this->boxes[$id])) {
-				$this->boxes[$id] = new FormMLBox();
-				$this->boxes[$id]->set_name($id);
-				if($this->dbobj_tmp) {
-					$this->boxes[$id]->bind($this->dbobj_tmp);
-					$this->dbobj_tmp = null;
-				} else
-					if($obj = $this->dbobj())
-						$this->boxes[$id]->bind($obj);
+			if(!isset($this->boxrefs[$id])) {
+				$this->items[$id] = new FormBox();
+				$this->boxrefs[$id] =& $this->items[$id];
+				$this->boxrefs[$id]->set_name($id);
+				if($obj = $this->dbobj())
+					$this->boxrefs[$id]->bind($obj);
 			}
-			return $this->boxes[$id];
+			return $this->boxrefs[$id];
 		}
-
 	}
 
-	class FormMLBox extends FormBox {
-		// this is only a type marker for the FormBuilder
+	class FormML extends FormMLBox {
 	}
 
 	require_once MODULE_ROOT.'inc.form.items.php';
