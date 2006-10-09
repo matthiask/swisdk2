@@ -529,6 +529,9 @@ EOD;
 		}
 	}
 
+	class RadioButtons extends DropdownInput {
+	}
+
 	class ComboBox extends SelectionFormItem {
 		protected $attributes = array('style' => 'width:250px');
 	}

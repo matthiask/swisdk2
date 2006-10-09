@@ -373,6 +373,25 @@ EOD;
 			$this->_render($obj, $html);
 		}
 
+		protected function visit_RadioButtons($obj)
+		{
+			$this->_collect_javascript($obj);
+			$name = $obj->id();
+			$attribute_html = $obj->attribute_html();
+			$html = '<span class="sf-radiobuttons">';
+			$value = $obj->value();
+			$items = $obj->items();
+			foreach($items as $id => $title) {
+				$html .= '<span><input type="radio" id="'.$name.$id.'" name="'.$name.'"';
+				if((is_numeric($id) && $id===intval($value))
+						|| (!is_numeric($id) && $id==="$value"))
+					$html .= 'selected="selected" ';
+				$html .= 'value="'.$id.'"><label for="'.$name.$id.'">'.$title."</label></span>\n";
+			}
+			$html .= '</span>';
+			$this->_render($obj, $html);
+		}
+
 		protected function visit_Combobox($obj)
 		{
 			$this->_collect_javascript($obj);
