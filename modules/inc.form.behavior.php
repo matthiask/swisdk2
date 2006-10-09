@@ -18,12 +18,12 @@
 		public function __construct()
 		{
 			$this->args = func_get_args();
-			$this->setup();
 		}
 
 		public function set_form_item($item)
 		{
 			$this->item = $item;
+			$this->setup();
 		}
 
 		/**
@@ -68,10 +68,10 @@
 	class EnableOnValidBehavior extends FormItemBehavior {
 		protected function setup()
 		{
-			foreach($this->args as $item) {
-				if(!$item->is_valid())
+			if(!$this->item->is_valid()) {
+				foreach($this->args as $item)
 					$item->set_attributes(array('disabled' => 'disabled'));
-				$item->set_message(null);
+				$this->item->set_message(null);
 			}
 		}
 
