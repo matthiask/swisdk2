@@ -69,8 +69,8 @@
 		protected function validation_js_impl()
 		{
 			$id = $this->form->id();
-			$in1 = $this->field1->iname();
-			$in2 = $this->field2->iname();
+			$in1 = $this->field1->id();
+			$in2 = $this->field2->id();
 			static $sent = false;
 			if(!$sent) {
 				$sent = true;
@@ -123,7 +123,7 @@ EOD;
 		{
 			if(!list($rulefunc, $rulejs) = $this->validation_js_impl())
 				return null;
-			$name = $this->item->iname();
+			$name = $this->item->id();
 			$prefix = Swisdk::config_value('runtime.webroot.img', '/images');
 			$message = '<img style="position:relative;top:3px"'
 				.' "src="'.$prefix.'/icons/error.png" /> '.$this->message;
@@ -295,7 +295,7 @@ EOD;
 
 		protected function validation_js_impl($set_sent=true)
 		{
-			$name = $this->item->iname();
+			$name = $this->item->id();
 			$min = $this->min;
 			$max = $this->max;
 			$js = <<<EOD
@@ -328,7 +328,7 @@ EOD;
 
 		protected function validation_js_impl($set_sent=true)
 		{
-			$id = $this->item->iname();
+			$id = $this->item->id();
 			$empty_valid = '';
 			if($this->empty_valid)
 				$empty_valid = 'value==\'\' || ';

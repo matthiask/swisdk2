@@ -48,7 +48,7 @@
 	class GrabFocusBehavior extends FormItemBehavior {
 		public function javascript()
 		{
-			$name = $this->item->iname();
+			$name = $this->item->id();
 			return array('document.getElementById(\''.$name.'\').focus();', null);
 		}
 	}
@@ -78,10 +78,10 @@
 		public function javascript()
 		{
 			$id = uniqid();
-			$name = $this->item->iname();
+			$name = $this->item->id();
 			$elems = array();
 			foreach($this->args as $item)
-				$elems[] = $item->iname();
+				$elems[] = $item->id();
 			$elems = '\''.implode('\',\'', $elems).'\'';
 			$ruleobjs = $this->item->rules();
 			$rules = '';
@@ -117,8 +117,8 @@ EOD;
 		public function javascript()
 		{
 			$id = uniqid();
-			$n1 = $this->item->iname();
-			$n2 = $this->args[0]->iname();
+			$n1 = $this->item->id();
+			$n2 = $this->args[0]->id();
 			$method = $this->args[2];
 
 			$client = new Ajax_Client($this->args[1],

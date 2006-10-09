@@ -239,7 +239,7 @@ function validate_'.$id.'()
 		{
 			$this->_collect_javascript($obj);
 			$this->file_upload = true;
-			$name = $obj->iname();
+			$name = $obj->id();
 			$current = $obj->current_value();
 			$this->_render($obj, sprintf(
 				'%s<input type="%s" name="%s" id="%s" value="%s" %s />',
@@ -254,7 +254,7 @@ function validate_'.$id.'()
 		protected function visit_CheckboxInput($obj)
 		{
 			$this->_collect_javascript($obj);
-			$name = $obj->iname();
+			$name = $obj->id();
 			$this->_render($obj, sprintf(
 				'<input type="checkbox" name="%s" id="%s" %s value="1" />'
 				.'<input type="hidden" name="__check_'.$name
@@ -297,7 +297,7 @@ function formitem_tristate(elem)
 }
 //]]>
 </script>";
-			$name = $obj->iname();
+			$name = $obj->id();
 			$value = $obj->value();
 			$cb_html = '';
 			if($value=='mixed')
@@ -319,7 +319,7 @@ function formitem_tristate(elem)
 		protected function visit_Textarea($obj)
 		{
 			$this->_collect_javascript($obj);
-			$name = $obj->iname();
+			$name = $obj->id();
 			$this->_render($obj, sprintf(
 				'<textarea name="%s" id="%s" %s>%s</textarea>',
 				$name, $name, $obj->attribute_html(),
@@ -330,7 +330,7 @@ function formitem_tristate(elem)
 		{
 			$prefix = Swisdk::config_value('runtime.webroot.js', '/scripts');
 			$this->_collect_javascript($obj);
-			$name = $obj->iname();
+			$name = $obj->id();
 			$value = $obj->value();
 			$attributes = $obj->attribute_html();
 			$html = <<<EOD
@@ -357,7 +357,7 @@ EOD;
 		protected function visit_DropdownInput($obj)
 		{
 			$this->_collect_javascript($obj);
-			$name = $obj->iname();
+			$name = $obj->id();
 			$html = '<select name="'.$name.'" id="'.$name.'"'
 				.$obj->attribute_html().">\n";
 			$value = $obj->value();
@@ -376,7 +376,7 @@ EOD;
 		protected function visit_Combobox($obj)
 		{
 			$this->_collect_javascript($obj);
-			$name = $obj->iname();
+			$name = $obj->id();
 			$html = '<select name="'.$name.'" id="'.$name.'"'
 				.$obj->attribute_html().">\n";
 			$value = $obj->value();
@@ -411,7 +411,7 @@ EOD;
 		protected function visit_Multiselect($obj)
 		{
 			$this->_collect_javascript($obj);
-			$name = $obj->iname();
+			$name = $obj->id();
 			$html = '<select name="'.$name.'[]" id="'.$name
 				.'" multiple="multiple"'.$obj->attribute_html().">\n";
 			$value = $obj->value();
@@ -434,7 +434,7 @@ EOD;
 			$html = array();
 			$second = $obj->second();
 			foreach($second as $k => $v) {
-				$name = $obj->iname()."[$k]";
+				$name = $obj->id()."[$k]";
 				$html[] = sprintf(
 					'<label for="%s">%s</label>: '
 					.$this->threeway_helper_choice($obj,
@@ -474,7 +474,7 @@ EOD;
 EOD;
 			}
 
-			$name = $obj->iname();
+			$name = $obj->id();
 			$span_name = $name.'_span';
 			$trigger_name = $name.'_trigger';
 			$value = intval($obj->value());
@@ -524,7 +524,7 @@ EOD;
 
 		protected function _title_html($obj)
 		{
-			return '<label for="'.$obj->iname().'">'.$obj->title().'</label>';
+			return '<label for="'.$obj->id().'">'.$obj->title().'</label>';
 		}
 
 		protected function _message_html($obj)
@@ -549,7 +549,7 @@ EOD;
 
 		protected function _simpleinput_html($obj)
 		{
-			$name = $obj->iname();
+			$name = $obj->id();
 			return sprintf(
 				'<input type="%s" name="%s" id="%s" value="%s" %s />',
 				$obj->type(), $name, $name, $obj->value(),
