@@ -273,7 +273,9 @@
 		{
 			if(!$this->dirty)
 				return true;
-			if(isset($this->data[$this->primary]) && $this->data[$this->primary])
+			if(isset($this->data[$this->primary])
+					&& $this->data[$this->primary]
+					&& $this->data[$this->primary]>0)
 				return $this->update();
 			else
 				return $this->insert();
