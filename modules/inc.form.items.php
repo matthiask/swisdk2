@@ -627,13 +627,20 @@ EOD;
 
 		public function popup_url()
 		{
-			return sprintf('/picker?element=%s&class=%s',
-				$this->iname(), $this->picker_class);
+			return sprintf('/picker?element=%s&class=%s&%s',
+				$this->iname(), $this->picker_class,
+				http_build_query(array('params' => $this->params)));
 		}
 
 		public function behavior_functions()
 		{
 			return $this->funcs;
+		}
+
+		public function add_params($params)
+		{
+			$this->params = array_merge_recursive($this->params, $params);
+			return $this;
 		}
 
 		public function javascript()
@@ -656,6 +663,7 @@ EOD;
 
 		protected $picker_class;
 		protected $funcs;
+		protected $params = array();
 	}
 
 ?>
