@@ -34,6 +34,8 @@
 				'_smarty_swisdk_runtime_value');
 			$this->smarty->register_block('block', '_smarty_swisdk_process_block');
 			$this->smarty->register_function('extends', '_smarty_swisdk_extends');
+			$this->smarty->register_block('ifblock', '_smarty_swisdk_if_block');
+			$this->smarty->register_block('ifnotblock', '_smarty_swisdk_if_not_block');
 			$this->smarty->assign_by_ref('_swisdk_smarty_instance', $this);
 			error_reporting($er);
 
@@ -156,6 +158,24 @@
 			$ss->_derived = Swisdk::template($params['template']);
 		else
 			$ss->_derived = $params['file'];
+	}
+
+	function _smarty_swisdk_if_block($params, $content, &$smarty, &$repeat)
+	{
+		$name = $params['name'];
+		$ss = $smarty->get_template_vars('_swisdk_smarty_instance');
+		if(isset($ss->_blocks[$name]) && $ss->_blocks[$name])
+			return $content;
+		return null;
+	}
+
+	function _smarty_swisdk_if_not_block($params, $content, &$smarty, &$repeat)
+	{
+		$name = $params['name'];
+		$ss = $smarty->get_template_vars('_swisdk_smarty_instance');
+		if(isset($ss->_blocks[$name]) && $ss->_blocks[$name])
+			return null;
+		return $content;
 	}
 
 	class SmartyMaster {
