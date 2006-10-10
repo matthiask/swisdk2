@@ -287,8 +287,8 @@
 		 */
 		public function update()
 		{
-			$this->listener_call('store');
 			$this->auto_update_fields();
+			$this->listener_call('pre-store');
 
 			$dbh = DBObject::db($this->db_connection_id);
 			$vals = array();
@@ -311,6 +311,7 @@
 				DBObject::db_rollback($this->db_connection_id);
 				return false;
 			}
+			$this->listener_call('store');
 			DBObject::db_commit($this->db_connection_id);
 			$this->dirty = false;
 			return true;
@@ -321,8 +322,8 @@
 		 */
 		public function insert($force_primary = false)
 		{
-			$this->listener_call('store');
 			$this->auto_update_fields(true);
+			$this->listener_call('pre-store');
 
 			$dbh = DBObject::db($this->db_connection_id);
 			$keys = array();
@@ -351,6 +352,7 @@
 				DBObject::db_rollback($this->db_connection_id);
 				return false;
 			}
+			$this->listener_call('store');
 			DBObject::db_commit($this->db_connection_id);
 			$this->dirty = false;
 			return true;
@@ -500,7 +502,7 @@
 		 */
 		public function delete()
 		{
-			$this->listener_call('delete');
+			$this->listener_call('pre-delete');
 			if(!$this->id())
 				return true;
 			DBObject::db_start_transaction($this->db_connection_id);
@@ -536,6 +538,7 @@
 					@unlink(DATA_ROOT.'upload/'.$this->data[$field]);
 			}
 
+			$this->listener_call('delete');
 			DBObject::db_commit($this->db_connection_id);
 			return $ret;
 		}
