@@ -189,6 +189,10 @@
 			$clauses[':order'] = $order;
 		if(isset($params['limit']) && $limit = $params['limit'])
 			$clauses[':limit'] = $limit;
+		if(isset($params['cut_off_future']) && $cof = $params['cut_off_future'])
+			$clauses[$cof.'<'] = time();
+		if(isset($params['cut_off_past']) && $cop = $params['cut_off_past'])
+			$clauses[$cop.'<'] = time();
 
 		$class = $params['class'];
 		$name = $params['name'];
