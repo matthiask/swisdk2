@@ -83,6 +83,19 @@
 	}
 
 	/**
+	 * generates a css class from a string (request uri, controller uri
+	 * or whatever)
+	 */
+	function cssClassify($string)
+	{
+		$res = str_replace(' ', '-', trim(preg_replace(
+			'/[^A-Za-z]+/', ' ', $string)));
+		if($res)
+			return $res;
+		return 'root';
+	}
+
+	/**
 	* Generates a string of random numbers and characters.
 	*/
 	function randomKeys($length)
