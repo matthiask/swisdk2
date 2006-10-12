@@ -26,7 +26,7 @@
 	class ControllerDispatcher extends ControllerDispatcherModule {
 		public function collect_informations()
 		{
-			$tokens = explode('/', substr( $this->input(), 1 ) );
+			$tokens = explode('/', trim($this->input(), '/').'/');
 			$t = $tokens;
 			$matches = array();
 
