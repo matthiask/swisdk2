@@ -328,7 +328,7 @@ function formitem_tristate(elem)
 
 		protected function visit_RichTextarea($obj)
 		{
-			$prefix = Swisdk::config_value('runtime.webroot.js', '/scripts');
+			$prefix = Swisdk::config_value('runtime.webroot.js', '/js');
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
 			$value = $obj->value();
@@ -478,7 +478,7 @@ EOD;
 
 		protected function visit_DateInput($obj)
 		{
-			$prefix = Swisdk::config_value('runtime.webroot.js', '/scripts');
+			$prefix = Swisdk::config_value('runtime.webroot.js', '/js');
 			$this->_collect_javascript($obj);
 			$html = '';
 			static $js_sent = false;
@@ -529,7 +529,7 @@ EOD;
 
 		protected function visit_PickerBase($obj)
 		{
-			$prefix = Swisdk::config_value('runtime.webroot.img', '/images');
+			$prefix = Swisdk::config_value('runtime.webroot.img', '/img');
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
 			$value = $obj->value();
@@ -587,7 +587,7 @@ EOD;
 		{
 			$msg = $obj->message();
 			$name = $obj->id();
-			$prefix = Swisdk::config_value('runtime.webroot.img', '/images');
+			$prefix = Swisdk::config_value('runtime.webroot.img', '/img');
 			return '<div id="'.$name.'_msg" style="clear:both;color:red">'
 				.($msg?
 				'<img style="position:relative;top:4px" src="'.$prefix.'/icons/error.png" alt="error" />'
@@ -597,7 +597,7 @@ EOD;
 		protected function _info_html($obj)
 		{
 			$msg = $obj->info();
-			$prefix = Swisdk::config_value('runtime.webroot.img', '/images');
+			$prefix = Swisdk::config_value('runtime.webroot.img', '/img');
 			return $msg?'<div style="float:left;clear:both;font-size:80%">'
 				.'<img style="position:relative;top:4px;" src="'.$prefix.'/icons/information.png" alt="info" /> '
 				.$msg."</div>\n":'';
