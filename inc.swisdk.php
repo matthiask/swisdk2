@@ -243,7 +243,9 @@
 		public static function template($key)
 		{
 			$key = strtolower($key);
-			$tmpl = Swisdk::website_config_value('template.'.$key);
+			if(strpos($key, '.template.')===false)
+				$key = 'template.'.$key;
+			$tmpl = Swisdk::website_config_value($key);
 			if(!$tmpl)
 				SwisdkError::handle(new FatalError(
 					dgettext('swisdk', 'Invalid template key: ').$key));
