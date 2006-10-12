@@ -35,8 +35,8 @@
 			$this->smarty->register_block('block', '_smarty_swisdk_process_block');
 			$this->smarty->register_function('extends', '_smarty_swisdk_extends');
 			$this->smarty->register_function('db_assign', '_smarty_swisdk_db_assign');
-			$this->smarty->register_block('ifblock', '_smarty_swisdk_if_block');
-			$this->smarty->register_block('ifnotblock', '_smarty_swisdk_if_not_block');
+			$this->smarty->register_block('if_block', '_smarty_swisdk_if_block');
+			$this->smarty->register_block('if_not_block', '_smarty_swisdk_if_not_block');
 			$this->smarty->assign_by_ref('_swisdk_smarty_instance', $this);
 			error_reporting($er);
 
