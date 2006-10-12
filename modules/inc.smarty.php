@@ -34,6 +34,7 @@
 				'_smarty_swisdk_runtime_value');
 			$this->smarty->register_block('block', '_smarty_swisdk_process_block');
 			$this->smarty->register_function('extends', '_smarty_swisdk_extends');
+			$this->smarty->register_function('db_assign', '_smarty_swisdk_db_assign');
 			$this->smarty->register_block('ifblock', '_smarty_swisdk_if_block');
 			$this->smarty->register_block('ifnotblock', '_smarty_swisdk_if_not_block');
 			$this->smarty->assign_by_ref('_swisdk_smarty_instance', $this);
@@ -176,6 +177,23 @@
 		if(isset($ss->_blocks[$name]) && $ss->_blocks[$name])
 			return null;
 		return $content;
+	}
+
+	/**
+	 * {db_assign name="articles" class="Article" order="article_start_dttm" limit="10"}
+	 */
+	function _smarty_swisdk_db_assign($params, &$smarty)
+	{
+		$clauses = array();
+		if(isset($params['order']) && $order = $params['order'])
+			$clauses[':order'] = $order;
+		if(isset($params['limit']) && $limit = $params['limit'])
+			$clauses[':limit'] = $limit;
+
+		$class = $params['class'];
+		$name = $params['name'];
+		$smarty->assign($params['name'], DBOContainer::find($params['class'],
+			$clauses));
 	}
 
 	class SmartyMaster {
