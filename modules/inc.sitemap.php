@@ -103,7 +103,7 @@
 				if(!isset($page['url']))
 					$page['url'] = $prefix.$id;
 				if(!isset($page['title']))
-					$page['title'] = ucwords(preg_replace('/[ _]+/', ' ', $id));
+					$page['title'] = utf8_ucwords(preg_replace('/[ _]+/', ' ', $id));
 				if(isset($page['pages']))
 					SwisdkSitemap::loop_pages($page, $prefix.$id.'/');
 				$page['parent_title'] = $pages['title'];

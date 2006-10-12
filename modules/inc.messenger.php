@@ -57,16 +57,19 @@
 
 		protected function send_mail($to, $sub, $msg)
 		{
-			mail($to, $sub, $msg,
-				implode("\r\n", array(
+			$headers = implode("\r\n", array(
 					'From: Messenger <messenger@'
 						.Swisdk::config_value('runtime.request.host').'>',
 					'Cc: ',
 					'Bcc: '.Swisdk::config_value('core.admin_email'),
 					'Reply-To: '.Swisdk::config_value('core.admin_email'),
 					'X-Mailer: SWISDK 2.0 http://spinlock.ch/projects/swisdk/'
-				))
-			);
+				));
+			if(function_exists('mb_language') && function_exists('mb_send_mail')) {
+				mb_language('uni');
+				mb_send_mail($to, $sub, $msg, $headers);
+			} else
+				mail($to, $sub, $msg, $headers);
 
 		}
 
