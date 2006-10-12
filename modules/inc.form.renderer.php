@@ -343,7 +343,7 @@ function load_editor_$name(){
 var oFCKeditor = new FCKeditor('$name');
 oFCKeditor.BasePath = '$prefix/fckeditor/';
 oFCKeditor.Height = 450;
-oFCKeditor.Width = 750;
+oFCKeditor.Width = 550;
 oFCKeditor.ReplaceTextarea();
 }
 add_event(window,'load',load_editor_$name);
