@@ -387,16 +387,17 @@ EOD;
 
 		protected function form_javascript()
 		{
-			$id = $this->form->id();
+			$form_id = $this->form->id();
+			$box_id = $form_id.'search_';
 			$p = $this->form->dbobj()->_prefix();
 			list($first, $count, $last) = $this->list_position();
 			return <<<EOD
 <script type="text/javascript">
 //<![CDATA[
 function order(col) {
-	var form = document.getElementById('$id');
-	var order = form.{$p}order;
-	var dir = form.{$p}dir;
+	var form = document.getElementById('$form_id');
+	var order = form.$box_id{$p}order;
+	var dir = form.$box_id{$p}dir;
 	if(order.value==col) {
 		dir.value=(dir.value=='DESC'?'ASC':'DESC');
 	} else {
@@ -407,14 +408,14 @@ function order(col) {
 }
 function skim(step)
 {
-	var form = document.getElementById('$id');
-	var start = form.{$p}start;
+	var form = document.getElementById('$form_id');
+	var start = form.$box_id{$p}start;
 	var sv = parseInt(start.value);
 	if(isNaN(sv))
 		sv = 0;
 	start.value=sv+step;
 	start.value = Math.min(Math.max(start.value,0),
-		$count-($count%parseInt(form.{$p}limit.value)));
+		$count-($count%parseInt(form.$box_id{$p}limit.value)));
 	form.submit();
 }
 //]]>
