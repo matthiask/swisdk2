@@ -22,7 +22,7 @@
 				$regex = str_replace('/', '\/',
 					Swisdk::config_value('website.'.$w.'.match'));
 				if(!$regex)
-					$regex = '\/'.$w.'\/';
+					$regex = '\/'.$w.'(\/|$)';
 				if(preg_match('/^'.$regex.'/', $input)) {
 					$website = $w;
 					break;
