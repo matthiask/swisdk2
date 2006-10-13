@@ -180,5 +180,29 @@
 		exit();
 	}
 
+	/**
+	 * convert a timespan in seconds to a textual representation
+	 */
+	function stringifyTimespan($seconds, $future=false)
+	{
+		static $timespans = null;
+
+		$template = dgettext('swisdk', '%s ago');
+		if($future)
+			$template = dgettext('swisdk', 'in %s');
+
+		if(!$timespans)
+			$timespans = array_combine(
+				explode(',',
+					dgettext('swisdk', 'years,months,weeks,days,hours,min,sec')),
+				array(86400*365, 86400*365/12, 86400*7, 86400, 3600, 60, 1));
+
+		foreach($timespans as $type => $span)
+			if($seconds>2*$span)
+				return sprintf($template,
+					intval($seconds/$span).' '.$type);
+
+		return 'right now';
+	}
 
 ?>
