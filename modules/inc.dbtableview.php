@@ -374,7 +374,7 @@ EOD;
 
 		public function html()
 		{
-			$this->set_data($this->obj->data());
+			$this->set_data($this->obj);
 			$this->prepend_column(new IDTableViewColumn(
 				$this->dbobj()->dbobj()->primary()));
 			$renderer = new TableViewFormRenderer();
