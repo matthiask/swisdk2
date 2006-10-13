@@ -383,8 +383,8 @@
 			
 		protected function filter_slug()
 		{
-			if(isset($this->request['slug'])
-					&& $slug_field = $this->find_config_value('slug', '#')) {
+			if(isset($this->request['slug']) && $slug_field =
+					$this->find_config_value('slug_field', '#')) {
 				if($slug_field=='#')
 					$slug_field = $this->dbobj->dbobj()->name('name');
 				$this->dbobj->add_clause($slug_field.'=',
