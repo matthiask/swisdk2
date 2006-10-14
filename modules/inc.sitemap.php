@@ -80,6 +80,7 @@
 				// parent references where applicable
 
 				if(!isset($_swisdk2_sitemap['processed'])) {
+					require_once UTF8.'/ucwords.php';
 					foreach($_swisdk2_sitemap as &$site) {
 						foreach($site as $language => &$page) {
 							SwisdkSitemap::loop_pages($page,
