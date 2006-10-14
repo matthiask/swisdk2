@@ -122,13 +122,13 @@
 				return false;
 
 			if($this->init_index!==null) {
-				while($row = $res->fetch()) {
+				while($row = $res->fetch_assoc()) {
 					$obj = clone $this->obj;
 					$obj->set_data($row);
 					$this->data[$obj->{$this->init_index}] = $obj;
 				}
 			} else {
-				while($row = $res->fetch()) {
+				while($row = $res->fetch_assoc()) {
 					$obj = clone $this->obj;
 					$obj->set_data($row);
 					$this->data[$obj->id()] = $obj;
@@ -206,8 +206,7 @@
 				$rel = $relations[$clause];
 				$this->add_join($clause);
 				$this->clause_sql .= $binding.' '.$rel['foreign'].'='
-					.DBObject::db_escape($data,
-						$this->obj->db_connection());
+					.DBObject::db_escape($data, $this->obj->db_connection());
 				return;
 			}
 

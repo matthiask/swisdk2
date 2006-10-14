@@ -85,7 +85,8 @@
 		public function dirty()		{ return $this->dirty; }
 
 		/**
-		 * main DB handle (holds the PDO instances)
+		 * main DB handle (holds the mysqli instance in the current version
+		 * of DBObject)
 		 */
 		protected static $dbhandle = null;
 
@@ -297,8 +298,8 @@
 				if($field==$this->primary)
 					continue;
 				if(isset($this->data[$field]))
-					$vals[] = $field.'='
-						.$dbh->quote($this->data[$field]);
+					$vals[] = $field.'=\''
+						.$dbh->escape_string($this->data[$field]).'\'';
 			}
 			$vals_sql = implode(',', $vals);
 
@@ -334,13 +335,17 @@
 					continue;
 				if(isset($this->data[$field])) {
 					$keys[] = $field;
-					$vals[] = $dbh->quote($this->data[$field]);
+					$vals[] = '\''.$dbh->escape_string($this->data[$field])
+						.'\'';
 				}
 			}
 			$vals_sql = '('.implode(',', $keys).') VALUES ('.implode(',', $vals).')';
 
 			DBObject::db_start_transaction($this->db_connection_id);
-			$res = DBObject::db_query('INSERT INTO ' . $this->table . $vals_sql,
+			if(!$force_primary)
+				$this->unset_primary();
+			$res = DBObject::db_query('INSERT INTO ' . $this->table
+				. $vals_sql,
 				$this->db_connection_id);
 			if($res===false) {
 				DBObject::db_rollback($this->db_connection_id);
@@ -833,25 +838,18 @@
 		{
 			if(!isset(DBObject::$dbhandle[$connection_id])) {
 				$prefix = 'db'.($connection_id=='db'?'':'.'.$connection_id);
-				$driver = Swisdk::config_value($prefix.'.driver');
-				if($driver=='sqlite') {
-					DBObject::$dbhandle[$connection_id] = new PDO('sqlite:'
-						.Swisdk::config_value($prefix.'.dbfile'));
-				} else if($driver=='mysql') {
-					$dbname = Swisdk::config_value($prefix.'.dbname');
-					// backward compatibility:
-					if(!$dbname)
-						$dbname = Swisdk::config_value($prefix.'.database');
-					DBObject::$dbhandle[$connection_id] = new PDO(
-						sprintf('mysql:host=%s;dbname=%s',
-							Swisdk::config_value($prefix.'.host'),
-							$dbname),
-						Swisdk::config_value($prefix.'.username'),
-						Swisdk::config_value($prefix.'.password'));
-				}
-				if(Swisdk::config_value('error.debug_mode'))
-					DBObject::$dbhandle[$connection_id]->setAttribute(
-					PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+				$dbname = Swisdk::config_value($prefix.'.dbname');
+				if(!$dbname)
+					$dbname = Swisdk::config_value($prefix.'.database');
+				DBObject::$dbhandle[$connection_id] = new mysqli(
+					Swisdk::config_value($prefix.'.host'),
+					Swisdk::config_value($prefix.'.username'),
+					Swisdk::config_value($prefix.'.password'),
+					$dbname);
+				if(mysqli_connect_errno())
+					SwisdkError::handle(new DBError('Connect failed: '
+						.mysqli_connect_error()));
+				DBObject::$dbhandle[$connection_id]->query('SET NAMES \'UTF-8\'');
 			}
 
 			return DBObject::$dbhandle[$connection_id];
@@ -859,7 +857,7 @@
 
 		public function db_driver()
 		{
-			return DBObject::db($this->db_connection_id)->getAttribute(PDO::ATTR_DRIVER_NAME);
+			return 'mysql';
 		}
 
 		/**
@@ -878,17 +876,15 @@
 			$dbh = DBObject::db($connection_id);
 			$result = $dbh->query($sql);
 			DBObject::$error_obj = null;
-			if($result===false) {
+			if($dbh->errno) {
 				$error = new DBError(sprintf(dgettext('swisdk', 'Database error: %s'),
-					implode(', ', $dbh->errorInfo())), $sql);
+					$dbh->error), $sql);
 				if(DBObject::$handle_error)
 					SwisdkError::handle($error);
 				else
 					DBObject::$error_obj = $error;
 				return false;
 			}
-			if($result instanceof PDOStatement)
-				$result->setFetchMode(PDO::FETCH_ASSOC);
 			return $result;
 		}
 
@@ -910,7 +906,7 @@
 			$res = DBObject::db_query($sql, $connection_id);
 			if($res===false)
 				return $res;
-			return $res->fetch();
+			return $res->fetch_assoc();
 		}
 
 		/**
@@ -938,14 +934,14 @@
 			if($result_key) {
 				if(is_array($result_key) && (($key = $result_key[0])
 						&& ($val = $result_key[1]))) {
-					while($row = $res->fetch())
+					while($row = $res->fetch_assoc())
 						$array[$row[$key]] = $row[$val];
 				} else {
-					while($row = $res->fetch())
+					while($row = $res->fetch_assoc())
 						$array[$row[$result_key]] = $row;
 				}
 			} else {
-				while($row = $res->fetch())
+				while($row = $res->fetch_assoc())
 					$array[] = $row;
 			}
 			return $array;
@@ -962,7 +958,7 @@
 		public static function db_escape($str,
 			$connection_id = DB_CONNECTION_DEFAULT)
 		{
-			return DBObject::db($connection_id)->quote($str);
+			return '\''.DBObject::db($connection_id)->escape_string($str).'\'';
 		}
 
 		/**
@@ -971,7 +967,8 @@
 		public static function db_escape_ref($key, &$str,
 			$connection_id = DB_CONNECTION_DEFAULT)
 		{
-			$str = DBObject::db($connection_id)->quote($str);
+			$str = DBObject::db($connection_id)->escape_string($str);
+			$str = '\''.$str.'\'';
 		}
 
 		/**
@@ -979,7 +976,7 @@
 		*/
 		public static function db_insert_id($connection_id = DB_CONNECTION_DEFAULT)
 		{
-			return DBObject::db($connection_id)->lastInsertId();
+			return DBObject::db($connection_id)->insert_id;
 		}
 
 		/**
@@ -991,7 +988,7 @@
 		public static function db_start_transaction($connection_id = DB_CONNECTION_DEFAULT)
 		{
 			if(DBObject::$in_transaction[$connection_id]==0)
-				DBObject::db($connection_id)->beginTransaction();
+				DBObject::db($connection_id)->autocommit(false);
 			DBObject::$in_transaction[$connection_id]++;
 		}
 
@@ -1001,6 +998,7 @@
 			if(DBObject::$in_transaction[$connection_id]<=0) {
 				$dbh = DBObject::db($connection_id);
 				$dbh->commit();
+				$dbh->autocommit(true);
 				DBObject::$in_transaction[$connection_id] = 0;
 			}
 		}
@@ -1010,7 +1008,8 @@
 			DBObject::$in_transaction[$connection_id]--;
 			if(DBObject::$in_transaction[$connection_id]<=0) {
 				$dbh = DBObject::db($connection_id);
-				$dbh->rollBack();
+				$dbh->rollback();
+				$dbh->autocommit(true);
 				DBObject::$in_transaction[$connection_id] = 0;
 			}
 		}
