@@ -104,9 +104,17 @@
 				$class = " class=\"$class\"";
 			$html = "<tr{$class}>\n";
 			foreach($this->columns as &$col)
-				$html .= '<td>'.$col->html($row)."</td>\n";
+				$html .= $this->render_cell($col, $row);
 			$html .= "</tr>\n";
 			return $html;
+		}
+
+		protected function render_cell(&$column, &$data)
+		{
+			$class = $column->css_class();
+			if($class)
+				$class = ' class="'.$class.'"';
+			return '<td'.$class.'>'.$column->html($data)."</td>\n";
 		}
 
 		protected function render_foot()
@@ -156,6 +164,13 @@
 		{
 			$this->title = dgettext('swisdk', $t);
 		}
+		
+		public function css_class()
+		{
+			if(!$this->css_class)
+				$this->css_class = 's-'.str_replace('_', '-', $this->column);
+			return $this->css_class;
+		}
 
 		public function set_tableview(&$tableview)
 		{
@@ -166,6 +181,7 @@
 		protected $title;
 		protected $args;
 		protected $tableview;
+		protected $css_class = null;
 	}
 
 	/**
