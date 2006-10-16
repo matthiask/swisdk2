@@ -223,7 +223,7 @@
 		public function is_valid()
 		{
 			if($this->valid!==null)
-				return $this->is_valid();
+				return $this->valid;
 
 			$this->valid = true;
 			foreach($this->rules as &$rule)
