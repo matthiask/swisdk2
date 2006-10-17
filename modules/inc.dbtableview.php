@@ -280,10 +280,13 @@
 				'</a>',
 				'<a href="javascript:skim('.$this->items_on_page.')">',
 				'</a>');
-			return "<tfoot>\n<tr>\n<td colspan=\"".$colcount.'">'
+			$html = "<tfoot>\n<tr>\n<td colspan=\"".$colcount.'">'
 				.($this->multi_enabled?$this->multi_foot():'')
 				.$str.' | '.$skim
-				."</td>\n</tr>\n</tfoot>\n</table>".<<<EOD
+				."</td>\n</tr>\n</tfoot>\n</table>";
+			if(!$this->multi_enabled)
+				return $html;
+			return $html.<<<EOD
 <script type="text/javascript">
 //<![CDATA[
 function init_tableview()
