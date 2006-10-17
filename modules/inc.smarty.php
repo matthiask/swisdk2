@@ -86,6 +86,16 @@
 			return $ret;
 		}
 
+		public function display_template($key)
+		{
+			echo $this->fetch_template($key);
+		}
+
+		public function fetch_template($key)
+		{
+			return $this->fetch(Swisdk::template($key));
+		}
+
 		public function block_content($block)
 		{
 			return $this->_blocks[$block];
