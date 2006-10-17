@@ -14,6 +14,7 @@
 		if(strpos($url, "\n")===false) {
 			session_write_close();
 			header('Location: '.$url);
+			exit();
 		} else
 			SwisdkError::handle(new FatalError(sprintf(
 				dgettext('swisdk', 'Invalid location specification: %s'), $url)));
