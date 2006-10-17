@@ -130,6 +130,11 @@
 		protected $items_on_page = 10;
 
 		/**
+		 * is selecting and acting on more than one row at a time enabled?
+		 */
+		protected $multi_enabled = true;
+
+		/**
 		 * @param obj: DBOContainer instance, DBObject instance or class
 		 * @param form: Form instance or class
 		 */
@@ -139,6 +144,16 @@
 				$this->bind($obj);
 			if($form)
 				$this->set_form($form);
+		}
+
+		public function multi_enabled()
+		{
+			return $this->multi_enabled;
+		}
+
+		public function set_multi_enabled($enabled)
+		{
+			$this->multi_enabled = $enabled;
 		}
 
 		public function bind($obj)
@@ -266,7 +281,7 @@
 				'<a href="javascript:skim('.$this->items_on_page.')">',
 				'</a>');
 			return "<tfoot>\n<tr>\n<td colspan=\"".$colcount.'">'
-				.$this->multi_foot()
+				.($this->multi_enabled?$this->multi_foot():'')
 				.$str.' | '.$skim
 				."</td>\n</tr>\n</tfoot>\n</table>".<<<EOD
 <script type="text/javascript">
@@ -375,8 +390,9 @@ EOD;
 		public function html()
 		{
 			$this->set_data($this->obj);
-			$this->prepend_column(new IDTableViewColumn(
-				$this->dbobj()->dbobj()->primary()));
+			if($this->multi_enabled)
+				$this->prepend_column(new IDTableViewColumn(
+					$this->dbobj()->dbobj()->primary()));
 			$renderer = new TableViewFormRenderer();
 			$this->form->accept($renderer);
 			return $renderer->html_start()
