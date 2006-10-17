@@ -189,9 +189,9 @@
 				->set_title('Password');
 			$form->add(new SubmitButton());
 
-			$sm = SmartyMaster::instance();
-			$sm->add_html_fragment('content', $form->html());
-			$sm->display();
+			$smarty = new SwisdkSmarty();
+			$smarty->assign('content', $form->html());
+			$smarty->display(Swisdk::template('swisdk.login'));
 			exit();
 		}
 
