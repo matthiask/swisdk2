@@ -498,7 +498,8 @@
 			$cancel = dgettext('swisdk', 'Cancel');
 
 			$this->html = <<<EOD
-<form method="post" action="?delete_confirmation_page=1" class="sf-form" accept-charset="utf-8">
+<form method="post" action="{$this->module_url}/_delete/$id" class="sf-form" accept-charset="utf-8">
+<input type="hidden" name="delete_confirmation_page" value="1" />
 <input type="hidden" name="guard" value="$token" />
 <table>
 <tr class="sf-form-title">
