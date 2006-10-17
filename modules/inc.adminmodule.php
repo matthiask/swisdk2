@@ -80,9 +80,7 @@
 			Swisdk::set_config_value('runtime.navigation.url',
 				Swisdk::config_value('runtime.controller.url'));
 
-			$sm = SmartyMaster::instance();
-			$sm->add_html_handler('content', $cmp);
-			$sm->display();
+			$cmp->display();
 		}
 
 		public function dbo_class()
@@ -116,6 +114,9 @@
 		protected $args;
 		protected $multilanguage;
 
+		protected $template;
+		protected $smarty;
+
 		/**
 		 * resulting HTML code
 		 */
@@ -124,6 +125,17 @@
 		public function html()
 		{
 			return $this->html;
+		}
+
+		public function display()
+		{
+			$this->smarty->assign('content', $this->html);
+			$this->smarty->display($this->template);
+		}
+
+		public function init()
+		{
+			$this->smarty = new SwisdkSmarty();
 		}
 
 		/**
@@ -136,6 +148,7 @@
 			$this->dbo_class = $module->dbo_class();
 			$this->args = $module->component_arguments();
 			$this->multilanguage = $module->multilanguage();
+			$this->init();
 		}
 
 		/**
@@ -207,6 +220,13 @@
 		protected $obj;
 		protected $multiple = false;
 		protected $editmode = true;
+
+		public function init()
+		{
+			parent::init();
+			if(!$this->template)
+				$this->template = Swisdk::template($this->dbo_class.'.edit');
+		}
 
 		public function run()
 		{
@@ -365,6 +385,13 @@
 		protected $tableview;
 		protected $creation_enabled = true;
 
+		public function init()
+		{
+			parent::init();
+			if(!$this->template)
+				$this->template = Swisdk::template($this->dbo_class.'.list');
+		}
+
 		public function get_dbobj()
 		{
 			if($this->multilanguage)
@@ -415,6 +442,13 @@
 	}
 
 	class AdminComponent_delete extends AdminComponent {
+		public function init()
+		{
+			parent::init();
+			if(!$this->template)
+				$this->template = Swisdk::template($this->dbo_class.'.delete');
+		}
+
 		public function run()
 		{
 			if($this->args[0]=='multiple')
