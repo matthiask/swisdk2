@@ -40,19 +40,27 @@
 			$args = Swisdk::config_value('runtime.arguments');
 			$cmp = null;
 
+			$cmd = '';
+			$template_keys = array('base.full');
+
 			if(isset($args[0]) && $args[0]) {
 				$cmp_class = 'AdminComponent_'.$this->dbo_class.$args[0];
-				if(class_exists($cmp_class))
+				if(class_exists($cmp_class)) {
 					$cmp = new $cmp_class;
-				else if($args[0]=='_new' && class_exists($cmp_class =
+					$cmd = substr($args[0], 1);
+				} else if($args[0]=='_new' && class_exists($cmp_class =
 						'AdminComponent_'.$this->dbo_class
-						.'_edit'))
+						.'_edit')) {
 					$cmp = new $cmp_class;
-				else if(class_exists($cmp_class = 'AdminComponent'
-						.$args[0]))
+					$cmd = 'edit';
+				} else if(class_exists($cmp_class = 'AdminComponent'
+						.$args[0])) {
 					$cmp = new $cmp_class;
-				else if($args[0]=='_new')
+					$cmd = substr($args[0], 1);
+				} else if($args[0]=='_new') {
 					$cmp = new AdminComponent_edit();
+					$cmd = 'new';
+				}
 				array_shift($args);
 			}
 
@@ -64,9 +72,15 @@
 					$cmp = new $cmp_class;
 				else
 					$cmp = new AdminComponent_index();
+				$cmd = 'index';
 			}
 
 			$cmp->set_module($this);
+			$cmp->set_template_keys(array_reverse(array(
+				'base.full',
+				'swisdk.adminmodule.'.$cmd,
+				$this->dbo_class.'.index',
+				$this->dbo_class.'.'.$cmd)));
 
 			return $cmp;
 		}
@@ -114,7 +128,7 @@
 		protected $args;
 		protected $multilanguage;
 
-		protected $template;
+		protected $template_keys;
 		protected $smarty;
 
 		/**
@@ -130,12 +144,22 @@
 		public function display()
 		{
 			$this->smarty->assign('content', $this->html);
-			$this->smarty->display($this->template);
+			$this->smarty->display_template($this->template_keys);
 		}
 
 		public function init()
 		{
 			$this->smarty = new SwisdkSmarty();
+		}
+
+		public function template_keys()
+		{
+			return $this->template_keys;
+		}
+
+		public function set_template_keys($keys)
+		{
+			$this->template_keys = $keys;
 		}
 
 		/**
@@ -220,13 +244,6 @@
 		protected $obj;
 		protected $multiple = false;
 		protected $editmode = true;
-
-		public function init()
-		{
-			parent::init();
-			if(!$this->template)
-				$this->template = Swisdk::template($this->dbo_class.'.edit');
-		}
 
 		public function run()
 		{
@@ -385,13 +402,6 @@
 		protected $tableview;
 		protected $creation_enabled = true;
 
-		public function init()
-		{
-			parent::init();
-			if(!$this->template)
-				$this->template = Swisdk::template($this->dbo_class.'.list');
-		}
-
 		public function get_dbobj()
 		{
 			if($this->multilanguage)
@@ -442,13 +452,6 @@
 	}
 
 	class AdminComponent_delete extends AdminComponent {
-		public function init()
-		{
-			parent::init();
-			if(!$this->template)
-				$this->template = Swisdk::template($this->dbo_class.'.delete');
-		}
-
 		public function run()
 		{
 			if($this->args[0]=='multiple')
