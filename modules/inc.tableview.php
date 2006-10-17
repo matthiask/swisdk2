@@ -22,6 +22,11 @@
 		 */
 		protected $title;
 
+		/**
+		 * javascript fragments
+		 */
+		protected $javascript_fragments;
+
 		public function title()
 		{
 			return $this->title;
@@ -30,6 +35,24 @@
 		public function set_title($title)
 		{
 			$this->title = $title;
+		}
+
+		public function add_javascript($js)
+		{
+			$this->javascript_fragments .= $js;
+		}
+
+		public function javascript()
+		{
+			if($this->javascript_fragments)
+				return <<<EOD
+<script type="text/javascript">
+//<![CDATA[
+$this->javascript_fragments
+//]]>
+</script>
+
+EOD;
 		}
 
 		/**
@@ -55,7 +78,8 @@
 		{
 			return $this->render_head()
 				.$this->render_body()
-				.$this->render_foot();
+				.$this->render_foot()
+				.$this->javascript();
 		}
 
 		/**
