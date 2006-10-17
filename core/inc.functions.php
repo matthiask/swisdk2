@@ -184,13 +184,14 @@
 	/**
 	 * convert a timespan in seconds to a textual representation
 	 */
-	function stringifyTimespan($seconds, $future=false)
+	function stringifyTimespan($seconds)
 	{
 		static $timespans = null;
 
 		$template = dgettext('swisdk', '%s ago');
-		if($future)
+		if($seconds>0)
 			$template = dgettext('swisdk', 'in %s');
+		$seconds = abs($seconds);
 
 		if(!$timespans)
 			$timespans = array_combine(
