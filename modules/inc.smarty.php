@@ -93,7 +93,21 @@
 
 		public function fetch_template($key)
 		{
-			return $this->fetch(Swisdk::template($key));
+			return $this->fetch($this->resolve_template($key));
+		}
+
+		public function resolve_template($key)
+		{
+			if(is_array($key)) {
+				foreach($key as $k)
+					if($tmpl = $this->resolve_template($k))
+						return $tmpl;
+			}
+
+			$tmpl = Swisdk::template($key);
+			if($this->template_exists($tmpl))
+				return $tmpl;
+			return null;
 		}
 
 		public function block_content($block)
