@@ -72,7 +72,7 @@
 		 * FormBox name
 		 *
 		 * this may be used to keep track of different FormBoxes
-		 * It is currently (060605) only used for the DBTableView
+		 * It is currently (060605) only used for the TableView
 		 * FormRenderer
 		 */
 		protected $name;

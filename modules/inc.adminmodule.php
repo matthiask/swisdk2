@@ -12,7 +12,7 @@
 	require_once SWISDK_ROOT.'site/inc.site.php';
 	require_once MODULE_ROOT.'inc.form.php';
 	require_once MODULE_ROOT.'inc.tableview.php';
-	require_once MODULE_ROOT.'inc.dbtableview.php';
+	require_once MODULE_ROOT.'inc.tableview.php';
 	require_once MODULE_ROOT.'inc.builder.php';
 
 	class AdminModule extends Site {
@@ -412,12 +412,12 @@
 
 		public function init_tableview()
 		{
-			$this->tableview = new DBTableView($this->get_dbobj());
+			$this->tableview = new TableView($this->get_dbobj());
 		}
 
 		public function init_tableview_form()
 		{
-			if(class_exists($c = 'DBTableViewForm_'.$this->dbo_class))
+			if(class_exists($c = 'TableViewForm_'.$this->dbo_class))
 				$this->tableview->set_form($c);
 		}
 
