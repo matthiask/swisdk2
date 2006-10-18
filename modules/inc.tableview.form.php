@@ -8,27 +8,48 @@
 	require_once MODULE_ROOT . 'inc.form.php';
 
 	class TableViewForm extends Form {
-		public function setup()
+		protected $search;
+		protected $action;
+
+		public function setup($which=null)
 		{
-			$p = $this->dbobj()->_prefix();
-			$box = $this->box('search');
-			$box->add($p.'order', new HiddenInput());
-			$box->add($p.'dir', new HiddenInput());
-			$box->add($p.'start', new HiddenInput());
-			$box->add($p.'limit', new HiddenInput());
-			if($this->setup_additional()!==false) {
-				$this->set_title(dgettext('swisdk', 'Search form'));
-				$this->box('search')->add(new SubmitButton());
+			$this->search = $this->box('search');
+			$this->action = $this->box('action');
+
+			if($which) {
+				if(!is_array($which))
+					$which = explode(',', $which);
+				foreach($which as $m)
+					$this->{'setup_'.$m}();
+			} else {
+				$methods = get_class_methods($this);
+				foreach($methods as $method)
+					if(strpos($method, 'setup_')===0)
+						$this->$method();
 			}
 		}
 
-		/**
-		 * setup() above will add a title and a submit button to the form
-		 * if you do not return false here, thereby making the form visible
-		 */
-		protected function setup_additional()
+		public function setup_form()
 		{
-			return false;
+			$this->set_title(dgettext('swisdk', 'Search form'));
+			$this->search->add(new SubmitButton());
+		}
+
+		public function setup_paging()
+		{
+			$p = $this->dbobj()->_prefix();
+			$box = $this->box('search');
+			$box->add($this->dbobj->name('order'), new HiddenInput());
+			$box->add($this->dbobj->name('dir'), new HiddenInput());
+
+		}
+
+		public function setup_sorting()
+		{
+			$p = $this->dbobj()->_prefix();
+			$box = $this->box('search');
+			$box->add($this->dbobj->name('start'), new HiddenInput());
+			$box->add($this->dbobj->name('limit'), new HiddenInput());
 		}
 
 		/**
