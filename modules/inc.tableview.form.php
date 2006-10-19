@@ -20,7 +20,8 @@
 				if(!is_array($which))
 					$which = explode(',', $which);
 				foreach($which as $m)
-					$this->{'setup_'.$m}();
+					if(method_exists($this, $m = 'setup_'.$m))
+						$this->$m();
 			} else {
 				$methods = get_class_methods($this);
 				foreach($methods as $method)
