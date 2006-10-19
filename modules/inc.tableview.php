@@ -45,6 +45,19 @@
 		 */
 		protected $multi_enabled = true;
 
+		/**
+		 * is row sorting by clicking on the column headers enabled?
+		 */
+		protected $order_enabled = true;
+
+		/**
+		 * is paging enabled?
+		 */
+		protected $paging_enabled = true;
+
+		/**
+		 * search form default values
+		 */
 		protected $form_defaults = array();
 
 		/**
@@ -59,15 +72,15 @@
 				$this->set_form($form);
 		}
 
-		public function multi_enabled()
-		{
-			return $this->multi_enabled;
-		}
-
+		public function multi_enabled() { return $this->multi_enabled; }
 		public function set_multi_enabled($enabled)
-		{
-			$this->multi_enabled = $enabled;
-		}
+		{ $this->multi_enabled = $enabled; }
+		public function order_enabled() { return $this->order_enabled; }
+		public function set_order_enabled($enabled)
+		{ $this->order_enabled = $enabled; }
+		public function paging_enabled() { return $this->paging_enabled; }
+		public function set_paging_enabled($enabled)
+		{ $this->paging_enabled = $enabled; }
 
 
 		public function title()
@@ -96,12 +109,14 @@
 			$box_id = $form_id.'search_';
 			$p = $this->form->dbobj()->_prefix();
 			list($first, $count, $last) = $this->list_position();
-			return <<<EOD
+			$js = <<<EOD
 <script type="text/javascript">
 //<![CDATA[
-
 {$this->javascript_fragments}
 
+EOD;
+			if($this->order_enabled)
+				$js .= <<<EOD
 function order(col) {
 	var form = document.getElementById('$form_id');
 	var order = form.$box_id{$p}order;
@@ -114,6 +129,10 @@ function order(col) {
 	}
 	form.submit();
 }
+
+EOD;
+			if($this->paging_enabled)
+				$js .= <<<EOD
 function skim(step)
 {
 	var form = document.getElementById('$form_id');
@@ -126,9 +145,14 @@ function skim(step)
 		$count-($count%parseInt(form.$box_id{$p}limit.value)));
 	form.submit();
 }
+
+EOD;
+			$js .= <<<EOD
 //]]>
 </script>
+
 EOD;
+			return $js;
 		}
 
 		public function append_auto($field, $title=null)
@@ -262,6 +286,9 @@ EOD;
 		 */
 		protected function multi_foot()
 		{
+			if(!$this->multi_enabled)
+				return;
+
 			$id = $this->form->id();
 			$gid = guardToken('delete');
 			$delete = dgettext('swisdk', 'Really delete?');
@@ -310,41 +337,34 @@ EOD;
 
 		protected function render_head()
 		{
-			$order = $this->form->dbobj()->order;
-			$dir = $this->form->dbobj()->dir;
 			$html = "<table class=\"s-table\">\n<thead>\n<tr>\n";
 			if($t = $this->title())
 				$html .= "<th colspan=\"".count($this->columns)."\">"
 					."<big><strong>"
 					.$t."</strong></big></th>\n</tr>\n<tr>\n";
-			foreach($this->columns as &$col) {
-				$html .= '<th>';
-				if($col instanceof NoDataTableViewColumn) {
-					$html .= $col->title();
-				} else {
-					$html .= '<a href="#" onclick="order(\''.$col->column().'\')">';
-					$html .= $col->title();
-					if($col->column()==$order) {
-						$html .= $dir=='DESC'?'&nbsp;&uArr;':'&nbsp;&dArr;';
+			if($this->order_enabled) {
+				$order = $this->form->dbobj()->order;
+				$dir = $this->form->dbobj()->dir;
+				foreach($this->columns as &$col) {
+					$html .= '<th>';
+					if($col instanceof NoDataTableViewColumn) {
+						$html .= $col->title();
+					} else {
+						$html .= '<a href="#" onclick="order(\''.$col->column().'\')">';
+						$html .= $col->title();
+						if($col->column()==$order) {
+							$html .= $dir=='DESC'?'&nbsp;&uArr;':'&nbsp;&dArr;';
+						}
+						$html .= '</a>';
 					}
-					$html .= '</a>';
+					$html .= "</th>\n";
 				}
-				$html .= "</th>\n";
+			} else {
+				foreach($this->columns as &$col)
+					$html .= '<th>'.$col->title()."</th>\n";
 			}
-
 			$html .= "</tr>\n</thead>\n";
 			return $html;
-			/*
-			$html = "<table class=\"s-table\">\n<thead>\n<tr>\n";
-			if($t = $this->title())
-				$html .= "<th colspan=\"".count($this->columns)."\">"
-					."<big><strong>"
-					.$t."</strong></big></th>\n</tr>\n<tr>\n";
-			foreach($this->columns as &$col)
-				$html .= '<th>'.$col->title()."</th>\n";
-			$html .= "</tr>\n</thead>\n";
-			return $html;
-			*/
 		}
 
 		protected function render_body()
@@ -384,13 +404,11 @@ EOD;
 			return '<td'.$class.'>'.$column->html($data)."</td>\n";
 		}
 
-		protected function render_foot()
+		protected function paging_foot()
 		{
-			/*
-			return "</table>\n";
-			*/
+			if(!$this->paging_enabled)
+				return;
 
-			$colcount = count($this->columns);
 			list($first, $count, $last) = $this->list_position();
 
 			$str = sprintf(dgettext('swisdk', 'displaying %s &ndash; %s of %s'), $first, $last, $count);
@@ -399,10 +417,21 @@ EOD;
 				'</a>',
 				'<a href="javascript:skim('.$this->items_on_page.')">',
 				'</a>');
-			$html = "<tfoot>\n<tr>\n<td colspan=\"".$colcount.'">'
-				.($this->multi_enabled?$this->multi_foot():'')
-				.$str.' | '.$skim
-				."</td>\n</tr>\n</tfoot>\n</table>";
+			return $str.' | '.$skim;
+		}
+
+		protected function render_foot()
+		{
+			$html = $this->multi_foot().$this->paging_foot();
+
+			if($html) {
+				$colcount = count($this->columns);
+				$html = "<tfoot>\n<tr>\n<td colspan=\"".$colcount.'">'.$html
+					."</td>\n</tr>\n</tfoot>\n";
+			}
+			
+			$html .= "</table>\n";
+
 			if(!$this->multi_enabled)
 				return $html;
 			return $html.<<<EOD
