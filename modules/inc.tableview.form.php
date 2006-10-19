@@ -16,7 +16,7 @@
 			$this->search = $this->box('search');
 			$this->action = $this->box('action');
 
-			if($which) {
+			if($which || is_array($which)) {
 				if(!is_array($which))
 					$which = explode(',', $which);
 				foreach($which as $m)
@@ -29,13 +29,13 @@
 			}
 		}
 
-		public function setup_form()
+		public function setup_search()
 		{
 			$this->set_title(dgettext('swisdk', 'Search form'));
 			$this->search->add(new SubmitButton());
 		}
 
-		public function setup_paging()
+		public function setup_order()
 		{
 			$p = $this->dbobj()->_prefix();
 			$box = $this->box('search');
@@ -44,7 +44,7 @@
 
 		}
 
-		public function setup_sorting()
+		public function setup_paging()
 		{
 			$p = $this->dbobj()->_prefix();
 			$box = $this->box('search');

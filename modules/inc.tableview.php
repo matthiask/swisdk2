@@ -41,24 +41,27 @@
 		protected $items_on_page = 10;
 
 		/**
+		 * features
 		 * is selecting and acting on more than one row at a time enabled?
-		 */
-		protected $multi_enabled = true;
-
-		/**
 		 * is row sorting by clicking on the column headers enabled?
-		 */
-		protected $order_enabled = true;
-
-		/**
 		 * is paging enabled?
+		 * is searching enabled?
 		 */
-		protected $paging_enabled = true;
+		protected $features = array(
+			'multi' => true,
+			'order' => true,
+			'paging => true',
+			'search' => true);
 
 		/**
 		 * search form default values
 		 */
 		protected $form_defaults = array();
+
+		/**
+		 * is initialized?
+		 */
+		protected $initialized = false;
 
 		/**
 		 * @param obj: DBOContainer instance, DBObject instance or class
@@ -72,16 +75,23 @@
 				$this->set_form($form);
 		}
 
-		public function multi_enabled() { return $this->multi_enabled; }
-		public function set_multi_enabled($enabled)
-		{ $this->multi_enabled = $enabled; }
-		public function order_enabled() { return $this->order_enabled; }
-		public function set_order_enabled($enabled)
-		{ $this->order_enabled = $enabled; }
-		public function paging_enabled() { return $this->paging_enabled; }
-		public function set_paging_enabled($enabled)
-		{ $this->paging_enabled = $enabled; }
+		public function features() { return $this->features; }
+		public function set_features($features) { $this->features = $features; }
+		public function enable($features) { $this->set_feature_state($features, true); }
+		public function disable($features) { $this->set_feature_state($features, false); }
 
+		public function enabled($feature)
+		{
+			return isset($this->features[$feature]) && $this->features[$feature];
+		}
+
+		public function set_feature_state($features, $state)
+		{
+			if(!is_array($features))
+				$features = explode(',', $features);
+			foreach($features as $f)
+				$this->features[$f] = $state;
+		}
 
 		public function title()
 		{
@@ -115,7 +125,7 @@
 {$this->javascript_fragments}
 
 EOD;
-			if($this->order_enabled)
+			if($this->enabled('order'))
 				$js .= <<<EOD
 function order(col) {
 	var form = document.getElementById('$form_id');
@@ -131,7 +141,7 @@ function order(col) {
 }
 
 EOD;
-			if($this->paging_enabled)
+			if($this->enabled('paging'))
 				$js .= <<<EOD
 function skim(step)
 {
@@ -189,7 +199,9 @@ EOD;
 
 		public function html()
 		{
-			if($this->multi_enabled)
+			$this->init();
+
+			if($this->enabled('multi'))
 				$this->prepend_column(new IDTableViewColumn(
 					$this->dbobj()->dbobj()->primary()));
 			$renderer = new TableViewFormRenderer();
@@ -204,6 +216,7 @@ EOD;
 
 		public function bind($obj)
 		{
+			$this->initialized = false;
 			if($obj instanceof DBOContainer)
 				$this->obj = $obj;
 			else
@@ -218,6 +231,7 @@ EOD;
 
 		public function set_form($form = 'TableViewForm')
 		{
+			$this->initialized = false;
 			if($form instanceof Form)
 				$this->form = $form;
 			else if(class_exists($form))
@@ -240,6 +254,9 @@ EOD;
 		 */
 		public function init()
 		{
+			if($this->initialized)
+				return;
+
 			if(!$this->obj)
 				SwisdkError::handle(new FatalError(
 					dgettext('swisdk', 'Cannot use TableView without DBOContainer')));
@@ -259,9 +276,15 @@ EOD;
 
 			$this->form->bind($dbo);
 
-			$this->form->setup();
+			$form_enabled = array();
+			foreach($this->features as $feature => $enabled)
+				if($enabled)
+					$form_enabled[] = $feature;
+			$this->form->setup($form_enabled);
 			$this->form->set_clauses($this->obj);
 			$this->obj->init();
+
+			$this->initialized = true;
 		}
 
 		public function column_count()
@@ -286,7 +309,7 @@ EOD;
 		 */
 		protected function multi_foot()
 		{
-			if(!$this->multi_enabled)
+			if(!$this->enabled('multi'))
 				return;
 
 			$id = $this->form->id();
@@ -342,7 +365,7 @@ EOD;
 				$html .= "<th colspan=\"".count($this->columns)."\">"
 					."<big><strong>"
 					.$t."</strong></big></th>\n</tr>\n<tr>\n";
-			if($this->order_enabled) {
+			if($this->enabled('order')) {
 				$order = $this->form->dbobj()->order;
 				$dir = $this->form->dbobj()->dir;
 				foreach($this->columns as &$col) {
@@ -406,7 +429,7 @@ EOD;
 
 		protected function paging_foot()
 		{
-			if(!$this->paging_enabled)
+			if(!$this->enabled('paging'))
 				return;
 
 			list($first, $count, $last) = $this->list_position();
@@ -432,7 +455,7 @@ EOD;
 			
 			$html .= "</table>\n";
 
-			if(!$this->multi_enabled)
+			if(!$this->enabled('multi'))
 				return $html;
 			return $html.<<<EOD
 <script type="text/javascript">
