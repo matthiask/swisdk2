@@ -248,7 +248,7 @@ function validate_'.$id.'()
 						$current, $current)
 					:''),
 				$obj->type(), $name, $name, $obj->value(),
-				$obj->attribute_html()));
+				$this->_attribute_html($obj->attributes())));
 		}
 
 		protected function visit_CheckboxInput($obj)
@@ -261,7 +261,7 @@ function validate_'.$id.'()
 				.'" value="1" />',
 				$name, $name,
 				($obj->value()?'checked="checked" ':' ')
-				.$obj->attribute_html()));
+				.$this->_attribute_html($obj->attributes())));
 		}
 
 		protected function visit_TristateInput($obj)
@@ -322,7 +322,8 @@ function formitem_tristate(elem)
 			$name = $obj->id();
 			$this->_render($obj, sprintf(
 				'<textarea name="%s" id="%s" %s>%s</textarea>',
-				$name, $name, $obj->attribute_html(),
+				$name, $name,
+				$this->_attribute_html($obj->attributes()),
 				$obj->value()));
 		}
 
@@ -332,7 +333,7 @@ function formitem_tristate(elem)
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
 			$value = $obj->value();
-			$attributes = $obj->attribute_html();
+			$attributes = $this->_attribute_html($obj->attributes());
 			$html = <<<EOD
 <textarea name="$name" id="$name" $attributes>$value</textarea>
 <script type="text/javascript" src="$prefix/util.js"></script>
@@ -359,7 +360,7 @@ EOD;
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
 			$html = '<select name="'.$name.'" id="'.$name.'"'
-				.$obj->attribute_html().">\n";
+				.$this->_attribute_html($obj->attributes()).">\n";
 			$value = $obj->value();
 			$items = $obj->items();
 			foreach($items as $id => $title) {
@@ -377,8 +378,8 @@ EOD;
 		{
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
-			$attribute_html = $obj->attribute_html();
-			$html = '<span class="sf-radiobuttons">';
+			$attributes = $this->_attribute_html($obj->attributes());
+			$html = '<span class="sf-radiobuttons" '.$atttributes.'>';
 			$value = $obj->value();
 			$items = $obj->items();
 			foreach($items as $id => $title) {
@@ -397,7 +398,7 @@ EOD;
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
 			$html = '<select name="'.$name.'" id="'.$name.'"'
-				.$obj->attribute_html().">\n";
+				.$this->_attribute_html($obj->attributes()).">\n";
 			$value = $obj->value();
 			$items = $obj->items();
 			foreach($items as $id => $title) {
@@ -432,7 +433,8 @@ EOD;
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
 			$html = '<select name="'.$name.'[]" id="'.$name
-				.'" multiple="multiple"'.$obj->attribute_html().">\n";
+				.'" multiple="multiple"'
+				.$this->_attribute_html($obj->attributes()).">\n";
 			$value = $obj->value();
 			if(!$value)
 				$value = array();
@@ -572,7 +574,7 @@ EOD;
 			if(!$value)
 				$value = 'Submit';
 			$this->_render_bar($obj,
-				'<input type="submit" '.$obj->attribute_html()
+				'<input type="submit" '.$this->_attribute_html($obj->attributes())
 				.($name?' name="'.$name.'"':'')
 				.' value="'.$value.'" />',
 				'sf-button');
@@ -609,7 +611,20 @@ EOD;
 			return sprintf(
 				'<input type="%s" name="%s" id="%s" value="%s" %s />',
 				$obj->type(), $name, $name, $obj->value(),
-				$obj->attribute_html());
+				$this->_attribute_html($obj->attributes()));
+		}
+
+		/**
+		 * helper function which composes a html-compatible attribute
+		 * string
+		 */
+		protected function _attribute_html($attributes)
+		{
+			$html = ' ';
+			foreach($attributes as $k => $v)
+				if($v)
+					$html .= $k.'="'.htmlspecialchars($v).'" ';
+			return $html;
 		}
 	}
 

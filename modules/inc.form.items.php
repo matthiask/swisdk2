@@ -140,19 +140,6 @@
 		}
 
 		/**
-		 * helper function which composes a html-compatible attribute
-		 * string
-		 */
-		public function attribute_html()
-		{
-			$html = ' ';
-			foreach($this->attributes as $k => $v)
-				if($v)
-					$html .= $k.'="'.htmlspecialchars($v).'" ';
-			return $html;
-		}
-
-		/**
 		 * get the value from the user and store it in this FormItem
 		 * and also in the corresponding field in the bound DBObject
 		 */
