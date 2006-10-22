@@ -304,7 +304,12 @@
 				Swisdk::$_languages = DBObject::db_get_array(
 					'SELECT * FROM tbl_language', 'language_key');
 			}
-			if($key || $key=Swisdk::config_value('runtime.language')) {
+			if(is_numeric($key)) {
+				foreach(Swisdk::$_languages as $lang_key => $language) {
+					if($language['language_id']==$key)
+						return $lang_key;
+				}
+			} else if($key || $key=Swisdk::config_value('runtime.language')) {
 				if(isset(Swisdk::$_languages[$key])) {
 					if($array)
 						return Swisdk::$_languages[$key];
