@@ -33,6 +33,8 @@
 
 		/**
 		 * the default (non-archive) listing title
+		 *
+		 * f.e. "Blog" or "Agenda"
 		 */
 		protected $title = null;
 
@@ -101,6 +103,7 @@
 			$args = Swisdk::config_value('runtime.arguments');
 			$this->request = array();
 
+			// handle /controller?p=<numeric> specially
 			if(isset($_GET['p']) && $id = intval($_GET['p'])) {
 				$this->request['id'] = $id;
 				$this->mode = 'single';
@@ -325,6 +328,9 @@
 			$this->dbobj->init();
 		}
 
+		/**
+		 * paging filter (do not display more than $default_limit entries)
+		 */
 		protected function filter_limit()
 		{
 			if($limit = $this->find_config_value('default_limit', 10)) {
@@ -335,6 +341,12 @@
 			}
 		}
 
+		/**
+		 * use this filter to hide things from the past respective from the future
+		 *
+		 * F.e. hide articles which have a publication date in the future or events
+		 * which have gone by
+		 */
 		protected function filter_cutoff()
 		{
 			if($cop = $this->find_config_value('cut_off_past'))
@@ -343,6 +355,9 @@
 				$this->dbobj->add_clause($cof.'<'.time());
 		}
 
+		/**
+		 * Should the entries be ordered?
+		 */
 		protected function filter_order()
 		{
 			if($order = $this->find_config_value('order', '#')) {
@@ -354,6 +369,12 @@
 			}
 		}
 
+		/**
+		 * Filter by entry category
+		 *
+		 * needs a table tbl_entry_category with the three fields
+		 * entry_category_id, entry_category_key and entry_category_title
+		 */
 		protected function filter_category()
 		{
 			if(isset($this->request['category'])
@@ -367,6 +388,9 @@
 			}
 		}
 
+		/**
+		 * Find out timespan using the numbers in the arguments and filter accordingly
+		 */
 		protected function filter_archive()
 		{
 			$pubdate_field = $this->find_config_value('pubdate_field', '#');
@@ -382,6 +406,9 @@
 			}
 		}
 			
+		/**
+		 * Filter by slug (entry name)
+		 */
 		protected function filter_slug()
 		{
 			if(isset($this->request['slug']) && $slug_field =
@@ -398,6 +425,19 @@
 		 * Helper methods
 		 */
 
+		/**
+		 * Walk the configuration to find a matching value
+		 *
+		 * find_config_value('pubdate_field') tries to get
+		 * content.<dbobject class>.pubdate_field and then
+		 * content.pubdate_field
+		 *
+		 * You can f.e. enable comments globally, but disable
+		 * them for events using
+		 * [content]
+		 * comments_enabled = true
+		 * event.comments_enabled = false
+		 */
 		protected function find_config_value($key, $default = null)
 		{
 			$keys = array('content.'.$this->dbo_class.'.'.$key,
@@ -408,6 +448,13 @@
 			return $default;
 		}
 
+		/**
+		 * Argument:
+		 * array($year [, $month, [$day]])
+		 *
+		 * Returns:
+		 * array($start_timestamp, $end_timestamp, $timespan_type)
+		 */
 		protected function dttm_range($numbers)
 		{
 			list($year, $month, $day) = $numbers;
@@ -433,6 +480,9 @@
 		}
 	}
 
+	/**
+	 * Helper function which can send a trackback response
+	 */
 	function trackback_response($error = 0, $error_message = '')
 	{
 		header('Content-Type: text/xml; charset=UTF-8');
@@ -453,6 +503,11 @@
 	}
 
 
+	/**
+	 * Multilanguage content site
+	 *
+	 * Also filter by language
+	 */
 	class MLContentSite extends ContentSite {
 		public function init_dbobj()
 		{
