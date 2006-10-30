@@ -432,10 +432,11 @@ EOD;
 
 		public function init_value($dbobj)
 		{
-			$name = $this->id();
+			$name = $this->name();
+			$id = $this->id();
 
-			if(isset($_POST['__check_'.$name])) {
-				if(getInput($name))
+			if(isset($_POST['__check_'.$id])) {
+				if(getInput($id))
 					$dbobj->set($name, 1);
 				else
 					$dbobj->set($name, 0);
