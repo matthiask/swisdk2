@@ -446,12 +446,15 @@ EOD;
 		protected $image_mimetypes = array('image/png', 'image/gif',
 			'image/jpg', 'image/jpeg', 'image/pjpeg');
 
-		public function __construct($message=null)
+		public function __construct($message=null, $mimetypes=null)
 		{
 			if($message)
 				$this->message = $message;
 			else
 				$this->message = dgettext('swisdk', 'Please provide a valid image file');
+
+			if($mimetypes)
+				$this->image_mimetypes = $mimetypes;
 		}
 
 		protected function is_valid_impl()
@@ -459,6 +462,8 @@ EOD;
 			// NOTE! you could probably stuff more checks in here. I
 			// hope these should be enough
 			$data = $this->item->files_data();
+			if(!$data['name'])
+				return true;
 			$mime = $data['type'];
 			if(in_array($data['type'], $this->image_mimetypes)
 					&& preg_match('/\.(png|jpg|jpeg|gif)$/',
