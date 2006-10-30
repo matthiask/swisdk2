@@ -508,14 +508,12 @@
 	 *
 	 * Also filter by language
 	 */
-	class MLContentSite extends ContentSite {
-		public function init_dbobj()
+	class ContentSiteML extends ContentSite {
+		protected function filter_language()
 		{
-			parent::init_dbobj();
 			$this->dbobj->add_join('Language');
 			$this->dbobj->add_clause('language_id=', Swisdk::language());
 		}
-
 	}
 
 ?>
