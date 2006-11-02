@@ -79,8 +79,8 @@
 			$cmp->set_template_keys(array_reverse(array(
 				'base.full',
 				'swisdk.adminmodule.'.$cmd,
-				$this->dbo_class.'.index',
-				$this->dbo_class.'.'.$cmd)));
+				'admin.'.$this->dbo_class.'.index',
+				'admin.'.$this->dbo_class.'.'.$cmd)));
 
 			return $cmp;
 		}
