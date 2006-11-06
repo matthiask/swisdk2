@@ -125,7 +125,7 @@
 				while($row = $res->fetch_assoc()) {
 					$obj = clone $this->obj;
 					$obj->set_data($row);
-					$this->data[$obj->{$this->init_index}] = $obj;
+					$this->data[$obj->get($this->init_index)] = $obj;
 				}
 			} else {
 				while($row = $res->fetch_assoc()) {
