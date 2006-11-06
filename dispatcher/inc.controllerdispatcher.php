@@ -36,7 +36,7 @@
 			// for the full REQUEST_URI path
 			if(!($matches = glob($path.'Index_*'))) {
 				while(true) {
-					if(($matches=glob($path.'All_*')) ||
+					if(($matches=glob($path.'/All_*')) ||
 							($matches=glob($path.'_*'))) {
 						if(is_file($matches[0]))
 							break;
