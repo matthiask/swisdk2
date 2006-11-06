@@ -150,6 +150,7 @@
 		public function init()
 		{
 			$this->smarty = new SwisdkSmarty();
+			$this->smarty->assign('module_url', $this->module_url);
 		}
 
 		public function template_keys()
