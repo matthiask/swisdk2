@@ -86,25 +86,53 @@
 		 * accessors and mutators
 		 */
 		public function value()			{ return $this->value; }
-		public function set_value($value)	{ $this->value = $value; }
+		public function set_value($value)
+		{
+			$this->value = $value;
+			return $this;
+		}
+
 		public function name()			{ return $this->name; }
-		public function set_name($name)		{ $this->name = $name; }
+		public function set_name($name)
+		{
+			$this->name = $name;
+			return $this;
+		}
+
 		public function title()			{ return $this->title; }
 		public function info()			{ return $this->info; }
-		public function set_info($info)		{ $this->info = $info; }
+		public function set_info($info)
+		{
+			$this->info = $info;
+			return $this;
+		}
+
 		public function message()		{ return $this->message; }
-		public function set_message($message)	{ $this->message = $message; }
+		public function set_message($message)
+		{
+			$this->message = $message;
+			return $this;
+		}
+
 		public function add_message($message)
 		{
 			if($this->message)
 				$this->message .= "\n<br />".$message;
 			else
 				$this->message = $message;
+			return $this;
 		}
-		public function set_preinitialized() { $this->preinitialized = true; }
+
+		public function set_preinitialized()
+		{
+			$this->preinitialized = true;
+			return $this;
+		}
+
 		public function set_title($title)
 		{
 			$this->title = dgettext('swisdk', $title);
+			return $this;
 		}
 
 		/**
