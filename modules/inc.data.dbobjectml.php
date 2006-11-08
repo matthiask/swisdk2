@@ -82,14 +82,21 @@
 			parent::_setup_dbvars();
 			if($this->tclass===null)
 				$this->tclass = $this->class.'Content';
-			DBObject::has_many($this->class, $this->tclass);
+			DBObject::has_many($this, $this->tclass);
 			DBObject::has_a($this->tclass, 'Language');
+		}
+
+		public function __construct($language = LANGUAGE_DEFAULT, $setup_dbvars = true)
+		{
+			$this->language = $language;
+			if($setup_dbvars)
+				$this->_setup_dbvars();
 		}
 
 		public static function create($class, $language = LANGUAGE_DEFAULT)
 		{
 			if(class_exists($class))
-				return new $class();
+				return new $class($language);
 
 			$obj = new DBObjectML(false);
 			$obj->class = $class;

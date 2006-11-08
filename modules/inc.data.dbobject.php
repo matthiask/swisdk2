@@ -581,8 +581,18 @@
 		 */
 		public static function belongs_to($c1, $c2, $options = null)
 		{
-			$o1 = DBObject::create($c1);
-			$o2 = DBObject::create($c2);
+			if($c1 instanceof DBObject) {
+				$o1 = $c1;
+				$c1 = $o1->_class();
+			} else
+				$o1 = DBObject::create($c1);
+
+			if($c2 instanceof DBObject) {
+				$o2 = $c2;
+				$c2 = $o2->_class();
+			} else
+				$o2 = DBObject::create($c2);
+
 			$field = $options;
 			$class = $c2;
 			if(!$field) {
@@ -622,8 +632,17 @@
 
 		public static function n_to_m($c1, $c2, $options = null)
 		{
-			$o1 = DBObject::create($c1);
-			$o2 = DBObject::create($c2);
+			if($c1 instanceof DBObject) {
+				$o1 = $c1;
+				$c1 = $o1->_class();
+			} else
+				$o1 = DBObject::create($c1);
+
+			if($c2 instanceof DBObject) {
+				$o2 = $c2;
+				$c2 = $o2->_class();
+			} else
+				$o2 = DBObject::create($c2);
 
 			$rel1 = $c1;
 			$rel2 = $c2;
@@ -652,8 +671,17 @@
 		 */
 		public static function threeway($c1, $c2, $c3, $options = null)
 		{
-			$o1 = DBObject::create($c1);
-			$o2 = DBObject::create($c2);
+			if($c1 instanceof DBObject) {
+				$o1 = $c1;
+				$c1 = $o1->_class();
+			} else
+				$o1 = DBObject::create($c1);
+
+			if($c2 instanceof DBObject) {
+				$o2 = $c2;
+				$c2 = $o2->_class();
+			} else
+				$o2 = DBObject::create($c2);
 
 			$rel = $c2;
 			if($options!==null)
@@ -676,7 +704,12 @@
 		 */
 		public static function has_tags($class)
 		{
-			$obj = DBObject::create($class);
+			if($class instanceof DBObject) {
+				$obj = $class;
+				$class = $obj->_class;
+			} else
+				$obj = DBObject::create($class);
+
 			$table = 'tbl_'.$obj->name('to_tag');
 
 			DBObject::$relations[$class]['Tag'] = array(
