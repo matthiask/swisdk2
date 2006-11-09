@@ -229,9 +229,9 @@
 				return $this->obj->dbobj_clone();
 			if($this->multilanguage) {
 				if($val)
-					return DBObjectML::find($this->dbo_class, $val);
+					return DBObjectML::find($this->dbo_class, $val, LANGUAGE_ALL);
 				else
-					return DBObjectML::create($this->dbo_class);
+					return DBObjectML::create($this->dbo_class, LANGUAGE_ALL);
 			} else {
 				if($val)
 					return DBObject::find($this->dbo_class, $val);
