@@ -51,12 +51,13 @@
 		public function dbobj()
 		{
 			if(!$this->obj) {
+				$tmp = DBObject::create($this->tclass);
 				if($this->language == LANGUAGE_ALL) {
-					if($id = $this->id())
+					if($id = $this->id()) {
 						$this->obj = DBOContainer::find($this->tclass, array(
-							$this->primary.'=' => $id,
+							$tmp->name($this->primary).'=' => $id,
 							':index' => 'language_id'));
-					else
+					} else
 						$this->obj = DBOContainer::create($this->tclass);
 				} else {
 					$language = $this->language;
@@ -65,8 +66,8 @@
 
 					if($id = $this->id())
 						$this->obj = DBObject::find($this->tclass, array(
-							$this->primary.'=' => $id,
-							'language_id=' => $language));
+							$tmp->name($this->primary).'=' => $id,
+							$tmp->name('language_id').'=' => $language));
 					if(!$this->obj) {
 						$this->obj = DBObject::create($this->tclass);
 						$this->obj->language_id = $this->language;
