@@ -321,6 +321,15 @@
 			return 0;
 		}
 
+		public static function all_languages()
+		{
+			if(!Swisdk::$_languages) {
+				Swisdk::$_languages = DBObject::db_get_array(
+					'SELECT * FROM tbl_language', 'language_key');
+			}
+			return Swisdk::$_languages;
+		}
+
 		/**
 		 * set new language
 		 */
