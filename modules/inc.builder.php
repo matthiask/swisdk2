@@ -182,28 +182,51 @@
 			$dbobj =& $form->dbobj();
 			$box = null;
 			// FIXME this is hacky. FormBox should have a box() method too?
-			if($form instanceof FormBox)
-				$box = $form->add(new FormMLBox());
-			else
-				$box =& $form->box($dbobj->language());
 			$dbobjml =& $dbobj->dbobj();
-			$box->bind($dbobjml);
+			if($dbobjml instanceof DBOContainer) {
+				$languages = Swisdk::all_languages();
 
-			// work on the language form box (don't need to keep a
-			// reference to the main form around)
-			$this->form = $box;
+				foreach($languages as $key => &$l) {
+					$box = $form->box($key);
+					if(!isset($dbobjml[$l['language_id']]))
+						$dbobjml[$l['language_id']] =
+							DBObject::create($dbobj->_class().'Content');
+					$dbo =& $dbobjml[$l['language_id']];
+					$box->bind($dbo);
+					$box->set_title($key);
+					$this->form = $box;
 
-			$fields = array_keys($dbobjml->field_list());
+					$fields = array_keys($dbo->field_list());
+					$ninc_regex = '/^'.$dbo->_prefix()
+						.'(id|creation_dttm|language_id|'
+						.$dbobj->primary().')$/';
+					foreach($fields as $fname)
+						if(!preg_match($ninc_regex, $fname))
+							$this->create_field($fname);
+				}
+			} else {
+				if($form instanceof FormBox)
+					$box = $form->add(new FormMLBox());
+				else
+					$box =& $form->box($dbobj->language());
+				$box->bind($dbobjml);
 
-			// maybe this should be configurable? Someone might want to
-			// change the language of some entry, or might want to reparent
-			// the translation
-			$ninc_regex = '/^'.$dbobjml->_prefix()
-				.'(id|creation_dttm|language_id|'
-				.$dbobj->primary().')$/';
-			foreach($fields as $fname)
-				if(!preg_match($ninc_regex, $fname))
-					$this->create_field($fname);
+				// work on the language form box (don't need to keep a
+				// reference to the main form around)
+				$this->form = $box;
+
+				$fields = array_keys($dbobjml->field_list());
+
+				// maybe this should be configurable? Someone might want to
+				// change the language of some entry, or might want to reparent
+				// the translation
+				$ninc_regex = '/^'.$dbobjml->_prefix()
+					.'(id|creation_dttm|language_id|'
+					.$dbobj->primary().')$/';
+				foreach($fields as $fname)
+					if(!preg_match($ninc_regex, $fname))
+						$this->create_field($fname);
+			}
 
 			$this->form->add(new SubmitButton());
 		}
