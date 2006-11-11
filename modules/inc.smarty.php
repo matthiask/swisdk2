@@ -35,6 +35,7 @@
 			$this->smarty->register_block('block', '_smarty_swisdk_process_block');
 			$this->smarty->register_function('extends', '_smarty_swisdk_extends');
 			$this->smarty->register_function('db_assign', '_smarty_swisdk_db_assign');
+			$this->smarty->register_function('include_template', '_smarty_swisdk_include_template');
 			$this->smarty->register_block('if_block', '_smarty_swisdk_if_block');
 			$this->smarty->register_block('if_not_block', '_smarty_swisdk_if_not_block');
 			$this->smarty->assign_by_ref('_swisdk_smarty_instance', $this);
@@ -232,6 +233,14 @@
 		$name = $params['name'];
 		$smarty->assign($params['name'], DBOContainer::find($params['class'],
 			$clauses));
+	}
+
+	function _smarty_swisdk_include_template($params, &$smarty)
+	{
+		$ss = $smarty->get_template_vars('_swisdk_smarty_instance');
+		if($tmpl = $ss->resolve_template($params['key']))
+			return $ss->fetch($tmpl);
+		return null;
 	}
 
 	class SmartyMaster {
