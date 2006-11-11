@@ -41,7 +41,6 @@
 			$cmp = null;
 
 			$cmd = '';
-			$template_keys = array('base.full');
 
 			if(isset($args[0]) && $args[0]) {
 				$cmp_class = 'AdminComponent_'.$this->dbo_class.$args[0];
@@ -78,6 +77,7 @@
 			$cmp->set_module($this);
 			$cmp->set_template_keys(array_reverse(array(
 				'base.full',
+				'base.admin',
 				'swisdk.adminmodule.'.$cmd,
 				'admin.'.$this->dbo_class.'.index',
 				'admin.'.$this->dbo_class.'.'.$cmd)));
