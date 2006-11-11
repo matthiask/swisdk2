@@ -50,7 +50,7 @@
 		protected $features = array(
 			'multi' => true,
 			'order' => true,
-			'paging => true',
+			'paging' => true,
 			'search' => true);
 
 		/**
