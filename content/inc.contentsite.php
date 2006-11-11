@@ -177,7 +177,7 @@
 			}
 			$this->smarty->register_function($p.'url',
 				'generate_'.$p.'url');
-			$this->smarty->display(Swisdk::template($this->dbo_class.'.list'));
+			$this->smarty->display_template($this->dbo_class.'.list');
 		}
 
 		protected function handle_feed()
@@ -239,7 +239,7 @@
 				$comments->run(array('realm' => $dbo->comment_realm));
 				$this->smarty->assign('comments', $comments->html());
 			}
-			$this->smarty->display(Swisdk::template($this->dbo_class.'.single'));
+			$this->smarty->display_template($this->dbo_class.'.single');
 		}
 
 		protected function handle_trackback()

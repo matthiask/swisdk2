@@ -105,7 +105,9 @@
 			}
 
 			$tmpl = Swisdk::template($key);
-			if($this->template_exists($tmpl))
+			if($this->template_exists($tmpl)
+					|| $this->template_exists(
+						$tmpl = SWISDK_ROOT.'content/'.$tmpl))
 				return $tmpl;
 			return null;
 		}
@@ -188,7 +190,7 @@
 	{
 		$ss = $smarty->get_template_vars('_swisdk_smarty_instance');
 		if(isset($params['template']))
-			$ss->_derived = Swisdk::template($params['template']);
+			$ss->_derived = $ss->resolve_template($params['template']);
 		else
 			$ss->_derived = $params['file'];
 	}
@@ -297,7 +299,7 @@
 		public function display($template = null, $generate = STREGION_ALL)
 		{
 			if($template===null)
-				$template = Swisdk::template('base.full');
+				$template = $this->resolve_template('base.full');
 
 			$smarty = $this->smarty();
 			if($smarty->template_exists($template)) {
@@ -314,7 +316,7 @@
 		 */
 		public function display_header($generate = STREGION_HEADER)
 		{
-			$this->display(Swisdk::template('base.header'), $generate);
+			$this->display($this->resolve_template('base.header'), $generate);
 		}
 
 		/**
@@ -322,7 +324,7 @@
 		 */
 		public function display_footer($generate = STREGION_FOOTER)
 		{
-			$this->display(Swisdk::template('base.footer'), $generate);
+			$this->display($this->resolve_template('base.footer'), $generate);
 		}
 
 		/**

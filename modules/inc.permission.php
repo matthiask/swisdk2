@@ -191,7 +191,7 @@
 
 			$smarty = new SwisdkSmarty();
 			$smarty->assign('content', $form->html());
-			$smarty->display(Swisdk::template('swisdk.login'));
+			$smarty->display_template('swisdk.login');
 			exit();
 		}
 
