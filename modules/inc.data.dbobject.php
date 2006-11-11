@@ -1291,7 +1291,7 @@
 				return;
 			echo '<pre>';
 			echo "<b>field list</b>\n";
-			print_r(DBObject::$field_list);
+			print_r(DBObject::$_field_list);
 			echo "<b>relations</b>\n";
 			print_r(DBObject::$relations);
 			echo "<b>tables</b>\n";
