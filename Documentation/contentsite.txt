@@ -1,0 +1,89 @@
+# ContentSite
+
+## Standard ContentSite Modes
+
+* default
+	invoked when ContentSite gets no arguments
+	Example: /controller/
+* archive
+	all entries for some time period (year, month, day)
+	Example: /controller/2005/12/
+* feed
+	XML feed (RSS 2.0)
+	Example: /controller/category/swisdk/feed/
+* single
+	detail view of an entry
+	Example: /controller/2005/12/entry-title/ OR /controller/?p=102
+* trackback
+	special mode for single view which handles trackbacks
+	Example: /controller/2005/12/entry-title/trackback/
+
+
+## ContentSite parser configuration
+
+When the parser has finished, ContentSite::run() tries to execute
+a member function named handle_ + <mode>, f.e. handle_single()
+
+The parser configuration is a nested array having the following format:
+
+<request key> => array(
+	<key type>,
+	[mode => <mode>]
+	)
+where
+<request key> is an URL fragment
+<key type> is CONTENT_SITE_PARAM_NONE or CONTENT_SITE_PARAM_ONE
+<mode> is a facultative value with the name of another mode
+which will be set if the request key matches an url fragment
+
+For example, you might want to provide iCcal feeds to your users:
+
+$this->parser_config['ical'] = array(CONTENT_SITE_PARAM_NONE);
+
+Now, if the string 'ical' is part of the arguments, ContentSite::run()
+will try to execute handle_ical()
+
+
+## ContentSite configuration values
+
+ContentSite uses the following config values:
+
+* comments_enabled
+* feed_enabled
+* trackback_enabled
+	Whether these features are enabled for all ContentSite
+	instances (content.xy_enabled) or only for a certain
+	DBObject class (content.dbo_class.xy_enabled)
+* cut_off_single
+	Whether filter_cutoff should be used if mode is single.
+* cut_off_past
+	Which field (type unix timestamp) should be used to hide
+	entries with past dates. (f.e. start dttm of an event in
+	an agenda)
+* cut_off_future
+	Which field (type unix timestamp) should be used to hide
+	entries with future dates (f.e. publication dttm of an
+	article which should only appear after said time)
+* order
+	Field which should be used to order the entries
+	(defaults to <prefix>start_dttm)
+* default_limit
+	Maximal count of entries on one page (defaults to 10)
+* pubdate_field
+	publication date field (used for archive filtering)
+	(defaults to <prefix>start_dttm)
+* slug_field
+	slug field for single mode entry matching (defaults to
+	<prefix>name)
+
+
+## ContentSite templates
+
+The template keys which ContentSite tries to use are the following:
+
+<dbo_class>.list
+<dbo_class>.single
+
+The template source is resolved using Swisdk::template(). You should
+use the template inheritance mechanism (not SmartyMaster) if you need
+the ContentSite's functionality.
