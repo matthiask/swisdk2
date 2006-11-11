@@ -300,6 +300,15 @@
 			else
 				return $this->data[$var] = $value;
 		}
+
+		public function _select_sql($joins)
+		{
+			$tmp = DBObject::create($this->tclass);
+			return 'SELECT * FROM '.$this->table.' LEFT JOIN '.$tmp->table()
+				.' ON '.$this->table.'.'.$this->primary.'='
+					.$tmp->table().'.'.$tmp->name($this->primary)
+				.$joins.' WHERE 1';
+		}
 	}
 
 ?>
