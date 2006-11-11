@@ -450,7 +450,8 @@
 		{
 			// has aready been on confirmation page?
 			if(getInput('delete_confirmation_page')
-					&& (strtolower(getInput('confirmation_command'))!='delete'))
+					&& (getInput('confirmation_command')
+						!=dgettext('swisdk', 'Delete')))
 				$this->goto('_index');
 
 			// invalid guard token? show confirmation page
