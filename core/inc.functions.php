@@ -207,4 +207,27 @@
 		return 'right now';
 	}
 
+	/**
+	 * return a unique filenames for related files
+	 *
+	 * f.e.
+	 * img.jpg => img_32kjh321kjh.jpg
+	 * img.jpg (thumb) => img_thumb_3k3213kj1j2h.jpg
+	 *
+	 * If the filename has no extension, the uniquification token is simply appended
+	 */
+	function uniquifyFilename($fname, $token=null)
+	{
+		if($token)
+			$token = '_'.$token.'_'.uniqid();
+		else
+			$token = '_'.uniqid();
+
+		$pos = strrpos($fname, '.');
+		if($pos===false)
+			return $fname.$token;
+		else
+			return substr($fname, 0, $pos).$token.substr($fname, $pos);
+	}
+
 ?>

@@ -334,14 +334,8 @@ EOD;
 			if(isset($_FILES[$name])
 					&& ($this->files_data = $_FILES[$name])
 					&& $this->check_upload()) {
-				$fname = preg_replace('/[^A-Za-z0-9\.-_]+/', '_',
-					$this->files_data['name']);
-				$pos = strrpos($fname, '.');
-				if($pos===false)
-					$fname .= uniqid();
-				else
-					$fname = substr($fname, 0, $pos).'_'
-						.uniqid().substr($fname, $pos);
+				$fname = uniquifyFilename(preg_replace('/[^A-Za-z0-9\.-_]+/', '_',
+					$this->files_data['name']));
 
 				$this->files_data['path'] = CACHE_ROOT.'upload/'.$fname;
 				Swisdk::require_data_directory(CACHE_ROOT.'upload');
