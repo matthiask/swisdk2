@@ -38,8 +38,7 @@
 		protected $title;
 
 		/**
-		 * holds all FormItems and FormBoxes that are part of this
-		 * FormBox
+		 * holds all FormItems that are part of this FormBox
 		 */
 		protected $items = array();
 
@@ -127,8 +126,7 @@
 				return reset($this->boxrefs);
 
 			if(!isset($this->boxrefs[$id])) {
-				$this->items[$id] = new FormBox();
-				$this->boxrefs[$id] =& $this->items[$id];
+				$this->boxrefs[$id] = new FormBox();
 				$this->boxrefs[$id]->set_name($id);
 				if($obj = $this->dbobj())
 					$this->boxrefs[$id]->bind($obj);
@@ -169,6 +167,8 @@
 		{
 			foreach($this->items as &$item)
 				$item->refresh($this->dbobj());
+			foreach($this->boxrefs as &$boxref)
+				$boxref->refresh($this->dbobj());
 		}
 
 		/**
@@ -189,7 +189,6 @@
 
 			if(count($args)<2) {
 				if($args[0] instanceof FormBox) {
-					$this->items[] = $args[0];
 					$this->boxrefs[] = $args[0];
 					return $args[0];
 				} else if($args[0] instanceof FormItem) {
@@ -324,9 +323,12 @@
 		 */
 		public function accept($renderer)
 		{
+			ksort($this->boxrefs);
 			$renderer->visit($this, FORMRENDERER_VISIT_START);
 			foreach($this->items as &$item)
 				$item->accept($renderer);
+			foreach($this->boxrefs as &$boxref)
+				$boxref->accept($renderer);
 			$renderer->visit($this, FORMRENDERER_VISIT_END);
 		}
 
@@ -343,6 +345,9 @@
 			// loop over all Items
 			foreach($this->items as &$item)
 				if(!$item->is_valid())
+					$valid = false;
+			foreach($this->boxrefs as &$boxref)
+				if(!$boxref->is_valid())
 					$valid = false;
 			return $valid;
 		}
@@ -476,8 +481,7 @@
 				return reset($this->boxrefs);
 
 			if(!isset($this->boxrefs[$id])) {
-				$this->items[$id] = new FormBox();
-				$this->boxrefs[$id] =& $this->items[$id];
+				$this->boxrefs[$id] = new FormBox();
 				$this->boxrefs[$id]->set_name($id);
 				if($obj = $this->dbobj())
 					$this->boxrefs[$id]->bind($obj);
