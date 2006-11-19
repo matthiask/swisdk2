@@ -71,7 +71,6 @@
 			if(!$this->item->is_valid()) {
 				foreach($this->args as $item)
 					$item->set_attributes(array('disabled' => 'disabled'));
-				$this->item->set_message(null);
 			}
 		}
 

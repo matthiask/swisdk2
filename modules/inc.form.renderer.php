@@ -13,6 +13,7 @@
 		protected $validation_javascript = '';
 		protected $file_upload = false;
 		protected $js_validation = true;
+		protected $form_submitted = null;
 
 		/**
 		 * Render the HTML of an input field
@@ -120,6 +121,7 @@
 
 		protected function visit_Form_start($obj)
 		{
+			$this->form_submitted = $obj->submitted();
 			if($title = $obj->title())
 				$this->_render_bar($obj,
 					'<big><strong>'.$title.'</strong></big>',
@@ -597,7 +599,7 @@ EOD;
 
 		protected function _message_html($obj)
 		{
-			$msg = $obj->message();
+			$msg = ($this->form_submitted===true)?$obj->message():null;
 			$name = $obj->id();
 			$prefix = Swisdk::config_value('runtime.webroot.img', '/img');
 			return '<div id="'.$name.'_msg" style="clear:both;color:red">'
