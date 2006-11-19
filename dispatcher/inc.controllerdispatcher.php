@@ -26,15 +26,21 @@
 	class ControllerDispatcher extends ControllerDispatcherModule {
 		public function collect_informations()
 		{
-			$tokens = explode('/', trim($this->input(), '/').'/');
+			$input = trim($this->input(), '/');
+			$tokens = array();
+			$path = CONTENT_ROOT;
+			if($input) {
+				$tokens = explode('/', $input);
+				$path .= $input;
+			} else {
+				$path = rtrim($path, '/');
+			}
 			$t = $tokens;
 			$matches = array();
 
-			$path = CONTENT_ROOT . implode('/', $tokens);
-
 			// try to find an Index_* controller/template only
 			// for the full REQUEST_URI path
-			if(!($matches = glob($path.'Index_*'))) {
+			if(!($matches = glob($path.'/Index_*'))) {
 				while(true) {
 					if(($matches=glob($path.'/All_*')) ||
 							($matches=glob($path.'_*'))) {
