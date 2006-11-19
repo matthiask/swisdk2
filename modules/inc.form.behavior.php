@@ -84,9 +84,10 @@
 			$elems = '\''.implode('\',\'', $elems).'\'';
 			$ruleobjs = $this->item->rules();
 			$rules = '';
-			foreach($ruleobjs as $rule) {
+			foreach($ruleobjs as $rule)
 				$rules[] = $rule->javascript_rule_name($this->item);
-			}
+			if(!is_array($rules) || !count($rules))
+				return;
 			$valid = implode('(\''.$name.'\') && ', $rules).'(\''.$name.'\')';
 			$js = <<<EOD
 function enable_on_valid_behavior_handler_$name()
