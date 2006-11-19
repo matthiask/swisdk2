@@ -169,7 +169,7 @@
 			}
 
 			if($submitbtn)
-				$this->form->add(new SubmitButton());
+				$this->form->box('zzz_last')->add(new SubmitButton());
 		}
 
 		/**
@@ -228,7 +228,7 @@
 						$this->create_field($fname);
 			}
 
-			$this->form->add(new SubmitButton());
+			$this->form->box('zzz_last')->add(new SubmitButton());
 		}
 
 		public function dbobj()
