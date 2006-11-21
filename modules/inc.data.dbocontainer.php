@@ -306,7 +306,7 @@
 		 *
 		 * $doc->add_join('User');
 		 */
-		public function add_join($table, $clause=null)
+		public function add_join($table, $clause=null, $type='LEFT')
 		{
 			if($clause===null) {
 				$relations = $this->obj->relations();
@@ -314,7 +314,7 @@
 					switch($rel['type']) {
 						case DB_REL_SINGLE:
 						case DB_REL_MANY:
-							$this->joins .= ' LEFT JOIN '.$rel['table']
+							$this->joins .= ' '.$type.' JOIN '.$rel['table']
 								.' ON '.$this->obj->table().'.'
 								.$rel['field'].'='
 								.$rel['table'].'.'
@@ -323,7 +323,7 @@
 						case DB_REL_N_TO_M:
 						case DB_REL_3WAY:
 						case DB_REL_TAGS:
-							$this->joins .= ' LEFT JOIN '.$rel['table']
+							$this->joins .= ' '.$type.' JOIN '.$rel['table']
 								.' ON '.$this->obj->table().'.'
 								.$this->obj->primary().'='
 								.$rel['table'].'.'
@@ -333,11 +333,11 @@
 				} else {
 					$dbo = DBObject::create($table);
 					$p = $dbo->primary();
-					$this->joins .= ' LEFT JOIN '.$dbo->table().' ON '
+					$this->joins .= ' '.$type.' JOIN '.$dbo->table().' ON '
 						.$this->dbobj()->name($p).'='.$p;
 				}
 			} else
-				$this->joins .= ' LEFT JOIN ' . $table . ' ON ' . $clause;
+				$this->joins .= ' '.$type.' JOIN ' . $table . ' ON ' . $clause;
 		}
 
 		/**
