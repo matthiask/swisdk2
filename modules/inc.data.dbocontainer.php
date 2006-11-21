@@ -228,7 +228,7 @@
 						if(is_array($data[$v])) {
 							$q[] = '(\''.implode('\',\'', $data[$v]).'\')';
 						} else {
-							$q[] = $data[$v];
+							$q[] = '\''.$data[$v].'\'';
 						}
 					}
 					$this->clause_sql .= $binding.preg_replace($p, $q, $clause);
