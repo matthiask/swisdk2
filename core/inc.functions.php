@@ -230,4 +230,15 @@
 			return substr($fname, 0, $pos).$token.substr($fname, $pos);
 	}
 
+	/**
+	 * sanitize a filename
+	 */
+	function sanitizeFilename($fname)
+	{
+		$fname = trim(preg_replace('/[^A-Za-z0-9\.\-_+]/', '_', $fname), '._');
+		if(!$fname)
+			$fname = 'none';
+		return $fname;
+	}
+
 ?>
