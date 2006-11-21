@@ -199,9 +199,14 @@ EOD;
 			} else {
 				$val = $data[$this->column];
 				if(!isset($this->db_data[$val]))
-					return null;
+					return $this->no_data;
 				return $this->db_data[$val];
 			}
+		}
+
+		public function set_no_data_text($txt)
+		{
+			$this->no_data = $txt;
 		}
 
 		protected $initialized = false;
@@ -211,6 +216,8 @@ EOD;
 
 		protected $vars = null;
 		protected $patterns = null;
+
+		protected $no_data = '(none)';
 	}
 
 	class ManyDBTableViewColumn extends DBTableViewColumn {
@@ -262,7 +269,7 @@ EOD;
 			$p = $this->dbobj->primary();
 
 			if(!isset($data[$p]) || !isset($this->db_data[$data[$p]]))
-				return;
+				return $this->no_data;
 
 			$id = $data[$p];
 			$data =& $this->db_data[$id];
@@ -318,7 +325,7 @@ EOD;
 			$p = $this->dbobj->primary();
 
 			if(!isset($data[$p]) || !isset($this->reldata[$data[$p]]))
-				return;
+				return $this->no_data;
 			$vals = $this->reldata[$data[$p]];
 			$tokens = array();
 			foreach($vals as $v)
