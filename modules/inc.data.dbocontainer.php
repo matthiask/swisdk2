@@ -226,7 +226,7 @@
 					foreach($matches[1] as $v) {
 						$p[] = '/\{' . $v . '\}/';
 						if(is_array($data[$v])) {
-							$q[] = '('.implode(',', $data[$v]).')';
+							$q[] = '(\''.implode('\',\'', $data[$v]).'\')';
 						} else {
 							$q[] = $data[$v];
 						}
