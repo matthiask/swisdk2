@@ -484,7 +484,7 @@
 			$this->goto('_index');
 		}
 
-		protected function delete_single()
+		protected function delete_confirmation()
 		{
 			// has aready been on confirmation page?
 			if(getInput('delete_confirmation_page')
@@ -497,6 +497,14 @@
 				$this->display_confirmation_page();
 				return;
 			}
+
+			return true;
+		}
+
+		protected function delete_single()
+		{
+			if(!$this->delete_confirmation())
+				return;
 
 			$dbo = null;
 			if($this->multilanguage)
