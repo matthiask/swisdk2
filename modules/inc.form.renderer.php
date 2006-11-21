@@ -137,7 +137,10 @@
 			if($this->file_upload)
 				$upload = 'enctype="multipart/form-data">'."\n"
 					.'<input type="hidden" name="MAX_FILE_SIZE" '
-					.'value="2000000"';
+					.'value="'
+					.str_replace(array('k', 'm'), array('000', '000000'),
+						strtolower(ini_get('upload_max_filesize')))
+					.'"';
 			list($html, $js) = $this->_validation_html($obj);
 			$this->add_html_start(
 				'<form method="post" action="'.$_SERVER['REQUEST_URI']
