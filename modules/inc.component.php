@@ -20,6 +20,10 @@
 		public function send_feed();
 	}
 
+	interface ISmartyComponent extends IComponent {
+		public function set_smarty(&$smarty);
+	}
+
 	abstract class CommandComponent implements IHtmlComponent {
 		protected $_html;
 		protected $args;

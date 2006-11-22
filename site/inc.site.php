@@ -17,6 +17,22 @@
 		{
 			return Swisdk::config_value('runtime.controller.url');
 		}
+
+		public function run_website_components(&$smarty)
+		{
+			$components = explode(',', Swisdk::website_config_value('components'));
+
+			foreach($components as &$c) {
+				$c = trim($c);
+				$cmp = Swisdk::load_instance($c, 'components');
+				if($cmp instanceof IComponent)
+					$cmp->run();
+				if($cmp instanceof IHtmlComponent)
+					$smarty->assign(strtolower($c), $cmp->html());
+				if($cmp instanceof ISmartyComponent)
+					$cmp->set_smarty($smarty);
+			}
+		}
 	}
 
 
