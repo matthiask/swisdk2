@@ -321,6 +321,16 @@
 			return 0;
 		}
 
+		public static function language_key($id=null)
+		{
+			if($id===null)
+				$id = Swisdk::language();
+			foreach(Swisdk::$_languages as $lang_key => &$language) {
+				if($language['language_id']==$id)
+					return $lang_key;
+			}
+		}
+
 		public static function all_languages()
 		{
 			if(!Swisdk::$_languages) {
