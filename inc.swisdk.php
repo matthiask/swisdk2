@@ -369,7 +369,7 @@
 
 			$path = sprintf('%s/inc.%s.php', $stage, strtolower($class));
 
-			$bases = array(SWISDK_ROOT, CONTENT_ROOT);
+			$bases = array(CONTENT_ROOT, SWISDK_ROOT);
 
 			while(count($bases)) {
 				$base = array_shift($bases);
