@@ -135,6 +135,7 @@
 		{
 			$this->init();
 			$this->filter();
+			$this->dbobj->init();
 
 			$this->handle_listing();
 		}
@@ -142,7 +143,11 @@
 		protected function handle_archive()
 		{
 			$this->init();
-			$this->filter();
+			if($this->find_config_value('cut_off_archive', true))
+				$this->filter();
+			else
+				$this->filter('!cutoff');
+			$this->dbobj->init();
 
 			$title = dgettext('swisdk', 'Archive for ');
 			switch($this->archive_mode) {
@@ -186,6 +191,7 @@
 				SwisdkError::handle(new FatalError('Feed is disabled'));
 			$this->dbobj = DBOContainer::create($this->dbo_class);
 			$this->filter();
+			$this->dbobj->init();
 
 			require_once SWISDK_ROOT.'lib/contrib/feedcreator.class.php';
 			require_once SWISDK_ROOT.'lib/contrib/markdown.php';
@@ -223,7 +229,7 @@
 					$this->request['id']);
 			} else {
 				$this->init();
-				if($this->find_config_value('cut_off_single', true)===true)
+				if($this->find_config_value('cut_off_archive', true)===true)
 					$this->filter_cutoff();
 				$this->filter_archive();
 				$this->filter_slug();
@@ -313,19 +319,26 @@
 
 		protected function filter($which = null)
 		{
-			if($which) {
-				if(!is_array($which))
-					$which = explode(',', $which);
-				foreach($which as $m)
-					$this->{'filter_'.$m}();
-			} else {
-				$methods = get_class_methods($this);
-				foreach($methods as $method)
-					if(strpos($method, 'filter_')===0)
-						$this->$method();
+			$methods = get_class_methods($this);
+			$which = explode(',', $which);
+			$include = array();
+			$exclude = array();
+			foreach($which as $m) {
+				if(!($m = trim($m)))
+					continue;
+				if($m{0}=='!')
+					$exclude[] = 'filter_'.substr($m, 1);
+				else
+					$include[] = 'filter_'.$m;
 			}
 
-			$this->dbobj->init();
+			if(count($include))
+				$methods = array_intersect($methods, $include);
+			if(count($exclude))
+				$methods = array_diff($methods, $exclude);
+			foreach($methods as $m)
+				if(strpos($m, 'filter_')===0)
+					$this->$m();
 		}
 
 		/**
@@ -509,7 +522,7 @@
 	 * Also filter by language
 	 */
 	class ContentSiteML extends ContentSite {
-		protected function filter_language()
+		public function filter_language()
 		{
 			$this->dbobj->add_join('Language');
 			$this->dbobj->add_clause('language_id=', Swisdk::language());
