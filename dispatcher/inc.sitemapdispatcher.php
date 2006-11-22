@@ -43,6 +43,8 @@
 						$input));
 			} else if(isset($page['path']))
 				$this->set_output($page['path']);
+			else if(isset($page['rewrite']))
+				$this->set_output($page['rewrite']);
 		}
 	}
 
