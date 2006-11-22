@@ -307,10 +307,10 @@
 		 */
 		public function display($template = null, $generate = STREGION_ALL)
 		{
-			if($template===null)
-				$template = $this->resolve_template('base.full');
-
 			$smarty = $this->smarty();
+			if($template===null)
+				$template = $smarty->resolve_template('base.full');
+
 			if($smarty->template_exists($template)) {
 				if($this->generate_sections($generate))
 					$smarty->display($template);
