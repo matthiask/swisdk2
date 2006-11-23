@@ -309,13 +309,16 @@ EOD;
 			$p = $this->dbobj->primary();
 			$relations = $this->dbobj->relations();
 			$rel = $relations[$this->db_class];
-			$rdata = DBObject::db_get_array(sprintf(
-				'SELECT %s,%s FROM %s WHERE %s IN (%s)',
-				$p,$rel['foreign'], $rel['table'], $p,
-				implode(',', $this->tableview->dbobj()->ids())));
+			$ids = $this->tableview->dbobj()->ids();
 			$this->reldata = array();
-			foreach($rdata as $row)
-				$this->reldata[$row[$p]][] = $row[$rel['foreign']];
+			if(count($ids)) {
+				$rdata = DBObject::db_get_array(sprintf(
+					'SELECT %s,%s FROM %s WHERE %s IN (%s)',
+					$p,$rel['foreign'], $rel['table'], $p,
+					implode(',', $ids)));
+				foreach($rdata as $row)
+					$this->reldata[$row[$p]][] = $row[$rel['foreign']];
+			}
 		}
 
 		public function html(&$data)
