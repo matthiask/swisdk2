@@ -159,12 +159,13 @@
 
 		protected function handle_listing()
 		{
-			$p = $this->dbobj->dbobj()->_prefix();
+			$dbobj = $this->dbobj->dbobj();
+			$p = $dbobj->_prefix();
 			$this->smarty->assign('items', $this->dbobj);
 			if($this->find_config_value('comments_enabled')) {
 				$comment_count = DBObject::db_get_array(
 					'SELECT comment_realm, COUNT(comment_id) AS count '
-					.'FROM '.$this->dbobj->table().', tbl_comment '
+					.'FROM '.$dbobj->table().', tbl_comment '
 					.'WHERE '.$p.'comment_realm=comment_realm '
 					.'AND '.$p.'id IN ('.implode(',', $this->dbobj->ids()).') '
 					.'GROUP BY comment_realm',
