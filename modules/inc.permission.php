@@ -224,15 +224,35 @@
 		{
 			if($uid===null)
 				$uid = SessionHandler::user()->id();
+			$rsql = '';
+			if(is_array($realm)) {
+				foreach($realm as $r)
+					$rsql .= ','.intval($r);
+				$rsql = 'realm_id IN ('.substr($rsql, 1).')';
+			} else {
+				$rsql = 'realm_id='.intval($realm);
+			}
 			$rid = intval($realm);
-			$sql = 'SELECT role_id FROM tbl_user_to_realm WHERE user_id='.$uid.' AND '
-				.'realm_id='.$rid;
-			$user = DBObject::db_get_row($sql);
-			$sql = 'SELECT MAX(role_id) AS role_id FROM tbl_user_group_to_realm, tbl_user_to_user_group '
+			$usql = 'SELECT role_id,realm_id FROM tbl_user_to_realm WHERE user_id='.$uid.' AND '.$rsql
+				.' GROUP BY realm_id';
+			$gsql = 'SELECT MAX(role_id) AS role_id,realm_id FROM tbl_user_group_to_realm, tbl_user_to_user_group '
 				.'WHERE tbl_user_group_to_realm.user_group_id=tbl_user_to_user_group.user_group_id'
-				.' AND user_id='.$uid.' AND realm_id='.$rid;
-			$group = DBObject::db_get_row($sql);
-			return max($user['role_id'], $group['role_id']);
+				.' AND user_id='.$uid.' AND '.$rsql.' GROUP BY realm_id';
+			if(is_array($realm)) {
+				$user = DBObject::db_get_array($usql, array('realm_id', 'role_id'));
+				$group = DBObject::db_get_array($gsql, array('realm_id', 'role_id'));
+				$realms = array_merge(array_keys($user), array_keys($group));
+				$ret = array();
+				foreach($realms as $realm)
+					$ret[$realm] = max(
+						isset($user[$realm])?$user[$realm]:0,
+						isset($group[$realm])?$group[$realm]:0);
+				return $ret;
+			} else {
+				$user = DBObject::db_get_row($usql);
+				$group = DBObject::db_get_row($gsql);
+				return max($user['role_id'], $group['role_id']);
+			}
 		}
 
 		/**
@@ -259,7 +279,46 @@
 					)
 				)";
 			$dboc->add_clause($sql, $params);
+		}
 
+		public static function limit_by_realm(&$container, $realms, $role = ROLE_VISITOR, $realm_link = 'RealmLink')
+		{
+			$dbo = $container->dbobj();
+			$relations = $dbo->relations();
+			if(!isset($relations[$realm_link]))
+				return;
+
+			// if no realms have been specified, apply rules to all
+			if(!$realms)
+				$realms = DBOContainer::find('Realm')->ids();
+
+			$p = $dbo->_prefix();
+			$t = $dbo->table();
+
+			$role = intval($role);
+			$sql1 = array();
+			$sql2 = array();
+
+			$realmroles = PermissionManager::role_for_realm($realms);
+
+			foreach($realmroles as $realm => $realmrole) {
+				$r = $role;
+				if($realmrole)
+					$r = max($r, $realmrole);
+				$sql1[] = "($t.{$p}realm_id=$realm AND $t.{$p}role_id<=$r)";
+				$sql2[] = "(realm_id=$realm AND role_id<=$r)";
+			}
+
+			$sql = '('
+				.implode(' OR ', $sql1)
+				." OR $t.{$p}id IN ("
+					."SELECT DISTINCT {$p}id FROM tbl_{$p}to_realm"
+					.' WHERE '
+					.implode(' OR ', $sql2)
+				.")"
+			.')';
+
+			$container->add_clause($sql);
 		}
 	}
 
