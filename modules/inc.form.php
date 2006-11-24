@@ -547,15 +547,18 @@
 		 */
 		public function is_valid()
 		{
-			// has this form been submitted (or was it another form on the same page)
-			if(!isset($_POST['__guard_'.$this->id()]))
-				return false;
-			if($_POST['__guard_'.$this->id()]!=guardToken()) {
+			if(!$this->submitted()) {
 				$this->box()->add_message(dgettext('swisdk', 'Could not validate form submission'));
 				return false;
 			}
 
 			return parent::is_valid();
+		}
+
+		public function submitted()
+		{
+			return isset($_POST['__guard_'.$this->id()])
+				&& $_POST['__guard_'.$this->id()]==guardToken();
 		}
 	}
 
