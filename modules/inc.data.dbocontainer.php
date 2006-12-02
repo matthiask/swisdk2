@@ -415,6 +415,7 @@
 						return false;
 			foreach($this->data as &$obj)
 				call_user_func_array(array(&$obj,$method), $args);
+			return true;
 		}
 
 		public function add($param)

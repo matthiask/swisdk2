@@ -182,7 +182,7 @@
 			$dbobj =& $form->dbobj();
 			$box = null;
 			// FIXME this is hacky. FormBox should have a box() method too?
-			$dbobjml =& $dbobj->dbobj();
+			$dbobjml = $dbobj->dbobj();
 			if($dbobjml instanceof DBOContainer) {
 				$languages = Swisdk::all_languages();
 
@@ -192,6 +192,8 @@
 						$dbobjml[$l['language_id']] =
 							DBObject::create($dbobj->_class().'Content');
 					$dbo =& $dbobjml[$l['language_id']];
+					$dbo->set_owner($dbobj);
+					$dbo->language_id = $l['language_id'];
 					$box->bind($dbo);
 					$box->set_title($key);
 					$this->form = $box;

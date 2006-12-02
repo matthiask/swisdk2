@@ -142,8 +142,6 @@
 
 		public function store()
 		{
-			if(!$this->dirty()&&!$this->obj->dirty())
-				return false;
 			if(isset($this->data[$this->primary]) && $this->data[$this->primary])
 				return $this->update();
 			else
@@ -153,7 +151,7 @@
 		public function update()
 		{
 			DBObject::db_start_transaction($this->db_connection_id);
-			if(parent::update()===false||!$this->obj->update()) {
+			if(parent::update()===false||!$this->obj->store()) {
 				DBObject::db_rollback($this->db_connection_id);
 				return false;
 			}
@@ -254,7 +252,7 @@
 			}
 
 			$this->language = $data[$lkey];
-			$dbobj =& $this->dbobj();
+			$dbobj = $this->dbobj();
 			foreach($data as $k => $v) {
 				if(strpos($k, $p)===0)
 					$dbobj->set($k, $v);
@@ -265,7 +263,9 @@
 
 		public function __get($var)
 		{
-			return $this->get($this->name($var));
+			if($val = $this->get($this->name($var)))
+				return $val;
+			return $this->dbobj()->$var;
 		}
 
 		public function __set($var, $value)
@@ -304,10 +304,13 @@
 		public function _select_sql($joins)
 		{
 			$tmp = DBObject::create($this->tclass);
+			$lang_clause = '';
+			if(($lang_id = $this->language())!=LANGUAGE_ALL)
+				$lang_clause = ' AND '.$tmp->name('language_id').'='.$lang_id;
 			return 'SELECT * FROM '.$this->table.' LEFT JOIN '.$tmp->table()
 				.' ON '.$this->table.'.'.$this->primary.'='
 					.$tmp->table().'.'.$tmp->name($this->primary)
-				.$joins.' WHERE 1';
+				.$joins.' WHERE 1'.$lang_clause;
 		}
 	}
 

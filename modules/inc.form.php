@@ -417,7 +417,7 @@
 		public static function to_form_id($dbo, $id=0)
 		{
 			$id = $dbo->id();
-			return '__sf_'.$dbo->table().'_'.($id?$id:0);
+			return 'sf_'.$dbo->table().'_'.($id?$id:0);
 		}
 
 		/**
