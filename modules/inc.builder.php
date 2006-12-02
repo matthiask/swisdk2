@@ -192,6 +192,8 @@
 						$dbobjml[$l['language_id']] =
 							DBObject::create($dbobj->_class().'Content');
 					$dbo =& $dbobjml[$l['language_id']];
+					$dbo->set_owner($dbobj);
+					$dbo->language_id = $l['language_id'];
 					$box->bind($dbo);
 					$box->set_title($key);
 					$this->form = $box;
