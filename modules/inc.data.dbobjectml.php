@@ -254,7 +254,7 @@
 			}
 
 			$this->language = $data[$lkey];
-			$dbobj =& $this->dbobj();
+			$dbobj = $this->dbobj();
 			foreach($data as $k => $v) {
 				if(strpos($k, $p)===0)
 					$dbobj->set($k, $v);

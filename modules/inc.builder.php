@@ -182,7 +182,7 @@
 			$dbobj =& $form->dbobj();
 			$box = null;
 			// FIXME this is hacky. FormBox should have a box() method too?
-			$dbobjml =& $dbobj->dbobj();
+			$dbobjml = $dbobj->dbobj();
 			if($dbobjml instanceof DBOContainer) {
 				$languages = Swisdk::all_languages();
 
