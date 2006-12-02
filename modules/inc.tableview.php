@@ -111,7 +111,7 @@ EOD;
 		protected function render_body()
 		{
 			$html = "<tbody>\n";
-			foreach($this->data as &$row)
+			foreach($this->data as $row)
 				$html .= $this->render_row($row);
 			$html .= "</tbody>\n";
 			return $html;
