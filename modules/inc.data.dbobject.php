@@ -344,7 +344,7 @@
 			DBObject::db_start_transaction($this->db_connection_id);
 			if(!$force_primary)
 				$this->unset_primary();
-			$res = DBObject::db_query('INSERT INTO ' . $this->table
+			$res = DBObject::db_query('INSERT INTO ' . $this->table.' '
 				. $vals_sql,
 				$this->db_connection_id);
 			if($res===false) {
