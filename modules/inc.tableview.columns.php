@@ -180,7 +180,7 @@ EOD;
 				$this->db_data = DBOContainer::find($this->db_class)->data();
 			} else {
 				$doc = DBOContainer::find($this->db_class);
-				foreach($doc as $id => &$obj)
+				foreach($doc as $id => $obj)
 					$this->db_data[$id] = $obj->title();
 			}
 		}
@@ -250,12 +250,12 @@ EOD;
 					$this->patterns[] = '/\{' . $v . '\}/';
 
 				$doc = DBOContainer::find($this->db_class, $clause);
-				foreach($doc as $id => &$obj)
+				foreach($doc as $id => $obj)
 					$this->db_data[$obj->get($rel['field'])][] =
 						$obj->data();
 			} else {
 				$doc = DBOContainer::find($this->db_class, $clause);
-				foreach($doc as $id => &$obj)
+				foreach($doc as $id => $obj)
 					$this->db_data[$obj->get($rel['field'])][] =
 						$obj->title();
 			}

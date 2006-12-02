@@ -393,11 +393,7 @@ EOD;
 		protected function render_body()
 		{
 			$html = "<tbody>\n";
-<<<<<<< .merge_file_ShlHeP
-			foreach($this->data as $row)
-=======
-			foreach($this->obj as &$row)
->>>>>>> .merge_file_uC6XEN
+			foreach($this->obj as $row)
 				$html .= $this->render_row($row);
 			$html .= "</tbody>\n";
 			return $html;
