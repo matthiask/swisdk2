@@ -28,22 +28,28 @@
 		{
 			$input = trim($this->input(), '/');
 			$tokens = array();
-			$path = CONTENT_ROOT;
+			$path_1 = CONTENT_ROOT;
+			$path_2 = SWISDK_ROOT.'content/';
 			if($input) {
 				$tokens = explode('/', $input);
-				$path .= $input;
+				$path_1 .= $input;
+				$path_2 .= $input;
 			} else {
-				$path = rtrim($path, '/');
+				$path_1 = rtrim($path_1, '/');
+				$path_2 = rtrim($path_2, '/');
 			}
 			$t = $tokens;
 			$matches = array();
 
 			// try to find an Index_* controller/template only
 			// for the full REQUEST_URI path
-			if(!($matches = glob($path.'/Index_*'))) {
+			if(!($matches = glob($path_1.'/Index_*'))
+					&&!($matches=glob($path_2.'/Index_*'))) {
 				while(true) {
-					if(($matches=glob($path.'/All_*')) ||
-							($matches=glob($path.'_*'))) {
+					if(($matches=glob($path_1.'/All_*'))
+							||($matches=glob($path_1.'_*'))
+							||($matches=glob($path_2.'/All_*'))
+							||($matches=glob($path_2.'_*'))) {
 						if(is_file($matches[0]))
 							break;
 					}
@@ -52,7 +58,8 @@
 						return false;
 
 					array_pop($tokens);
-					$path = CONTENT_ROOT.implode('/', $tokens);
+					$path_1 = rtrim(CONTENT_ROOT.implode('/', $tokens), '/');
+					$path_2 = rtrim(SWISDK_ROOT.implode('/', $tokens), '/');
 				}
 			}
 
