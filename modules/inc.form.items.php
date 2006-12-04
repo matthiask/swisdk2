@@ -26,11 +26,6 @@
 		protected $message;
 
 		/**
-		 * the value (ooh!)
-		 */
-		protected $value;
-
-		/**
 		 * info text
 		 */
 		protected $info;
@@ -76,6 +71,11 @@
 		 */
 		protected $valid = null;
 
+		/**
+		 * the bound DBObject
+		 */
+		protected $dbobj = null;
+
 		public function __construct($name=null)
 		{
 			if($name)
@@ -85,17 +85,21 @@
 		/**
 		 * accessors and mutators
 		 */
-		public function value()			{ return $this->value; }
+		public function value()
+		{
+			return $this->dbobj->get($this->name);
+		}
+
 		public function set_value($value)
 		{
-			$this->value = $value;
+			$this->dbobj->set($this->name, $value);
 			return $this;
 		}
 
 		public function set_default_value($value)
 		{
-			if($this->value===null)
-				$this->value = $value;
+			if(!$this->dbobj->get($this->name))
+				$this->dbobj->set($this->name, $value);
 			return $this;
 		}
 
@@ -180,6 +184,8 @@
 		 */
 		public function init_value($dbobj)
 		{
+			$this->dbobj = $dbobj;
+
 			$name = $this->name();
 			$id = $this->id();
 			$val = null;
@@ -215,9 +221,11 @@
 		/**
 		 * refresh the FormItem's value (read value from DBObject)
 		 */
-		public function refresh($dbobj)
+		public function refresh($dbobj=null)
 		{
-			$this->set_value($dbobj->get($this->name()));
+			if($dbobj)
+				$this->dbobj = $dbobj;
+			$this->set_value($this->dbobj->get($this->name));
 		}
 
 		/**
@@ -337,6 +345,8 @@ EOD;
 
 		public function init_value($dbobj)
 		{
+			$this->dbobj = $dbobj;
+
 			$name = $this->id();
 			if(isset($_FILES[$name])
 					&& ($this->files_data = $_FILES[$name])
@@ -467,6 +477,8 @@ EOD;
 
 		public function init_value($dbobj)
 		{
+			$this->dbobj = $dbobj;
+
 			$name = $this->name();
 			$id = $this->id();
 
@@ -607,12 +619,13 @@ EOD;
 		public function init_value($dbobj)
 		{
 			parent::init_value($dbobj);
-			if(is_array($this->value)) {
-				$this->real_value = $this->value;
-				$this->value = implode(', ', $this->real_value);
+			if(is_array($this->value())) {
+				$this->real_value = $this->value();
+				$this->set_value(implode(', ', $this->real_value));
 			} else {
-				$this->real_value = array_map('trim', explode(',', $this->value));
-				$dbobj->set($this->name(), $this->real_value);
+				$this->real_value = array_map('trim',
+					explode(',', $this->value()));
+				$this->set_value($this->real_value);
 			}
 		}
 
@@ -629,6 +642,8 @@ EOD;
 	class SubmitButton extends FormBar {
 		public function init_value($dbobj)
 		{
+			$this->dbobj = $dbobj;
+
 			$this->value = dgettext('swisdk', 'Submit');
 		}
 	}
