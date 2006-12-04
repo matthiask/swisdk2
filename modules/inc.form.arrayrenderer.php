@@ -51,6 +51,8 @@
 				$this->array['form'] = array(
 					'type' => get_class($obj),
 					'html' => $html);
+			else if($obj instanceof FormItem)
+				$this->_render($obj, $html, $row_class);
 			else
 				$this->stack[$this->ref][] = array(
 					'type' => get_class($obj),
@@ -61,8 +63,7 @@
 		{
 			$this->array['form'] = array_merge($this->array['form'], array(
 				'start' => $this->html_start,
-				'end' => $this->html_end,
-				'javascript' => $this->javascript()));
+				'end' => $this->html_end));
 			return $this->array;
 		}
 	}
