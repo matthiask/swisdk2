@@ -42,7 +42,10 @@
 				'html' => $field_html,
 				'title' => $this->_title_html($obj),
 				'message' => $this->_message_html($obj),
-				'info' => $this->_info_html($obj));
+				'info' => $this->_info_html($obj),
+				'valid' => $obj->is_valid(),
+				'message_raw' => $obj->message(),
+				'info_raw' => $obj->info());
 		}
 
 		protected function _render_bar($obj, $html, $row_class = null)
