@@ -92,6 +92,13 @@
 			return $this;
 		}
 
+		public function set_default_value($value)
+		{
+			if($this->value===null)
+				$this->value = $value;
+			return $this;
+		}
+
 		public function name()			{ return $this->name; }
 		public function set_name($name)
 		{
