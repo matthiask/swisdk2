@@ -5,22 +5,12 @@
 
 <xsl:template match="sitemap">&lt;?php
 global $_swisdk2_sitemap;
-$_swisdk2_sitemap = array();
-<xsl:apply-templates/>
-?></xsl:template>
-
-<xsl:template match="site">
-$_swisdk2_sitemap['<xsl:value-of select="@id"/>']['<xsl:value-of select="@lang"/>'] = array(
-	<xsl:for-each select="@*">
-		'<xsl:value-of select="name()" />' => '<xsl:value-of select="." />',
-	</xsl:for-each>
-	<xsl:if test="count(*) &gt; 0">
+$_swisdk2_sitemap = array(
 	'pages' => array(
-		<xsl:apply-templates/>
-	),
-	</xsl:if>
+	<xsl:apply-templates/>
+	)
 );
-</xsl:template>
+?></xsl:template>
 
 <xsl:template match="page">
 '<xsl:value-of select="@id"/>' => array(

@@ -16,15 +16,13 @@
 		public static function page($url, $site = 'default', $partial = false)
 		{
 			$sitemap = SwisdkSitemap::sitemap();
-			$ref =& $sitemap[$site];
+			$ref =& $sitemap;
 			if(array_keys($ref)==array(''))
 				$ref = reset($ref);
-			$tokens = explode('/', substr($url, 1));
+			$tokens = explode('/', $url);
 
 			// drill down until there are no more URL tokens
-			foreach($tokens as $t) {
-				if(!$t)
-					continue;
+			while(($t = array_shift($tokens))!==null) {
 				if(isset($ref['pages'][$t]))
 					$ref =& $ref['pages'][$t];
 				else if($partial)
@@ -43,9 +41,11 @@
 		{
 			static $sitemap = null;
 			if($sitemap === null) {
-				$xmlfile = WEBAPP_ROOT.'sitemap.xml';
+				$xmlfile = Swisdk::website_config_value('sitemap',
+					'sitemap.xml');
 				$xslfile = SWISDK_ROOT.'lib/sitemap-php.xsl';
-				$phpfile = CACHE_ROOT.'sitemap.php';
+				$phpfile = CACHE_ROOT.'sitemap-'.sanitizeFilename($xmlfile).'.php';
+				$xmlfile = CONTENT_ROOT.$xmlfile;
 
 				global $_swisdk2_sitemap;
 
@@ -62,6 +62,8 @@
 				} else
 					$regenerate = true;
 
+				$regenerate = true;
+
 				if($regenerate) {
 					$prc = new XSLTProcessor();
 					$xsl = new DOMDocument();
@@ -70,7 +72,6 @@
 					$xsl->load($xslfile);
 					$prc->importStyleSheet($xsl);
 					file_put_contents($phpfile, $prc->transformToXML($xml));
-					require_once $phpfile;
 				}
 
 				require_once $phpfile;
@@ -81,25 +82,23 @@
 
 				if(!isset($_swisdk2_sitemap['processed'])) {
 					require_once UTF8.'/ucwords.php';
-					foreach($_swisdk2_sitemap as &$site) {
-						foreach($site as $language => &$page) {
-							SwisdkSitemap::loop_pages($page,
-								'/'.($language?$language.'/':''));
-						}
-					}
+					SwisdkSitemap::loop_pages($_swisdk2_sitemap);
 					$_swisdk2_sitemap['processed'] = true;
 					file_put_contents($phpfile,
 						'<?php $_swisdk2_sitemap='
 						.var_export($_swisdk2_sitemap, true).'?>');
 				}
+
 				$sitemap = $_swisdk2_sitemap;
 			}
 
 			return $sitemap;
 		}
 
-		protected static function loop_pages(&$pages, $prefix)
+		protected static function loop_pages(&$pages, $prefix=null)
 		{
+			if(!isset($pages['pages']))
+				return;
 			foreach($pages['pages'] as $id => &$page) {
 				if(!isset($page['url']))
 					$page['url'] = $prefix.$id;
@@ -107,8 +106,8 @@
 					$page['title'] = utf8_ucwords(preg_replace('/[ _]+/', ' ', $id));
 				if(isset($page['pages']))
 					SwisdkSitemap::loop_pages($page, $prefix.$id.'/');
-				$page['parent_title'] = $pages['title'];
-				$page['parent_url'] = $pages['url'];
+				$page['parent_title'] = isset($pages['title'])?$pages['title']:'';
+				$page['parent_url'] = isset($pages['url'])?$pages['url']:'/';
 			}
 		}
 	}

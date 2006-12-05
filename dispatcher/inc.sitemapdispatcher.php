@@ -27,24 +27,67 @@
 	 *   to /blog/ respectively /blog/something
 	 */
 	class SitemapDispatcher extends ControllerDispatcherModule {
+		protected $rewroten = null;
+		protected $tokens;
+
 		public function collect_informations()
 		{
 			$input = $this->input();
-			$page = SwisdkSitemap::page($input);
-			if(isset($page['title']))
-				Swisdk::set_config_value('runtime.page.title',
-					$page['title']);
-			if($page===false) {
-				$page = SwisdkSitemap::page($input,
-					'default', true);
-				if(isset($page['rewrite']))
-					$this->set_output(str_replace(
-						$page['url'], $page['rewrite'],
-						$input));
-			} else if(isset($page['path']))
-				$this->set_output($page['path']);
-			else if(isset($page['rewrite']))
-				$this->set_output($page['rewrite']);
+
+			$sitemap = SwisdkSitemap::sitemap();
+			$ref =& $sitemap;
+
+			$this->tokens = explode('/', rtrim($input, '/'));
+			$this->rewroten = null;
+
+			while(($t = array_shift($this->tokens))!==null) {
+				if(!isset($ref['pages'][$t]))
+					break;
+
+				$this->rewroten = null;
+
+				$ref =& $ref['pages'][$t];
+				$this->walk_page($ref);
+			}
+
+			if($this->rewroten)
+				$this->set_output($this->rewroten);
+		}
+
+		protected function walk_page(&$page)
+		{
+			foreach($page as $k => &$v) {
+				switch($k) {
+					case 'language':
+						Swisdk::set_language($v);
+						break;
+					case 'website':
+						Swisdk::set_config_value(
+							'runtime.website', $v);
+						Swisdk::set_config_value('runtime.website.title',
+							Swisdk::website_config_value('title'));
+						break;
+					case 'title':
+						Swisdk::set_config_value('runtime.page.title',
+							$v);
+						break;
+					case 'rewrite-exact':
+						if(!count($this->tokens))
+							$this->set_output($v);
+						break;
+					case 'rewrite':
+						$this->rewroten = str_replace($page['url'], $v,
+							$this->input());
+						break;
+					case 'pages':
+					case 'parent_title':
+					case 'parent_url':
+						break;
+					default:
+						Swisdk::set_config_value(
+							'runtime.'.str_replace(':', '.', $k), $v);
+				}
+			}
 		}
 	}
 
