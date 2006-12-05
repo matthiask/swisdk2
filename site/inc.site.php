@@ -18,7 +18,7 @@
 			return Swisdk::config_value('runtime.controller.url');
 		}
 
-		public function run_website_components(&$smarty)
+		public function run_website_components($smarty)
 		{
 			$components = explode(',', Swisdk::website_config_value('components'));
 
