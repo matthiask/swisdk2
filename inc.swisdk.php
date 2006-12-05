@@ -214,7 +214,7 @@
 		 * [website.something]
 		 * inherit = default
 		 */
-		public static function website_config_value($key)
+		public static function website_config_value($key, $default=null)
 		{
 			$key = strtolower($key);
 			if(isset(Swisdk::$config[$key]))
@@ -232,7 +232,7 @@
 				if(isset(Swisdk::$config['website.'.$website.'.inherit']))
 					$website = Swisdk::$config['website.'.$website.'.inherit'];
 				else
-					return null;
+					return $default;
 			}
 			return Swisdk::$config['website.'.$website.'.'.$key];
 		}
