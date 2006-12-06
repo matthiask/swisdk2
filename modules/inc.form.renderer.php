@@ -256,8 +256,10 @@ function validate_'.$id.'()
 			$this->_render($obj, sprintf(
 				'%s<input type="%s" name="%s" id="%s" value="%s" %s />',
 				($current
-					?sprintf('Current: <a href="/download/%s">%s</a><br />',
-						$current, $current)
+					?sprintf('Current: <a href="/download/%s">%s</a>, '
+						.'remove? <input type="checkbox" '
+							.'name="%s___delete" id="%s___delete" /><br />',
+						$current, $current, $name, $name)
 					:''),
 				$obj->type(), $name, $name, $obj->value(),
 				$this->_attribute_html($obj->attributes())));

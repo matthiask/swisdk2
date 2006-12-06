@@ -434,6 +434,7 @@ EOD;
 
 	class DBFileUpload extends FileUpload {
 		protected $current_value = null;
+		protected $delete_file = false;
 
 		public function init_value($dbobj)
 		{
@@ -446,15 +447,25 @@ EOD;
 				$dbobj[$name.'_mimetype'] = $this->files_data['type'];
 				$dbobj[$name.'_size'] = $this->files_data['size'];
 				unset($dbobj[$name]);
-
-				// automatically call $this->store_file() while
-				// storing the DBObject. Magic!
-				$dbobj->listener_add('store', array($this, 'store_file'));
 			}
+
+			// automatically call $this->store_file() while
+			// storing the DBObject. Magic!
+			$dbobj->listener_add('pre-store', array($this, 'store_file'));
+
+			if(getInput($this->id().'___delete'))
+				$this->delete_file = true;
 		}
 
 		public function store_file($dbobj)
 		{
+			if($this->delete_file) {
+				$name = $this->name();
+				@unlink(DATA_ROOT.'upload/'.$dbobj->get($name.'_file'));
+				foreach(array('_file', '_name', '_mimetype', '_size') as $t)
+					$dbobj->set($name.$t, '');
+			}
+			
 			if($this->valid && !$this->no_upload) {
 				Swisdk::require_data_directory('upload');
 				copy($this->files_data['path'],
