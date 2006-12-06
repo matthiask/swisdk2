@@ -59,7 +59,9 @@
 		{
 			$headers = implode("\r\n", array(
 					'From: Messenger <messenger@'
-						.Swisdk::config_value('runtime.request.host').'>',
+						.preg_replace('/^www\./', '',
+							Swisdk::config_value('runtime.request.host')).'>',
+					'To: '.$to,
 					'Cc: ',
 					'Bcc: '.Swisdk::config_value('core.admin_email'),
 					'Reply-To: '.Swisdk::config_value('core.admin_email'),
