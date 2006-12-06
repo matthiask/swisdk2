@@ -12,6 +12,7 @@
 		protected $array = array();
 		protected $stack = array();
 		protected $ref;
+		protected $form;
 
 		public function __construct()
 		{
@@ -21,6 +22,7 @@
 
 		protected function visit_FormBox_start($obj)
 		{
+			$this->form = $obj;
 			$name = $obj->name();
 			$this->stack[$this->ref][$name] = array();
 			$this->stack[$this->ref+1] =& $this->stack[$this->ref][$name];
@@ -36,14 +38,20 @@
 
 		protected function _render($obj, $field_html, $row_class = null)
 		{
+			$valid = true;
+			if(isset($this->form) && $this->form->submitted()) {
+				$valid = $obj->is_valid();
+			}
+		
 			$this->stack[$this->ref][$obj->name()] = array(
 				'type' => get_class($obj),
 				'name' => $obj->name(),
 				'html' => $field_html,
+				'id' => $obj->id(),
 				'title' => $this->_title_html($obj),
 				'message' => $this->_message_html($obj),
 				'info' => $this->_info_html($obj),
-				'valid' => $obj->is_valid(),
+				'valid' => $valid,
 				'message_raw' => $obj->message(),
 				'info_raw' => $obj->info());
 		}
