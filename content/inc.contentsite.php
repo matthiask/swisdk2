@@ -359,8 +359,9 @@
 		{
 			if(isset($this->request['category'])
 					&& $this->request['category']) {
-				$p = $this->dbobj->_prefix();
-				$this->dbobj->add_join($this->dbobj->_class().'Category');
+				$dbo = $this->dbobj->dbobj_clone();
+				$p = $dbo->_prefix();
+				$this->dbobj->add_join($dbo->_class().'Category');
 				$this->dbobj->add_join('tbl_'.$p.'category',
 					'tbl_'.$p.'to_'.$p.'category.'.$p.'category_id='
 					.'tbl_'.$p.'category.'.$p.'category_id');
