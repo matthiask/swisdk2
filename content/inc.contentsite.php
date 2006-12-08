@@ -162,12 +162,13 @@
 			$dbobj = $this->dbobj->dbobj();
 			$p = $dbobj->_prefix();
 			$this->smarty->assign('items', $this->dbobj);
-			if($this->find_config_value('comments_enabled')) {
+			if($this->find_config_value('comments_enabled')
+					&& count($ids = $this->dbobj->ids())) {
 				$comment_count = DBObject::db_get_array(
 					'SELECT comment_realm, COUNT(comment_id) AS count '
 					.'FROM '.$dbobj->table().', tbl_comment '
 					.'WHERE '.$p.'comment_realm=comment_realm '
-					.'AND '.$p.'id IN ('.implode(',', $this->dbobj->ids()).') '
+					.'AND '.$p.'id IN ('.implode(',', $ids).') '
 					.'GROUP BY comment_realm',
 					array('comment_realm', 'count'));
 				$this->smarty->assign('comment_count', $comment_count);
