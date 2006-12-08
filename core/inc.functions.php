@@ -241,4 +241,14 @@
 		return $fname;
 	}
 
+	/**
+	 * add ellipsis to a string if it is too long
+	 */
+	function ellipsize($string, $len=100, $ellipsis=' &hellip;')
+	{
+		if(strlen($string)>$len)
+			return substr($string, 0, $len).$ellipsis;
+		return $string;
+	}
+
 ?>
