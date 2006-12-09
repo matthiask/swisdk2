@@ -27,6 +27,7 @@
 	 *   to /blog/ respectively /blog/something
 	 */
 	class SitemapDispatcher extends ControllerDispatcherModule {
+		protected $redirect = null;
 		protected $rewroten = null;
 		protected $tokens;
 
@@ -50,6 +51,8 @@
 				$this->walk_page($ref);
 			}
 
+			if($this->redirect)
+				redirect($this->redirect);
 			if($this->rewroten)
 				$this->set_output($this->rewroten);
 		}
@@ -70,6 +73,14 @@
 					case 'title':
 						Swisdk::set_config_value('runtime.page.title',
 							$v);
+						break;
+					case 'redirect-exact':
+						if(!count($this->tokens))
+							redirect($v);
+						break;
+					case 'redirect':
+						$this->redirect = str_replace($page['url'], $v,
+							$this->input());
 						break;
 					case 'rewrite-exact':
 						if(!count($this->tokens))
