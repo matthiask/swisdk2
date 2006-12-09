@@ -99,7 +99,7 @@
 			if(class_exists($class))
 				return new $class($language);
 
-			$obj = new DBObjectML(false);
+			$obj = new DBObjectML($language, false);
 			$obj->class = $class;
 			$obj->_setup_dbvars();
 			$obj->language = $language;
