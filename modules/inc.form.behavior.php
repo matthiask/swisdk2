@@ -157,4 +157,45 @@ EOD;
 		}
 	}
 
+	class UrlifyBehavior extends FormItemBehavior {
+		public function javascript()
+		{
+			$n1 = $this->item->id();
+			$n2 = $this->args[0]->id();
+
+			$js = <<<EOD
+function urlify_behavior_handler_$n1()
+{
+	str = document.getElementById('$n1').value;
+	removelist = ["a", "an", "as", "at", "before", "but", "by", "for", "from",
+		"is", "in", "into", "like", "of", "off", "on", "onto", "per",
+		"since", "than", "the", "this", "that", "to", "up", "via",
+		"with"];
+	replacement = [
+		['ä', 'ae'],
+		['ö', 'oe'],
+		['ü', 'ue'],
+		['ß', 'ss'],
+		['à', 'a'],
+		['á', 'a'],
+		['è', 'e'],
+		['é', 'e'],
+		['î', 'i'],
+		['ô', 'o']];
+	r = new RegExp('\\b(' + removelist.join('|') + ')\\b', 'gi');
+	for(i=0; i<replacement.length; i++)
+		str = str.replace(new RegExp(replacement[i][0]), replacement[i][1]);
+	document.getElementById('$n2').value = str.replace(r, '').replace(r, '')
+		.replace(/[^-A-Z0-9\s]/gi, '').replace(/^\s+|\s+$/g, '')
+		.replace(/[-\s]+/g, '_').toLowerCase();
+}
+
+EOD;
+			return array(
+				"add_event(document.getElementById('$n1'), 'change',"
+				." urlify_behavior_handler_$n1);",
+				$js);
+		}
+	}
+
 ?>
