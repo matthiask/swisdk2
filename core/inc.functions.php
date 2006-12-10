@@ -170,8 +170,8 @@
 			header("Pragma: no-cache");
 		}
 		header("Content-Type: $mime");
-		header("Content-Disposition:$disposition; filename=\"".trim(htmlentities($name))."\"");
-		header("Content-Description: ".trim(htmlentities($name)));
+		header("Content-Disposition:$disposition; filename=\"".trim($name)."\"");
+		header("Content-Description: ".trim($name));
 		header("Content-Length: ".(string)(filesize($path)));
 		header("Connection: close");
 	
