@@ -301,6 +301,22 @@
 				return $this->data[$var] = $value;
 		}
 
+		public function &_fulltext_fields()
+		{
+			if(!isset(DBObject::$_fulltext_fields[$this->db_connection_id]
+					[$this->class])) {
+				$mine = parent::_fulltext_fields();
+				DBObject::$_fulltext_fields[$this->db_connection_id]
+					[$this->class] =
+					array_merge($mine,
+						DBObject::create($this->tclass)
+						->_fulltext_fields());
+			}
+
+			return DBObject::$_fulltext_fields[$this->db_connection_id][$this->class];
+
+		}
+
 		public function _select_sql($joins)
 		{
 			$tmp = DBObject::create($this->tclass);
