@@ -136,8 +136,6 @@
 			$this->dbo_class = $module->dbo_class();
 			$this->args = $module->component_arguments();
 			$this->multilanguage = $module->multilanguage();
-			$this->init();
-			$module->run_website_components($this->smarty);
 		}
 
 		/**
