@@ -89,6 +89,8 @@
 					case 'rewrite':
 						$this->rewroten = str_replace($page['url'], $v,
 							$this->input());
+						Swisdk::set_config_value('runtime.controller.url',
+							$page['url'].'/');
 						break;
 					case 'pages':
 					case 'parent_title':
