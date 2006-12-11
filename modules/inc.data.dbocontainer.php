@@ -197,6 +197,15 @@
 							$this, 'set_fulltext'),
 							$data);
 						break;
+					case ':set_realm_clause':
+						PermissionManager::set_realm_clause($this);
+						break;
+					case ':limit_by_realm':
+						array_unshift($data, $this);
+						call_user_func_array(array(
+							'PermissionManager', 'limit_by_realm'),
+							$data);
+						break;
 				}
 				return;
 			}
