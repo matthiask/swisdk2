@@ -63,8 +63,9 @@
 				}
 			}
 
-			Swisdk::set_config_value('runtime.controller.url',
-				preg_replace('/[\/]+/', '/', '/'.implode('/',$tokens).'/'));
+			if(Swisdk::config_value('runtime.controller.url', '#')=='#')
+				Swisdk::set_config_value('runtime.controller.url',
+					preg_replace('/[\/]+/', '/', '/'.implode('/',$tokens).'/'));
 			Swisdk::set_config_value('runtime.includefile', $matches[0] );
 			Swisdk::set_config_value('runtime.arguments', array_slice(
 				$t, count($tokens)));
