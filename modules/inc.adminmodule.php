@@ -90,10 +90,6 @@
 			PermissionManager::check_throw($this->role);
 			$cmp = $this->component_dispatch();
 			$cmp->run();
-
-			Swisdk::set_config_value('runtime.navigation.url',
-				Swisdk::config_value('runtime.controller.url'));
-
 			$cmp->display();
 		}
 
