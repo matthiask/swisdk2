@@ -24,6 +24,8 @@
 
 			foreach($components as &$c) {
 				$c = trim($c);
+				if(!$c)
+					continue;
 				$cmp = Swisdk::load_instance($c, 'components');
 				if($cmp instanceof IComponent)
 					$cmp->run();
