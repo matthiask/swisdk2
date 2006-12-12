@@ -56,7 +56,7 @@
 					if($id = $this->id()) {
 						$this->obj = DBOContainer::find($this->tclass, array(
 							$tmp->name($this->primary).'=' => $id,
-							':index' => 'language_id'));
+							':index' => $tmp->name('language_id')));
 					} else
 						$this->obj = DBOContainer::create($this->tclass);
 				} else {

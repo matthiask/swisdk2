@@ -433,7 +433,7 @@
 		{
 			if($param instanceof DBObject) {
 				if($this->init_index!==null)
-					$this->data[$param->{$this->init_index}] = $param;
+					$this->data[$param->get($this->init_index)] = $param;
 				else if(isset($this->data[$param->id()]))
 					$this->data[$param->id()] = $param;
 				else
@@ -442,7 +442,7 @@
 				$obj = clone $this->obj;
 				$obj->set_data($param);
 				if($this->init_index!==null)
-					$this->data[$obj->{$this->init_index}] = $obj;
+					$this->data[$obj->get($this->init_index)] = $obj;
 				else
 					$this->data[$obj->id()] = $obj;
 			}
