@@ -32,6 +32,10 @@
 
 		public function setup_search()
 		{
+		}
+
+		public function add_default_items()
+		{
 			$this->set_title(dgettext('swisdk', 'Search form'));
 			$this->search->add(new SubmitButton());
 		}
