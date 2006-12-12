@@ -26,7 +26,7 @@
 				$c = trim($c);
 				if(!$c)
 					continue;
-				$cmp = Swisdk::load_instance($c, 'components');
+				$cmp = Swisdk::load_instance($c.'Component', 'components');
 				if($cmp instanceof IComponent)
 					$cmp->run();
 				if($cmp instanceof IHtmlComponent)

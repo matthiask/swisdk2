@@ -247,7 +247,7 @@
 			$this->smarty->assign('item', $dbo);
 			$chtml = '';
 			if($this->find_config_value('comments_enabled')) {
-				require_once CONTENT_ROOT.'components/CommentComponent.inc.php';
+				Swisdk::load('CommentComponent', 'components');
 				$comments = new CommentComponent($dbo->comment_realm);
 				$comments->run(array('realm' => $dbo->comment_realm));
 				$this->smarty->assign('comments', $comments->html());
