@@ -418,12 +418,14 @@
 		 */
 		public function __call($method, $args)
 		{
-			if(in_array($method, array('update','insert','store','delete', 'dirty')))
+			if(in_array($method, array('update','insert','store','delete', 'dirty'))) {
 				foreach($this->data as &$dbobj)
 					if(call_user_func_array(array(&$dbobj,$method), $args)===false)
 						return false;
-			foreach($this->data as &$obj)
-				call_user_func_array(array(&$obj,$method), $args);
+			} else {
+				foreach($this->data as &$obj)
+					call_user_func_array(array(&$obj,$method), $args);
+			}
 			return true;
 		}
 
