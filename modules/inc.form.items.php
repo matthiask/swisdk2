@@ -612,13 +612,13 @@ EOD;
 
 		public function second()
 		{
-			return DBOContainer::find($this->relation['class'])
+			return DBOContainer::find($this->relation['foreign_class'])
 				->collect('id', 'title');
 		}
 
 		public function choices()
 		{
-			return DBOContainer::find($this->relation['choices'])
+			return DBOContainer::find($this->relation['choices_class'])
 				->collect('id', 'title');
 		}
 	}

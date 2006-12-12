@@ -306,18 +306,18 @@ EOD;
 			} else
 				$this->dbobj = DBObject::create(
 					$this->tableview->dbobj()->dbobj()->_class());
-			$p = $this->dbobj->primary();
 			$relations = $this->dbobj->relations();
 			$rel = $relations[$this->db_class];
+			$p = $rel['link_here'];
+			$q = $rel['link_there'];
 			$ids = $this->tableview->dbobj()->ids();
 			$this->reldata = array();
 			if(count($ids)) {
 				$rdata = DBObject::db_get_array(sprintf(
 					'SELECT %s,%s FROM %s WHERE %s IN (%s)',
-					$p,$rel['foreign'], $rel['table'], $p,
-					implode(',', $ids)));
+					$p, $q, $rel['link_table'], $p, implode(',', $ids)));
 				foreach($rdata as $row)
-					$this->reldata[$row[$p]][] = $row[$rel['foreign']];
+					$this->reldata[$row[$p]][] = $row[$q];
 			}
 		}
 

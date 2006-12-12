@@ -53,7 +53,7 @@
 				case DB_FIELD_FOREIGN_KEY|(DB_REL_SINGLE<<10):
 					$relations = $dbobj->relations();
 					return $this->create_rel_single($field, $title,
-						$relations[$field]['class']);
+						$relations[$field]['foreign_class']);
 			}
 
 			// field from a related table
@@ -62,14 +62,14 @@
 				switch($relations[$field]['type']) {
 					case DB_REL_MANY:
 						return $this->create_rel_many($field, $title,
-							$relations[$field]['class']);
+							$relations[$field]['foreign_class']);
 					case DB_REL_N_TO_M:
 						return $this->create_rel_manytomany($field, $title,
-							$relations[$field]['class']);
+							$relations[$field]['foreign_class']);
 					case DB_REL_3WAY:
 						return $this->create_rel_3way($field, $title,
-							$relations[$field]['class'],
-							$relations[$field]['foreign']);
+							$relations[$field]['foreign_class'],
+							$relations[$field]['foreign_primary']);
 					case DB_REL_TAGS:
 						return $this->create_rel_tags($field, $title);
 				}

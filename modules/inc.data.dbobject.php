@@ -376,11 +376,11 @@
 				if($rel['type']==DB_REL_N_TO_M) {
 					$field = $rel['field'];
 					if(!$field||!isset($this->data[$field]))
-						$field = $rel['class'];
+						$field = $rel['foreign_class'];
 					if(!isset($this->data[$field]))
 						continue;
-					$res = DBObject::db_query('DELETE FROM '.$rel['table']
-						.' WHERE '.$this->primary.'='.$this->id(),
+					$res = DBObject::db_query('DELETE FROM '.$rel['link_table']
+						.' WHERE '.$rel['link_here'].'='.$this->id(),
 						$this->db_connection_id);
 					if($res===false)
 						return false;
@@ -392,9 +392,9 @@
 								$ids[] = $id;
 						if(!count($ids))
 							return true;
-						$sql = 'INSERT INTO '.$rel['table']
-							.' ('.$this->primary.','
-							.$rel['foreign'].') VALUES ('
+						$sql = 'INSERT INTO '.$rel['link_table']
+							.' ('.$rel['link_here'].','
+							.$rel['link_there'].') VALUES ('
 							.$this->id().','
 							.implode('),('.$this->id().',',
 							$ids).')';
@@ -405,11 +405,11 @@
 				} else if($rel['type']==DB_REL_3WAY) {
 					$field = $rel['field'];
 					if(!$field||!isset($this->data[$field]))
-						$field = $rel['class'];
+						$field = $rel['foreign_class'];
 					if(!isset($this->data[$field]))
 						continue;
-					$res = DBObject::db_query('DELETE FROM '.$rel['table']
-						.' WHERE '.$this->primary.'='.$this->id(),
+					$res = DBObject::db_query('DELETE FROM '.$rel['link_table']
+						.' WHERE '.$rel['link_here'].'='.$this->id(),
 						$this->db_connection_id);
 					if($res===false)
 						return false;
@@ -422,11 +422,11 @@
 								$frags[] = $id1.','.$id2;
 						if(!count($frags))
 							return true;
-						$o3 = DBObject::create($rel['choices']);
-						$sql = 'INSERT INTO '.$rel['table']
-							.' ('.$this->primary.','
-							.$rel['foreign'].','
-							.$o3->primary().') VALUES ('
+						$o3 = DBObject::create($rel['$choices_class']);
+						$sql = 'INSERT INTO '.$rel['link_table']
+							.' ('.$rel['link_here'].','
+							.$rel['link_there'].','
+							.$rel['link_choices'].') VALUES ('
 							.$this->id().','
 							.implode('),('.$this->id().',',
 							$frags).')';
@@ -437,11 +437,11 @@
 				} else if($rel['type']==DB_REL_TAGS) {
 					$field = $rel['field'];
 					if(!$field||!isset($this->data[$field]))
-						$field = $rel['class'];
+						$field = $rel['foreign_class'];
 					if(!isset($this->data[$field]))
 						continue;
-					$res = DBObject::db_query('DELETE FROM '.$rel['table']
-						.' WHERE '.$this->primary.'='.$this->id(),
+					$res = DBObject::db_query('DELETE FROM '.$rel['link_table']
+						.' WHERE '.$rel['link_here'].'='.$this->id(),
 						$this->db_connection_id);
 					if($res===false)
 						return false;
@@ -466,8 +466,8 @@
 						}
 						if(!count($ids))
 							return true;
-						$sql = 'INSERT INTO '.$rel['table']
-							.' ('.$this->primary.',tag_id'
+						$sql = 'INSERT INTO '.$rel['link_table']
+							.' ('.$rel['link_here'].','.$rel['link_there']
 							.') VALUES ('
 							.$this->id().','
 							.implode('),('.$this->id().',',
@@ -522,9 +522,8 @@
 							|| $rel['type']==DB_REL_3WAY
 							|| $rel['type']==DB_REL_TAGS) {
 						if(!DBObject::db_query('DELETE FROM '
-								.$rel['table'].' WHERE '
-								.$this->primary
-								.'='.$id,
+								.$rel['link_table'].' WHERE '
+								.$rel['link_here'].'='.$id,
 								$this->db_connection_id)) {
 							DBObject::db_rollback(
 								$this->db_connection_id);
@@ -609,19 +608,26 @@
 			if($options)
 				$c2 = $field;
 
-			DBObject::$relations[$c1][$c2] =
-				array('type' => DB_REL_SINGLE, 'field' => $field,
-					'class' => $class, 'table' => $o2->table(),
-					'foreign' => $o2->primary());
+			DBObject::$relations[$c1][$c2] = array(
+				'type' => DB_REL_SINGLE,
+				'field' => $field,
+				'foreign_class' => $class,
+				'foreign_table' => $o2->table(),
+				'foreign_primary' => $o2->primary(),
+				'foreign_condition' => $field.'='.$o2->primary()
+				);
 			DBObject::$relations[$c1][$field] = DBObject::$relations[$c1][$c2];
 			// do not set reverse mapping if user passed an explicit field
 			// specification
 			if($options)
 				return;
-			DBObject::$relations[$c2][$c1] =
-				array('type' => DB_REL_MANY, 'field' => $field,
-					'class' => $c1, 'table' => $o1->table(),
-					'foreign' => $o1->primary());
+			DBObject::$relations[$c2][$c1] = array(
+				'type' => DB_REL_MANY,
+				'field' => $field,
+				'foreign_class' => $c1,
+				'foreign_table' => $o1->table(),
+				'foreign_primary' => $o1->primary()
+				);
 			DBObject::$relations[$c2][$field] = DBObject::$relations[$c2][$c1];
 		}
 
@@ -652,6 +658,8 @@
 			$rel1 = $c1;
 			$rel2 = $c2;
 
+			$tp = strtolower(preg_replace('/[^A-Z]/', '', $c1.$c2)).'_';
+
 			if($options!==null) {
 				$rel1 = $rel2 = $options;
 			}
@@ -660,15 +668,29 @@
 			$table = substr($table, 0, strlen($table)-1);
 
 			DBObject::$relations[$c1][$rel2] = array(
-				'type' => DB_REL_N_TO_M, 'table' => $table,
-				'join' => $o2->table().'.'.$o2->primary().'='
-					.$table.'.'.$o2->primary(),
-				'field' => $options, 'class' => $c2, 'foreign' => $o2->primary());
+				'type' => DB_REL_N_TO_M,
+				'link_table' => $table,
+				'link_condition' => $o1->primary().'='.$tp.$o1->primary(),
+				'link_here' => $tp.$o1->primary(),
+				'link_there' => $tp.$o2->primary(),
+				'foreign_table' => $o2->table(),
+				'foreign_condition' => $tp.$o2->primary().'='.$o2->primary(),
+				'foreign_class' => $c2,
+				'foreign_primary' => $o2->primary(),
+				'field' => $options,
+				);
 			DBObject::$relations[$c2][$rel1] = array(
-				'type' => DB_REL_N_TO_M, 'table' => $table,
-				'join' => $o1->table().'.'.$o1->primary().'='
-					.$table.'.'.$o1->primary(),
-				'field' => $options, 'class' => $c1, 'foreign' => $o1->primary());
+				'type' => DB_REL_N_TO_M,
+				'link_table' => $table,
+				'link_condition' => $o2->primary().'='.$tp.$o2->primary(),
+				'link_here' => $tp.$o2->primary(),
+				'link_there' => $tp.$o1->primary(),
+				'foreign_table' => $o2->table(),
+				'foreign_condition' => $tp.$o1->primary().'='.$o1->primary(),
+				'foreign_class' => $c1,
+				'foreign_primary' => $o1->primary(),
+				'field' => $options,
+				);
 		}
 
 		/**
@@ -688,20 +710,37 @@
 			} else
 				$o2 = DBObject::create($c2);
 
+			if($c3 instanceof DBObject) {
+				$o3 = $c3;
+				$c3 = $o3->_class();
+			} else
+				$o3 = DBObject::create($c3);
+
 			$rel = $c2;
 			if($options!==null)
 				$rel = $options;
+
+			$tp = strtolower(preg_replace('/[^A-Z]/', '', $c1.$c2.$c3)).'_';
 
 			$table = 'tbl_'.$o1->name('to_'.$o2->name(''));
 			$table = substr($table, 0, strlen($table)-1);
 
 			DBObject::$relations[$c1][$rel] = array(
-				'type' => DB_REL_3WAY, 'table' => $table,
-				'join' => $o2->table().'.'.$o2->primary().'='
-					.$table.'.'.$o2->primary(),
-				'class' => $c2, 'choices' => $c3,
-				'foreign' => $o2->primary(),
-				'field' => $rel);
+				'type' => DB_REL_3WAY,
+				'link_table' => $table,
+				'link_condition' => $o1->primary().'='.$tp.$o1->primary(),
+				'link_here' => $tp.$o1->primary(),
+				'link_there' => $tp.$o2->primary(),
+				'link_choices' => $tp.$o3->primary(),
+				'foreign_table' => $o2->table(),
+				'foreign_condition' => $tp.$o2->primary().'='.$o2->primary(),
+				'foreign_class' => $c2,
+				'foreign_primary' => $o2->primary(),
+				'choices_table' => $o3->table(),
+				'choices_class' => $c3,
+				'choices_primary' => $o3->primary(),
+				'field' => $rel,
+				);
 		}
 
 		/**
@@ -716,18 +755,32 @@
 				$obj = DBObject::create($class);
 
 			$table = 'tbl_'.$obj->name('to_tag');
+			$tp = strtolower(preg_replace('/[^A-Z]/', '', $class)).'t_';
 
 			DBObject::$relations[$class]['Tag'] = array(
-				'type' => DB_REL_TAGS, 'table' => $table,
-				'join' => 'tbl_tag.tag_id='.$table.'.tag_id',
-				'field' => 'Tag', 'class' => 'Tag',
-				'foreign' => 'tag_id');
+				'type' => DB_REL_TAGS,
+				'link_table' => $table,
+				'link_condition' => $obj->primary().'='.$tp.$obj->primary(),
+				'link_here' => $tp.$obj->primary(),
+				'link_there' => $tp.'tag_id',
+				'foreign_table' => 'tbl_tag',
+				'foreign_condition' => $tp.'tag_id=tag_id',
+				'foreign_class' => 'Tag',
+				'foreign_primary' => 'tag_id',
+				'field' => 'Tag'
+				);
 			DBObject::$relations['Tag'][$class] = array(
-				'type' => DB_REL_N_TO_M, 'table' => $table,
-				'join' => $obj->table().'.'.$obj->primary.'='
-					.$table.'.'.$obj->primary(),
-				'field' => $obj->_class(), 'class' => $obj->_class(),
-				'foreign' => $obj->primary());
+				'type' => DB_REL_N_TO_M,
+				'link_table' => $table,
+				'link_condition' => 'tag_id='.$tp.'tag_id',
+				'link_here' => $tp.'tag_id',
+				'link_there' => $tp.$obj->primary(),
+				'foreign_table' => $obj->table(),
+				'foreign_condition' => $tp.$obj->primary().'='.$obj->primary(),
+				'foreign_class' => $class,
+				'foreign_primary' => $obj->primary(),
+				'field' => $class
+				);
 		}
 
 		/**
@@ -743,15 +796,15 @@
 				case DB_REL_SINGLE:
 					if(isset($this->data[$rel['field']])) {
 						if(!is_array($params))
-							return DBObject::find($rel['class'],
+							return DBObject::find($rel['foreign_class'],
 								$this->data[$rel['field']]);
 						else
-							return DBObject::find($rel['class'],
+							return DBObject::find($rel['foreign_class'],
 							array_merge($params,
-								array($rel['foreign'].'=',
+								array($rel['foreign_primary'].'=',
 								$this->data[$rel['field']])));
 					} else
-						return DBObject::create($rel['class']);
+						return DBObject::create($rel['foreign_class']);
 				case DB_REL_MANY:
 					return $this->related_many($rel, $params);
 				case DB_REL_N_TO_M:
@@ -765,7 +818,7 @@
 
 		protected function related_many(&$rel, $params=null)
 		{
-			$container = DBOContainer::create($rel['class']);
+			$container = DBOContainer::create($rel['foreign_class']);
 			if(!$this->id())
 				return $container;
 			$container->add_clause($rel['field'].'=',
@@ -778,11 +831,11 @@
 
 		protected function related_many_to_many(&$rel, $params=null)
 		{
-			$container = DBOContainer::create($rel['class']);
+			$container = DBOContainer::create($rel['foreign_class']);
 			if(!$this->id())
 				return $container;
-			$container->add_join($rel['table'], $rel['join']);
-			$container->add_clause($rel['table'].'.'.$this->primary().'=',
+			$container->add_join($rel['link_table'], $rel['foreign_condition']);
+			$container->add_clause($rel['link_here'].'=',
 				$this->id());
 			if(is_array($params))
 				$container->add_clause_array($params);
@@ -1127,8 +1180,8 @@
 						break;
 					case DB_REL_3WAY:
 						$this->data[$var] = $obj->collect_full(
-							DBObject::create($relations[$var]['class'])->primary(),
-							DBObject::create($relations[$var]['choices'])->primary());
+							$relations[$var]['link_there'],
+							$relations[$var]['link_choices']);
 						break;
 					case DB_REL_TAGS:
 						$this->data[$var] = $obj->collect_full(

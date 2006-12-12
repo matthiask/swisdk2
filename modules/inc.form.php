@@ -279,13 +279,13 @@
 						$f = $this->add_obj($title, new DropdownInput(),
 							$relations[$relspec]['field']);
 						$f->set_items(DBOContainer::find(
-							$relations[$relspec]['class']));
+							$relations[$relspec]['foreign_class']));
 						break;
 					case DB_REL_N_TO_M:
 						$f = $this->add_obj($title, new Multiselect(),
 							$relations[$relspec]['field']);
 						$f->set_items(DBOContainer::find(
-							$relations[$relspec]['class']));
+							$relations[$relspec]['foreign_class']));
 						break;
 					case DB_REL_MANY:
 						SwisdkError::handle(new BasicSwisdkError(sprintf(

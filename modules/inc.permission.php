@@ -45,16 +45,16 @@
 
 			$sql = 'SELECT tbl_realm.realm_id, realm_url FROM tbl_realm '
 				.'JOIN tbl_user_to_realm '
-					.'ON tbl_user_to_realm.realm_id=tbl_realm.realm_id '
-				.'WHERE user_id='.$uid.' AND role_id>='.ROLE_SITEADMIN
+					.'ON urr_realm_id=realm_id '
+				.'WHERE urr_user_id='.$uid.' AND urr_role_id>='.ROLE_SITEADMIN
 				.' UNION '
-				.'SELECT tbl_realm.realm_id, realm_url FROM tbl_realm '
+				.'SELECT realm_id, realm_url FROM tbl_realm '
 				.'JOIN tbl_user_group_to_realm '
-					.'ON tbl_user_group_to_realm.realm_id=tbl_realm.realm_id '
+					.'ON ugrr_realm_id=realm_id '
 				.'LEFT JOIN tbl_user_to_user_group '
-					.'ON tbl_user_group_to_realm.user_group_id='
-						.'tbl_user_to_user_group.user_group_id '
-				.'WHERE user_id='.$uid.' AND role_id>='.ROLE_SITEADMIN;
+					.'ON ugrr_user_group_id='
+						.'uug_user_group_id '
+				.'WHERE uug_user_id='.$uid.' AND ugrr_role_id>='.ROLE_SITEADMIN;
 			$urls = DBObject::db_get_array($sql, array('realm_id', 'realm_url'));
 			if(count($urls)) {
 				$sql = 'SELECT * FROM tbl_realm WHERE ';
@@ -133,9 +133,9 @@
 			if(isset($siteadmin_realms[$realm]))
 				return true;
 
-			$perms = DBObject::db_get_row('SELECT role_id '
-				.'FROM tbl_user_to_realm WHERE user_id='
-				.$uid.' AND realm_id='.$realm);
+			$perms = DBObject::db_get_row('SELECT urr_role_id AS role_id '
+				.'FROM tbl_user_to_realm WHERE urr_user_id='
+				.$uid.' AND urr_realm_id='.$realm);
 
 			//
 			// the user must have an entry in the permission table, even
@@ -152,12 +152,12 @@
 			//
 			// check user's groups for sufficient permissions
 			//
-			$perms = DBObject::db_get_array('SELECT role_id '
+			$perms = DBObject::db_get_array('SELECT ugrr_role_id AS role_id '
 				.'FROM tbl_user_group_to_realm '
 				.'LEFT JOIN tbl_user_to_user_group '
-					.'ON tbl_user_group_to_realm.user_group_id='
-						.'tbl_user_to_user_group.user_group_id '
-				.'WHERE user_id='.$uid.' AND realm_id='.$realm);
+					.'ON ugrr_user_group_id='
+						.'uug_user_group_id '
+				.'WHERE uug_user_id='.$uid.' AND ugrr_realm_id='.$realm);
 			foreach($perms as &$p)
 				if($p['role_id']>=$role)
 					return true;
@@ -205,18 +205,18 @@
 			if($uid===null)
 				$uid = SessionHandler::user()->id();
 			$rid = intval($role_id);
-			$sql = 'SELECT tbl_realm.realm_id, realm_title FROM tbl_realm '
+			$sql = 'SELECT realm_id, realm_title FROM tbl_realm '
 				.'LEFT JOIN tbl_user_to_realm '
-					.'ON tbl_realm.realm_id=tbl_user_to_realm.realm_id '
-				.'WHERE user_id='.$uid.' AND role_id>='.$rid
+					.'ON realm_id=urr_realm_id '
+				.'WHERE urr_user_id='.$uid.' AND urr_role_id>='.$rid
 				.' UNION ALL '
-				.'SELECT tbl_realm.realm_id, realm_title FROM tbl_realm '
+				.'SELECT realm_id, realm_title FROM tbl_realm '
 				.'LEFT JOIN tbl_user_group_to_realm '
-					.'ON tbl_realm.realm_id=tbl_user_group_to_realm.realm_id '
+					.'ON realm_id=ugrr_realm_id '
 				.'LEFT JOIN tbl_user_to_user_group '
-					.'ON tbl_user_group_to_realm.user_group_id='
-						.'tbl_user_to_user_group.user_group_id '
-				.'WHERE user_id='.$uid.' AND role_id>='.$rid;
+					.'ON ugrr_user_group_id='
+						.'uug_user_group_id '
+				.'WHERE uug_user_id='.$uid.' AND ugrr_role_id>='.$rid;
 			return DBObject::db_get_array($sql, array('realm_id', 'realm_title'));
 		}
 
@@ -233,14 +233,14 @@
 				$rsql = 'realm_id='.intval($realm);
 			}
 			$rid = intval($realm);
-			$usql = 'SELECT role_id,realm_id FROM tbl_user_to_realm WHERE user_id='.$uid.' AND '.$rsql
-				.' GROUP BY realm_id';
-			$gsql = 'SELECT MAX(role_id) AS role_id,realm_id FROM tbl_user_group_to_realm, tbl_user_to_user_group '
-				.'WHERE tbl_user_group_to_realm.user_group_id=tbl_user_to_user_group.user_group_id'
-				.' AND user_id='.$uid.' AND '.$rsql.' GROUP BY realm_id';
+			$usql = 'SELECT urr_role_id,urr_realm_id FROM tbl_user_to_realm WHERE urr_user_id='.$uid.' AND urr_'.$rsql
+				.' GROUP BY urr_realm_id';
+			$gsql = 'SELECT MAX(ugrr_role_id) AS ugrr_role_id,ugrr_realm_id FROM tbl_user_group_to_realm, tbl_user_to_user_group '
+				.'WHERE ugrr_user_group_id=uug_user_group_id'
+				.' AND uug_user_id='.$uid.' AND ugrr_'.$rsql.' GROUP BY ugrr_realm_id';
 			if(is_array($realm)) {
-				$user = DBObject::db_get_array($usql, array('realm_id', 'role_id'));
-				$group = DBObject::db_get_array($gsql, array('realm_id', 'role_id'));
+				$user = DBObject::db_get_array($usql, array('urr_realm_id', 'urr_role_id'));
+				$group = DBObject::db_get_array($gsql, array('ugrr_realm_id', 'ugrr_role_id'));
 				$realms = array_merge(array_keys($user), array_keys($group));
 				$ret = array();
 				foreach($realms as $realm)
@@ -251,7 +251,7 @@
 			} else {
 				$user = DBObject::db_get_row($usql);
 				$group = DBObject::db_get_row($gsql);
-				return max($user['role_id'], $group['role_id']);
+				return max($user['urr_role_id'], $group['ugrr_role_id']);
 			}
 		}
 
@@ -272,10 +272,12 @@
 
 			$p = $dbo->_prefix();
 			$t = $dbo->table();
+			$tp = strtolower(preg_replace('/[^A-Z]/', '', $dbo->_class())).'rr_';
+
 			$sql = "($t.{$p}realm_id={realm_id} AND $t.{$p}role_id<={user_role_id}
 					OR $t.{$p}id IN (
-						SELECT DISTINCT {$p}id FROM tbl_{$p}to_realm
-						WHERE realm_id={realm_id} AND role_id<={user_role_id}
+						SELECT DISTINCT {$tp}{$p}id FROM tbl_{$p}to_realm
+						WHERE {$tp}realm_id={realm_id} AND {$tp}role_id<={user_role_id}
 					)
 				)";
 			$dboc->add_clause($sql, $params);
@@ -294,6 +296,7 @@
 
 			$p = $dbo->_prefix();
 			$t = $dbo->table();
+			$tp = strtolower(preg_replace('/[^A-Z]/', '', $dbo->_class())).'rr_';
 
 			$role = intval($role);
 			$sql1 = array();
@@ -306,13 +309,13 @@
 				if($realmrole)
 					$r = max($r, $realmrole);
 				$sql1[] = "($t.{$p}realm_id=$realm AND $t.{$p}role_id<=$r)";
-				$sql2[] = "(realm_id=$realm AND role_id<=$r)";
+				$sql2[] = "({$tp}realm_id=$realm AND {$tp}role_id<=$r)";
 			}
 
 			$sql = '('
 				.implode(' OR ', $sql1)
 				." OR $t.{$p}id IN ("
-					."SELECT DISTINCT {$p}id FROM tbl_{$p}to_realm"
+					."SELECT DISTINCT {$tp}{$p}id FROM tbl_{$p}to_realm"
 					.' WHERE '
 					.implode(' OR ', $sql2)
 				.")"

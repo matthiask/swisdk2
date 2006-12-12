@@ -214,7 +214,7 @@
 			if(isset($relations[$clause])) {
 				$rel = $relations[$clause];
 				$this->add_join($clause);
-				$this->clause_sql .= $binding.' '.$rel['foreign'].'='
+				$this->clause_sql .= $binding.' '.$rel['foreign_primary'].'='
 					.DBObject::db_escape($data, $this->obj->db_connection());
 				return;
 			}
@@ -323,20 +323,19 @@
 					switch($rel['type']) {
 						case DB_REL_SINGLE:
 						case DB_REL_MANY:
-							$this->joins .= ' '.$type.' JOIN '.$rel['table']
-								.' ON '.$this->obj->table().'.'
-								.$rel['field'].'='
-								.$rel['table'].'.'
-								.$rel['foreign'];
+							$this->joins .= ' '.$type.' JOIN '.$rel['foreign_table']
+								.' ON '.$rel['foreign_condition'];
 							break;
 						case DB_REL_N_TO_M:
+							$this->joins .= ' '.$type.' JOIN '.$rel['link_table']
+								.' ON '.$rel['link_condition']
+								.' LEFT JOIN '.$rel['foreign_table']
+								.' ON '.$rel['foreign_condition'];
+							break;
 						case DB_REL_3WAY:
 						case DB_REL_TAGS:
-							$this->joins .= ' '.$type.' JOIN '.$rel['table']
-								.' ON '.$this->obj->table().'.'
-								.$this->obj->primary().'='
-								.$rel['table'].'.'
-								.$this->obj->primary();
+							$this->joins .= ' '.$type.' JOIN '.$rel['link_table']
+								.' ON '.$rel['link_condition'];
 							break;
 					}
 				} else {
