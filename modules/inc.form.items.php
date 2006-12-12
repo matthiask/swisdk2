@@ -316,7 +316,7 @@ EOD;
 
 	class TextInput extends SimpleInput {
 		protected $type = 'text';
-		protected $attributes = array('size' => 60);
+		protected $attributes = array('class' => 'sf-textinput');
 	}
 
 	/**
@@ -331,7 +331,7 @@ EOD;
 
 	class PasswordInput extends SimpleInput {
 		protected $type = 'password';
-		protected $attributes = array('size' => 60);
+		protected $attributes = array('class' => 'sf-textinput');
 	}
 
 	/**
@@ -341,7 +341,7 @@ EOD;
 	 */
 	class FileUpload extends SimpleInput {
 		protected $type = 'file';
-		protected $attributes = array('size' => 60);
+		protected $attributes = array('class' => 'sf-textinput');
 
 		protected $files_data;
 		protected $no_upload = true;
@@ -510,20 +510,22 @@ EOD;
 	}
 
 	class Textarea extends FormItem {
-		protected $attributes = array('rows' => 12, 'cols' => 60);
+		protected $attributes = array('class' => 'sf-textarea');
 	}
 
 	/**
 	 * Textarea with all the Wysiwyg-Bling!
 	 */
 	class RichTextarea extends FormItem {
-		protected $attributes = array('style' => 'width:800px;height:300px;');
+		protected $attributes = array('class' => 'sf-richtextarea');
 	}
 
 	/**
 	 * base class for all FormItems which offer a choice between several items
 	 */
 	class SelectionFormItem extends FormItem {
+		protected $attributes = array('class' => 'sf-selection');
+
 		public function set_items($items)
 		{
 			if($items instanceof DBOContainer) {
@@ -624,6 +626,8 @@ EOD;
 	}
 
 	class TagInput extends TextInput {
+		protected $attributes = array('class' => 'sf-textinput');
+
 		public function init_value($dbobj)
 		{
 			parent::init_value($dbobj);
