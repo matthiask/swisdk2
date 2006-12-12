@@ -237,6 +237,15 @@ function validate_'.$id.'()
 			$this->add_html($this->_simpleinput_html($obj)."\n");
 		}
 
+		protected function visit_HiddenArrayInput($obj)
+		{
+			$name = $obj->id();
+			return sprintf(
+				'<input type="hidden" name="%s" id="%s" value="%s" %s />',
+				$name, $name, implode(',', $obj->value()),
+				$this->_attribute_html($obj->attributes()));
+		}
+
 		protected function visit_SimpleInput($obj)
 		{
 			$this->_collect_javascript($obj);

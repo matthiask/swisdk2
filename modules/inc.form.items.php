@@ -326,6 +326,9 @@ EOD;
 		protected $type = 'hidden';
 	}
 
+	class HiddenArrayInput extends HiddenInput {
+	}
+
 	class PasswordInput extends SimpleInput {
 		protected $type = 'password';
 		protected $attributes = array('size' => 60);
