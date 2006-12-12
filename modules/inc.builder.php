@@ -186,14 +186,15 @@
 			if($dbobjml instanceof DBOContainer) {
 				$languages = Swisdk::all_languages();
 
-				foreach($languages as $key => &$l) {
+				foreach($languages as $lid => &$l) {
+					$key = $l['language_key'];
 					$box = $form->box($key);
-					if(!isset($dbobjml[$l['language_id']]))
-						$dbobjml[$l['language_id']] =
+					if(!isset($dbobjml[$lid]))
+						$dbobjml[$lid] =
 							DBObject::create($dbobj->_class().'Content');
-					$dbo =& $dbobjml[$l['language_id']];
+					$dbo =& $dbobjml[$lid];
 					$dbo->set_owner($dbobj);
-					$dbo->language_id = $l['language_id'];
+					$dbo->language_id = $lid;
 					$box->bind($dbo);
 					$box->set_title($key);
 					$this->form = $box;

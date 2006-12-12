@@ -262,6 +262,7 @@
 		 */
 
 		protected static $_languages;
+		protected static $_all_languages;
 
 		/**
 		 * initialize gettext and set the current locale
@@ -300,22 +301,15 @@
 		public static function language($key=null, $array=false)
 		{
 			require_once MODULE_ROOT.'inc.data.php';
-			if(!Swisdk::$_languages) {
-				Swisdk::$_languages = DBObject::db_get_array(
-					'SELECT * FROM tbl_language', 'language_key');
+			if(!Swisdk::$_all_languages) {
+				Swisdk::$_all_languages = DBObject::db_get_array(
+					'SELECT * FROM tbl_language', 'language_id');
 			}
-			if(is_numeric($key)) {
-				foreach(Swisdk::$_languages as $lang_key => $language) {
-					if($language['language_id']==$key)
-						return $lang_key;
-				}
-			} else if($key || $key=Swisdk::config_value('runtime.language')) {
-				if(isset(Swisdk::$_languages[$key])) {
-					if($array)
-						return Swisdk::$_languages[$key];
-					else
-						return intval(Swisdk::$_languages[$key]['language_id']);
-				}
+			
+			if($key || $key=Swisdk::config_value('runtime.language')) {
+				foreach(Swisdk::$_all_languages as $id => &$l)
+					if($l['language_key']==$key)
+						return $array?$l:$id;
 			}
 
 			return 0;
@@ -325,17 +319,35 @@
 		{
 			if($id===null)
 				$id = Swisdk::language();
-			foreach(Swisdk::$_languages as $lang_key => &$language) {
-				if($language['language_id']==$id)
-					return $lang_key;
-			}
+			if(isset(Swisdk::$_all_languages[$id]))
+				return Swisdk::$_all_languages[$id]['language_key'];
+			return false;
 		}
 
 		public static function all_languages()
 		{
+			if(!Swisdk::$_all_languages) {
+				Swisdk::$_all_languages = DBObject::db_get_array(
+					'SELECT * FROM tbl_language', 'language_id');
+			}
+			return Swisdk::$_all_languages;
+		}
+
+		public static function languages()
+		{
 			if(!Swisdk::$_languages) {
-				Swisdk::$_languages = DBObject::db_get_array(
-					'SELECT * FROM tbl_language', 'language_key');
+				Swisdk::$_languages = array();
+				$_langs = Swisdk::website_config_value('languages');
+					
+				if($_langs) {
+					$langs = array_flip(explode(',', $_langs));
+					$languages = Swisdk::all_languages();
+					foreach($languages as $lid => &$l)
+						if(isset($langs[$l['language_key']]))
+							Swisdk::$_languages[$lid] = $l;
+					
+				} else
+					Swisdk::$_languages = Swisdk::all_languages();
 			}
 			return Swisdk::$_languages;
 		}
