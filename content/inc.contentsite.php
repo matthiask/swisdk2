@@ -465,7 +465,7 @@
 			$keys = array('content.'.$this->dbo_class.'.'.$key,
 				'content.'.$key);
 			while($key = array_shift($keys))
-				if(($value = Swisdk::config_value($key))!==null)
+				if(($value = Swisdk::website_config_value($key))!==null)
 					return $value;
 			return $default;
 		}
