@@ -78,6 +78,22 @@
 			return $this->obj;
 		}
 
+		public function translation($language_id)
+		{
+			if($this->language!=LANGUAGE_ALL)
+				return null;
+
+			$container = $this->dbobj();
+			if(!$container->offsetExists($language_id)) {
+				$obj = DBObject::create($this->tclass);
+				$obj->set_owner($this);
+				$obj->language_id = $language_id;
+				$container[$language_id] = $obj;
+			}
+
+			return $container[$language_id];
+		}
+
 		protected function _setup_dbvars()
 		{
 			parent::_setup_dbvars();
