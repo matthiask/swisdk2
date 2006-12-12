@@ -114,7 +114,8 @@
 			if(!$recipient)
 				return;
 			@mail($recipient, 'NotificationError: '.Swisdk::config_value('core.name'),
-				$message, 'From: swisdk-suckage@'.$_SERVER['SERVER_NAME']);
+				$message, 'From: swisdk-suckage@'.preg_replace('/^www\./', '',
+					Swisdk::config_value('runtime.request.host')));
 		}
 	}
 
