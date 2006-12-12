@@ -320,6 +320,30 @@
 
 			$container->add_clause($sql);
 		}
+
+		public static function check_access($dbobj)
+		{
+			if(PermissionManager::check_realm_role($dbobj->realm_id, $dbobj->role_id))
+				return true;
+
+			$obj_realms = $dbobj->get('RealmLink');
+			$realms_for_role = PermissionManager::realms_for_role($dbobj->role_id);
+			foreach($obj_realms as $realm => $role)
+				if(isset($realms_for_role[$realm]) && $role<=$dbobj->role_id)
+					return true;
+
+			return false;
+		}
+
+		public static function check_access_throw($dbobj)
+		{
+			if(PermissionManager::check_access($dbobj))
+				return true;
+
+			if(SessionHandler::authenticated())
+				PermissionManager::access_denied();
+			PermissionManager::login_form();
+		}
 	}
 
 ?>
