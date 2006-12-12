@@ -93,7 +93,7 @@
 				return true;
 
 			if(SessionHandler::authenticated())
-				PermissionManager::access_denied();
+				SwisdkError::handle(new AccessDeniedError());
 			PermissionManager::login_form();
 		}
 
@@ -166,12 +166,6 @@
 			// insufficient roles everywhere... check failed!
 			//
 			return false;
-		}
-
-		public static function access_denied()
-		{
-			header('HTTP/1.0 401 Unauthorized');
-			die(dgettext('swisdk', 'Access denied'));
 		}
 
 		public static function login_form()
@@ -344,7 +338,7 @@
 				return true;
 
 			if(SessionHandler::authenticated())
-				PermissionManager::access_denied();
+				SwisdkError::handle(new AccessDeniedError());
 			PermissionManager::login_form();
 		}
 	}

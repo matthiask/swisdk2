@@ -222,4 +222,13 @@
 		}
 	}
 
+	class AccessDeniedError extends BasicSwisdkError {
+		public function run()
+		{
+			header('HTTP/1.0 401 Unauthorized');
+			echo dgettext('swisdk', 'Access denied');
+			exit();
+		}
+	}
+
 ?>
