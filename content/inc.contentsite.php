@@ -472,10 +472,9 @@
 		 */
 		protected function dttm_range($numbers)
 		{
-			list($year, $month, $day) = $numbers;
-			if($year) {
-				if($month) {
-					if($day) {
+			if(isset($numbers[0]) && $year=$numbers[0]) {
+				if(isset($numbers[1]) && $month=$numbers[1]) {
+					if(isset($numbers[2]) && $day=$numbers[2]) {
 						return array(
 							mktime(0, 0, 0, $month, $day, $year),
 							mktime(0, 0, 0, $month, $day+1, $year),
