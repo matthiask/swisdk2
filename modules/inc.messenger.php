@@ -6,7 +6,7 @@
 	*/
 
 	class SwisdkMessenger {
-		public function send($message)
+		public static function send($message)
 		{
 			$message->send();
 		}
