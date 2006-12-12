@@ -11,7 +11,10 @@
 			$elem = new DropdownInput();
 			$elem->set_items(
 				PermissionManager::realms_for_role($role));
-			return $formbox->add($id, $elem, $id);
+			$ret = $formbox->add($id, $elem, $id);
+			$realm = PermissionManager::realm_for_url();
+			$ret->set_default_value($realm['realm_id']);
+			return $ret;
 		}
 
 		public static function realm_multiselect($formbox, $id='Realm', $role=ROLE_MANAGER)
@@ -19,7 +22,10 @@
 			$elem = new Multiselect();
 			$elem->set_items(
 				PermissionManager::realms_for_role($role));
-			return $formbox->add($id, $elem, $id);
+			$ret = $formbox->add($id, $elem, $id);
+			$realm = PermissionManager::realm_for_url();
+			$ret->set_default_value(array($realm['realm_id']));
+			return $ret;
 		}
 
 		public static function language_dropdown($formbox, $id='Language')
