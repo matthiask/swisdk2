@@ -238,7 +238,11 @@
 				$dbo = $this->dbobj->rewind();
 			}
 
-			PermissionManager::check_access_throw($dbo);
+			if(!$dbo)
+				return $this->handle_none();
+
+			if($this->find_config_value('permission_filter', true))
+				PermissionManager::check_access_throw($dbo);
 
 			$this->smarty->assign('item', $dbo);
 			$chtml = '';
@@ -307,8 +311,11 @@
 				$this->smarty = new SwisdkSmarty();
 				$this->smarty->assign('title', $this->title);
 			}
-			if($container)
+			if($container) {
 				$this->dbobj = DBOContainer::create($this->dbo_class);
+				if($this->find_config_value('permission_filter', true))
+					PermissionManager::set_realm_clause($this->dbobj);
+			}
 		}
 
 
