@@ -263,7 +263,7 @@
 			$dbo = $dboc->dbobj();
 			$relations = $dbo->relations();
 			if(!isset($relations[$realm_link]))
-				return;
+				SwisdkError::handle(new FatalError('Could not set realm clause'));
 
 			$realm = PermissionManager::realm_for_url();
 			$params = array(
@@ -288,7 +288,7 @@
 			$dbo = $container->dbobj();
 			$relations = $dbo->relations();
 			if(!isset($relations[$realm_link]))
-				return;
+				SwisdkError::handle(new FatalError('Could not limit by realm'));
 
 			// if no realms have been specified, apply rules to all
 			if(!$realms)
