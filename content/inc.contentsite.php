@@ -238,6 +238,8 @@
 				$dbo = $this->dbobj->rewind();
 			}
 
+			PermissionManager::check_access_throw($dbo);
+
 			$this->smarty->assign('item', $dbo);
 			$chtml = '';
 			if($this->find_config_value('comments_enabled')) {
@@ -395,11 +397,9 @@
 					&& $this->request['category']) {
 				$dbo = $this->dbobj->dbobj_clone();
 				$p = $dbo->_prefix();
-				$this->dbobj->add_join($dbo->_class().'Category');
-				$this->dbobj->add_join('tbl_'.$p.'category',
-					'tbl_'.$p.'to_'.$p.'category.'.$p.'category_id='
-					.'tbl_'.$p.'category.'.$p.'category_id');
-				$this->dbobj->add_clause($p.'category_key=', $this->request['category']);
+				$this->dbobj->add_join('Category');
+				$this->dbobj->add_clause('category_name=',
+					$this->request['category']);
 			}
 		}
 
@@ -527,8 +527,25 @@
 		public function filter_language()
 		{
 			$this->dbobj->add_join('Language');
-			$this->dbobj->add_clause('language_id=', Swisdk::language());
+			$this->dbobj->add_clause('tbl_language.language_id=', Swisdk::language());
 		}
+
+		public function filter_category()
+		{
+			if(isset($this->request['category'])
+					&& $this->request['category']) {
+				$dbo = $this->dbobj->dbobj_clone();
+				$p = $dbo->_prefix();
+				$this->dbobj->add_join('Category');
+				$this->dbobj->add_join('tbl_category_content',
+					'tbl_category.category_id=category_content_category_id');
+				$this->dbobj->add_clause('category_content_language_id=',
+					Swisdk::language());
+				$this->dbobj->add_clause('category_content_name=',
+					$this->request['category']);
+			}
+		}
+
 	}
 
 ?>
