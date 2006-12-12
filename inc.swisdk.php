@@ -249,11 +249,7 @@
 			if(!$tmpl)
 				$tmpl = str_replace('.', '/', $key).'.tpl';
 
-			$dir = Swisdk::website_config_value('template_dir');
-			if($dir)
-				$dir = str_replace('//', '/', $dir.'/');
-
-			return $dir.$tmpl;
+			return $tmpl;
 		}
 
 
