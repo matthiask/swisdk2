@@ -50,7 +50,7 @@
 		{
 			$str = strip_tags($data[$this->column]);
 			if(isset($this->args[0]) && $ml = $this->args[0])
-				return substr($str, 0, $ml).(strlen($str)>$ml?'&hellip;':'');
+				return ellipsize($str, $ml);
 			return $data[$this->column];
 		}
 	}
@@ -285,10 +285,18 @@ EOD;
 				}
 			} else
 				$tokens =& $data;
+			if($this->ellipsize)
+				return ellipsize(implode(', ', $tokens), $this->ellipsize);
 			return implode(', ', $tokens);
 		}
 
+		public function set_ellipsize($e)
+		{
+			$this->ellipsize = $e;
+		}
+
 		protected $dbobj = null;
+		protected $ellipsize = false;
 	}
 
 	/**
@@ -331,7 +339,7 @@ EOD;
 				return $this->no_data;
 			$vals = $this->reldata[$data[$p]];
 			$tokens = array();
-			foreach($vals as $v)
+			foreach($vals as $v) {
 				if(isset($this->db_data[$v])) {
 					if($this->vars!==null) {
 						$vals = array();
@@ -343,11 +351,20 @@ EOD;
 					} else
 						$tokens[] = $this->db_data[$v];
 				}
+			}
+			if($this->ellipsize)
+				return ellipsize(implode(', ', $tokens), $this->ellipsize);
 			return implode(', ', $tokens);
+		}
+
+		public function set_ellipsize($e)
+		{
+			$this->ellipsize = $e;
 		}
 
 		protected $reldata = null;
 		protected $dbobj = null;
+		protected $ellipsize = false;
 	}
 
 	/**
