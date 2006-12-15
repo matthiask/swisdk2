@@ -167,6 +167,10 @@
 
 		protected function handle_listing()
 		{
+			if(!$this->dbobj->count()) {
+				$this->handle_none();
+				return;
+			}
 			$dbobj = $this->dbobj->dbobj();
 			$p = $dbobj->_prefix();
 			$this->smarty->assign('items', $this->dbobj);
