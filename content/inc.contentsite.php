@@ -320,10 +320,9 @@
 
 		protected function handle_none()
 		{
-			// TODO how to do this with raw SwisdkSmarty?
-			$sm = SmartyMaster::instance();
-			$sm->add_html_fragment('content', 'No items matched your criteria');
-			$sm->display();
+			$smarty = new SwisdkSmarty();
+			$this->smarty->assign('content', 'No items matched your criteria');
+			$this->smarty->display_template('base.full');
 		}
 
 
