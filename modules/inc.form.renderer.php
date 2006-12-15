@@ -521,37 +521,74 @@ EOD;
 EOD;
 			}
 
+			$format = '%d.%m.%Y';
+
 			$name = $obj->id();
-			$span_name = $name.'_span';
 			$trigger_name = $name.'_trigger';
 			$value = intval($obj->value());
 			if(!$value)
 				$value = time();
 
-			$display_value = strftime("%d. %B %Y : %H:%M", $value);
+			$display_value = strftime($format, $value);
 
 			$html.=<<<EOD
-<input type="hidden" name="$name" id="$name" value="$value" />
-<span id="$span_name">$display_value</span> <img src="$prefix/calendar/img.gif"
+<input type="text" name="$name" id="$name" value="$display_value" />
+<img src="$prefix/calendar/img.gif"
 	id="$trigger_name"
-	style="cursor: pointer; border: 1px solid red;" title="Date selector"
-	onmouseover="this.style.background='red';" onmouseout="this.style.background=''" />
+	style="cursor: pointer; border: 1px solid red; margin-bottom: -4px;" title="Date selector"
+	onmouseover="this.style.background='red';" onmouseout="this.style.background=''"
+	onclick="show_datesel_$name()" />
 <script type="text/javascript">
 //<![CDATA[
-Calendar.setup({
-	inputField  : "$name",
-	ifFormat    : "%s",
-	displayArea : "$span_name",
-	daFormat    : "%d. %B %Y : %H:%M",
-	button      : "$trigger_name",
-	singleClick : true,
-	showsTime   : true,
-	step        : 1
-});
+function show_datesel_$name()
+{
+	var el = document.getElementById('$name');
+	var cal = new Calendar(1, null, onSelectHandler_$name, onCloseHandler_$name);
+	cal.showsOtherMonths = true;
+	cal.create();
+	cal.setDateFormat('$format');
+	cal.parseDate(document.getElementById('$name').value);
+	cal.showAtElement(document.getElementById('$trigger_name', 'tl'));
+}
+
+function onSelectHandler_$name(cal, date)
+{
+	document.getElementById('$name').value = date;
+	if(cal.dateClicked)
+		cal.callCloseHandler();
+}
+
+function onCloseHandler_$name(cal)
+{
+	cal.hide();
+}
 //]]>
 </script>
 
 EOD;
+
+			$date = getdate($value);
+			$hour = $date['hours'];
+			$minute = $date['minutes'];
+
+			$html .= '<select id="'.$name.'__hour" name="'.$name.'__hour">';
+			for($h=0; $h<24; $h++) {
+				$s = '';
+				if($hour==$h)
+					$s = ' selected="selected"';
+				$html .= '<option value="'.$h.'"'.$s.'>'
+					.str_pad($h, 2, '0', STR_PAD_LEFT).'</option>';
+			}
+			$html .= '</select>';
+			$html .= '<select id="'.$name.'__minute" name="'.$name.'__minute">';
+			for($m=0; $m<60; $m+=5) {
+				$s = '';
+				if($minute>=$m && $minute<$m+5)
+					$s = ' selected="selected"';
+				$html .= '<option value="'.$m.'"'.$s.'>'
+					.str_pad($m, 2, '0', STR_PAD_LEFT).'</option>';
+			}
+			$html .= '</select>';
 			$this->_render($obj, $html);
 		}
 

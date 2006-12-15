@@ -661,6 +661,21 @@ EOD;
 	}
 
 	class DateInput extends FormItem {
+		public function init_value($dbobj)
+		{
+			parent::init_value($dbobj);
+
+			if(!is_numeric($val = $this->value())) {
+				$new = strtotime($val);
+				if($new) {
+					$id = $this->id();
+					$h = getInput($id.'__hour');
+					$m = getInput($id.'__minute');
+					$new += $h*3600 + $m*60;
+					$this->set_value($new);
+				}
+			}
+		}
 	}
 
 	class PickerBase extends FormItem {
