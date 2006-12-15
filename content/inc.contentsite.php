@@ -183,7 +183,25 @@
 			}
 			$this->smarty->register_function($p.'url',
 				'generate_'.$p.'url');
+			$this->smarty->register_function('generate_pagelinks',
+				array(&$this, '_generate_pagelinks'));
 			$this->smarty->display_template($this->dbo_class.'.list');
+		}
+
+		public function _generate_pagelinks($params, &$smarty)
+		{
+			$html = '<ul class="pagelinks">';
+			$limit = $this->find_config_value('default_limit', 10);
+			if($limit) {
+				$count = $this->dbobj->total_count();
+				$page = 1;
+				$url = preg_replace('/\/page\/[0-9]+/', '',
+					rtrim(Swisdk::config_value('runtime.request.uri'), '/'));
+				for($entry=0; $entry<$count; $entry+=$limit)
+					$html .= '<li><a href="'.$url.'/page/'.($page++).'">'.$entry.'</a></li>';
+			}
+			$html .= '</ul>';
+			return $html;
 		}
 
 		protected function handle_feed()
