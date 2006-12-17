@@ -33,8 +33,8 @@
 			if( $classname != null ) {
 				return Swisdk::load_instance($classname);
 			} else {
-				return new FatalError(sprintf(
-					dgettext('swisdk', 'No handler defined for %s suffix'), $type));
+				SwisdkError::handle(new FatalError(sprintf(
+					dgettext('swisdk', 'No handler defined for %s suffix'), $type)));
 			}
 		}
 
