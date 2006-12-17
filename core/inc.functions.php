@@ -123,11 +123,20 @@
 	/**
 	 * return the backtrace as a string
 	 */
-	function backtrace()
+	function backtrace($full=false)
 	{
 		$bt = debug_backtrace();
 		$str = "<pre><b>Backtrace:</b>\n";
+		$show = $full;
 		foreach($bt as $frame) {
+			if(!$show) {
+				if(isset($frame['class'])
+						&& $frame['class']=='SwisdkError'
+						&& $frame['function']=='handle')
+					$show = true;
+				else
+					continue;
+			}
 			$str .= sprintf("%s() called at [%s]\n",
 				(isset($frame['class'])?
 				$frame['class'].$frame['type']:'').
