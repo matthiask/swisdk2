@@ -95,7 +95,7 @@
 				$container = new DBOContainer($class);
 
 			if(!is_array($ids) || !count($ids))
-				return false;
+				return $container;
 			$container->add_clause($container->dbobj()->primary().' IN {list}',
 				array('list' => $ids));
 			if($container->init()===false)
