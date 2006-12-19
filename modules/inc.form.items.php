@@ -662,6 +662,7 @@ EOD;
 
 	class DateInput extends FormItem {
 		protected $time = true;
+		protected $actions = array();
 
 		public function init_value($dbobj)
 		{
@@ -688,6 +689,18 @@ EOD;
 		public function time()
 		{
 			return $this->time;
+		}
+
+		public function add_action($event, $action)
+		{
+			if(!isset($this->actions[$event]))
+				$this->actions[$event] = '';
+			$this->actions[$event] .= $action."\n";
+		}
+
+		public function actions()
+		{
+			return $this->actions;
 		}
 	}
 

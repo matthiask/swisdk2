@@ -163,6 +163,14 @@ EOD;
 			$n1 = $this->item->id();
 			$n2 = $this->args[0]->id();
 
+			$date_js = '';
+			if(isset($this->args[1])) {
+				$n3 = $this->args[1]->id();
+				$date_js = 'document.getElementById(\''.$n3
+					.'\').value.replace(/^([0-9]+)\.([0-9]+)\.([0-9]+)$/g, \'$3$2$1\') + \'-\' +';
+				$this->args[1]->add_action('close', "urlify_behavior_handler_$n1();");
+			}
+
 			$js = <<<EOD
 function urlify_behavior_handler_$n1()
 {
@@ -185,7 +193,7 @@ function urlify_behavior_handler_$n1()
 	r = new RegExp('\\b(' + removelist.join('|') + ')\\b', 'gi');
 	for(i=0; i<replacement.length; i++)
 		str = str.replace(new RegExp(replacement[i][0]), replacement[i][1]);
-	document.getElementById('$n2').value = str.replace(r, '').replace(r, '')
+	document.getElementById('$n2').value = $date_js str.replace(r, '').replace(r, '')
 		.replace(/[^-A-Z0-9\s]/gi, '').replace(/^\s+|\s+$/g, '')
 		.replace(/[-\s]+/g, '_').toLowerCase();
 }

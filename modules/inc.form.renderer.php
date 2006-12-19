@@ -531,6 +531,15 @@ EOD;
 
 			$display_value = strftime($format, $value);
 
+			$close_actions = '';
+			$select_actions = '';
+
+			$actions = $obj->actions();
+			if(isset($actions['close']))
+				$close_actions = $actions['close'];
+			if(isset($actions['select']))
+				$select_actions = $actions['select'];
+
 			$html.=<<<EOD
 <input type="text" name="$name" id="$name" value="$display_value" />
 <img src="$prefix/calendar/img.gif"
@@ -556,11 +565,13 @@ function onSelectHandler_$name(cal, date)
 	document.getElementById('$name').value = date;
 	if(cal.dateClicked)
 		cal.callCloseHandler();
+	$select_actions
 }
 
 function onCloseHandler_$name(cal)
 {
 	cal.hide();
+	$close_actions
 }
 //]]>
 </script>
