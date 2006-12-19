@@ -661,6 +661,8 @@ EOD;
 	}
 
 	class DateInput extends FormItem {
+		protected $time = true;
+
 		public function init_value($dbobj)
 		{
 			parent::init_value($dbobj);
@@ -675,6 +677,17 @@ EOD;
 					$this->set_value($new);
 				}
 			}
+		}
+
+		public function disable_time($disable=true)
+		{
+			$this->time = !$disable;
+			return $this;
+		}
+
+		public function time()
+		{
+			return $this->time;
 		}
 	}
 

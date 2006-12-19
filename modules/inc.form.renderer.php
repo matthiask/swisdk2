@@ -567,28 +567,30 @@ function onCloseHandler_$name(cal)
 
 EOD;
 
-			$date = getdate($value);
-			$hour = $date['hours'];
-			$minute = $date['minutes'];
+			if($obj->time()) {
+				$date = getdate($value);
+				$hour = $date['hours'];
+				$minute = $date['minutes'];
 
-			$html .= '<select id="'.$name.'__hour" name="'.$name.'__hour">';
-			for($h=0; $h<24; $h++) {
-				$s = '';
-				if($hour==$h)
-					$s = ' selected="selected"';
-				$html .= '<option value="'.$h.'"'.$s.'>'
-					.str_pad($h, 2, '0', STR_PAD_LEFT).'</option>';
+				$html .= '<select id="'.$name.'__hour" name="'.$name.'__hour">';
+				for($h=0; $h<24; $h++) {
+					$s = '';
+					if($hour==$h)
+						$s = ' selected="selected"';
+					$html .= '<option value="'.$h.'"'.$s.'>'
+						.str_pad($h, 2, '0', STR_PAD_LEFT).'</option>';
+				}
+				$html .= '</select>';
+				$html .= '<select id="'.$name.'__minute" name="'.$name.'__minute">';
+				for($m=0; $m<60; $m+=5) {
+					$s = '';
+					if($minute>=$m && $minute<$m+5)
+						$s = ' selected="selected"';
+					$html .= '<option value="'.$m.'"'.$s.'>'
+						.str_pad($m, 2, '0', STR_PAD_LEFT).'</option>';
+				}
+				$html .= '</select>';
 			}
-			$html .= '</select>';
-			$html .= '<select id="'.$name.'__minute" name="'.$name.'__minute">';
-			for($m=0; $m<60; $m+=5) {
-				$s = '';
-				if($minute>=$m && $minute<$m+5)
-					$s = ' selected="selected"';
-				$html .= '<option value="'.$m.'"'.$s.'>'
-					.str_pad($m, 2, '0', STR_PAD_LEFT).'</option>';
-			}
-			$html .= '</select>';
 			$this->_render($obj, $html);
 		}
 
