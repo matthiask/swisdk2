@@ -69,6 +69,8 @@
 							'runtime.website', $v);
 						Swisdk::set_config_value('runtime.website.title',
 							Swisdk::website_config_value('title'));
+						Swisdk::add_loader_base(
+							CONTENT_ROOT.substr($page['url'], 1).'/');
 						break;
 					case 'title':
 						Swisdk::set_config_value('runtime.page.title',

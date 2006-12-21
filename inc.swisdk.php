@@ -77,7 +77,11 @@
 			Swisdk::require_data_directory(CACHE_ROOT);
 			Swisdk::read_configfile();
 			Swisdk::init_language();
+
+			Swisdk::$load_bases = array(CONTENT_ROOT, SWISDK_ROOT.'content/', SWISDK_ROOT);
 		}
+
+		protected static $load_bases;
 
 		public static function run($arguments)
 		{
@@ -377,7 +381,7 @@
 
 			$path = sprintf('%s/inc.%s.php', $stage, strtolower($class));
 
-			$bases = array(CONTENT_ROOT, SWISDK_ROOT.'content/', SWISDK_ROOT);
+			$bases = Swisdk::$load_bases;
 
 			while(count($bases)) {
 				$base = array_shift($bases);
@@ -407,6 +411,11 @@
 				SwisdkError::handle(new FatalError(sprintf(
 					dgettext('swisdk', 'Could not load %s, stage %s'),
 					$class, $stage)));
+		}
+
+		public static function add_loader_base($base)
+		{
+			array_unshift(Swisdk::$load_bases, $base);
 		}
 	}
 
