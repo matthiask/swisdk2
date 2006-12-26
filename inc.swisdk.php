@@ -264,6 +264,9 @@
 			else if($val=='override-false')
 				return false;
 
+			if(!Swisdk::config_value('core.user_config', false))
+				return $val;
+
 			if(!$uid)
 				$uid = SessionHandler::user()->id();
 			if($dbo = DBObject::find('UserMeta', array(
