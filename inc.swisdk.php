@@ -259,9 +259,9 @@
 		public static function user_config_value($key, $default=null, $uid=null)
 		{
 			$val = Swisdk::website_config_value('user.'.$key, $default);
-			if($val=='override-true')
+			if($val==='force-true')
 				return true;
-			else if($val=='override-false')
+			else if($val==='force-false')
 				return false;
 
 			if(!Swisdk::config_value('core.user_config', false))
