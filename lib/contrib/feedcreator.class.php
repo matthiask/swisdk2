@@ -200,7 +200,7 @@ class FeedItem extends HtmlDescribable {
 	/**
 	 * Optional attributes of an item.
 	 */
-	var $author, $authorEmail, $image, $category, $comments, $guid, $source, $creator;
+	var $author, $authorEmail, $image, $category, $comments, $guid, $source, $creator, $thumb;
 	
 	/**
 	 * Publishing date of an item. May be in one of the following formats:
@@ -565,7 +565,7 @@ class FeedCreator extends HtmlDescribable {
 	 * @param int        length the maximum length the string should be truncated to
 	 * @return string    the truncated string
 	 */
-	function iTrunc($string, $length) {
+	static function iTrunc($string, $length) {
 		if (strlen($string)<=$length) {
 			return $string;
 		}
@@ -931,6 +931,7 @@ class RSSCreator091 extends FeedCreator {
 	 * @access private
 	 */
 	var $RSSVersion;
+	var $format;
 
 	function RSSCreator091() {
 		$this->_setRSSVersion("0.91");
