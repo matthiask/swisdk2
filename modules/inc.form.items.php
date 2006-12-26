@@ -520,6 +520,17 @@ EOD;
 		protected $attributes = array('class' => 'sf-richtextarea');
 		protected $type = 'Standard';
 
+		public function init_value($dbobj)
+		{
+			parent::init_value($dbobj);
+			$value = $this->value();
+			$new = preg_replace('/^<!--.*-->/u', '', $value);
+			if(strpos($value, '<!-- NORT -->')===0)
+				$this->set_value($new);
+			else
+				$this->set_value('<!-- RT -->'.$new);
+		}
+
 		public function type()
 		{
 			return $this->type;

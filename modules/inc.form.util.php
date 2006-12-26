@@ -67,6 +67,16 @@
 				return $formbox->add($id, $elem, $id);
 			}
 		}
+
+		public static function textarea($formbox, $field, $title=null, $default=true,
+			$config_key='richtextarea')
+		{
+			if(Swisdk::user_config_value($config_key, $default)
+					|| strpos($formbox->dbobj()->get($field), '<!-- RT -->')===0)
+				return $formbox->add($field, new RichTextarea(), $title);
+			else
+				return $formbox->add($field, new Textarea(), $title);
+		}
 	}
 
 ?>
