@@ -185,8 +185,6 @@
 					array('comment_realm', 'count'));
 				$this->smarty->assign('comment_count', $comment_count);
 			}
-			$this->smarty->register_function($p.'url',
-				'generate_'.$p.'url');
 			$this->smarty->register_function('generate_pagelinks',
 				array(&$this, '_generate_pagelinks'));
 			$this->smarty->display_template($this->dbo_class.'.list');

@@ -40,6 +40,7 @@
 			$this->smarty->register_block('if_not_block', '_smarty_swisdk_if_not_block');
 			$this->smarty->assign_by_ref('_swisdk_smarty_instance', $this);
 			$this->smarty->register_function('css_classify', '_smarty_swisdk_css_classify');
+			$this->smarty->register_function('generate_url', '_smarty_swisdk_generate_url');
 			error_reporting($er);
 
 			Swisdk::require_data_directory($this->smarty->compile_dir);
@@ -147,6 +148,12 @@
 	function _smarty_swisdk_css_classify($params, &$smarty)
 	{
 		return cssClassify(Swisdk::config_value('runtime.'.$params['key']));
+	}
+
+	function _smarty_swisdk_generate_url($params, &$smarty)
+	{
+		$generator = Swisdk::load_instance('UrlGenerator', 'modules');
+		return $generator->generate_url($params['item']);
 	}
 
 	/**
