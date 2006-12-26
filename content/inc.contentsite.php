@@ -218,18 +218,24 @@
 			require_once SWISDK_ROOT.'lib/contrib/markdown.php';
 			$feed = new UniversalFeedCreator();
 			$feed->title = Swisdk::config_value('runtime.website.title');
-			$feed->description = 'Description';
+			$feed->description = $feed->title;
 			$feed->link = 'http://'.Swisdk::config_value('runtime.request.host');
 			$feed->syndicationURL = $_SERVER['REQUEST_URI'];
+
+			$ug = Swisdk::load_instance('UrlGenerator', 'modules');
+
+			$authors = DBOContainer::find_by_id('User',
+				$this->dbobj->collect('id', 'author_id'));
 
 			foreach($this->dbobj as $dbo) {
 				$item = new FeedItem();
 				$item->title = $dbo->title;
 				$item->link = $feed->link
-					.$this->generate_url($dbo);
+					.$ug->generate_url($dbo);
 				$item->description = Markdown($dbo->teaser);
 				$item->date = date(DATE_W3C, $dbo->start_dttm);
-				$item->author = $dbo->author_id;
+				$item->author = $authors[$dbo->author_id]->forename.' '
+					.$authors[$dbo->author_id]->name;
 
 				$feed->addItem($item);
 			}
