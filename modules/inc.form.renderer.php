@@ -360,6 +360,7 @@ function formitem_tristate(elem)
 			$name = $obj->id();
 			$value = $obj->value();
 			$attributes = $this->_attribute_html($obj->attributes());
+			$type = $obj->type();
 			$html = <<<EOD
 <textarea name="$name" id="$name" $attributes>$value</textarea>
 <script type="text/javascript" src="$prefix/util.js"></script>
@@ -371,6 +372,7 @@ var oFCKeditor = new FCKeditor('$name');
 oFCKeditor.BasePath = '$prefix/fckeditor/';
 oFCKeditor.Height = 450;
 oFCKeditor.Width = 550;
+oFCKeditor.ToolbarSet = '$type';
 oFCKeditor.ReplaceTextarea();
 }
 add_event(window,'load',load_editor_$name);

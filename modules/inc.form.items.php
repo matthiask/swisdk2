@@ -518,6 +518,18 @@ EOD;
 	 */
 	class RichTextarea extends Textarea {
 		protected $attributes = array('class' => 'sf-richtextarea');
+		protected $type = 'Standard';
+
+		public function type()
+		{
+			return $this->type;
+		}
+
+		public function set_type($type)
+		{
+			$this->type = $type;
+			return $this;
+		}
 	}
 
 	/**
