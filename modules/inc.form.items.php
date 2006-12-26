@@ -516,7 +516,7 @@ EOD;
 	/**
 	 * Textarea with all the Wysiwyg-Bling!
 	 */
-	class RichTextarea extends FormItem {
+	class RichTextarea extends Textarea {
 		protected $attributes = array('class' => 'sf-richtextarea');
 	}
 
