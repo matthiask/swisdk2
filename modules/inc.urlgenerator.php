@@ -30,28 +30,28 @@
 
 		public function generate_article_url($obj)
 		{
-			$date = getdate($obj->start_dttm);
-			return sprintf('%s/%04d/%02d/%02d/%s/',
-				Swisdk::config_value('runtime.urlgenerator.article',
-					$this->controller_url),
-				$date['year'], $date['mon'],
-				$date['mday'], $obj->name);
+			return $this->_generate_wp_style_url('article', $obj);
 		}
 
 		public function generate_event_url($obj)
 		{
-			$date = getdate($obj->start_dttm);
-			return sprintf('%s/%04d/%02d/%02d/%s/',
-				Swisdk::config_value('runtime.urlgenerator.event',
-					$this->controller_url),
-				$date['year'], $date['mon'],
-				$date['mday'], $obj->name);
+			return $this->_generate_wp_style_url('event', $obj);
 		}
 
 		public function generate_download_url($obj)
 		{
 			return Swisdk::config_value('runtime.urlgenerator.download',
 					$this->controller_url).'/'.$obj->file_name;
+		}
+
+		protected function _generate_wp_style_url($db_class, $obj)
+		{
+			$date = getdate($obj->start_dttm);
+			return sprintf('%s/%04d/%02d/%02d/%s/',
+				Swisdk::config_value('runtime.urlgenerator.'.$db_class,
+					$this->controller_url),
+				$date['year'], $date['mon'], $date['mday'],
+				$obj->name);
 		}
 	}
 
