@@ -256,6 +256,24 @@
 			return $tmpl;
 		}
 
+		public static function user_config_value($key, $default=null, $uid=null)
+		{
+			$val = Swisdk::website_config_value('user.'.$key, $default);
+			if($val=='override-true')
+				return true;
+			else if($val=='override-false')
+				return false;
+
+			if(!$uid)
+				$uid = SessionHandler::user()->id();
+			if($dbo = DBObject::find('UserMeta', array(
+					'user_meta_user_id=' => $uid,
+					'user_meta_key=' => $key)))
+				return $dbo->value;
+
+			return $val;
+		}
+
 
 		/**
 		 * i18n support
