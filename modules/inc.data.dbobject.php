@@ -600,17 +600,17 @@
 			$field = $options;
 			$class = $c2;
 			if(!$field)
-				$field = $o2->name('id');
+				$field = $o1->name($o2->primary());
 			if($options)
 				$c2 = $field;
 
 			DBObject::$relations[$c1][$c2] = array(
 				'type' => DB_REL_SINGLE,
-				'field' => $o1->name($o2->primary()),
+				'field' => $field,
 				'foreign_class' => $class,
 				'foreign_table' => $o2->table(),
 				'foreign_primary' => $o2->primary(),
-				'foreign_condition' => $o1->name($o2->primary()).'='.$o2->primary()
+				'foreign_condition' => $field.'='.$o2->primary()
 				);
 			DBObject::$relations[$c1][$field] = DBObject::$relations[$c1][$c2];
 			// do not set reverse mapping if user passed an explicit field
@@ -619,11 +619,11 @@
 				return;
 			DBObject::$relations[$c2][$c1] = array(
 				'type' => DB_REL_MANY,
-				'field' => $o1->name($o2->primary()),
+				'field' => $field,
 				'foreign_class' => $c1,
 				'foreign_table' => $o1->table(),
 				'foreign_primary' => $o1->primary(),
-				'foreign_condition' => $o2->primary().'='.$o1->name($o2->primary())
+				'foreign_condition' => $o2->primary().'='.$field
 				);
 			DBObject::$relations[$c2][$field] = DBObject::$relations[$c2][$c1];
 		}
