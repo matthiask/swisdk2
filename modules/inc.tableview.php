@@ -316,7 +316,7 @@ EOD;
 			$gid = guardToken('delete');
 			$delete = dgettext('swisdk', 'Really delete?');
 			return '<div style="float:left">'
-				.sprintf(dgettext('swisdk', '%s edit %s or %s delete %s checked'),
+				.sprintf(dgettext('swisdk', '%sedit%s or %sdelete%s checked'),
 					'<a href="javascript:tv_edit()">',
 					'</a>',
 					'<a href="javascript:tv_delete()">',
@@ -431,7 +431,7 @@ EOD;
 			list($first, $count, $last) = $this->list_position();
 
 			$str = sprintf(dgettext('swisdk', 'displaying %s &ndash; %s of %s'), $first, $last, $count);
-			$skim = sprintf(dgettext('swisdk', 'skim %s backwards %s or %s forwards %s'),
+			$skim = sprintf(dgettext('swisdk', 'skim %sbackwards%s or %sforwards%s'),
 				'<a href="javascript:skim(-'.$this->items_on_page.')">',
 				'</a>',
 				'<a href="javascript:skim('.$this->items_on_page.')">',

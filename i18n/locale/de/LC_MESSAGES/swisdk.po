@@ -115,13 +115,13 @@ msgstr "zeige %s &ndash; %s von %s"
 
 #: modules/inc.dbtableview.php:259
 #, php-format
-msgid "skim %s backwards %s or %s forwards %s"
-msgstr "%s rückwärts %s oder %s vorwärts %s"
+msgid "skim %sbackwards%s or %sforwards%s"
+msgstr "%srückwärts%s oder %svorwärts%s"
 
 #: modules/inc.dbtableview.php:316
 #, php-format
-msgid "%s edit %s or %s delete %s checked"
-msgstr "%s bearbeite %s oder %s lösche %s markierte"
+msgid "%sedit%s or %sdelete%s checked"
+msgstr "%sbearbeite%s oder %slösche%s markierte"
 
 #: modules/inc.form.items.php:324
 msgid "The uploaded file exceeds the allowed filesize"
