@@ -422,7 +422,7 @@
 								$frags[] = $id1.','.$id2;
 						if(!count($frags))
 							return true;
-						$o3 = DBObject::create($rel['$choices_class']);
+						$o3 = DBObject::create($rel['choices_class']);
 						$sql = 'INSERT INTO '.$rel['link_table']
 							.' ('.$rel['link_here'].','
 							.$rel['link_there'].','
