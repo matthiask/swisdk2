@@ -105,6 +105,7 @@
 			if(file_exists(APP_ROOT.'webapp/config.ini')) {
 				$cfg = parse_ini_file(APP_ROOT.'webapp/config.ini', true);
 				foreach($cfg as $section => $array) {
+					$section = preg_replace('/^([\w]+)\ "(.*)"$/', '\1.\2', $section);
 					// special handling for sections which have a dot
 					// in their name, f.e. db.second, db.third for multiple
 					// db connections
