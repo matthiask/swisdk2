@@ -62,6 +62,7 @@
 				foreach($urls as $url)
 					$clauses[] = 'realm_url LIKE \''.$url.'%\'';
 				$sql .= implode(' OR ', $clauses);
+				$urls = DBObject::db_get_array($sql, array('realm_id', 'realm_title'));
 				PermissionManager::$siteadmin_realms[$uid] = $urls;
 			} else {
 				PermissionManager::$siteadmin_realms[$uid] = array();
@@ -211,7 +212,9 @@
 					.'ON ugrr_user_group_id='
 						.'uug_user_group_id '
 				.'WHERE uug_user_id='.$uid.' AND ugrr_role_id>='.$rid;
-			return DBObject::db_get_array($sql, array('realm_id', 'realm_title'));
+			return array_flip(array_merge(
+				array_flip(DBObject::db_get_array($sql, array('realm_id', 'realm_title'))),
+				array_flip(PermissionManager::siteadmin_realms($uid))));
 		}
 
 		public static function role_for_realm($realm, $uid = null)
