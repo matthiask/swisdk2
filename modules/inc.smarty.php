@@ -152,7 +152,9 @@
 
 	function _smarty_swisdk_generate_url($params, &$smarty)
 	{
-		$generator = Swisdk::load_instance('UrlGenerator', 'modules');
+		static $generator = null;
+		if($generator===null)
+			$generator = Swisdk::load_instance('UrlGenerator', 'modules');
 		return $generator->generate_url($params['item']);
 	}
 

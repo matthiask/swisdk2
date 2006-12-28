@@ -10,7 +10,7 @@
 
 		public function __construct()
 		{
-			$this->controller_url = Swisdk::config_value('runtime.controller.url');
+			$this->controller_url = rtrim(Swisdk::config_value('runtime.controller.url'), '/');
 		}
 
 		public function generate_url($obj)
