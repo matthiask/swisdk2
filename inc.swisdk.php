@@ -421,13 +421,16 @@
 		 */
 		public static function load_instance($class, $stage = null)
 		{
+			$key = 'runtime.loader.'.$class;
+			$class = Swisdk::config_value($key, $class);
 			if(class_exists($class))
 				return new $class;
 
 			if($stage===null)
 				$stage = Swisdk::config_value('runtime.stage');
+			Swisdk::set_config_value($key, $class);
 			if(Swisdk::load($class, $stage)
-					&& class_exists($class))
+					&& class_exists($class = Swisdk::config_value($key)))
 				return new $class;
 			else
 				SwisdkError::handle(new FatalError(sprintf(
