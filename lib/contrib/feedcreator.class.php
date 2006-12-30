@@ -200,7 +200,7 @@ class FeedItem extends HtmlDescribable {
 	/**
 	 * Optional attributes of an item.
 	 */
-	var $author, $authorEmail, $image, $category, $comments, $guid, $source, $creator, $thumb;
+	var $author, $authorEmail, $image, $category, $comments, $guid, $source, $creator, $thumb, $thumbdata;
 	
 	/**
 	 * Publishing date of an item. May be in one of the following formats:
@@ -540,7 +540,7 @@ class FeedCreator extends HtmlDescribable {
 	 * the FeedCreator class used.
 	 */
 	var $additionalElements = Array();
-   
+
     
 	/**
 	 * Adds an FeedItem to the feed.
@@ -1333,6 +1333,8 @@ class PIECreator01 extends FeedCreator {
  * @author Kai Blankenhorn <kaib@bitfolge.de>, Scott Reynen <scott@randomchaos.com>
  */
 class AtomCreator03 extends FeedCreator {
+
+	var $format;
 
 	function AtomCreator03() {
 		$this->contentType = "application/atom+xml";
