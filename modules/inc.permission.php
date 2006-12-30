@@ -113,14 +113,17 @@
 			//
 			$tokens = explode('/', $url);
 			$clauses = array();
+			$d = Swisdk::config_value('runtime.domain');
+			if($d)
+				$d .= ':';
 			while(count($tokens)) {
-				$clauses[] = DBObject::db_escape(implode('/', $tokens));
+				$clauses[] = DBObject::db_escape($d.implode('/', $tokens));
 				array_pop($tokens);
 			}
 			return DBObject::db_get_row(
 				'SELECT realm_id,realm_role_id FROM tbl_realm WHERE '
 				.'(realm_url='.implode(' OR realm_url=', $clauses)
-				.' OR realm_url=\'\') ORDER BY realm_url DESC LIMIT 1');
+				.' OR realm_url=\''.$d.'\') ORDER BY realm_url DESC LIMIT 1');
 		}
 
 		public static function check_realm_role($realm, $role, $uid=null)

@@ -33,6 +33,9 @@
 				CONTENT_ROOT,
 				SWISDK_ROOT.'content/');
 
+			if($domain = Swisdk::config_value('runtime.domain'))
+				array_unshift($bases, CONTENT_ROOT.$domain.'/');
+
 			$paths = array();
 
 			if($input) {

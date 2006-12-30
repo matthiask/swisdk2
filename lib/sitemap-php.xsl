@@ -12,6 +12,20 @@ $_swisdk2_sitemap = array(
 );
 ?></xsl:template>
 
+<xsl:template match="domain">
+'<xsl:value-of select="@id"/>' => array(
+	'domain' => 1,
+	<xsl:for-each select="@*">
+		'<xsl:value-of select="name()" />' => '<xsl:value-of select="." />',
+	</xsl:for-each>
+	<xsl:if test="count(*) &gt; 0">
+	'pages' => array(
+		<xsl:apply-templates/>
+	),
+	</xsl:if>
+),
+</xsl:template>
+
 <xsl:template match="page">
 '<xsl:value-of select="@id"/>' => array(
 	<xsl:for-each select="@*">

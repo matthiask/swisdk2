@@ -30,6 +30,7 @@
 		protected $redirect = null;
 		protected $rewroten = null;
 		protected $tokens;
+		protected $domain;
 
 		public function collect_informations()
 		{
@@ -38,7 +39,10 @@
 			$sitemap = SwisdkSitemap::sitemap();
 			$ref =& $sitemap;
 
-			$this->tokens = explode('/', rtrim($input, '/'));
+			$this->tokens = explode('/', trim($input, '/'));
+			$this->domain = Swisdk::config_value('runtime.domain');
+			// null is ok too
+			array_unshift($this->tokens, $this->domain);
 			$this->rewroten = null;
 
 			while(($t = array_shift($this->tokens))!==null) {
@@ -70,7 +74,9 @@
 						Swisdk::set_config_value('runtime.website.title',
 							Swisdk::website_config_value('title'));
 						Swisdk::add_loader_base(
-							CONTENT_ROOT.substr($page['url'], 1).'/');
+							CONTENT_ROOT
+							.($this->domain?$this->domain.'/':'')
+							.substr($page['url'], 1).'/');
 						break;
 					case 'title':
 						Swisdk::set_config_value('runtime.page.title',
@@ -98,6 +104,9 @@
 					case 'pages':
 					case 'parent_title':
 					case 'parent_url':
+					case 'id':
+					case 'url':
+					case 'domain':
 						break;
 					default:
 						Swisdk::set_config_value(

@@ -110,6 +110,8 @@
 			}
 
 			$bases = array(null, SWISDK_ROOT.'content/');
+			if($domain = Swisdk::config_value('runtime.domain'))
+				array_unshift($bases, $domain.'/');
 
 			$tmpl = Swisdk::template($key);
 

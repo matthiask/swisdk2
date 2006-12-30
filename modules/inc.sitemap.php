@@ -19,7 +19,15 @@
 			$ref =& $sitemap;
 			if(array_keys($ref)==array(''))
 				$ref = reset($ref);
-			$tokens = explode('/', $url);
+			$tokens = array();
+
+			// if runtime.domain is set (multi domain support has been activated),
+			// we need to start directly with the domain token. Otherwise, the
+			// empty token is needed too for the first sitemap node
+			if(Swisdk::config_value('runtime.domain'))
+				$tokens = explode('/', trim($url, '/'));
+			else
+				$tokens = explode('/', rtrim($url, '/'));
 
 			// drill down until there are no more URL tokens
 			while(($t = array_shift($tokens))!==null) {
@@ -104,8 +112,12 @@
 					$page['url'] = $prefix.$id;
 				if(!isset($page['title']))
 					$page['title'] = utf8_ucwords(preg_replace('/[ _]+/', ' ', $id));
-				if(isset($page['pages']))
-					SwisdkSitemap::loop_pages($page, $prefix.$id.'/');
+				if(isset($page['pages'])) {
+					if(isset($page['domain']))
+						SwisdkSitemap::loop_pages($page, $prefix.'/');
+					else
+						SwisdkSitemap::loop_pages($page, $prefix.$id.'/');
+				}
 				$page['parent_title'] = isset($pages['title'])?$pages['title']:'';
 				$page['parent_url'] = isset($pages['url'])?$pages['url']:'/';
 			}
