@@ -28,21 +28,23 @@
 		protected $_html;
 		protected $args;
 
-		public function run($args=null)
+		public function run()
 		{
-			if($args===null)
+			$this->dispatch();
+		}
+
+		public function dispatch($command=null)
+		{
+			if($this->args===null)
 				$this->args = Swisdk::config_value('runtime.arguments');
+
+			if(($command===null) && count($this->args))
+				$command = array_shift($this->args);
+
+			if($command && method_exists($this, $cmd = 'cmd_'.$command))
+				$this->_html = $this->$cmd();
 			else
-				$this->args = $args;
-			if(isset($this->args[0])) {
-				$cmd = $this->args[0];
-				if($cmd && method_exists($this, 'cmd_'.$cmd)) {
-					array_shift($this->args);
-					$this->_html = $this->{'cmd_'.$cmd}();
-					return;
-				}
-			}
-			$this->_html = $this->cmd_index();
+				$this->_html = $this->cmd_index();
 		}
 
 		public function html()
