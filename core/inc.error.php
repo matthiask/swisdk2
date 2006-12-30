@@ -8,53 +8,31 @@
 	/**
 	*	entry point for php errors
 	*/
-	function swisdk_php_error_handler( $errno, $errstr, $file, $line, $context )
+	function swisdk_php_error_handler($errno, $errstr, $file, $line, $context)
 	{
-		SwisdkError::handle( new PHPError( $errno, $errstr, $file, $line, $context ) );
+		SwisdkError::handle(new PHPError($errno, $errstr, $file, $line, $context));
 	}
 
-	function swisdk_php_exception_handler( $exception )
+	function swisdk_php_exception_handler($exception)
 	{
-		SwisdkError::handle( new UnhandledExceptionError( $exception ) );
+		SwisdkError::handle(new UnhandledExceptionError($exception));
 	}
 
 	class SwisdkError {
-
-		public static function handle( $eObj )
+		public static function handle($error)
 		{
-			if($eObj instanceof BasicSwisdkError) {
-				$eObj->run();
-				return $eObj;
-			} else {
-				SwisdkError::handle(new FatalError(sprintf(
-					dgettext('swisdk', 'SwisdkError::handle: Argument must be of type BasicSwisdkError'))));
-			}
+			$error->run();
 		}
 
-		public static function setup($handler = array(__CLASS__,
-			'standard_output_handler'))
+		public static function setup()
 		{
-			SwisdkError::$handler_callback = $handler;
-			set_error_handler( 'swisdk_php_error_handler' );
-			set_exception_handler( 'swisdk_php_exception_handler' );
+			set_error_handler('swisdk_php_error_handler');
+			set_exception_handler('swisdk_php_exception_handler');
 		}
 
 		public static function is_error($obj)
 		{
 			return ($obj instanceof BasicSwisdkError);
-		}
-
-		protected static $handler_callback;
-
-		public static function standard_output_handler($obj)
-		{
-			echo '<div style="background:#f88;padding:10px;border:2px solid black;">'
-				.$obj->to_string($obj->debug_mode).'</div>';
-		}
-
-		public static function call_output_handler($obj)
-		{
-			call_user_func(SwisdkError::$handler_callback, $obj);
 		}
 	}
 
@@ -67,22 +45,33 @@
 	class BasicSwisdkError {
 		public $args;
 		public $debug_mode;
+		protected $send_email;
 
 		public function __construct( $message = null )
 		{
 			$this->args = func_get_args();
 			$this->debug_mode = Swisdk::config_value('error.debug_mode');
+			$this->send_email = Swisdk::config_value('error.email_notification');
 		}
 
 		public function run()
 		{
 			$dbgmsg = $this->to_string(true);
-			if(Swisdk::config_value('error.email_notification'))
+			if($this->send_email)
 				$this->send_notification($dbgmsg);
 			if(Swisdk::config_value('error.logging'))
-				$this->append_log_message($dbgmsg);
-			SwisdkError::call_output_handler($this);
+				Swisdk::log($dbgmsg);
+			$this->display();
 			die();
+		}
+
+		public function display($message=null)
+		{
+			if(!$message)
+				$message = $this->to_string($this->debug_mode);
+
+			echo '<div style="background:#f88;padding:10px;border:2px solid black;">'
+				.$message.'</div>';
 		}
 
 		public function to_string($debug_mode = false)
@@ -98,23 +87,15 @@
 			return backtrace(true);
 		}
 
-		public function append_log_message($message)
-		{
-			$fname = Swisdk::config_value('error.logfile');
-			if(!$fname)
-				return;
-			$fp = @fopen(LOG_ROOT.$fname, 'a');
-			@fwrite($fp, date(DATE_W3C).' '.$message."\n");
-			@fclose($fp);
-		}
-
 		public function send_notification($message)
 		{
+			$this->send_email = false;
+
 			$recipient = Swisdk::config_value('core.admin_email');
 			if(!$recipient)
 				return;
-			@mail($recipient, 'NotificationError: '.Swisdk::config_value('core.name'),
-				$message, 'From: swisdk-suckage@'.preg_replace('/^www\./', '',
+			@mail($recipient, 'Error: '.Swisdk::config_value('core.name'), $message,
+				'From: swisdk-suckage@'.preg_replace('/^www\./', '',
 					Swisdk::config_value('runtime.request.host')));
 		}
 	}
@@ -124,7 +105,7 @@
 	 * - sql string is shown if debug_mode is activated
 	 * - terminates script
 	 */
-	class DBError extends NotificationError {
+	class DBError extends BasicSwisdkError {
 		//
 		// usage example:
 		//
@@ -139,32 +120,11 @@
 	}
 
 	/**
-	 * - error output
-	 * - notification by email (always, do not honor error.email_notification)
-	 */
-	class NotificationError extends BasicSwisdkError {
-		public function run()
-		{
-			$message = $this->to_string($this->debug_mode);
-			$this->send_notification($message);
-			parent::run();
-		}
-	}
-
-	/**
-	 * same as NotificationError
+	 * same as BasicSwisdkError
 	 * this class is a type hint (and its name is classy)
 	 */
-	class FatalError extends NotificationError {
+	class FatalError extends BasicSwisdkError {
 	}
-
-	/**
-	*	TODO add a check if the file which was not found just isnt readable for
-	*	the webserver user...
-	*/
-	class FileNotFoundError extends NotificationError {
-	}
-
 
 	/**
 	 * old school php erro :)
@@ -194,9 +154,6 @@
 		}
 	}
 
-	class SuicideError extends BasicSwisdkError {
-	}
-
 	/**
 	 * No comments. We don't like exceptions.
 	 *
@@ -213,7 +170,6 @@
 	/**
 	 * this is self-explaining (...)
 	 */
-
 	class SiteNotFoundError extends BasicSwisdkError {
 		public function run()
 		{
