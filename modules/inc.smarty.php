@@ -83,7 +83,7 @@
 			$ret = $this->smarty->fetch($resource_name);
 			while($resource = $this->_derived) {
 				$this->_derived = null;
-				$ret = $this->smarty->fetch($resource);
+				$ret = $this->fetch_template($resource);
 			}
 			return $ret;
 		}
@@ -98,20 +98,27 @@
 			return $this->fetch($this->resolve_template($key));
 		}
 
-		public function resolve_template($key)
+		public function resolve_template($key, $throw=true)
 		{
 			if(is_array($key)) {
 				foreach($key as $k)
-					if($tmpl = $this->resolve_template($k))
+					if($tmpl = $this->resolve_template($k, false))
 						return $tmpl;
+
+				if($throw)
+					SwisdkError::handle(new FatalError('Could not resolve template '.$key));
 			}
 
+			$bases = array(null, SWISDK_ROOT.'content/');
+
 			$tmpl = Swisdk::template($key);
-			if($this->template_exists($tmpl)
-					|| $this->template_exists(
-						$tmpl = SWISDK_ROOT.'content/'.$tmpl))
-				return $tmpl;
-			return null;
+
+			foreach($bases as $b)
+				if($this->template_exists($b.$tmpl))
+					return $b.$tmpl;
+
+			if($throw)
+				SwisdkError::handle(new FatalError('Could not resolve template '.$key));
 		}
 
 		public function block_content($block)
@@ -200,7 +207,7 @@
 	{
 		$ss = $smarty->get_template_vars('_swisdk_smarty_instance');
 		if(isset($params['template']))
-			$ss->_derived = $ss->resolve_template($params['template']);
+			$ss->_derived = $params['template'];
 		else
 			$ss->_derived = $params['file'];
 	}
