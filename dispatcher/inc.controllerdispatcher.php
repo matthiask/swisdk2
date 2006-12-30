@@ -27,39 +27,50 @@
 		public function collect_informations()
 		{
 			$input = trim($this->input(), '/');
+
 			$tokens = array();
-			$path_1 = CONTENT_ROOT;
-			$path_2 = SWISDK_ROOT.'content/';
+			$bases = array(
+				CONTENT_ROOT,
+				SWISDK_ROOT.'content/');
+
+			$paths = array();
+
 			if($input) {
 				$tokens = explode('/', $input);
-				$path_1 .= $input;
-				$path_2 .= $input;
+				foreach($bases as $b)
+					$paths[] = $b.$input;
 			} else {
-				$path_1 = rtrim($path_1, '/');
-				$path_2 = rtrim($path_2, '/');
+				foreach($bases as $b)
+					$paths[] = rtrim($b, '/');
 			}
+
 			$t = $tokens;
 			$matches = array();
 
 			// try to find an Index_* controller/template only
 			// for the full REQUEST_URI path
-			if(!($matches = glob($path_1.'/Index_*'))
-					&&!($matches=glob($path_2.'/Index_*'))) {
+			foreach($paths as $p) {
+				if($matches = glob($p.'/Index_*'))
+					break;
+			}
+
+			if(!$matches) {
 				while(true) {
-					if(($matches=glob($path_1.'/All_*'))
-							||($matches=glob($path_1.'_*'))
-							||($matches=glob($path_2.'/All_*'))
-							||($matches=glob($path_2.'_*'))) {
-						if(is_file($matches[0]))
-							break;
+					foreach($paths as $p) {
+						if(($matches = glob($p.'/All_*'))
+								||($matches = glob($p.'_*'))) {
+							if(count($matches) && is_file($matches[0]))
+								break 2;
+						}
 					}
 
 					if(!count($tokens))
 						return false;
 
 					array_pop($tokens);
-					$path_1 = rtrim(CONTENT_ROOT.implode('/', $tokens), '/');
-					$path_2 = rtrim(SWISDK_ROOT.implode('/', $tokens), '/');
+					$paths = array();
+					foreach($bases as $b)
+						$paths[] = rtrim($b.implode('/', $tokens), '/');
 				}
 			}
 
