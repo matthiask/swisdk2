@@ -185,6 +185,8 @@
 			echo '<pre>';
 			echo '<strong>Swisdk config</strong><br />';
 			print_r(Swisdk::$config);
+			echo '<strong>Swisdk load bases</strong><br />';
+			print_r(Swisdk::$load_bases);
 			echo '</pre>';
 		}
 
