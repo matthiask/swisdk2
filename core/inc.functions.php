@@ -123,17 +123,16 @@
 	/**
 	 * return the backtrace as a string
 	 */
-	function backtrace($full=false)
+	function backtrace($limit=false)
 	{
 		$bt = debug_backtrace();
 		$str = "<pre><b>Backtrace:</b>\n";
-		$show = $full;
 		foreach($bt as $frame) {
-			if(!$show) {
+			if($limit) {
 				if(isset($frame['class'])
 						&& $frame['class']=='SwisdkError'
 						&& $frame['function']=='handle')
-					$show = true;
+					$limit = false;
 				else
 					continue;
 			}

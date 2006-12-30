@@ -95,7 +95,7 @@
 
 		protected function debug_string()
 		{
-			return backtrace();
+			return backtrace(true);
 		}
 
 		public function append_log_message($message)
