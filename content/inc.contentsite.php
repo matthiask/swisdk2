@@ -199,6 +199,8 @@
 				$page = 1;
 				$url = preg_replace('/\/page\/[0-9]+/', '',
 					rtrim(Swisdk::config_value('runtime.request.uri'), '/'));
+				if($count<=$limit)
+					return;
 				for($entry=0; $entry<$count; $entry+=$limit)
 					$html .= '<li><a href="'.$url.'/page/'.($page++).'">'.$entry.'</a></li>';
 			}
