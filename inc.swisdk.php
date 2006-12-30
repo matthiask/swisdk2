@@ -247,6 +247,8 @@
 		 */
 		public static function template($key)
 		{
+			if(strpos($key, '/')!==false)
+				return $key;
 			$tmp = $key = strtolower($key);
 			if(strpos($tmp, '.template.')===false)
 				$tmp = 'template.'.$tmp;
