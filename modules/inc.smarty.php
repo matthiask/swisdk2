@@ -45,6 +45,7 @@
 
 			Swisdk::require_data_directory($this->smarty->compile_dir);
 			$this->assign('swisdk_user', SessionHandler::user()->data());
+			$this->assign('swisdk_language', Swisdk::language_key());
 		}
 
 		public function __call($method, $args)
