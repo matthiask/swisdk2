@@ -11,7 +11,7 @@
 			$elem = new DropdownInput();
 			$elem->set_items(
 				PermissionManager::realms_for_role($role));
-			$ret = $formbox->add($id, $elem, $id);
+			$ret = $formbox->add($id, $elem);
 			$realm = PermissionManager::realm_for_url();
 			$ret->set_default_value($realm['realm_id']);
 			return $ret;
@@ -22,7 +22,7 @@
 			$elem = new Multiselect();
 			$elem->set_items(
 				PermissionManager::realms_for_role($role));
-			$ret = $formbox->add($id, $elem, $id);
+			$ret = $formbox->add($id, $elem);
 			$realm = PermissionManager::realm_for_url();
 			$ret->set_default_value(array($realm['realm_id']));
 			return $ret;
@@ -38,7 +38,7 @@
 			if(count($items)>1) {
 				$elem = new DropdownInput();
 				$elem->set_items($items);
-				return $formbox->add($id, $elem, $id);
+				return $formbox->add($id, $elem);
 			} else {
 				$elem = $formbox->add($id, new HiddenInput());
 				$elem->set_value(reset(array_keys($items)));
@@ -64,7 +64,7 @@
 			} else {
 				$elem = new Multiselect();
 				$elem->set_items($items);
-				return $formbox->add($id, $elem, $id);
+				return $formbox->add($id, $elem);
 			}
 		}
 
