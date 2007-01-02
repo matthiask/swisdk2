@@ -95,36 +95,8 @@
 		public function handle()
 		{
 			require_once MODULE_ROOT.'inc.smarty.php';
-			$smartyM = SmartyMaster::instance();
-			$smartyM->display( Swisdk::config_value('runtime.includefile') );
-			return;
-		}
-	}
-
-	/**
-	*	Send first the header template of the website, then the include file and
-	*	in the end the footer template.
-	*/
-	class EmbeddedSmartySiteHandler extends SwisdkSiteHandler
-	{
-		public function handle()
-		{
-			require_once MODULE_ROOT.'inc.smarty.php';
-			$smartyM = SmartyMaster::instance();
-			$smartyM->display_header();
-			$smartyM->display( Swisdk::config_value('runtime.includefile') );
-			$smartyM->display_footer();
-		}
-	}
-
-	class FullEmbeddedSiteHandler extends SwisdkSiteHandler {
-		public function handle()
-		{
-			require_once MODULE_ROOT.'inc.smarty.php';
-			$sm = SmartyMaster::instance();
-			$sm->add_html_fragment('content', file_get_contents(
-				Swisdk::config_value('runtime.includefile')));
-			$sm->display();
+			$smarty = new SwisdkSmarty();
+			$smarty->display_template(Swisdk::config_value('runtime.includefile'));
 		}
 	}
 
