@@ -215,10 +215,6 @@
 				$this->form = $box;
 
 				$fields = array_keys($dbobjml->field_list());
-
-				// maybe this should be configurable? Someone might want to
-				// change the language of some entry, or might want to reparent
-				// the translation
 				$ninc_regex = '/^'.$dbobjml->_prefix()
 					.'(id|creation_dttm|language_id|'
 					.$dbobj->primary().')$/';
