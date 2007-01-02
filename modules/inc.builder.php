@@ -181,7 +181,6 @@
 
 			$dbobj =& $form->dbobj();
 			$box = null;
-			// FIXME this is hacky. FormBox should have a box() method too?
 			$dbobjml = $dbobj->dbobj();
 			if($dbobjml instanceof DBOContainer) {
 				$languages = Swisdk::all_languages();
@@ -208,10 +207,7 @@
 							$this->create_field($fname);
 				}
 			} else {
-				if($form instanceof FormBox)
-					$box = $form->add(new FormMLBox());
-				else
-					$box =& $form->box($dbobj->language());
+				$box = $form->box($dbobj->language());
 				$box->bind($dbobjml);
 
 				// work on the language form box (don't need to keep a
