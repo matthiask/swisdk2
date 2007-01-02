@@ -37,21 +37,4 @@
 		}
 	}
 
-
-	abstract class SecuritySite extends Site
-	{
-		public function check_login()
-		{
-			// do something to check if the user
-			// is allowed to see this page
-
-			PermissionManager::instance()->check_throw();
-		}
-
-		public function run()
-		{
-			$this->check_login();
-		}
-	}
-
 ?>
