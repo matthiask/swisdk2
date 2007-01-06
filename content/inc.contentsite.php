@@ -327,8 +327,8 @@
 		protected function handle_none()
 		{
 			$smarty = new SwisdkSmarty();
-			$this->smarty->assign('content', 'No items matched your criteria');
-			$this->smarty->display_template('base.full');
+			$smarty->assign('items', array());
+			$smarty->display_template($this->dbo_class.'.list');
 		}
 
 
