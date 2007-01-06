@@ -328,6 +328,9 @@
 		{
 			$smarty = new SwisdkSmarty();
 			$smarty->assign('items', array());
+			$smarty->register_function('generate_pagelinks',
+				array(&$smarty, '_generate_pagelinks'));
+			$this->run_website_components($smarty);
 			$smarty->display_template($this->dbo_class.'.list');
 		}
 
