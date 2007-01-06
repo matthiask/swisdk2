@@ -43,8 +43,10 @@
 
 			if($command && method_exists($this, $cmd = 'cmd_'.$command))
 				$this->_html = $this->$cmd();
-			else
+			else {
+				array_unshift($this->args, $command);
 				$this->_html = $this->cmd_index();
+			}
 		}
 
 		public function html()
