@@ -110,7 +110,7 @@
 					SwisdkError::handle(new FatalError('Could not resolve template '.$key));
 			}
 
-			$bases = array(null, SWISDK_ROOT.'content/');
+			$bases = Swisdk::loader_bases();
 			if($domain = Swisdk::config_value('runtime.domain'))
 				array_unshift($bases, $domain.'/');
 

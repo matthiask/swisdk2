@@ -446,6 +446,11 @@
 		{
 			array_unshift(Swisdk::$load_bases, $base);
 		}
+
+		public static function loader_bases()
+		{
+			return Swisdk::$load_bases;
+		}
 	}
 
 ?>
