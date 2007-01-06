@@ -39,10 +39,12 @@
 			$sitemap = SwisdkSitemap::sitemap();
 			$ref =& $sitemap;
 
-			$this->tokens = explode('/', trim($input, '/'));
+			$this->tokens = array();
+			if($input = trim($input, '/'))
+				$this->tokens = explode('/', $input);
 			$this->domain = Swisdk::config_value('runtime.domain', '');
 			// empty string is ok too
-			if(count($this->tokens) && $this->tokens[0])
+			if(!count($this->tokens) || $this->tokens[0])
 				array_unshift($this->tokens, $this->domain);
 			$this->rewroten = null;
 
