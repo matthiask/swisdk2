@@ -343,8 +343,6 @@
 			}
 			if($container) {
 				$this->dbobj = DBOContainer::create($this->dbo_class);
-				if($this->find_config_value('permission_filter', true))
-					PermissionManager::set_realm_clause($this->dbobj);
 			}
 		}
 
@@ -470,6 +468,12 @@
 				$this->dbobj->add_clause($slug_field.'=',
 					$this->request['slug']);
 			}
+		}
+
+		protected function filter_permission()
+		{
+			if($this->find_config_value('permission_filter', true))
+				PermissionManager::set_realm_clause($this->dbobj);
 		}
 
 
