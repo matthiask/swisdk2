@@ -129,6 +129,8 @@
 			if(strpos($key, '/')!==false)
 				return $key;
 			$tmp = $key = strtolower($key);
+			if(strpos($key, 'website.')===0)
+				return Swisdk::config_value($key);
 			if(strpos($tmp, '.template.')===false)
 				$tmp = 'template.'.$tmp;
 			$tmpl = Swisdk::website_config_value($tmp);
