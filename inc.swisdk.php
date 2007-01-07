@@ -252,23 +252,6 @@
 			return $default;
 		}
 
-		/**
-		 * returns the path to a smarty template for the current website
-		 */
-		public static function template($key)
-		{
-			if(strpos($key, '/')!==false)
-				return $key;
-			$tmp = $key = strtolower($key);
-			if(strpos($tmp, '.template.')===false)
-				$tmp = 'template.'.$tmp;
-			$tmpl = Swisdk::website_config_value($tmp);
-			if(!$tmpl)
-				$tmpl = str_replace('.', '/', $key).'.tpl';
-
-			return $tmpl;
-		}
-
 		public static function user_config_value($key, $default=null, $uid=null)
 		{
 			$val = Swisdk::website_config_value('user.'.$key, $default);

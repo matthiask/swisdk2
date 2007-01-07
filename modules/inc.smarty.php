@@ -114,7 +114,7 @@
 			if($domain = Swisdk::config_value('runtime.domain'))
 				array_unshift($bases, $domain.'/');
 
-			$tmpl = Swisdk::template($key);
+			$tmpl = $this->_template($key);
 
 			foreach($bases as $b)
 				if($this->template_exists($b.$tmpl))
@@ -122,6 +122,20 @@
 
 			if($throw)
 				SwisdkError::handle(new FatalError('Could not resolve template '.$key));
+		}
+
+		protected function _template($key)
+		{
+			if(strpos($key, '/')!==false)
+				return $key;
+			$tmp = $key = strtolower($key);
+			if(strpos($tmp, '.template.')===false)
+				$tmp = 'template.'.$tmp;
+			$tmpl = Swisdk::website_config_value($tmp);
+			if(!$tmpl)
+				$tmpl = str_replace('.', '/', $key).'.tpl';
+
+			return $tmpl;
 		}
 
 		public function block_content($block)
