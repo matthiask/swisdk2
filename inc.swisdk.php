@@ -202,9 +202,15 @@
 
 		public static function config_value($key, $default = null)
 		{
-			$key = strtolower($key);
-			if(isset(Swisdk::$config[$key]))
-				return Swisdk::$config[$key];
+			if(!is_array($key))
+				$key = array($key);
+
+			foreach($key as $k) {
+				$k = strtolower($k);
+				if(isset(Swisdk::$config[$k]))
+					return Swisdk::$config[$k];
+			}
+
 			return $default;
 		}
 
@@ -221,27 +227,29 @@
 		 * [website.something]
 		 * inherit = default
 		 */
-		public static function website_config_value($key, $default=null)
+		public static function website_config_value($key, $default=null, $website=null)
 		{
-			$key = strtolower($key);
-			if(isset(Swisdk::$config[$key]))
-				return Swisdk::$config[$key];
-			$website = null;
-			if(strpos($key, 'website.')===0) {
-				$matches = array();
-				preg_match('/^website\.([^\.]+)\.(.*)$/', $key, $matches);
-				$key = $matches[2];
-				$website = $matches[1];
-			}
 			if(!$website)
 				$website = Swisdk::config_value('runtime.website');
-			while(!isset(Swisdk::$config['website.'.$website.'.'.$key])) {
-				if(isset(Swisdk::$config['website.'.$website.'.inherit']))
-					$website = Swisdk::$config['website.'.$website.'.inherit'];
+
+			if(!is_array($key))
+				$key = array($key);
+
+			$keys = array();
+			foreach($key as $k)
+				$keys[] = strtolower($k);
+
+			while(true) {
+				$w = 'website.'.$website.'.';
+				foreach($keys as $k)
+					if(isset(Swisdk::$config[$w.$k]))
+						return Swisdk::$config[$w.$k];
+				if(isset(Swisdk::$config[$w.'inherit']))
+					$website = Swisdk::$config[$w.'inherit'];
 				else
-					return $default;
+					break;
 			}
-			return Swisdk::$config['website.'.$website.'.'.$key];
+			return $default;
 		}
 
 		/**
