@@ -8,6 +8,9 @@
 	class FormUtil {
 		public static function realm_dropdown($formbox, $id='Realm', $role=ROLE_MANAGER)
 		{
+			$rel = $formbox->dbobj()->relations();
+			if(isset($rel[$id]))
+				$id = $rel[$id]['field'];
 			$elem = new DropdownInput();
 			$elem->set_items(
 				PermissionManager::realms_for_role($role));
@@ -19,6 +22,9 @@
 
 		public static function realm_multiselect($formbox, $id='Realm', $role=ROLE_MANAGER)
 		{
+			$rel = $formbox->dbobj()->relations();
+			if(isset($rel[$id]))
+				$id = $rel[$id]['field'];
 			$elem = new Multiselect();
 			$elem->set_items(
 				PermissionManager::realms_for_role($role));
@@ -30,6 +36,9 @@
 
 		public static function language_dropdown($formbox, $id='Language')
 		{
+			$rel = $formbox->dbobj()->relations();
+			if(isset($rel[$id]))
+				$id = $rel[$id]['field'];
 			$_langs = Swisdk::languages();
 			$items = array();
 			foreach($_langs as $id => &$l)
@@ -48,6 +57,9 @@
 
 		public static function language_multiselect($formbox, $id='Language')
 		{
+			$rel = $formbox->dbobj()->relations();
+			if(isset($rel[$id]))
+				$id = $rel[$id]['field'];
 			$_langs = Swisdk::languages();
 			$items = array();
 			foreach($_langs as $lid => &$l)
