@@ -110,6 +110,9 @@
 					SwisdkError::handle(new FatalError('Could not resolve template '.$key));
 			}
 
+			if($key{0}=='/')
+				return $key;
+
 			$bases = Swisdk::loader_bases();
 			$tmpl = $this->_template($key);
 
