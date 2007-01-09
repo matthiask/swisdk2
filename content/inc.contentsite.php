@@ -185,6 +185,23 @@
 					array('comment_realm', 'count'));
 				$this->smarty->assign('comment_count', $comment_count);
 			}
+			if($this->find_config_value('categories')
+					&& count($ids = $this->dbobj->ids())) {
+				$this->smarty->assign('categories',
+					DBOContainer::find('Category', array(
+					':join' => $dbobj->_class(),
+					$dbobj->primary().' IN {ids}' => array(
+						'ids' => $ids)
+					)));
+				$rel = $dbobj->relations();
+				$r = $rel['Category'];
+				$_i2c = DBObject::db_get_array('SELECT * FROM '.$r['link_table']
+					.' WHERE '.$r['link_here'].' IN ('.implode(',', $ids).')');
+				$i2c = array();
+				foreach($_i2c as $row)
+					$i2c[$row[$r['link_here']]][] = $row[$r['link_there']];
+				$this->smarty->assign('items_to_categories', $i2c);
+			}
 			$this->smarty->register_function('generate_pagelinks',
 				array(&$this, '_generate_pagelinks'));
 			$this->smarty->display_template($this->dbo_class.'.list');
@@ -279,6 +296,10 @@
 				$comments = new CommentComponent($dbo->comment_realm);
 				$comments->run(array('realm' => $dbo->comment_realm));
 				$this->smarty->assign('comments', $comments->html());
+			}
+			if($this->find_config_value('categories')) {
+				$this->smarty->assign('categories',
+					$dbo->related('Category'));
 			}
 			$this->smarty->display_template($this->dbo_class.'.single');
 		}
