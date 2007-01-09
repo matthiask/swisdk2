@@ -17,7 +17,7 @@
 			Swisdk::set_config_value('runtime.request.host', $matches[3]);
 			Swisdk::set_config_value('runtime.request.uri', $matches[5]);
 
-			$host = $matches[3];
+			$host = preg_replace('/^www\./', '', $matches[3]);
 			$out = null;
 
 			$domains = Swisdk::config_value('runtime.parser.domain');
