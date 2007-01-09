@@ -80,6 +80,8 @@
 							CONTENT_ROOT
 							.($this->domain?$this->domain.'/':'')
 							.substr($page['url'], 1).'/');
+						Swisdk::set_config_value('runtime.website.url',
+							$page['url'].'/');
 						break;
 					case 'title':
 						Swisdk::set_config_value('runtime.page.title',
