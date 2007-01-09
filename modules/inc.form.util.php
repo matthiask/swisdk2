@@ -89,6 +89,29 @@
 			else
 				return $formbox->add($field, new Textarea(), $title);
 		}
+
+		public static function realmed_relation($formbox, $relation, $realm_obj=null, $realm=null)
+		{
+			if(!$realm) {
+				$r = PermissionManager::realm_for_url();
+				$realm = $r['realm_id'];
+			}
+
+			$relations = DBOContainer::find($relation, array(
+				':join' => 'Realm',
+				DBObject::create($relation)->name('realm_id').'=' => $realm));
+
+			$elem = $formbox->add_auto($relation);
+			$elem->set_items($relations->collect('id','title'));
+
+			if($realm_obj) {
+				$realm_obj->add_behavior(new UpdateOnChangeAjaxBehavior(
+					$elem, 'AdminComponent_'.$formbox->dbobj()->_class().'_Ajax_Server',
+					strtolower($relation.'_for_realm')));
+			}
+
+			return $elem;
+		}
 	}
 
 ?>
