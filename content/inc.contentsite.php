@@ -401,7 +401,7 @@
 		protected function filter_cutoff()
 		{
 			if($cop = $this->find_config_value('cut_off_past'))
-				$this->dbobj->add_clause($cop.'>'.time());
+				$this->dbobj->add_clause($cop.'>='.time());
 			if($cof = $this->find_config_value('cut_off_future'))
 				$this->dbobj->add_clause($cof.'<'.time());
 		}
@@ -450,7 +450,7 @@
 			if(isset($this->request['date']) && $pubdate_field) {
 				list($this->archive_dttm, $end, $this->archive_mode) =
 					$this->dttm_range($this->request['date']);
-				$this->dbobj->add_clause($pubdate_field.'>',
+				$this->dbobj->add_clause($pubdate_field.'>=',
 					$this->archive_dttm);
 				$this->dbobj->add_clause($pubdate_field.'<', $end);
 			}
