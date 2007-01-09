@@ -682,7 +682,7 @@
 				'link_condition' => $o2->primary().'='.$tp.$o2->primary(),
 				'link_here' => $tp.$o2->primary(),
 				'link_there' => $tp.$o1->primary(),
-				'foreign_table' => $o2->table(),
+				'foreign_table' => $o1->table(),
 				'foreign_condition' => $tp.$o1->primary().'='.$o1->primary(),
 				'foreign_class' => $c1,
 				'foreign_primary' => $o1->primary(),
