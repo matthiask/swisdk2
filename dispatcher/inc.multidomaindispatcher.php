@@ -36,6 +36,9 @@
 				$out = $host;
 
 			if($out) {
+				$fd = Swisdk::config_value('domain.'.$out.'.force-domain');
+				if($fd && $matches[3]!=$fd)
+					redirect('http://'.$fd.$matches[5]);
 				Swisdk::set_config_value('runtime.domain', $out);
 				Swisdk::set_config_value('runtime.website', Swisdk::config_value(
 					'domain.'.$out.'.website'));
