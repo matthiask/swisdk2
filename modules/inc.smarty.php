@@ -111,9 +111,6 @@
 			}
 
 			$bases = Swisdk::loader_bases();
-			if($domain = Swisdk::config_value('runtime.domain'))
-				array_unshift($bases, $domain.'/');
-
 			$tmpl = $this->_template($key);
 
 			foreach($bases as $b)
