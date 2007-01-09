@@ -294,8 +294,8 @@
 			if($this->find_config_value('comments_enabled')) {
 				Swisdk::load('CommentComponent', 'components');
 				$comments = new CommentComponent($dbo->comment_realm);
-				$comments->run(array('realm' => $dbo->comment_realm));
-				$this->smarty->assign('comments', $comments->html());
+				$comments->run();
+				$comments->set_smarty($this->smarty);
 			}
 			if($this->find_config_value('categories')) {
 				$this->smarty->assign('categories',
