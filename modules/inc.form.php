@@ -59,6 +59,11 @@
 		protected $message;
 
 		/**
+		 * info message
+		 */
+		protected $info;
+
+		/**
 		 * Form and FormBox rules
 		 */
 		protected $rules = array();
@@ -146,6 +151,17 @@
 				$this->message .= "\n<br />".$message;
 			else
 				$this->message = $message;
+		}
+
+		public function info()
+		{
+			return $this->info;
+		}
+
+		public function set_info($info)
+		{
+			$this->info = $info;
+			return $this;
 		}
 
 		public function add_rule(FormRule $rule)

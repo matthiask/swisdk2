@@ -146,7 +146,8 @@
 				'<form method="post" action="'.$_SERVER['REQUEST_URI']
 				.'" id="'.$obj->id()."\" $html class=\"sf-form\" "
 				."accept-charset=\"utf-8\" $upload>\n<div>\n".$js);
-			$this->add_html_end('<span style="color:red" id="'.$obj->id()."_msg\"> </span>\n");
+			$this->add_html_end($this->_message_html($obj));
+			$this->add_html_end($this->_info_html($obj));
 			$this->add_html_end("</div></form>\n");
 		}
 
