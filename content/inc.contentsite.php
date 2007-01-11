@@ -202,6 +202,13 @@
 					$i2c[$row[$r['link_here']]][] = $row[$r['link_there']];
 				$this->smarty->assign('items_to_categories', $i2c);
 			}
+
+			if($this->find_config_value('realm_links')) {
+				$realm = PermissionManager::realm_for_url();
+				$this->smarty->assign('current_realm', $realm['realm_id']);
+				$this->smarty->assign('realms', DBOContainer::find('Realm')
+					->collect('id', 'title'));
+			}
 			$this->smarty->register_function('generate_pagelinks',
 				array(&$this, '_generate_pagelinks'));
 			$this->smarty->display_template($this->dbo_class.'.list');
@@ -300,6 +307,13 @@
 			if($this->find_config_value('categories')) {
 				$this->smarty->assign('categories',
 					$dbo->related('Category'));
+			}
+			if($this->find_config_value('realm_links')) {
+				$realm = PermissionManager::realm_for_url();
+				if($realm['realm_id']!=$dbo->realm_id) {
+					$this->smarty->assign('realm',
+						$dbo->related('Realm'));
+				}
 			}
 			$this->smarty->display_template($this->dbo_class.'.single');
 		}
