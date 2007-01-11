@@ -93,8 +93,10 @@
 		public static function realmed_relation($formbox, $relation, $realm_obj=null, $realm=null)
 		{
 			if(!$realm) {
-				$r = PermissionManager::realm_for_url();
-				$realm = $r['realm_id'];
+				if($r = $formbox->dbobj()->realm_id)
+					$realm = $r;
+				else if($r = PermissionManager::realm_for_url())
+					$realm = $r['realm_id'];
 			}
 
 			$relations = DBOContainer::find($relation, array(
