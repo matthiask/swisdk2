@@ -411,6 +411,22 @@
 			return $array;
 		}
 
+		public function collect_array()
+		{
+			$args = func_get_args();
+			$ret = array();
+			foreach($this->data as &$dbo)
+				foreach($args as $arg)
+					$ret[$arg][] = $dbo->$arg;
+
+			foreach($ret as &$r)
+				$r = array_unique($r);
+
+			if(count($args)==1)
+				return $ret[$args[0]];
+			return $ret;
+		}
+
 		/**
 		 * can be used to call delete, store etc. on the contained
 		 * DBObjects
