@@ -278,6 +278,7 @@
 					OR $t.{$p}id IN (
 						SELECT DISTINCT {$tp}{$p}id FROM tbl_{$p}to_realm
 						WHERE {$tp}realm_id={realm_id} AND {$tp}role_id<={user_role_id}
+							AND {$p}role_id<={user_role_id}
 					)
 				)";
 			$dboc->add_clause($sql, $params);
