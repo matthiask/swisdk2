@@ -43,20 +43,33 @@
 	 * error.email_notification and error.logging config values
 	 */
 	class BasicSwisdkError {
-		public $args;
-		public $debug_mode;
+		protected $backtrace = true;
+		protected $message;
+		protected $args;
+
+		protected $debug_mode;
 		protected $send_email;
 
-		public function __construct( $message = null )
+		public function __construct($message = null)
 		{
 			$this->args = func_get_args();
+			$this->init();
+			$this->message = array_shift($this->args);
+		}
+
+		public function init()
+		{
+			if($this->backtrace!==false)
+				$this->backtrace = backtrace();
+
 			$this->debug_mode = Swisdk::config_value('error.debug_mode');
 			$this->send_email = Swisdk::config_value('error.email_notification');
+
 		}
 
 		public function run()
 		{
-			$dbgmsg = $this->to_string(true);
+			$dbgmsg = $this->debug_message();
 			if($this->send_email)
 				$this->send_notification($dbgmsg);
 			if(Swisdk::config_value('error.logging'))
@@ -65,26 +78,20 @@
 			die();
 		}
 
-		public function display($message=null)
+		public function debug_message()
 		{
-			if(!$message)
-				$message = $this->to_string($this->debug_mode);
-
-			echo '<div style="background:#f88;padding:10px;border:2px solid black;">'
-				.$message.'</div>';
+			return $this->message." <br />\n".$this->backtrace;
 		}
 
-		public function to_string($debug_mode = false)
+		public function display()
 		{
-			if($debug_mode)
-				return $this->args[0] . $this->debug_string();
-
-			return $this->args[0];
-		}
-
-		protected function debug_string()
-		{
-			return backtrace(true);
+			require_once MODULE_ROOT.'inc.smarty.php';
+			$smarty = new SwisdkSmarty(false);
+			$smarty->assign('title', 'Error');
+			$smarty->assign('content', $this->message);
+			if($this->debug_mode)
+				$smarty->assign('messages', $this->debug_message());
+			$smarty->display(SWISDK_ROOT.'content/swisdk/box.tpl');
 		}
 
 		public function send_notification($message)
@@ -112,10 +119,10 @@
 		// SwisdkError::handle(new DBError('DB error while doing xyz', $sql_string));
 		//
 
-		protected function debug_string()
+		public function debug_message()
 		{
-			// return the SQL string when debug mode is activated
-			return "\n".$this->args[1]."\n".parent::debug_string();
+			return $this->message." <br />\n".$this->args[0]
+				." <br />\n".$this->backtrace;
 		}
 	}
 
@@ -131,6 +138,11 @@
 	 * (terminates script, or not: configurable, as always)
 	 */
 	class PHPError extends BasicSwisdkError {
+		public function __construct()
+		{
+			$this->args = func_get_args();
+		}
+
 		public function run()
 		{
 			// honor modified error_reporting value
@@ -141,16 +153,11 @@
 			if(in_array($this->args[0], explode(',',
 					Swisdk::config_value('error.ignore_error_nrs'))))
 				return;
-			parent::run();
-		}
 
-		public function to_string($debug_mode = false)
-		{
-			if($debug_mode)
-				return __CLASS__.": {$this->args[0]} ({$this->args[1]}) in"
+			$this->init();
+			$this->message = __CLASS__.": {$this->args[0]} ({$this->args[1]}) in"
 					." {$this->args[2]} at line {$this->args[3]}";
-
-			return dgettext('swisdk', 'An unexpected error occurred.');
+			parent::run();
 		}
 	}
 
@@ -162,8 +169,9 @@
 	class UnhandledExceptionError extends BasicSwisdkError {
 		public function __construct($exception)
 		{
-			parent::__construct();
-			$this->args[0] = sprintf(dgettext('swisdk', 'Uncaught exception: %s'), $exception->getMessage());
+			parent::__construct(
+				sprintf(dgettext('swisdk', 'Uncaught exception: %s'),
+					$exception->getMessage()));
 		}
 	}
 
@@ -171,6 +179,8 @@
 	 * this is self-explaining (...)
 	 */
 	class SiteNotFoundError extends BasicSwisdkError {
+		protected $backtrace = false;
+
 		public function run()
 		{
 			header('HTTP/1.0 404 Not Found');
@@ -182,6 +192,8 @@
 	}
 
 	class AccessDeniedError extends BasicSwisdkError {
+		protected $backtrace = false;
+
 		public function run()
 		{
 			header('HTTP/1.0 401 Unauthorized');

@@ -18,7 +18,7 @@
 	 */
 
 	class SwisdkSmarty {
-		public function __construct()
+		public function __construct($assign=true)
 		{
 			// make sure E_STRICT is turned off
 			$er = error_reporting(E_ALL^E_NOTICE);
@@ -41,11 +41,14 @@
 			$this->smarty->assign_by_ref('_swisdk_smarty_instance', $this);
 			$this->smarty->register_function('css_classify', '_smarty_swisdk_css_classify');
 			$this->smarty->register_function('generate_url', '_smarty_swisdk_generate_url');
+
+			if($assign) {
+				$this->assign('swisdk_user', SessionHandler::user()->data());
+				$this->assign('swisdk_language', Swisdk::language_key());
+			}
 			error_reporting($er);
 
 			Swisdk::require_data_directory($this->smarty->compile_dir);
-			$this->assign('swisdk_user', SessionHandler::user()->data());
-			$this->assign('swisdk_language', Swisdk::language_key());
 		}
 
 		public function __call($method, $args)
