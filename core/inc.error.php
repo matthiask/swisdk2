@@ -174,7 +174,9 @@
 		public function run()
 		{
 			header('HTTP/1.0 404 Not Found');
-			echo dgettext('swisdk', 'Site not found');
+			require_once MODULE_ROOT.'inc.smarty.php';
+			$smarty = new SwisdkSmarty();
+			$smarty->display_template('swisdk.error.404');
 			exit();
 		}
 	}
@@ -183,7 +185,9 @@
 		public function run()
 		{
 			header('HTTP/1.0 401 Unauthorized');
-			echo dgettext('swisdk', 'Access denied');
+			require_once MODULE_ROOT.'inc.smarty.php';
+			$smarty = new SwisdkSmarty();
+			$smarty->display_template('swisdk.error.401');
 			exit();
 		}
 	}
