@@ -49,6 +49,9 @@
 			$url->set_title('Your Website');
 			$text->set_title('Comment');
 
+			$text->set_attributes(array('style'
+				=> 'width:300px;height:250px'));
+
 			$author->add_rule(new RequiredRule());
 			$text->add_rule(new RequiredRule());
 
