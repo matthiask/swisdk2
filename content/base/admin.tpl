@@ -256,6 +256,8 @@ tr.severity-enhancement {
 			{/block}
 		</div>
 
+		<div style="clear:both;height:0px">&nbsp;</div>
+
 	</div>
 
 	<div id="foot">
