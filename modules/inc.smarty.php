@@ -5,12 +5,6 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
-	define( 'STREGION_NONE', -1 );
-	define( 'STREGION_ALL' , 0 );
-	define( 'STREGION_FULL' , 1 );
-	define( 'STREGION_HEADER' , 2 );
-	define( 'STREGION_FOOTER' , 3 );
-
 	require_once MODULE_ROOT.'inc.session.php';
 
 	/**
