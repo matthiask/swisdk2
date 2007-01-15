@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <body>
 <head>
-<title>{$title}</title>
+<title>{block name="title"}{$title}{/block}</title>
 <script type="text/javascript" src="{swisdk_runtime_value key="webroot.js" default="/js"}/util.js"></script>
 <style type="text/css">
 {literal}
@@ -105,7 +105,7 @@ a:hover {
 
 	<div id="body">
 
-		<h1>{$title}</h1>
+		<h1>{block name="title"}{$title}{/block}</h1>
 
 		{block name="content"}
 		{$content}

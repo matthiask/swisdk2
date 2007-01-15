@@ -2,7 +2,27 @@
 
 {assign var="title" value="Login"}
 
+{block name="title"}
+Login to {swisdk_runtime_value key="website.title"}
+{/block}
+
 {block name="content"}
+<script type="text/javascript">
+{literal}
+//<![CDATA[
+function focus_input()
+{
+	var user = document.getElementById('login_username');
+	if(user.value!='')
+		document.getElementById('login_password').focus();
+	else
+		user.focus();
+}
+add_event(window, 'load', focus_input);
+//]]>
+{/literal}
+</script>
+
 <form action="." method="post">
 	<fieldset>
 
