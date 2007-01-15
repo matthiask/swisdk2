@@ -567,8 +567,8 @@ EOD;
 
 		public function add_null_item()
 		{
-			$this->items = array_merge(array(0 => '-- '.dgettext('swisdk', 'select').' --'),
-				$this->items);
+			$this->items[0] = '-- '.dgettext('swisdk', 'select'.' --');
+			ksort($this->items);
 			return $this;
 		}
 
