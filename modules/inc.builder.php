@@ -155,7 +155,7 @@
 			$dbobj = $form->dbobj();
 			$fields = array_keys($dbobj->field_list());
 			$ninc_regex = '/^'.$dbobj->_prefix()
-				.'(id|creation_dttm)$/';
+				.'(id|creation_dttm|creator_id|author_id)$/';
 			foreach($fields as $fname)
 				if(!preg_match($ninc_regex, $fname))
 					$this->create_field($fname);
@@ -200,7 +200,7 @@
 
 					$fields = array_keys($dbo->field_list());
 					$ninc_regex = '/^'.$dbo->_prefix()
-						.'(id|creation_dttm|language_id|'
+						.'(id|creation_dttm|creator_id|author_id|language_id|'
 						.$dbobj->primary().')$/';
 					foreach($fields as $fname)
 						if(!preg_match($ninc_regex, $fname))
@@ -216,7 +216,7 @@
 
 				$fields = array_keys($dbobjml->field_list());
 				$ninc_regex = '/^'.$dbobjml->_prefix()
-					.'(id|creation_dttm|language_id|'
+					.'(id|creation_dttm|creator_id|author_id|language_id|'
 					.$dbobj->primary().')$/';
 				foreach($fields as $fname)
 					if(!preg_match($ninc_regex, $fname))
