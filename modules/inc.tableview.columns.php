@@ -81,6 +81,9 @@
 					$this->patterns[] = '/\{' . $v . '\}/';
 			}
 
+			if(!count($this->vars))
+				return $this->args[0];
+
 			$vals = array();
 			foreach($this->vars as $v)
 				$vals[] = $data[$v];
