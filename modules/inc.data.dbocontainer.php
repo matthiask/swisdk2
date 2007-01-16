@@ -271,10 +271,7 @@
 			}
 
 			if($column && !preg_match('/[^A-Za-z0-9_\.]/', $column)) {
-				$col = ((strpos($column, '.')===false)?
-						$this->obj->table().'.':'')
-					.$column
-					.($dir=='DESC'?' DESC':' ASC');
+				$col = $column.($dir=='DESC'?' DESC':' ASC');
 				if($prepend)
 					array_unshift($this->order_columns, $col);
 				else
