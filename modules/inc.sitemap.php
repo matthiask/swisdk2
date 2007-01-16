@@ -70,8 +70,6 @@
 				} else
 					$regenerate = true;
 
-				$regenerate = true;
-
 				if($regenerate) {
 					$prc = new XSLTProcessor();
 					$xsl = new DOMDocument();
