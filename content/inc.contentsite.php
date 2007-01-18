@@ -531,12 +531,9 @@
 		 */
 		protected function find_config_value($key, $default = null)
 		{
-			$keys = array('content.'.$this->dbo_class.'.'.$key,
-				'content.'.$key);
-			while($key = array_shift($keys))
-				if(($value = Swisdk::website_config_value($key))!==null)
-					return $value;
-			return $default;
+			return Swisdk::website_config_value(array(
+				'content.'.$this->dbo_class.'.'.$key,
+				'content.'.$key), $default);
 		}
 
 		/**
