@@ -58,9 +58,13 @@
 	class BoolTableViewColumn extends TableViewColumn {
 		public function html(&$data)
 		{
-			return $data[$this->column]
-				?dgettext('swisdk', 'true')
-				:dgettext('swisdk', 'false');
+			$prefix = Swisdk::config_value('runtime.webroot.img', '/img');
+
+			return '<img src="'.$prefix.'/icons/'
+				.($data[$this->column]?'tick':'cross')
+				.'.png" alt="'
+				.($data[$this->column]?'true':'false')
+				.'" />';
 		}
 	}
 
