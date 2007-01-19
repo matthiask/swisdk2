@@ -511,6 +511,13 @@
 				PermissionManager::set_realm_clause($this->dbobj);
 		}
 
+		protected function filter_active()
+		{
+			if($this->find_config_value('active_filter', true))
+				$this->dbobj->add_clause($this->dbobj->dbobj()->name('active')
+					.'!=0');
+		}
+
 
 		/**
 		 * Helper methods
