@@ -234,7 +234,8 @@
 		public function create_rel_single($fname, $title, $class)
 		{
 			$obj = new DropdownInput();
-			$obj->set_items(DBOContainer::find($class));
+			$obj->set_items(DBOContainer::find($dbo = DBObject::create($class),
+				array(':order' => $dbo->name('title'))));
 			if(strpos($fname, '_parent_id')==strlen($fname)-10)
 				$obj->add_null_item();
 			return $this->form->add($fname, $obj, $title);
