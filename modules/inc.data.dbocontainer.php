@@ -353,18 +353,44 @@
 			$this->fulltext_search = $clause;
 		}
 
+		protected function _ft_escape($str)
+		{
+			return preg_replace('/^\'(.*)\'$/', '\1',
+				DBObject::db_escape($str, $this->obj->db_connection()));
+		}
+
 		protected function _fulltext_clause()
 		{
 			if($this->fulltext_search
 				&& count($fields = $this->obj->_fulltext_fields())) {
 
-				$sql = ' AND (';
-				$search = preg_replace('/^\'(.*)\'$/', '\1',
-					DBObject::db_escape($this->fulltext_search,
-					$this->obj->db_connection()));
-				$sql .= implode(' LIKE \'%' . $search . '%\' OR ', $fields);
-				$sql .= ' LIKE \'%' . $search . '%\')';
-				return $sql;
+				$tokens = split("[ \t]+", $this->fulltext_search);
+				$include = array();
+				$exclude = array();
+
+				foreach($tokens as $t) {
+					if($t==='')
+						continue;
+					if($t{0}=='-')
+						$exclude[] = $this->_ft_escape(substr($t, 1));
+					else if($t{0}=='+')
+						$include[] = $this->_ft_escape(substr($t, 1));
+					else
+						$include[] = $this->_ft_escape($t);
+				}
+
+				$fulltext_sql = array();
+
+				foreach($include as $i)
+					$fulltext_sql[] = implode(' LIKE \'%'.$i.'%\' OR ', $fields)
+						.' LIKE \'%'.$i.'%\'';
+
+				foreach($exclude as $e)
+					$fulltext_sql[] = implode(' NOT LIKE \'%'.$e.'%\' AND ', $fields)
+						.' NOT LIKE \'%'.$e.'%\'';
+
+				if(count($fulltext_sql))
+					return ' AND (('.implode(') AND (', $fulltext_sql).'))';
 			}
 			return ' ';
 		}
