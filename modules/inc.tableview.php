@@ -38,7 +38,7 @@
 		/**
 		 * the maximal count of items to display on one page
 		 */
-		protected $items_on_page = 10;
+		protected $items_on_page = 20;
 
 		/**
 		 * features
