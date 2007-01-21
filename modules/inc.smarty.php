@@ -35,6 +35,7 @@
 			$this->smarty->assign_by_ref('_swisdk_smarty_instance', $this);
 			$this->smarty->register_function('css_classify', '_smarty_swisdk_css_classify');
 			$this->smarty->register_function('generate_url', '_smarty_swisdk_generate_url');
+			$this->smarty->register_function('dttm_range', '_smarty_swisdk_dttm_range');
 
 			if($assign) {
 				$this->assign('swisdk_user', SessionHandler::user()->data());
@@ -179,6 +180,11 @@
 		if($generator===null)
 			$generator = Swisdk::load_instance('UrlGenerator', 'modules');
 		return $generator->generate_url($params['item']);
+	}
+
+	function _smarty_swisdk_dttm_range($params, &$smarty)
+	{
+		return dttmRange($params['item']);
 	}
 
 	/**

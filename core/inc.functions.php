@@ -260,4 +260,28 @@
 		return $string;
 	}
 
+	function dttmRange($dbobj)
+	{
+		$fmt = '%d.%m.%Y : %H:%M';
+
+		if($dbobj->all_day)
+			$fmt = '%d.%m.%Y';
+
+		$start = strftime($fmt, $dbobj->start_dttm);
+
+		if($dbobj->openend) {
+			if($dbobj->all_day)
+				return $start;
+			else
+				return $start.' &ndash; openend';
+		}
+
+		$end = strftime($fmt, $dbobj->end_dttm);
+
+		if(substr($start, 0, 10)==substr($end, 0, 10))
+			$end = substr($end, 13);
+
+		return $start.($end?' &ndash; '.$end:'');
+	}
+
 ?>
