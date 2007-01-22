@@ -35,7 +35,8 @@
 		protected $limit = '';
 		protected $joins = '';
 
-		protected $fulltext_search = null;
+		protected $fulltext = array('include' => array(), 'exclude' => array());
+		protected $tags = array('include' => array(), 'exclude' => array());
 
 		public function &dbobj() { return $this->obj; }
 
@@ -113,6 +114,7 @@
 			array_unshift($args, $this->joins);
 			$sql = call_user_func_array(array(&$this->obj, '_select_sql'), $args)
 				. $this->clause_sql . $this->_fulltext_clause()
+				. $this->_tag_clause()
 				. (count($this->order_columns)
 					?' ORDER BY '.implode(',', $this->order_columns)
 					:'')
@@ -148,6 +150,7 @@
 			$sql = call_user_func_array(array(&$this->obj, '_select_sql'),
 					$this->joins)
 				. $this->clause_sql . $this->_fulltext_clause()
+				. $this->_tag_clause()
 				. (count($this->order_columns)
 					?' ORDER BY '.implode(',', $this->order_columns)
 					:'');
@@ -350,7 +353,22 @@
 		 */
 		public function set_fulltext($clause=null)
 		{
-			$this->fulltext_search = $clause;
+			$tokens = split("[ \t]+", $clause);
+
+			foreach($tokens as $t) {
+				$matches = array();
+				preg_match('/^([+-])?(tag:)?(.*)$/', $t, $matches);
+
+				if($matches[2]) {
+					if($matches[1]=='-')
+						$this->tags['exclude'][] = DBObject::db_escape($matches[3]);
+					else
+						$this->tags['include'][] = DBObject::db_escape($matches[3]);
+				} else if($matches[1]=='-')
+					$this->fulltext['exclude'][] = $this->_ft_escape($matches[3]);
+				else
+					$this->fulltext['include'][] = $this->_ft_escape($matches[3]);
+			}
 		}
 
 		protected function _ft_escape($str)
@@ -361,31 +379,16 @@
 
 		protected function _fulltext_clause()
 		{
-			if($this->fulltext_search
-				&& count($fields = $this->obj->_fulltext_fields())) {
-
-				$tokens = split("[ \t]+", $this->fulltext_search);
-				$include = array();
-				$exclude = array();
-
-				foreach($tokens as $t) {
-					if($t==='')
-						continue;
-					if($t{0}=='-')
-						$exclude[] = $this->_ft_escape(substr($t, 1));
-					else if($t{0}=='+')
-						$include[] = $this->_ft_escape(substr($t, 1));
-					else
-						$include[] = $this->_ft_escape($t);
-				}
+			if((count($this->fulltext['include']) || count($this->fulltext['exclude']))
+					&& count($fields = $this->obj->_fulltext_fields())) {
 
 				$fulltext_sql = array();
 
-				foreach($include as $i)
+				foreach($this->fulltext['include'] as $i)
 					$fulltext_sql[] = implode(' LIKE \'%'.$i.'%\' OR ', $fields)
 						.' LIKE \'%'.$i.'%\'';
 
-				foreach($exclude as $e)
+				foreach($this->fulltext['exclude'] as $e)
 					$fulltext_sql[] = implode(' NOT LIKE \'%'.$e.'%\' AND ', $fields)
 						.' NOT LIKE \'%'.$e.'%\'';
 
@@ -393,6 +396,35 @@
 					return ' AND (('.implode(') AND (', $fulltext_sql).'))';
 			}
 			return ' ';
+		}
+
+		protected function _tag_clause()
+		{
+			if(!count($this->tags['include']) && !count($this->tags['exclude']))
+				return '';
+			$relations = $this->obj->relations();
+			if(!isset($relations['Tag']))
+				return '';
+
+			$rel = $relations['Tag'];
+			$p = $this->obj->primary();
+
+			$sql = '';
+
+			if(count($this->tags['include']))
+				$sql .= ' AND '.$p.' IN ('
+					.'SELECT DISTINCT '.$rel['link_here'].' FROM '.$rel['link_table']
+					.' LEFT JOIN tbl_tag ON '.$rel['foreign_condition']
+					.' WHERE tag_title IN ('.implode(',', $this->tags['include']).')'
+				.')';
+			if(count($this->tags['exclude']))
+				$sql .= ' AND '.$p.' NOT IN ('
+					.'SELECT DISTINCT '.$rel['link_here'].' FROM '.$rel['link_table']
+					.' LEFT JOIN tbl_tag ON '.$rel['foreign_condition']
+					.' WHERE tag_title IN ('.implode(',', $this->tags['exclude']).')'
+				.')';
+
+			return $sql;
 		}
 
 		/**
