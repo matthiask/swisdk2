@@ -28,6 +28,11 @@
 					if(strpos($method, 'setup_')===0)
 						$this->$method();
 			}
+
+			if($defaults = getInput('search_form')) {
+				foreach($defaults as $k => $v)
+					$this->dbobj->$k = $v;
+			}
 		}
 
 		public function setup_search()
