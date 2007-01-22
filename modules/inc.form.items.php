@@ -652,21 +652,49 @@ EOD;
 
 	class TagInput extends TextInput {
 		protected $attributes = array('class' => 'sf-textinput');
+		protected $tag_formitems = array();
 
 		public function init_value($dbobj)
 		{
 			parent::init_value($dbobj);
-			if(is_array($this->value())) {
-				$this->real_value = $this->value();
-				$this->set_value(implode(', ', $this->real_value));
-			} else {
-				$this->real_value = array_map('trim',
-					explode(',', $this->value()));
-				$this->set_value($this->real_value);
+			$value = $this->value();
+			if(!is_array($value)) {
+				$this->set_value(array_map('trim',
+					explode(',', $this->value())));
 			}
 		}
 
-		protected $real_value;
+		public function add_tag_formitems()
+		{
+			$args = func_get_args();
+			$value = $this->value();
+			foreach($args as $item) {
+				$value = array_merge($value, $item->value());
+				$this->tag_formitems[] = $item;
+			}
+
+			$value = array_unique($value);
+
+			$this->set_value($value);
+		}
+
+		public function tag_formitems()
+		{
+			return $this->tag_formitems();
+		}
+
+		public function tag_string()
+		{
+			$value = $this->value();
+			$other_values = array();
+			foreach($this->tag_formitems as &$item) {
+				$other_values = array_merge($other_values, $item->value());
+			}
+
+			$other_values = array_unique($other_values);
+
+			return implode(', ', array_diff($value, $other_values));
+		}
 	}
 
 	/**

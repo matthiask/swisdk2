@@ -253,6 +253,16 @@ function validate_'.$id.'()
 			$this->_render($obj, $this->_simpleinput_html($obj));
 		}
 
+		protected function visit_TagInput($obj)
+		{
+			$this->_collect_javascript($obj);
+			$name = $obj->id();
+			$this->_render($obj, sprintf(
+				'<input type="%s" name="%s" id="%s" value="%s" %s />',
+				$obj->type(), $name, $name, $obj->tag_string(),
+				$this->_attribute_html($obj->attributes())));
+		}
+
 		protected function visit_FileUpload($obj)
 		{
 			$this->_collect_javascript($obj);
