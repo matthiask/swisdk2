@@ -114,6 +114,36 @@
 
 			return $elem;
 		}
+
+		public static function tag_multiselect($formbox, $query=null)
+		{
+			$sql = 'SELECT tag_title FROM tbl_tag WHERE 1';
+			if($query)
+				$sql .= ' AND tag_title LIKE '.DBObject::db_escape($query);
+
+			$sql .= ' ORDER BY tag_title';
+
+			$tags = DBObject::db_get_array($sql, array('tag_title', 'tag_title'));
+			$key = md5($query);
+
+			$elem = new Multiselect();
+			$elem->set_items($tags);
+			$formbox->add('tag_'.$key, $elem);
+
+			$current = $formbox->dbobj()->related('Tag')->collect('id', 'title');
+
+			$value = array_intersect($tags, $current);
+
+			if(getInput($elem->id())) {
+				$v = $elem->value();
+				$value = array_merge(array_intersect($value, $v), $v);
+			}
+
+			$elem->set_value($value);
+			$elem->set_title($query);
+
+			return $elem;
+		}
 	}
 
 ?>
