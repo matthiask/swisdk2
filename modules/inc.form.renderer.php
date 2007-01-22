@@ -143,7 +143,7 @@
 					.'"';
 			list($html, $js) = $this->_validation_html($obj);
 			$this->add_html_start(
-				'<form method="post" action="'.$_SERVER['REQUEST_URI']
+				'<form method="post" action="'.htmlspecialchars($_SERVER['REQUEST_URI'])
 				.'" id="'.$obj->id()."\" $html class=\"sf-form\" "
 				."accept-charset=\"utf-8\" $upload>\n<div>\n".$js);
 			$this->add_html_end($this->_message_html($obj));
@@ -243,7 +243,7 @@ function validate_'.$id.'()
 			$name = $obj->id();
 			return sprintf(
 				'<input type="hidden" name="%s" id="%s" value="%s" %s />',
-				$name, $name, implode(',', $obj->value()),
+				$name, $name, htmlspecialchars(implode(',', $obj->value())),
 				$this->_attribute_html($obj->attributes()));
 		}
 
@@ -259,7 +259,7 @@ function validate_'.$id.'()
 			$name = $obj->id();
 			$this->_render($obj, sprintf(
 				'<input type="%s" name="%s" id="%s" value="%s" %s />',
-				$obj->type(), $name, $name, $obj->tag_string(),
+				$obj->type(), $name, $name, htmlspecialchars($obj->tag_string()),
 				$this->_attribute_html($obj->attributes())));
 		}
 
@@ -275,7 +275,7 @@ function validate_'.$id.'()
 			$this->_collect_javascript($obj);
 			$this->file_upload = true;
 			$name = $obj->id();
-			$current = $obj->current_value();
+			$current = htmlspecialchars($obj->current_value());
 			$this->_render($obj, sprintf(
 				'%s<input type="%s" name="%s" id="%s" value="%s" %s />',
 				($current
@@ -284,7 +284,7 @@ function validate_'.$id.'()
 							.'name="%s___delete" id="%s___delete" /><br />',
 						$current, $current, $name, $name)
 					:''),
-				$obj->type(), $name, $name, $obj->value(),
+				$obj->type(), $name, $name, htmlspecialchars($obj->value()),
 				$this->_attribute_html($obj->attributes())));
 		}
 
@@ -347,7 +347,7 @@ function formitem_tristate(elem)
 		id="__cont_%s" onclick="formitem_tristate(this)"></div>
 	<input type="checkbox" name="__cb_%s" id="__cb_%s" %s />
 	<input type="hidden" name="%s" id="%s" value="%s" />
-</span>'."\n", $name, $name, $name, $cb_html, $name, $name, $value));
+</span>'."\n", $name, $name, $name, $cb_html, $name, $name, htmlspecialchars($value)));
 
 			// only send the javascript once
 			$js = '';
@@ -361,7 +361,7 @@ function formitem_tristate(elem)
 				'<textarea name="%s" id="%s" %s>%s</textarea>',
 				$name, $name,
 				$this->_attribute_html($obj->attributes()),
-				$obj->value()));
+				htmlspecialchars($obj->value())));
 		}
 
 		protected function visit_RichTextarea($obj)
@@ -369,7 +369,7 @@ function formitem_tristate(elem)
 			$prefix = Swisdk::config_value('runtime.webroot.js', '/js');
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
-			$value = $obj->value();
+			$value = htmlspecialchars($obj->value());
 			$attributes = $this->_attribute_html($obj->attributes());
 			$type = $obj->type();
 			$html = <<<EOD
@@ -407,7 +407,8 @@ EOD;
 				if((is_numeric($id) && $id===intval($value))
 						|| (!is_numeric($id) && $id==="$value"))
 					$html .= 'selected="selected" ';
-				$html .= 'value="'.$id.'">'.$title."</option>\n";
+				$html .= 'value="'.htmlspecialchars($id).'">'
+					.htmlspecialchars($title)."</option>\n";
 			}
 			$html .= "</select>\n";
 			$this->_render($obj, $html);
@@ -418,15 +419,21 @@ EOD;
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
 			$attributes = $this->_attribute_html($obj->attributes());
-			$html = '<span class="sf-radiobuttons" '.$atttributes.'>';
+			$html = '<span class="sf-radiobuttons" '
+				.$this->_attribute_html($obj->attributes())
+				.'>';
 			$value = $obj->value();
 			$items = $obj->items();
 			foreach($items as $id => $title) {
-				$html .= '<span><input type="radio" id="'.$name.$id.'" name="'.$name.'"';
+				$html .= '<span><input style="width:auto" type="radio" id="'
+					.htmlspecialchars($name.$id).'" name="'
+					.htmlspecialchars($name).'"';
 				if((is_numeric($id) && $id===intval($value))
 						|| (!is_numeric($id) && $id==="$value"))
 					$html .= 'selected="selected" ';
-				$html .= 'value="'.$id.'"><label for="'.$name.$id.'">'.$title."</label></span>\n";
+				$html .= 'value="'.htmlspecialchars($id).'"><label for="'
+					.htmlspecialchars($name.$id).'">'
+					.htmlspecialchars($title)."</label></span>\n";
 			}
 			$html .= '</span>';
 			$this->_render($obj, $html);
@@ -445,7 +452,8 @@ EOD;
 				if((is_numeric($id) && $id===intval($value))
 						|| (!is_numeric($id) && $id==="$value"))
 					$html .= 'selected="selected" ';
-				$html .= 'value="'.$id.'">'.$title."</option>\n";
+				$html .= 'value="'.htmlspecialchars($id).'">'
+					.htmlspecialchars($title)."</option>\n";
 			}
 			$html .= "</select>\n";
 			$html .= '<input type="button" name="'.$name.'_button"'
@@ -482,7 +490,8 @@ EOD;
 				$html .= '<option ';
 				if(in_array($k,$value))
 					$html .= 'selected="selected" ';
-				$html .= 'value="'.$k.'">'.$v."</option>\n";
+				$html .= 'value="'.htmlspecialchars($k).'">'
+					.htmlspecialchars($v)."</option>\n";
 			}
 			$html .= "</select>\n";
 			$this->_render($obj, $html);
@@ -499,7 +508,7 @@ EOD;
 					'<label for="%s">%s</label>: '
 					.$this->threeway_helper_choice($obj,
 						isset($values[$k])?$values[$k]:null),
-					$name, $v, $name, $name);
+					$name, htmlspecialchars($v), $name, $name);
 			}
 			$this->_render($obj, implode("<br />\n", $html));
 		}
@@ -510,9 +519,9 @@ EOD;
 			$html = "<select name=\"%s\" id=\"%s\">\n"
 				."<option value=\"0\"> -- </option>";
 			foreach($choices as $k => $v)
-				$html .= '<option value="'.$k.'"'
+				$html .= '<option value="'.htmlspecialchars($k).'"'
 					.($k==$value?' selected="selected"':'')
-					.'>'.$v."</option>\n";
+					.'>'.htmlspecialchars($v)."</option>\n";
 			$html .= "</select>\n";
 			return $html;
 		}
@@ -625,7 +634,7 @@ EOD;
 			$prefix = Swisdk::config_value('runtime.webroot.img', '/img');
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
-			$value = $obj->value();
+			$value = htmlspecialchars($obj->value());
 			$display = $obj->display_string();
 			$url = $obj->popup_url();
 			$behavior_functions = $obj->behavior_functions();
@@ -661,7 +670,7 @@ EOD;
 		{
 			$this->_collect_javascript($obj);
 			$name = $obj->name();
-			$value = $obj->value();
+			$value = htmlspecialchars($obj->value());
 			if(!$value)
 				$value = 'Submit';
 			$this->_render_bar($obj,
@@ -701,7 +710,7 @@ EOD;
 			$name = $obj->id();
 			return sprintf(
 				'<input type="%s" name="%s" id="%s" value="%s" %s />',
-				$obj->type(), $name, $name, $obj->value(),
+				$obj->type(), $name, $name, htmlspecialchars($obj->value()),
 				$this->_attribute_html($obj->attributes()));
 		}
 
