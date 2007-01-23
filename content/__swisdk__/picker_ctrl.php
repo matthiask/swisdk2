@@ -38,32 +38,7 @@
 				}
 			}
 			$dboc->init();
-			echo <<<EOD
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
-<head>
-	<title>$class Picker</title>
-	<link rel="stylesheet" type="text/css" href="/css/feinware.css" />
-	<script type="text/javascript">
-	//<![CDATA[
-	function do_select(elem, val, str)
-	{
-		opener.select_$element(val, str);
-		this.close();
-	}
-	//]]>
-	</script>
-	<style type="text/css">
-	html, body {
-		margin: 0;
-		padding: 0;
-	}
-	.s-table {
-		width: 100%;
-	}
-	</style>
-</head>
-<body>
+			$html = <<<EOD
 <table class="s-table">
 <thead>
 <tr>
@@ -77,7 +52,7 @@ EOD;
 			foreach($dboc as $dbo) {
 				$id = $dbo->id();
 				$title = $dbo->title();
-				echo <<<EOD
+				$html .= <<<EOD
 <tr class="$odd" onclick="do_select(this, $id, '$title');">
 <td>$title</td>
 </tr>
@@ -86,13 +61,15 @@ EOD;
 				$odd = $odd?'':'odd';
 			}
 
-			echo <<<EOD
+			$html .= <<<EOD
 </tbody>
 </table>
-</body>
-</html>
 
 EOD;
+			$smarty = new SwisdkSmarty();
+			$smarty->assign('content', $html);
+			$smarty->assign('element', $element);
+			$smarty->display_template('base.picker');
 		}
 	}
 

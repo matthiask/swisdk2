@@ -224,6 +224,8 @@ tr.severity-enhancement {
 {/literal}
 
 </style>
+{block name="head"}
+{/block}
 </head>
 
 <body>
@@ -239,6 +241,7 @@ tr.severity-enhancement {
 	</div>
 
 	<div id="body">
+		{block name="body"}
 		<div id="logout">
 			<a href="?logout=1">Log out</a>
 		</div>
@@ -258,6 +261,7 @@ tr.severity-enhancement {
 
 		<div style="clear:both;height:0px">&nbsp;</div>
 
+		{/block}
 	</div>
 
 	<div id="foot">
