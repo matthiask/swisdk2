@@ -840,4 +840,19 @@ EOD;
 		protected $params = array();
 	}
 
+	class ListSelector extends SelectionFormItem {
+		public function __construct($class=null)
+		{
+			if($class)
+				$this->class = $class;
+		}
+
+		public function _class()
+		{
+			return $this->class;
+		}
+
+		protected $class;
+	}
+
 ?>

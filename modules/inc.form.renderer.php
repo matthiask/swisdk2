@@ -666,6 +666,68 @@ EOD;
 			$this->_render($obj, $html);
 		}
 
+		protected function visit_ListSelector($obj)
+		{
+			$name = $obj->id();
+			$class = $obj->_class();
+			$prefix = Swisdk::config_value('runtime.webroot.img', '/img');
+
+			$html = <<<EOD
+<script type="text/javascript">
+//<![CDATA[
+function remove_$name(id)
+{
+	elem = document.getElementById('{$name}_'+id);
+	elem.parentNode.removeChild(elem);
+}
+
+function open_$name()
+{
+	window.open('/__swisdk__/picker?element=$name&class=$class', '$name',
+		'width=300,height=300,toolbar=no,location=no');
+	return false;
+}
+
+function select_$name(val, str)
+{
+	elem = document.getElementById('$name');
+
+	html = '<div id="{$name}_'+val+'">';
+	html += '<input type="hidden" name="{$name}[]" value="'+val+'" />';
+	html += '<img src="$prefix/icons/delete.png" onclick="remove_$name(';
+	html += val+')" style="cursor:pointer" /> '+str+'</div>';
+
+	elem.innerHTML += html;
+}
+//]]>
+</script>
+
+<div id="$name">
+
+EOD;
+
+			$items = $obj->items();
+			$value = $obj->value();
+			foreach($value as $v) {
+				$html .= <<<EOD
+<div id="{$name}_$v">
+	<input type="hidden" name="{$name}[]" value="$v" />
+	<img src="$prefix/icons/delete.png" onclick="remove_$name($v)" style="cursor:pointer" />
+	{$items[$v]}
+</div>
+
+EOD;
+			}
+
+			$html .= <<<EOD
+</div>
+<img src="$prefix/icons/add.png" onclick="javascript:open_$name()" style="cursor:pointer" />
+
+EOD;
+
+			$this->_render($obj, $html);
+		}
+
 		protected function visit_SubmitButton($obj)
 		{
 			$this->_collect_javascript($obj);
