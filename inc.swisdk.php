@@ -145,7 +145,7 @@
 			umask(0002);
 			if(!file_exists($dir))
 				if(!@mkdir($dir, 0775, true))
-					SwisdkError::handle(new FatalError(sprintf(
+					SwisdkError::handle(new ExtremelyFatalError(sprintf(
 						dgettext('swisdk', 'Could not create data directory %s'),
 						$dir)));
 		}

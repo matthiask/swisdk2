@@ -50,6 +50,8 @@
 		protected $debug_mode;
 		protected $send_email;
 
+		protected $use_template = true;
+
 		public function __construct($message = null)
 		{
 			$this->args = func_get_args();
@@ -85,6 +87,14 @@
 
 		public function display()
 		{
+			if(!$this->use_template) {
+				echo $this->message."<br />\n";
+				if($this->debug_mode)
+					echo "<br /><strong>Debug message:</strong><br />\n";
+					echo $this->debug_message();
+				return;
+			}
+
 			require_once MODULE_ROOT.'inc.smarty.php';
 			$smarty = new SwisdkSmarty(false);
 			$smarty->assign('title', 'Error');
@@ -131,6 +141,10 @@
 	 * this class is a type hint (and its name is classy)
 	 */
 	class FatalError extends BasicSwisdkError {
+	}
+
+	class ExtremelyFatalError extends FatalError {
+		protected $use_template = false;
 	}
 
 	/**
