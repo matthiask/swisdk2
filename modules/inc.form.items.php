@@ -82,6 +82,11 @@
 				$this->name = $name;
 		}
 
+		public function dbobj()
+		{
+			return $this->dbobj;
+		}
+
 		/**
 		 * accessors and mutators
 		 */
