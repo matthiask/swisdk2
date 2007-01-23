@@ -282,6 +282,12 @@
 			}
 		}
 
+		public function set_order_column($column, $dir=null)
+		{
+			$this->order_columns = array();
+			$this->add_order_column($column, $dir);
+		}
+
 		/**
 		 * $doc->set_limit(10);
 		 */
