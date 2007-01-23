@@ -427,6 +427,27 @@ EOD;
 		}
 	}
 
+	class UniqueRule extends FormItemRule {
+		public function __construct($message=null)
+		{
+			if($message)
+				$this->message = $message;
+			else
+				$this->message = dgettext('swisdk', 'Value is not unique');
+		}
+
+		protected function is_valid_impl()
+		{
+			$dbobj = $this->item->dbobj();
+			$id = $dbobj->id();
+			if(!$id)
+				$id = 0;
+			return DBOContainer::find($dbobj->_class(), array(
+				$this->item->name().'=' => $this->item->value(),
+				$dbobj->primary().'!=' => $id))->count()==0;
+		}
+	}
+
 	class UploadedFileRule extends FormItemRule {
 		public function __construct($message=null)
 		{
