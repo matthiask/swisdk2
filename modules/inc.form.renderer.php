@@ -683,7 +683,12 @@ function remove_$name(id)
 
 function open_$name()
 {
-	window.open('/__swisdk__/picker?element=$name&class=$class', '$name',
+	var inputs = document.getElementById('$name').getElementsByTagName('input');
+	var str = '';
+	for(i=0; i<inputs.length; i++)
+		str += inputs[i].value+',';
+
+	window.open('/__swisdk__/picker?element=$name&class=$class&params[:exclude_ids]='+str, '$name',
 		'width=300,height=300,toolbar=no,location=no');
 	return false;
 }

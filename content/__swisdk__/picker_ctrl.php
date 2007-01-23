@@ -29,6 +29,12 @@
 				foreach($params as $k => $v) {
 					if($k==':order')
 						$dboc->add_order_column($v);
+					else if($k==':exclude_ids') {
+						if(($ids = explode(',', $v)) && count($ids))
+							$dboc->add_clause(
+								$dboc->dbobj()->name('id').' NOT IN {ids}',
+								array('ids' => $ids));
+					}
 				}
 			}
 			$dboc->init();
