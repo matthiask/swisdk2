@@ -491,7 +491,7 @@ EOD;
 				if(in_array($k,$value))
 					$html .= 'selected="selected" ';
 				$html .= 'value="'.htmlspecialchars($k).'">'
-					.htmlspecialchars($v)."</option>\n";
+					.$v."</option>\n";
 			}
 			$html .= "</select>\n";
 			$this->_render($obj, $html);
@@ -499,18 +499,108 @@ EOD;
 
 		protected function visit_ThreewayInput($obj)
 		{
-			$values = $obj->value();
-			$html = array();
-			$second = $obj->second();
-			foreach($second as $k => $v) {
-				$name = $obj->id()."[$k]";
-				$html[] = sprintf(
-					'<label for="%s">%s</label>: '
-					.$this->threeway_helper_choice($obj,
-						isset($values[$k])?$values[$k]:null),
-					$name, htmlspecialchars($v), $name, $name);
+			$_choices = $obj->choices();
+			$choices = '<select style="float:none" id="__ID__", name="__ID__">';
+			foreach($_choices as $k => $v)
+				$choices .= '<option value="'.htmlspecialchars($k).'"'
+					.'>'.htmlspecialchars($v)."</option>";
+			$choices .= '</select>';
+
+			$name = $obj->id();
+
+			$class = $obj->_class();
+			$prefix = Swisdk::config_value('runtime.webroot.img', '/img');
+
+			$value = $obj->value();
+			$items = $obj->second();
+
+			$set_value = '';
+			foreach($value as $k => $v) {
+				$set_value .= <<<EOD
+	document.getElementById('{$name}[$k]').value = $v;
+
+EOD;
 			}
-			$this->_render($obj, implode("<br />\n", $html));
+
+			$html = <<<EOD
+<script type="text/javascript">
+//<![CDATA[
+function remove_$name(id)
+{
+	elem = document.getElementById('{$name}_'+id);
+	elem.parentNode.removeChild(elem);
+}
+
+function open_$name()
+{
+	var inputs = document.getElementById('$name').getElementsByTagName('select');
+	var str = '';
+	for(i=0; i<inputs.length; i++)
+		str += inputs[i].id.replace(/^.*\[([0-9]+)\]$/, '$1')+',';
+
+	window.open('/__swisdk__/picker?element=$name&class=$class&params[:exclude_ids]='+str, '$name',
+		'width=300,height=300,toolbar=no,location=no');
+	return false;
+}
+
+function select_$name(val, str)
+{
+	elem = document.getElementById('$name');
+
+	// save the values ...
+	var inputs = elem.getElementsByTagName('select');
+	var values = new Array();
+	for(i=0; i<inputs.length; i++)
+		values[inputs[i].id] = inputs[i].value;
+
+	html = '<div id="{$name}_'+val+'">';
+	html += '<span style="width:150px;display:block;float:left">'+str+'</span>: ';
+	html += '$choices'.replace(/__ID__/g, '{$name}['+val+']');
+	html += ' <img src="$prefix/icons/delete.png" onclick="remove_$name(';
+	html += val+')" style="cursor:pointer" /></div>';
+
+	elem.innerHTML += html;
+
+	// ... and restore them (they get clobbered when appending to innerHTML)
+	for(i in values)
+		document.getElementById(i).value = values[i];
+}
+
+function load_$name()
+{
+$set_value
+}
+
+add_event(window, 'load', load_$name);
+//]]>
+</script>
+
+<div id="$name">
+	<input type="hidden" name="__check_{$name}" value="1" />
+
+EOD;
+
+
+			foreach($value as $v => $third) {
+				$c = str_replace('__ID__', $name.'['.$v.']',
+					$choices);
+				$html .= <<<EOD
+<div id="{$name}_$v">
+	<span style="width:150px;display:block;float:left">{$items[$v]}</span>:
+	$c
+	<img src="$prefix/icons/delete.png" onclick="remove_$name($v)" style="cursor:pointer" />
+</div>
+
+EOD;
+			}
+
+			$html .= <<<EOD
+</div>
+<img src="$prefix/icons/add.png" onclick="javascript:open_$name()" style="cursor:pointer" />
+
+EOD;
+
+			$this->_render($obj, $html);
 		}
 
 		protected function threeway_helper_choice($obj, $value=null)

@@ -646,11 +646,26 @@ EOD;
 	class ThreewayInput extends FormItem {
 		protected $relation;
 
+		public function init_value($dbobj)
+		{
+			parent::init_value($dbobj);
+			$id = $this->id();
+			if(isset($_POST['__check_'.$id])
+					&& !getInput($id)) {
+				$this->set_value(array());
+			}
+		}
+
 		public function set_form_box(&$box)
 		{
 			parent::set_form_box($box);
 			$rels = $box->dbobj()->relations();
 			$this->relation = $rels[$this->name()];
+		}
+
+		public function _class()
+		{
+			return $this->relation['foreign_class'];
 		}
 
 		public function second()
