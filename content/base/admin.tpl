@@ -64,7 +64,7 @@ fieldset {
 }
 
 label {
-	width: 100px;
+	width: 150px;
 	text-align: right;
 	display: block;
 	float: left;
