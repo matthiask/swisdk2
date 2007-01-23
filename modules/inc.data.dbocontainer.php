@@ -80,6 +80,8 @@
 			else
 				$container = new DBOContainer($class);
 
+			$container->set_traits();
+
 			if(is_array($params))
 				$container->add_clause_array($params);
 			if($container->init()===false)
@@ -102,6 +104,15 @@
 			if($container->init()===false)
 				return false;
 			return $container;
+		}
+
+		protected function set_traits()
+		{
+			$traits = $this->obj->traits();
+			foreach($traits as $key => &$value) {
+				if($key{0}==':')
+					$this->add_clause($key, $value);
+			}
 		}
 
 		/**

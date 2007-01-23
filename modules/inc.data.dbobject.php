@@ -881,6 +881,25 @@
 			$obj->{$this->primary()} = $this->id();
 		}
 
+
+		private static $traits = array();
+
+		public function traits()
+		{
+			if(isset(DBObject::$traits[$this->class]))
+				return DBObject::$traits[$this->class];
+			return array();
+		}
+
+		public static function set_traits($class, $key)
+		{
+			$args = func_get_args();
+			array_shift($args);
+			array_shift($args);
+
+			DBObject::$traits[$class][$key] = $args;
+		}
+
 		/**
 		 * @return: the DB handle
 		 */
@@ -1343,6 +1362,8 @@
 			print_r(DBObject::$_field_list);
 			echo "<b>relations</b>\n";
 			print_r(DBObject::$relations);
+			echo "<b>traits</b>\n";
+			print_r(DBObject::$traits);
 			echo "<b>tables</b>\n";
 			print_r(DBObject::$_tables);
 			echo "<b>transaction</b>\n";
