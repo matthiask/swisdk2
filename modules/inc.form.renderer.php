@@ -361,7 +361,7 @@ function formitem_tristate(elem)
 				'<textarea name="%s" id="%s" %s>%s</textarea>',
 				$name, $name,
 				$this->_attribute_html($obj->attributes()),
-				htmlspecialchars($obj->value())));
+				$obj->value()));
 		}
 
 		protected function visit_RichTextarea($obj)
