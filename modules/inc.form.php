@@ -260,6 +260,9 @@
 				$this->items[$obj->name()] =& $obj;
 			else
 				$this->items[] =& $obj;
+
+			$obj->set_traits();
+
 			return $obj;
 		}
 
@@ -279,6 +282,8 @@
 			$obj->init_value($dbobj);
 
 			$this->items[$field] = $obj;
+
+			$obj->set_traits();
 
 			return $obj;
 		}

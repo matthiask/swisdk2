@@ -306,6 +306,17 @@ add_event(window, 'load', init_$id);
 
 EOD;
 		}
+
+		public function set_traits()
+		{
+			$traits = $this->dbobj->traits();
+			if(isset($traits[$name = $this->name()][0])) {
+				switch($traits[$name][0]) {
+					case 'unique':
+						$this->add_rule(new UniqueRule());
+				}
+			}
+		}
 	}
 
 	/**
