@@ -48,33 +48,44 @@ will try to execute handle_ical()
 
 ContentSite uses the following config values:
 
-* comments_enabled
-* feed_enabled
-* trackback_enabled
+* comments_enabled (bool, false)
+* feed_enabled (bool, false)
+* trackback_enabled (bool, false)
 	Whether these features are enabled for all ContentSite
 	instances (content.xy_enabled) or only for a certain
 	DBObject class (content.dbo_class.xy_enabled)
-* cut_off_single
-	Whether filter_cutoff should be used if mode is single.
-* cut_off_past
+* cut_off_archive (bool, true)
+	Apply cut-off if archive mode is archive
+* cut_off_past (string, NULL)
 	Which field (type unix timestamp) should be used to hide
 	entries with past dates. (f.e. start dttm of an event in
 	an agenda)
-* cut_off_future
+* cut_off_future (string, NULL)
 	Which field (type unix timestamp) should be used to hide
 	entries with future dates (f.e. publication dttm of an
 	article which should only appear after said time)
-* order
+* order (string, <prefix>start_dttm)
 	Field which should be used to order the entries
 	(defaults to <prefix>start_dttm)
-* default_limit
+	The ordering direction can also be specified by adding
+	:ASC or :DESC to the field string
+* default_limit (int, 10)
 	Maximal count of entries on one page (defaults to 10)
-* pubdate_field
+* pubdate_field (string, <prefix>start_dttm)
 	publication date field (used for archive filtering)
-	(defaults to <prefix>start_dttm)
-* slug_field
+* slug_field (string, <prefix>name)
 	slug field for single mode entry matching (defaults to
 	<prefix>name)
+* categories (bool, false)
+	True if a Category DBObject table exists and there is an
+	n-to-m relation from content items to categories.
+* realm_links (bool, false)
+	Should PermissionManager::add_realm_clause() be callled
+	with the DBOContainer?
+* permission_filter (bool, true)
+	Should permission filtering be applied to the content?
+* active_filter (bool, true)
+	Is there an "active" flag which should be honored?
 
 
 ## ContentSite templates

@@ -59,6 +59,7 @@ can ease the realization of a solution.
 * [[projects/swisdk/permissions|Permission handling]]
 * [[projects/swisdk/resolver|Request resolver]]
 * [[projects/swisdk/sitemap|Sitemap]]
+* [[projects/swisdk/templates|Templates]]
 
 ## Where can I download it?
 
@@ -85,4 +86,4 @@ needlessly heavy and fuel-wasting Sport Utility Vehicles
 to take part in the [European Mobility Week](http://www.mobilityweek-europe.org/) too!
 * Some web applications which I cannot link to here, because they contain
 sensitive information. <a href="/images/webapp.png" target="_blank">A screenshot should do, though</a>
-* I also migrated my wordpress blog: [Go to my weblog](/blog/ )
+* [Young Greens of Switzerland](http://www.jungegruene.ch/)

@@ -1,0 +1,160 @@
+# SWISDK2 Template Inheritance
+
+## Vorher lesen
+
+* <http://smarty.php.net/manual/en/smarty.for.designers.php>
+
+## SWISDK2 Directory Layout
+
+	/webapp				Variert zwischen Installationen
+		/config.ini		Konfiguration (DB Parameter, Admin Email, etc)
+		/htdocs			Alles, was der Server direkt ausliefert (Bilder, Scripts...)
+		/data			Cache (wird von SWISDK2 verwaltet)
+		/content		Der wirklich interessante Teil
+			/templates	Templates Verzeichnis
+	/swisdk				SWISDK2 Core (dasselbe für alle Websites)
+
+
+D.h. der wichtige Teil für den Templatedesigner ist /webapp/content/templates/
+
+Standardmässiges Layout des Template Verzeichnis:
+
+	/base
+		/full.tpl		Haupt-Template
+
+	/module
+		/function.tpl		Webseitenspezifische Templates
+
+
+## Haupttemplate
+
+	--8<--
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	<html >
+	<head>
+	{swisdk_runtime_value key="website.title"}{block name="title"}{/block}
+	
+	
+	
+	{block name="head"}{/block}
+	</head>
+	<body>
+	{block name="main"}
+	{/block}
+	</body>
+	</html>
+	--8<--
+
+`swisdk_runtime_value`
+
+: Funktion, welche einen Wert aus der Webseiten-Konfiguration ausliest und einfügt.
+  `website.title` ist der Titel der aktuellen Webseite, wie in `/webapp/config.ini`
+  festgeschrieben.
+
+`block`
+
+: Definiert einen Block, welcher in anderen Templates überschrieben werden kann.
+  Dazu später mehr.
+
+## Seitentemplates
+
+
+(Ich weiss, man sollte nicht mit Tables arbeiten, aber es ist gut genug um das
+Prinzip zu illustrieren)
+
+Nehmen wir an, dass die Webseite entweder 2 oder 3 Spalten haben soll
+
+Zuerst die Datei `/base/2col.tpl`:
+
+	--8<--
+	{extends template="base.full"}
+
+	{block name="main"}
+	<table>
+		<tr>
+			<td>
+			{block name="navigation"}
+				<strong>Standard-Navigation</strong>
+				<ul>
+					<li>...</li>
+					<li>...</li>
+				</ul>
+			{/block}
+			</td>
+			<td>{block name="content"}{/block}</td>
+		</tr>
+	</table>
+	{/block}
+	--8<--
+
+dann `/base/3col.tpl`:
+
+	--8<--
+	{extends template="base.full"}
+
+	{block name="main"}
+	<table>
+		<tr>
+			<td>
+			{block name="navigation"}
+				<strong>Standard-Navigation</strong>
+				<ul>
+					<li>...</li>
+					<li>...</li>
+				</ul>
+			{/block}
+			</td>
+			<td>{block name="content"}{/block}</td>
+			<td>{block name="rightbar"}{/block}</td>
+		</tr>
+	</table>
+	{/block}
+	--8<--
+
+
+Die Frontseite ist eine 3spaltige Newsseite `/article/list.tpl`:
+
+	--8<--
+	{extends template="base.3col"}
+
+	{block name="content"}
+	blah blah...
+	{/block}
+
+	{block name="rightbar"}
+	Dumdidum... irgendwas für die rechte Spalte
+	{/block}
+	--8<--
+
+Artikel-Detailansicht `/article/single.tpl` soll 2spaltig sein, zudem braucht
+es für diese Ansicht ein weiteres CSS File (Der `head`-Block wurde im `base.full`
+Template definiert):
+
+	--8<--
+	{extends template="base.2col"}
+
+	{block name="head"}
+	
+	{/block}
+
+	{block name="content"}
+	blah blah...
+	{/block}
+	--8<--
+
+
+### Regeln:
+
+1. Die Templates werden vom Detailtemplate zum Haupttemplate ausgewertet, also z.B.:
+	- article.single
+	- base.2col
+	- base.full
+
+2. Blöcke, welche in weiter abgeleiteten Templates stehen, ersetzen die Blöcke in anderen
+   Templates.
+
+3. Blöcke, welche nicht überschrieben werden, behalten ihren Inhalt.
+
+
+

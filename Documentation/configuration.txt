@@ -146,13 +146,26 @@ away the controller part
   `wiki_ctrl.php` inside your `content` folder which handles this request.
   `runtime.controller.url` will be set to `/wiki`
 
+`runtime.domain` (string)
+
+: *Only if MultiDomainDispatcher is used*
+The currently active domain
+
 `runtime.includefile` (string)
 
 : the file `DynamicSiteHandler` is going to include
 
+`runtime.language` (string)
+
+: Current language key
+
 `runtime.language_id` (int)
 
 : the language id
+
+`runtime.navigation.prepend` (string)
+
+: String to prepend to every URL while generating the navigation
 
 `runtime.navigation.url` (string)
 
@@ -162,6 +175,15 @@ away the controller part
 `runtime.page.title` (string)
 
 : the title of the current page (taken from the sitemap)
+
+`runtime.parser.domain` (array of string)
+
+: *Only evaluated in MultiDomainDispatcher*
+all currently registered domains
+
+`runtime.parser.website` (array of string)
+
+: All website keys
 
 `runtime.request.host` (string)
 
@@ -177,6 +199,18 @@ away the controller part
 
   For the example above, this would be set to `/wiki/xyz/page`
 
+`runtime.stage` (string)
+
+: The current stage *See also Swisdk::load()*
+
+`runtime.urlgenerator.$class` (string)
+
+: Controller url for data object with class
+
+`runtime.webroot.[img|js|css|feeds]` (string)
+
+: Location of default images if it is not /[img|js|css|feeds]
+
 `runtime.website` (string)
 
 : the current website; see also `website`
@@ -184,6 +218,16 @@ away the controller part
 `runtime.website.title` (string)
 
 : the title of the current website (taken from the `website` section)
+
+`runtime.website.url` (string)
+
+: The URL of the current website
+
+## Website configuration values
+
+### ContentSite
+
+See ContentSite documentation
 
 ## Example configuration file
 
