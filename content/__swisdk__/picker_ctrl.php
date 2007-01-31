@@ -8,6 +8,7 @@
 	require_once SWISDK_ROOT.'site/inc.site.php';
 	require_once MODULE_ROOT.'inc.smarty.php';
 	require_once MODULE_ROOT.'inc.form.php';
+	require_once MODULE_ROOT.'inc.tableview.php';
 
 	class User extends DBObject {
 		protected $class = __CLASS__;
@@ -18,54 +19,66 @@
 		}
 	}
 
+	class PickerTableViewForm extends TableViewForm {
+		public function set_clauses(DBOContainer &$container)
+		{
+
+			parent::set_clauses($container);
+			$params = getInput('params');
+			if(is_array($params)) {
+				foreach($params as $k => $v) {
+					if($k==':order')
+						$container->add_order_column($v);
+					else if($k==':exclude_ids') {
+						if(($ids = explode(',', $v)) && count($ids))
+							$container->add_clause(
+								$container->dbobj()->name('id').' NOT IN {ids}',
+								array('ids' => $ids));
+					}
+				}
+			}
+		}
+	}
+
+	function _picker_row($dbo)
+	{
+		$id = $dbo->id();
+		$title = $dbo->title();
+		return '<div onclick="do_select(this, '.$id.', \''.$title.'\');">'.$title.'</div>';
+	}
+
 	class PickerSite extends Site {
 		public function run()
 		{
 			$element = getInput('element');
 			$class = getInput('class');
-			$params = getInput('params');
-			$dboc = DBOContainer::create($class);
-			if(is_array($params)) {
-				foreach($params as $k => $v) {
-					if($k==':order')
-						$dboc->add_order_column($v);
-					else if($k==':exclude_ids') {
-						if(($ids = explode(',', $v)) && count($ids))
-							$dboc->add_clause(
-								$dboc->dbobj()->name('id').' NOT IN {ids}',
-								array('ids' => $ids));
-					}
-				}
-			}
-			$dboc->init();
-			$html = <<<EOD
-<table class="s-table">
-<thead>
-<tr>
-	<th>$class Picker</th>
-</tr>
-</thead>
-<tbody>
+			$dbo = DBObject::create($class);
+
+			$tableview = new TableView($dbo);
+			$tableview->disable('multi');
+
+			$title = $dbo->name('title');
+			$id = $dbo->primary();
+
+			$tableview->append_column(new TemplateTableViewColumn(
+				$title, 'Title',
+				'<div onclick="do_select(this, {'.$id.'}, \'{'
+					.$title.'}\');">{'.$title.'}</div>'));
+
+			$form = new PickerTableViewForm($dbo);
+			$form->add_fulltext_field();
+			$tableview->set_form($form);
+			$tableview->init();
+
+			$html = $tableview->html().<<<EOD
+<style type="text/css">
+label {
+	width: 40px;
+}
+</style>
 
 EOD;
-			$odd = '';
-			foreach($dboc as $dbo) {
-				$id = $dbo->id();
-				$title = $dbo->title();
-				$html .= <<<EOD
-<tr class="$odd" onclick="do_select(this, $id, '$title');">
-<td>$title</td>
-</tr>
 
-EOD;
-				$odd = $odd?'':'odd';
-			}
-
-			$html .= <<<EOD
-</tbody>
-</table>
-
-EOD;
 			$smarty = new SwisdkSmarty();
 			$smarty->assign('content', $html);
 			$smarty->assign('element', $element);
