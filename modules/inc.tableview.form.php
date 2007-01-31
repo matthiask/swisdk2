@@ -65,7 +65,7 @@
 		/**
 		 * add fulltext search field to form
 		 */
-		protected function add_fulltext_field($title=null)
+		public function add_fulltext_field($title=null)
 		{
 			$this->box('search')->add($this->dbobj()->name('query'),
 				new TextInput(),
