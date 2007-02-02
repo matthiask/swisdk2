@@ -286,6 +286,10 @@
 
 		public function __set($var, $value)
 		{
+			$dbo = $this->dbobj();
+			$fields = $dbo->field_list();
+			if(isset($fields[$name = $dbo->name($var)]))
+				return $dbo->set($name, $value);
 			return $this->set($this->name($var), $value);
 		}
 
