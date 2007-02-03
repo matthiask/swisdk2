@@ -25,7 +25,9 @@
 
 		public function generate_dbobject_url($obj)
 		{
-			return '/'.strtolower($obj->_class()).'?id='.$obj->id();
+			$c = strtolower($obj->_class());
+			return Swisdk::config_value('runtime.urlgenerator.'.$c, '/'.$c)
+				.'?p='.$obj->id();
 		}
 
 		public function generate_article_url($obj)
