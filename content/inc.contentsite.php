@@ -211,6 +211,7 @@
 			}
 			$this->smarty->register_function('generate_pagelinks',
 				array(&$this, '_generate_pagelinks'));
+			$this->run_website_components($this->smarty);
 			$this->smarty->display_template($this->dbo_class.'.list');
 		}
 
@@ -272,13 +273,11 @@
 				.sha1($_SERVER['REQUEST_URI']).'.xml');
 		}
 
-		protected function handle_single()
+		protected function _single_get_dbobj()
 		{
-			$dbo = null;
-
 			if(isset($this->request['id'])) {
 				$this->init(false);
-				$dbo = DBObject::find($this->dbo_class,
+				return DBObject::find($this->dbo_class,
 					$this->request['id']);
 			} else {
 				$this->init();
@@ -287,12 +286,12 @@
 				$this->filter_archive();
 				$this->filter_slug();
 				$this->dbobj->init();
-				$dbo = $this->dbobj->rewind();
+				return $this->dbobj->rewind();
 			}
+		}
 
-			if(!$dbo)
-				return $this->handle_none();
-
+		protected function _single_handler($dbo)
+		{
 			if($this->find_config_value('permission_filter', true))
 				PermissionManager::check_access_throw($dbo);
 
@@ -315,6 +314,15 @@
 						$dbo->related('Realm'));
 				}
 			}
+			$this->run_website_components($this->smarty);
+		}
+
+		protected function handle_single()
+		{
+			$dbo = $this->_single_get_dbobj();
+			if(!$dbo)
+				return $this->handle_none();
+			$this->_single_handler($dbo);
 			$this->smarty->display_template($this->dbo_class.'.single');
 		}
 
