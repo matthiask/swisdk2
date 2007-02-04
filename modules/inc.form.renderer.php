@@ -616,6 +616,106 @@ EOD;
 			return $html;
 		}
 
+		protected function visit_InlineEditor($obj)
+		{
+			$this->_collect_javascript($obj);
+
+			$prefix = Swisdk::config_value('runtime.webroot.img', '/img');
+			$class = $obj->_class();
+			$fields = $obj->fields();
+			$name = $obj->id();
+
+			$empty_field = "<div id=\"{$name}___ID__\">";
+			foreach($fields as $f)
+				$empty_field .= "$f: <input style=\"float:none\" type=\"text\" "
+					."id=\"{$name}[__ID__][$f]\" name=\"{$name}[__ID__][$f]\" value=\"\" /> ";
+
+			$empty_field .= "<img src=\"$prefix/icons/delete.png\" "
+				."onclick=\"remove_$name(\'__ID__\')\" style=\"cursor:pointer\" /><div>";
+
+			$html = <<<EOD
+<script type="text/javascript">
+//<![CDATA[
+function remove_$name(id)
+{
+	elem = document.getElementById('{$name}_'+id);
+	elem.parentNode.removeChild(elem);
+}
+
+function add_$name(val, str)
+{
+	elem = document.getElementById('$name');
+
+	// save the values ...
+	var inputs = elem.getElementsByTagName('input');
+	var values = new Array();
+	for(i=0; i<inputs.length; i++)
+		values[inputs[i].id] = inputs[i].value;
+
+	var i=1;
+	while(document.getElementById('{$name}_new'+i))
+		i++;
+
+	html = '$empty_field'.replace(/__ID__/g, 'new'+i);
+
+	elem.innerHTML += html;
+
+	// ... and restore them (they get clobbered when appending to innerHTML)
+	for(i=0; i<inputs.length; i++) {
+		if(values[inputs[i].id])
+			inputs[i].value = values[inputs[i].id];
+	}
+}
+
+function load_$name()
+{
+$set_value
+}
+//]]>
+</script>
+
+EOD;
+			$html .= "<div id=\"$name\">";
+
+
+			$current = DBOContainer::find_by_id($class, $obj->value());
+
+			foreach($current as $dbo) {
+				$id = $dbo->id();
+				$html .= <<<EOD
+<div id="{$name}_$id">
+
+EOD;
+				foreach($fields as $f) {
+					$value = htmlspecialchars($dbo->$f);
+					$field_id = $name."[$id][$f]";
+					$html .= <<<EOD
+$f: <input style="float:none" type="text" id="$field_id" name="$field_id" value="$value" />
+
+EOD;
+				}
+
+				$html .= <<<EOD
+<img src="$prefix/icons/delete.png" onclick="remove_$name($id)" style="cursor:pointer" />
+</div>
+
+EOD;
+			}
+
+			$html .= str_replace(
+				array('__ID__', '\\\''),
+				array('new1', '\''),
+				$empty_field).<<<EOD
+</div>
+</div>
+</div>
+
+<img src="$prefix/icons/add.png" onclick="javascript:add_$name()" style="cursor:pointer" />
+
+EOD;
+			$this->_render($obj, $html);
+		}
+
 		protected function visit_DateInput($obj)
 		{
 			$prefix = Swisdk::config_value('runtime.webroot.js', '/js');

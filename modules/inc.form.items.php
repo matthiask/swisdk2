@@ -703,6 +703,68 @@ EOD;
 		}
 	}
 
+	class InlineEditor extends FormItem {
+		protected $class;
+		protected $fields;
+
+		public function __construct($class, $fields)
+		{
+			$this->class = $class;
+			$this->fields = $fields;
+		}
+
+		public function init_value($dbobj)
+		{
+			$dboc = $dbobj->related($this->class);
+			parent::init_value($dbobj);
+			$values = $this->value();
+			if(is_array(reset($values))) {
+				$ids = array_flip($dboc->ids());
+
+				foreach($values as $key => $value) {
+					$dbo = null;
+					$add = null;
+					if(is_numeric($key)) {
+						$dbo = $dboc[$key];
+						unset($ids[$key]);
+					} else {
+						$dbo = DBObject::create($this->class);
+						$add = false;
+					}
+
+					foreach($this->fields as $f) {
+						if($value[$f])
+							$add = true;
+						$dbo->$f = $value[$f];
+					}
+
+					if($add===true) {
+						$dbo->set($dboc->dbobj_clone()->name($this->dbobj->primary()),
+							$this->dbobj->id());
+						$dboc->add($dbo);
+					}
+				}
+
+				$delete_dboc = DBOContainer::find_by_id($this->class,
+					array_flip($ids));
+				$this->dbobj->listener_add('store', array(
+					&$dboc, 'store'));
+				$this->dbobj->listener_add('store', array(
+					&$delete_dboc, 'delete'));
+			}
+		}
+
+		public function _class()
+		{
+			return $this->class;
+		}
+
+		public function fields()
+		{
+			return $this->fields;
+		}
+	}
+
 	class TagInput extends TextInput {
 		protected $attributes = array('class' => 'sf-textinput');
 		protected $tag_formitems = array();
