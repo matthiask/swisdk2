@@ -738,15 +738,14 @@ EOD;
 						$dbo->$f = $value[$f];
 					}
 
-					if($add===true) {
-						$dbo->set($dboc->dbobj_clone()->name($this->dbobj->primary()),
-							$this->dbobj->id());
+					if($add===true)
 						$dboc->add($dbo);
-					}
 				}
 
 				$delete_dboc = DBOContainer::find_by_id($this->class,
 					array_flip($ids));
+				$this->dbobj->listener_add('store', array(
+					&$dboc, 'set_owner'));
 				$this->dbobj->listener_add('store', array(
 					&$dboc, 'store'));
 				$this->dbobj->listener_add('store', array(
