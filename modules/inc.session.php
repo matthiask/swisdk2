@@ -44,8 +44,16 @@
 				$this->user = DBObject::find('User',
 					$_SESSION['swisdk2']['user_id']);
 
-			if(!$this->user)
+			if(!$this->user) {
 				$this->user = DBObject::find('User', SWISDK2_VISITOR);
+			} else if(Swisdk::config_value('core.user_meta')) {
+				$time = time();
+				DBObject::db_query('INSERT INTO tbl_user_meta'
+					.'(user_meta_user_id,user_meta_key,'
+						.'user_meta_value,user_meta_creation_dttm)'
+					.' VALUES ('.$this->user->id().',\'activity\','.$time.','.$time.')'
+					.' ON DUPLICATE KEY UPDATE user_meta_value='.$time);
+			}
 		}
 
 		public static function &instance()
