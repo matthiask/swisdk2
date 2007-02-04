@@ -666,11 +666,6 @@ function add_$name(val, str)
 			inputs[i].value = values[inputs[i].id];
 	}
 }
-
-function load_$name()
-{
-$set_value
-}
 //]]>
 </script>
 
