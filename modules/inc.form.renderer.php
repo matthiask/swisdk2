@@ -833,6 +833,7 @@ EOD;
 	style="visibility:hidden;height:0px;width:0px;border:none;" />
 <span id="{$name}_span">$display</span>
 <a href="javascript:open_$name()"><img src="$prefix/icons/database_edit.png" /></a>
+<a href="javascript:select_$name(0, '')"><img src="$prefix/icons/cross.png" /></a>
 <script type="text/javascript">
 //<![CDATA[
 function open_$name()
