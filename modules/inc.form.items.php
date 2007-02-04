@@ -619,6 +619,28 @@ EOD;
 
 	class ComboBox extends SelectionFormItem {
 		protected $attributes = array('style' => 'width:250px');
+		protected $class;
+
+		public function __construct($class)
+		{
+			$this->class = $class;
+		}
+
+		public function init_value($dbobj)
+		{
+			parent::init_value($dbobj);
+			$name = $this->name();
+			$value = $this->value();
+			if(!is_numeric($value)) {
+				$dbo = DBObject::create($this->class);
+				if(DBObject::find($this->class, array(
+						$dbo->name('title').'=' => $value)))
+					return;
+				$dbo->title = $value;
+				$dbo->store();
+				$dbobj->set($name, $dbo->id());
+			}
+		}
 	}
 
 	class Multiselect extends SelectionFormItem {
