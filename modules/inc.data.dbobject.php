@@ -242,7 +242,7 @@
 				if($this->data && count($this->data))
 					return true;
 			} else if($params) {
-				$this->id = $params;
+				$this->data[$this->primary] = $params;
 				if($this->refresh())
 					return true;
 			}
