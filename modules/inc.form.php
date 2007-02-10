@@ -93,7 +93,12 @@
 				$this->bind($dbobj);
 		}
 
-		public function set_title($title=null) { $this->title = $title; }
+		public function set_title($title=null)
+		{
+			$this->title = $title?dgettext('swisdk', $title):null;
+			return $this;
+		}
+
 		public function title() { return $this->title; }
 
 		/**
