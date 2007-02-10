@@ -180,7 +180,6 @@
 			$form->bind(DBObject::create('Login'));
 			$form->set_title(dgettext('swisdk', 'Login'));
 			$form->add(new TextInput('login_username'))
-				->add_rule(new AlnumRule())
 				->add_behavior(new GrabFocusBehavior())
 				->set_title('Username');
 			$form->add(new PasswordInput('login_password'))
