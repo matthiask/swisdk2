@@ -32,6 +32,9 @@ add_event(window, 'load', focus_input);
 		<label for="login_password">Password</label>
 		<input type="password" name="login_password" id="login_password" />
 
+		<label for="login_private">Remember login</label>
+		<input type="checkbox" name="login_private" id="login_private" />
+
 		<input type="submit" value="Login" />
 	</fieldset>
 </form>

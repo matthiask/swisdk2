@@ -29,6 +29,20 @@
 				if($user) {
 					$_SESSION['swisdk2']['user_id'] = $user->id;
 					$this->user = $user;
+					if(isset($_REQUEST['login_private']))
+						setcookie('login_cookie',
+							md5($user->login.$user->password),
+							time()+31536000);
+				}
+			} else if(isset($_COOKIE['login_cookie'])
+					&& !isset($_SESSION['swisdk2']['user_id'])) {
+				$value = $_COOKIE['login_cookie'];
+				if(!preg_match('/[^a-z0-9]/', $value)) {
+					$row = DBObject::db_get_row(
+						'SELECT MD5(CONCAT(user_login,user_password)) AS hash, user_id'
+						.' FROM tbl_user HAVING hash=\''.$value.'\'');
+					if($row)
+						$_SESSION['swisdk2']['user_id'] = $row['user_id'];
 				}
 			}
 
@@ -36,6 +50,7 @@
 				if(isset($_COOKIE[session_name()]))
 					setcookie(session_name(), '', time()-42000, '/');
 				$_SESSION = array();
+				setcookie('login_cookie', '', time()-31536000);
 				session_destroy();
 				redirect('/');
 			}

@@ -184,6 +184,8 @@
 				->set_title('Username');
 			$form->add(new PasswordInput('login_password'))
 				->set_title('Password');
+			$form->add(new CheckboxInput('login_private'))
+				->set_title('Remember login');
 			$form->add(new SubmitButton());
 
 			$smarty = new SwisdkSmarty();
