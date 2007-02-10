@@ -16,6 +16,9 @@
 			$this->search = $this->box('search');
 			$this->action = $this->box('action');
 
+			$this->search->bind($this->dbobj());
+			$this->action->bind($this->dbobj());
+
 			if($which || is_array($which)) {
 				if(!is_array($which))
 					$which = explode(',', $which);
