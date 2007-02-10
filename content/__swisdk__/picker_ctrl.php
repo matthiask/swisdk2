@@ -10,19 +10,9 @@
 	require_once MODULE_ROOT.'inc.form.php';
 	require_once MODULE_ROOT.'inc.tableview.php';
 
-	class User extends DBObject {
-		protected $class = __CLASS__;
-
-		public function title()
-		{
-			return $this->forename.' '.$this->name;
-		}
-	}
-
 	class PickerTableViewForm extends TableViewForm {
 		public function set_clauses(DBOContainer &$container)
 		{
-
 			parent::set_clauses($container);
 			$params = getInput('params');
 			if(is_array($params)) {
