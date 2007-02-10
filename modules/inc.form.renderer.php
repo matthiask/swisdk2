@@ -539,7 +539,7 @@ function open_$name()
 		str += inputs[i].id.replace(/^.*\[([0-9]+)\]$/, '$1')+',';
 
 	window.open('/__swisdk__/picker?element=$name&class=$class&params[:exclude_ids]='+str, '$name',
-		'width=300,height=300,toolbar=no,location=no');
+		'width=400,height=600,toolbar=no,location=no,resizable=yes,scrollbars=yes');
 	return false;
 }
 
@@ -833,7 +833,7 @@ EOD;
 //<![CDATA[
 function open_$name()
 {
-	window.open('$url', '$name', 'width=300,height=300,toolbar=no,location=no');
+	window.open('$url', '$name', 'width=400,height=600,toolbar=no,location=no,resizable=yes,scrollbars=yes');
 }
 
 function select_$name(val, str)
@@ -875,7 +875,7 @@ function open_$name()
 		str += inputs[i].value+',';
 
 	window.open('/__swisdk__/picker?element=$name&class=$class&params[:exclude_ids]='+str, '$name',
-		'width=300,height=300,toolbar=no,location=no');
+		'width=400,height=600,toolbar=no,location=no,resizable=yes,scrollbars=yes');
 	return false;
 }
 
