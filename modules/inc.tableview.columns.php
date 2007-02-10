@@ -149,9 +149,10 @@
 			$delete = dgettext('swisdk', 'Really delete?');
 			$prefix = Swisdk::config_value('runtime.webroot.img', '/img');
 			$html =<<<EOD
-<a href="{$this->title}_edit/$id"><img src="$prefix/icons/database_edit.png" alt="edit" /></a>
+<a href="{$this->title}_edit/$id"><img src="$prefix/icons/page_white_edit.png" alt="edit" /></a>
+<a href="{$this->title}_new/from/$id"><img src="$prefix/icons/page_white_copy.png" alt="copy" /></a>
 <a href="{$this->title}_delete/$id" onclick="if(confirm('$delete')){this.href+='?guard=$gid';}else{this.parentNode.parentNode.onclick();return false;}">
-	<img src="$prefix/icons/database_delete.png" alt="delete" />
+	<img src="$prefix/icons/page_white_delete.png" alt="delete" />
 </a>
 EOD;
 			return $html;

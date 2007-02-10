@@ -241,14 +241,28 @@
 		protected $form;
 		protected $obj;
 		protected $multiple = false;
+		protected $copy = null;
 		protected $editmode = true;
+		protected $id = false;
 
 		public function run()
 		{
 			// if multiple is passed, the IDs of the records which should
 			// be edited are passed via $_POST
-			if(isset($this->args[0]) && $this->args[0]=='multiple')
-				$this->multiple = true;
+			if(isset($this->args[0])) {
+				switch($this->args[0]) {
+					case 'multiple':
+						$this->multiple = true;
+						break;
+					case 'from':
+						if(isset($this->args[1]))
+							$this->copy = $this->args[1];
+						break;
+					default:
+						$this->id = $this->args[0];
+				}
+			}
+
 			if($this->multiple)
 				$this->edit_multiple();
 			else
@@ -290,10 +304,10 @@
 					$this->editmode = false;
 				}
 			} else {
-				if(isset($this->args[0]))
-					$this->obj = $this->get_dbobj($this->args[0]);
+				if($this->id)
+					$this->obj = $this->get_dbobj($this->id);
 				else {
-					$this->obj = $this->get_dbobj();
+					$this->obj = $this->get_dbobj($this->copy);
 					$this->editmode = false;
 				}
 			}
@@ -328,7 +342,7 @@
 		public function execute()
 		{
 			if($this->form->is_valid()) {
-				if(!$this->editmode)
+				if(!$this->editmode || $this->copy)
 					$this->obj->unset_primary();
 				$this->post_process();
 				$this->obj->store();
