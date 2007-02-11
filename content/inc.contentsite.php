@@ -249,7 +249,7 @@
 			$feed->link = 'http://'.Swisdk::config_value('runtime.request.host');
 			$feed->syndicationURL = $_SERVER['REQUEST_URI'];
 
-			$ug = Swisdk::load_instance('UrlGenerator', 'modules');
+			$ug = Swisdk::load_instance('UrlGenerator');
 
 			$authors = DBOContainer::find_by_id('User',
 				$this->dbobj->collect('id', 'author_id'));

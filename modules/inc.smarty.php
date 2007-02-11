@@ -178,7 +178,7 @@
 	{
 		static $generator = null;
 		if($generator===null)
-			$generator = Swisdk::load_instance('UrlGenerator', 'modules');
+			$generator = Swisdk::load_instance('UrlGenerator');
 		return $generator->generate_url($params['item']);
 	}
 
