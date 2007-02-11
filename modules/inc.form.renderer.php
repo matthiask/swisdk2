@@ -919,6 +919,38 @@ EOD;
 			$this->_render($obj, $html);
 		}
 
+		protected function visit_GroupItem($obj)
+		{
+			require_once MODULE_ROOT.'inc.form.arrayrenderer.php';
+			$renderer = new ArrayFormRenderer();
+
+			$obj->box()->accept($renderer);
+			$name = $obj->name();
+			$elems = $renderer->fetch_array();
+
+			$html = array();
+			$msg = array();
+
+			$this->functions = array_merge($this->functions, $renderer->functions);
+			$this->html_start .= $renderer->html_start;
+			$this->html_end = $renderer->html_end.$this->html_end;
+			$this->javascript .= $renderer->javascript;
+			$this->validation_javascript .= $renderer->validation_javascript;
+			if($renderer->file_upload)
+				$this->file_upload = $renderer->file_upload;
+
+			foreach($elems[$name] as $elem) {
+				$html[] = <<<EOD
+<label for="{$elem['id']}">{$elem['title']}</label> {$elem['html']}
+EOD;
+				$msg[] = $elem['info'].$elem['message'];
+			}
+
+			$s = $obj->separator();
+
+			$this->_render($obj, implode($s, $html).implode($s, $msg));
+		}
+
 		protected function visit_SubmitButton($obj)
 		{
 			$this->_collect_javascript($obj);

@@ -953,4 +953,52 @@ EOD;
 		protected $class;
 	}
 
+	class GroupItem extends FormItem {
+		protected $box = null;
+		protected $separator = ' ';
+
+		public function box()
+		{
+			if(!$this->box) {
+				$this->box = new FormBox();
+				$this->box->set_name($this->name());
+				$this->box->bind($this->dbobj);
+			}
+
+			return $this->box;
+		}
+
+		public function add()
+		{
+			$args = func_get_args();
+			$box = $this->box();
+			return call_user_func_array(array(
+				$box, 'add'), $args);
+		}
+
+		public function add_auto()
+		{
+			$args = func_get_args();
+			$box = $this->box();
+			return call_user_func_array(array(
+				$box, 'add_auto'), $args);
+		}
+
+		public function init_value($dbobj)
+		{
+			$this->dbobj = $dbobj;
+		}
+
+		public function set_separator($separator)
+		{
+			$this->separator = $separator;
+			return $this;
+		}
+
+		public function separator()
+		{
+			return $this->separator;
+		}
+	}
+
 ?>
