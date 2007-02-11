@@ -46,14 +46,8 @@
 				}
 			}
 
-			if(isset($_REQUEST['logout'])) {
-				if(isset($_COOKIE[session_name()]))
-					setcookie(session_name(), '', time()-42000, '/');
-				$_SESSION = array();
-				setcookie('login_cookie', '', time()-31536000);
-				session_destroy();
-				redirect('/');
-			}
+			if(isset($_REQUEST['logout']))
+				SessionHandler::logout();
 
 			if(isset($_SESSION['swisdk2']['user_id']) && !$this->user)
 				$this->user = DBObject::find('User',
@@ -69,6 +63,19 @@
 					.' VALUES ('.$this->user->id().',\'activity\','.$time.','.$time.')'
 					.' ON DUPLICATE KEY UPDATE user_meta_value='.$time);
 			}
+
+			if($this->user->disabled)
+				SessionHandler::logout();
+		}
+
+		public static function logout()
+		{
+			if(isset($_COOKIE[session_name()]))
+				setcookie(session_name(), '', time()-42000, '/');
+			$_SESSION = array();
+			setcookie('login_cookie', '', time()-31536000);
+			session_destroy();
+			redirect('/');
 		}
 
 		public static function &instance()
