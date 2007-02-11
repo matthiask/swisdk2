@@ -92,6 +92,9 @@
 			require_once SWISDK_ROOT . "dispatcher/inc.dispatcher.php";
 			SwisdkControllerDispatcher::dispatch( $arguments['REQUEST_URI'] );
 
+			// load common settings and relations
+			Swisdk::load_file('inc.common.php');
+
 			// Everything is ready to really rock now. Generate and display
 			// the response
 			require_once SWISDK_ROOT . 'site/inc.handlers.php';
