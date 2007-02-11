@@ -391,6 +391,17 @@
 			return null;
 		}
 
+		/**
+		 * forward calls to FormItems
+		 */
+		public function __call($method, $args)
+		{
+			foreach($this->items as &$item)
+				call_user_func_array(array(&$item, $method), $args);
+			foreach($this->boxrefs as &$box)
+				call_user_func_array(array(&$box, $method), $args);
+		}
+
 
 		/**
 		 * Iterator implementation (see PHP Object Iteration)
