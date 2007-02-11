@@ -380,3 +380,15 @@ msgstr "Projekt"
 
 msgid "Duration"
 msgstr "Dauer"
+
+msgid "years,months,weeks,days,hours,min,sec"
+msgstr "Jahre,Monate,Wochen,Tage,Stunden,Minuten,Sekunden"
+
+msgid "%s ago"
+msgstr "Vor %s"
+
+msgid "in %s"
+msgstr "In %s"
+
+msgid "right now"
+msgstr "Jetzt"

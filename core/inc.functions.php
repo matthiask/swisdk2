@@ -213,7 +213,7 @@
 				return sprintf($template,
 					intval($seconds/$span).' '.$type);
 
-		return 'right now';
+		return dgettext('swisdk', 'right now');
 	}
 
 	/**
