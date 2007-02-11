@@ -9,7 +9,7 @@
 	 * Returns the Form as a nested array
 	 */
 	class ArrayFormRenderer extends FormRenderer {
-		protected $array = array();
+		protected $array = array('form' => array());
 		protected $stack = array();
 		protected $ref;
 		protected $form;
@@ -39,7 +39,8 @@
 		protected function _render($obj, $field_html, $row_class = null)
 		{
 			$valid = true;
-			if(isset($this->form) && $this->form->submitted()) {
+			if(isset($this->form) && ($this->form instanceof Form)
+					&& $this->form->submitted()) {
 				$valid = $obj->is_valid();
 			}
 		
