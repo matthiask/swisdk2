@@ -388,15 +388,18 @@
 		}
 
 		/**
-		 * load a module taking into account the current stage of request
-		 * handling we are in
+		 * load a class
 		 */
-		public static function load($class, $stage = null)
+		public static function load($class, $prefix_path = null)
 		{
-			if($stage===null)
-				$stage = Swisdk::config_value('runtime.stage');
+			return Swisdk::load_file(
+				sprintf('%s/inc.%s.php', $prefix_path, strtolower($class)));
+		}
 
-			$path = sprintf('%s/inc.%s.php', $stage, strtolower($class));
+		public static function load_file($path, $prefix_path = null)
+		{
+			if($prefix_path)
+				$path = $prefix_path.'/'.$path;
 
 			$bases = Swisdk::$load_bases;
 
@@ -414,23 +417,21 @@
 		/**
 		 * load and instanciate a module
 		 */
-		public static function load_instance($class, $stage = null)
+		public static function load_instance($class, $prefix_path = null)
 		{
 			$key = 'runtime.loader.'.$class;
 			$class = Swisdk::config_value($key, $class);
 			if(class_exists($class))
 				return new $class;
 
-			if($stage===null)
-				$stage = Swisdk::config_value('runtime.stage');
 			Swisdk::set_config_value($key, $class);
-			if(Swisdk::load($class, $stage)
+			if(Swisdk::load($class, $prefix_path)
 					&& class_exists($class = Swisdk::config_value($key)))
 				return new $class;
 			else
 				SwisdkError::handle(new FatalError(sprintf(
-					dgettext('swisdk', 'Could not load %s, stage %s'),
-					$class, $stage)));
+					dgettext('swisdk', 'Could not load %s, prefix %s'),
+					$class, $prefix_path)));
 		}
 
 		public static function add_loader_base($base)

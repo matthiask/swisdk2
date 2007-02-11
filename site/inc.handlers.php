@@ -14,7 +14,6 @@
 
 		public static function run()
 		{
-			Swisdk::set_config_value('runtime.stage', 'site');
 			// at least we need the include file of the controller...
 			$includefile = Swisdk::config_value('runtime.includefile');
 			if( !$includefile )
@@ -31,7 +30,7 @@
 		{
 			$classname = Swisdk::config_value( "dispatcher." . $type );
 			if( $classname != null ) {
-				return Swisdk::load_instance($classname);
+				return Swisdk::load_instance($classname, 'site');
 			} else {
 				SwisdkError::handle(new FatalError(sprintf(
 					dgettext('swisdk', 'No handler defined for %s suffix'), $type)));
