@@ -72,6 +72,8 @@
 			$text->set_attributes(array('style'
 				=> 'width:300px;height:250px'));
 
+			$form->add_rule(new NoSpamRule());
+
 			if($form->is_valid() && !empty($_SERVER['HTTP_USER_AGENT'])) {
 				$dbo->realm = $this->realm;
 				$dbo->author_ip = $_SERVER['REMOTE_ADDR'];
@@ -109,6 +111,18 @@
 			$smarty->assign('comments', $this->dbobj->data());
 
 			$this->html = $smarty->fetch_template('comment.list');
+		}
+	}
+
+	class NoSpamRule extends FormRule {
+		public function __construct()
+		{
+			$this->message = dgettext('swisdk', 'Comment has been classified as spam!');
+		}
+
+		public function is_valid_impl()
+		{
+			return Swisdk::load_instance('SpamChecker')->check($this->form->dbobj());
 		}
 	}
 
