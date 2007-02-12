@@ -21,7 +21,7 @@
 		{
 			if($this->is_valid_impl())
 				return true;
-			$form->add_message($this->message);
+			$this->form->add_message($this->message);
 			return false;
 		}
 
