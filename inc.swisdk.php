@@ -6,6 +6,11 @@
 	*/
 
 	class Swisdk {
+		public static function version()
+		{
+			return 'SWISDK v2.2';
+		}
+
 		public static function runFromHttpRequest()
 		{
 			Swisdk::run(array('REQUEST_URI' =>
