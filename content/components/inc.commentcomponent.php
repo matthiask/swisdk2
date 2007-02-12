@@ -122,7 +122,7 @@
 
 		public function is_valid_impl()
 		{
-			return Swisdk::load_instance('SpamChecker')->check($this->form->dbobj());
+			return !Swisdk::load_instance('SpamChecker')->check($this->form->dbobj());
 		}
 	}
 
