@@ -324,7 +324,7 @@
 
 		protected function _single_handler($dbo)
 		{
-			if($this->find_config_value('permission_filter', true))
+			if($this->find_config_value('permission_filter'))
 				PermissionManager::check_access_throw($dbo);
 
 			$this->smarty->assign('item', $dbo);
