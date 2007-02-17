@@ -212,7 +212,7 @@
 			$this->smarty->register_function('generate_pagelinks',
 				array(&$this, '_generate_pagelinks'));
 			$this->run_website_components($this->smarty);
-			$this->smarty->display_template($this->dbo_class.'.list');
+			$this->smarty->display_template($this->template('list'));
 		}
 
 		public function _generate_pagelinks($params, &$smarty)
@@ -323,7 +323,7 @@
 			if(!$dbo)
 				return $this->handle_none();
 			$this->_single_handler($dbo);
-			$this->smarty->display_template($this->dbo_class.'.single');
+			$this->smarty->display_template($this->template('single'));
 		}
 
 		protected function handle_trackback()
@@ -374,7 +374,7 @@
 			$smarty->register_function('generate_pagelinks',
 				array(&$smarty, '_generate_pagelinks'));
 			$this->run_website_components($smarty);
-			$smarty->display_template($this->dbo_class.'.list');
+			$smarty->display_template($this->template('list'));
 		}
 
 
@@ -579,6 +579,11 @@
 					'year');
 			}
 			return null;
+		}
+
+		protected function template($action)
+		{
+			return $this->dbo_class.'.'.$action;
 		}
 	}
 
