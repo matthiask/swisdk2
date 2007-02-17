@@ -471,6 +471,9 @@
 		 */
 		protected function filter_category()
 		{
+			if(!$this->find_config_value('categories'))
+				return;
+
 			if(isset($this->request['category'])
 					&& $this->request['category']) {
 				$dbo = $this->dbobj->dbobj_clone();
