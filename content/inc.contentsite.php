@@ -211,6 +211,10 @@
 			}
 			$this->smarty->register_function('generate_pagelinks',
 				array(&$this, '_generate_pagelinks'));
+			$this->smarty->register_function('generate_page_forward',
+				array(&$this, '_generate_page_forward'));
+			$this->smarty->register_function('generate_page_backward',
+				array(&$this, '_generate_page_backward'));
 			$this->run_website_components($this->smarty);
 			$this->smarty->display_template($this->template('list'));
 		}
@@ -226,11 +230,39 @@
 					rtrim(Swisdk::config_value('runtime.request.uri'), '/'));
 				if($count<=$limit)
 					return;
-				for($entry=0; $entry<$count; $entry+=$limit)
+				for($entry=0; $entry+$limit<$count; $entry+=$limit)
 					$html .= '<li><a href="'.$url.'/page/'.($page++).'">'.$entry.'</a></li>';
 			}
 			$html .= '</ul>';
 			return $html;
+		}
+
+		public function _generate_page_forward($params, &$smarty)
+		{
+			$title = dgettext('swisdk', 'page forward');
+			if(isset($params['title']))
+				$title = $params['title'];
+			$url = preg_replace('/\/page\/[0-9]+/', '',
+				rtrim(Swisdk::config_value('runtime.request.uri'), '/'));
+			$page = isset($this->request['page'])?$this->request['page']:1;
+			$count = $this->dbobj->total_count();
+			list($offset, $limit) = $this->_limits();
+			if($offset+$limit>$count)
+				return '';
+			return '<a href="'.$url.'/page/'.($page+1).'">'.$title.'</a>';
+		}
+
+		public function _generate_page_backward($params, &$smarty)
+		{
+			$title = dgettext('swisdk', 'page backward');
+			if(isset($params['title']))
+				$title = $params['title'];
+			$url = preg_replace('/\/page\/[0-9]+/', '',
+				rtrim(Swisdk::config_value('runtime.request.uri'), '/'));
+			$page = isset($this->request['page'])?$this->request['page']:1;
+			if($page==1)
+				return '';
+			return '<a href="'.$url.'/page/'.($page-1).'">'.$title.'</a>';
 		}
 
 		protected function handle_feed()
@@ -428,11 +460,16 @@
 		protected function filter_limit()
 		{
 			if($limit = $this->find_config_value('default_limit', 10)) {
-				$offset = 0;
-				if(isset($this->request['page']))
-					$offset = ($this->request['page']-1)*$limit;
+				list($offset, $limit) = $this->_limits();
 				$this->dbobj->set_limit($offset, $limit);
 			}
+		}
+
+		protected function _limits()
+		{
+			$limit = $this->find_config_value('default_limit', 10);
+			$page = isset($this->request['page'])?$this->request['page']:1;
+			return array($page*$limit, $limit);
 		}
 
 		/**
