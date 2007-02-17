@@ -469,7 +469,7 @@
 		{
 			$limit = $this->find_config_value('default_limit', 10);
 			$page = isset($this->request['page'])?$this->request['page']:1;
-			return array($page*$limit, $limit);
+			return array(($page-1)*$limit, $limit);
 		}
 
 		/**
