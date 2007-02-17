@@ -518,13 +518,13 @@
 
 		protected function filter_permission()
 		{
-			if($this->find_config_value('permission_filter', true))
+			if($this->find_config_value('permission_filter'))
 				PermissionManager::set_realm_clause($this->dbobj);
 		}
 
 		protected function filter_active()
 		{
-			if($this->find_config_value('active_filter', true))
+			if($this->find_config_value('active_filter'))
 				$this->dbobj->add_clause($this->dbobj->dbobj()->name('active')
 					.'!=0');
 		}
