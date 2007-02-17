@@ -35,7 +35,8 @@
 	 * email_recipient
 	 * email_subject
 	 * email_message
-	 *
+	 * email_from (defaults to core.admin_email)
+	 * email_reply_to (defauls to email_from)
 	 */
 	class EmailMessage extends Message {
 		public function __construct($dbo = null)
@@ -57,14 +58,20 @@
 
 		protected function send_mail($to, $sub, $msg)
 		{
+			$from = $this->dbobj->from;
+			if(!$from)
+				$from = 'Messenger <messenger@'.preg_replace('/^www\./', '',
+						Swisdk::config_value('runtime.request.host')).'>';
+			$reply_to = $this->dbobj->reply_to;
+			if(!$reply_to)
+				$reply_to = $from;
+
 			$headers = implode("\r\n", array(
-					'From: Messenger <messenger@'
-						.preg_replace('/^www\./', '',
-							Swisdk::config_value('runtime.request.host')).'>',
+					'From: '.$from,
 					'To: '.$to,
 					'Cc: ',
 					'Bcc: '.Swisdk::config_value('core.admin_email'),
-					'Reply-To: '.Swisdk::config_value('core.admin_email'),
+					'Reply-To: '.$reply_to,
 					'X-Mailer: SWISDK 2.0 http://spinlock.ch/projects/swisdk/'
 				));
 			if(function_exists('mb_language') && function_exists('mb_send_mail')) {
