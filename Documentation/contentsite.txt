@@ -21,9 +21,6 @@
 
 ## ContentSite parser configuration
 
-When the parser has finished, ContentSite::run() tries to execute
-a member function named handle_ + <mode>, f.e. handle_single()
-
 The parser configuration is a nested array having the following format:
 
 <request key> => array(
@@ -36,12 +33,96 @@ where
 <mode> is a facultative value with the name of another mode
 which will be set if the request key matches an url fragment
 
+When the parser has finished, ContentSite::run() tries to execute
+a member function named handle_ + <mode>, f.e. handle_single()
+
 For example, you might want to provide iCcal feeds to your users:
 
 $this->parser_config['ical'] = array(CONTENT_SITE_PARAM_NONE);
 
 Now, if the string 'ical' is part of the arguments, ContentSite::run()
 will try to execute handle_ical()
+
+
+## ContentSite filtering
+
+The filtering framework can be accessed using ContentSite's filter()
+method.
+
+ContentSite uses introspection to find all methods whose names start
+with 'filter_' and by default calls everyone of them. You can pass
+a configuration string when calling filter(). This function accepts
+a comma-separated list of filter specifications.
+
+If the filter specification starts with a bang (!), this filter
+is explicitly excluded from running. If you pass any filter
+specifications without a bang, only the passed filters will be
+run.
+
+Examples:
+
+* $this->filter('limit,order');
+  Only apply 'limit' and 'order' filters
+* $this->filter('!slug,!limit');
+  Apply all filters except 'slug' and 'limit'
+* $this->filter('!limit,order');
+  Only apply 'order' filter (The '!limit' specification has no effect)
+
+### Filter descriptions
+
+See also the following chapter for the description of the configuration
+variables.
+
+limit
+
+: Apply paging filters. Enabled by default.
+
+  Configuration variables: `default_limit`
+
+cutoff
+
+: Hide entries from the future or in the past. Disabled by default.
+
+  Configuration variables: `cut_off_past`, `cut_off_future`
+
+order
+
+: Apply ordering. Enabled by default, uses <prefix>start_dttm for
+  sorting.
+
+  Configuration variables: `order`
+
+category
+
+: Uses a central Category table to filter by category. Disabled by
+  default.
+
+  Configuration variables: `categories`
+
+archive
+
+: Filter by a date range. Enabled by default.
+
+  Configuration variables: `pubdate_field`
+
+slug
+
+: Filter by a post name. Enabled by default.
+
+  Configuration variables: `slug_field`
+
+permission
+
+: Filter by realm. Uses PermissionManager::set_realm_clause. Disabled
+  by default.
+
+  Configuration variables: `permission_filter`
+
+active
+
+: Filter by `active` flag. Disabled by default.
+
+  Configuration variables: `active_filter`
 
 
 ## ContentSite configuration values
@@ -68,23 +149,25 @@ ContentSite uses the following config values:
 	Field which should be used to order the entries
 	(defaults to <prefix>start_dttm)
 	The ordering direction can also be specified by adding
-	:ASC or :DESC to the field string
+	:ASC or :DESC to the field string. Set to false to disable
+	ordering.
 * default_limit (int, 10)
 	Maximal count of entries on one page (defaults to 10)
 * pubdate_field (string, <prefix>start_dttm)
-	publication date field (used for archive filtering)
+	publication date field (used for archive filtering). Set
+	to false to disable archive filtering.
 * slug_field (string, <prefix>name)
 	slug field for single mode entry matching (defaults to
-	<prefix>name)
+	<prefix>name). Set to false to disable slug filtering.
 * categories (bool, false)
 	True if a Category DBObject table exists and there is an
 	n-to-m relation from content items to categories.
 * realm_links (bool, false)
 	Should PermissionManager::add_realm_clause() be callled
 	with the DBOContainer?
-* permission_filter (bool, true)
+* permission_filter (bool, false)
 	Should permission filtering be applied to the content?
-* active_filter (bool, true)
+* active_filter (bool, false)
 	Is there an "active" flag which should be honored?
 
 
