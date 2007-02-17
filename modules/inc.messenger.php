@@ -35,7 +35,7 @@
 	 * email_recipient
 	 * email_subject
 	 * email_message
-	 * email_from (defaults to core.admin_email)
+	 * email_from (defaults to messenger@HTTP_HOST)
 	 * email_reply_to (defauls to email_from)
 	 */
 	class EmailMessage extends Message {
