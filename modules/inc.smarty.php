@@ -6,80 +6,48 @@
 	*/
 
 	require_once MODULE_ROOT.'inc.session.php';
+	require_once SWISDK_ROOT.'lib/smarty/libs/Smarty.class.php';
 
-	/**
-	 * E_STRICT wrapper for PHP4 compatible Smarty code!
-	 */
-
-	class SwisdkSmarty {
+	class SwisdkSmarty extends Smarty {
 		public function __construct($assign=true)
 		{
+			$this->error_reporting = E_ALL^E_NOTICE;
 			// make sure E_STRICT is turned off
-			$er = error_reporting(E_ALL^E_NOTICE);
-			require_once SWISDK_ROOT . 'lib/smarty/libs/Smarty.class.php';
-			$this->smarty = new Smarty();
-			$this->smarty->compile_dir = CACHE_ROOT.'smarty';
-			$this->smarty->template_dir = CONTENT_ROOT;
-			//$this->smarty->cache_dir = CACHE_ROOT.'smarty';
+			$this->compile_dir = CACHE_ROOT.'smarty';
+			$this->template_dir = CONTENT_ROOT;
+			//$this->cache_dir = CACHE_ROOT.'smarty';
 			//$this->config_dir
-			$this->smarty->caching = false;
-			$this->smarty->security = false;
-			$this->smarty->register_function('swisdk_runtime_value',
+			$this->caching = false;
+			$this->security = false;
+			$this->register_function('swisdk_runtime_value',
 				'_smarty_swisdk_runtime_value');
-			$this->smarty->register_block('block', '_smarty_swisdk_process_block');
-			$this->smarty->register_function('extends', '_smarty_swisdk_extends');
-			$this->smarty->register_function('db_assign', '_smarty_swisdk_db_assign');
-			$this->smarty->register_function('include_template', '_smarty_swisdk_include_template');
-			$this->smarty->register_block('if_block', '_smarty_swisdk_if_block');
-			$this->smarty->register_block('if_not_block', '_smarty_swisdk_if_not_block');
-			$this->smarty->assign_by_ref('_swisdk_smarty_instance', $this);
-			$this->smarty->register_function('css_classify', '_smarty_swisdk_css_classify');
-			$this->smarty->register_function('generate_url', '_smarty_swisdk_generate_url');
-			$this->smarty->register_function('dttm_range', '_smarty_swisdk_dttm_range');
+			$this->register_block('block', '_smarty_swisdk_process_block');
+			$this->register_function('extends', '_smarty_swisdk_extends');
+			$this->register_function('db_assign', '_smarty_swisdk_db_assign');
+			$this->register_function('include_template', '_smarty_swisdk_include_template');
+			$this->register_block('if_block', '_smarty_swisdk_if_block');
+			$this->register_block('if_not_block', '_smarty_swisdk_if_not_block');
+			$this->assign_by_ref('_swisdk_smarty_instance', $this);
+			$this->register_function('css_classify', '_smarty_swisdk_css_classify');
+			$this->register_function('generate_url', '_smarty_swisdk_generate_url');
+			$this->register_function('dttm_range', '_smarty_swisdk_dttm_range');
 
 			if($assign) {
 				$this->assign('swisdk_user', SessionHandler::user()->data());
 				$this->assign('swisdk_language', Swisdk::language_key());
 			}
-			error_reporting($er);
 
-			Swisdk::require_data_directory($this->smarty->compile_dir);
+			Swisdk::require_data_directory($this->compile_dir);
 		}
 
-		public function __call($method, $args)
+		public function display($resource_name, $cache_id=null, $compile_id=null)
 		{
-			$er = error_reporting(E_ALL^E_NOTICE);
-			$ret = call_user_func_array(
-				array(&$this->smarty, $method),
-				$args);
-			error_reporting($er);
-			return $ret;
+			echo $this->fetch($resource_name, $cache_id, $compile_id);
 		}
 
-		public function __get($var)
+		public function fetch($resource_name, $cache_id=null, $compile_id=null, $display=false)
 		{
-			$er = error_reporting(E_ALL^E_NOTICE);
-			$ret = $this->smarty->$var;
-			error_reporting($er);
-			return $ret;
-		}
-
-		public function __set($var, $value)
-		{
-			$er = error_reporting(E_ALL^E_NOTICE);
-			$ret = ($this->smarty->$var = $value);
-			error_reporting($er);
-			return $ret;
-		}
-
-		public function display($resource_name)
-		{
-			echo $this->fetch($resource_name);
-		}
-
-		public function fetch($resource_name)
-		{
-			$ret = $this->smarty->fetch($resource_name);
+			$ret = parent::fetch($resource_name, $cache_id, $compile_id, $display);
 			while($resource = $this->_derived) {
 				$this->_derived = null;
 				$ret = $this->fetch_template($resource);
@@ -147,8 +115,6 @@
 		{
 			$this->_blocks[$block] = $content;
 		}
-
-		protected $smarty;
 
 		// template inheritance
 		public $_blocks = array();
