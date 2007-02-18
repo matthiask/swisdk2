@@ -204,5 +204,5 @@ The titles are optional.
 
 * {generate_page_first [title="optional title"]}
 * {generate_page_last [title="optional title"]}
-* {generate_page_forward [title="optional title"]}
-* {generate_page_backward [title="optional title"]}
+* {generate_page_next [title="optional title"]}
+* {generate_page_previous [title="optional title"]}

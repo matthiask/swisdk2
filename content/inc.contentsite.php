@@ -222,14 +222,18 @@
 		{
 			$this->smarty->register_function('generate_pagelinks',
 				array(&$this, '_generate_pagelinks'));
+			$this->smarty->register_function('generate_page_list',
+				array(&$this, '_generate_page_list'));
 			$this->smarty->register_function('generate_page_first',
 				array(&$this, '_generate_page_first'));
 			$this->smarty->register_function('generate_page_last',
 				array(&$this, '_generate_page_last'));
-			$this->smarty->register_function('generate_page_forward',
-				array(&$this, '_generate_page_forward'));
-			$this->smarty->register_function('generate_page_backward',
-				array(&$this, '_generate_page_backward'));
+			$this->smarty->register_function('generate_page_next',
+				array(&$this, '_generate_page_next'));
+			$this->smarty->register_function('generate_page_previous',
+				array(&$this, '_generate_page_previous'));
+			$this->smarty->register_function('generate_page_fpnl',
+				array(&$this, '_generate_page_fpnl'));
 		}
 
 		protected $_paging_limit = null;
@@ -237,6 +241,7 @@
 		protected $_paging_current_page;
 		protected $_paging_total_count;
 		protected $_paging_url;
+		protected $_img_prefix;
 
 		/**
 		 * returns false if no paging links should be shown (paging is deactivated
@@ -256,6 +261,9 @@
 				$this->_paging_total_count = $this->dbobj->total_count();
 				$this->_paging_url = preg_replace('/\/page\/[0-9]+/', '',
 					rtrim(Swisdk::config_value('runtime.request.uri'), '/'));
+
+				$this->_img_prefix = Swisdk::config_value('runtime.webroot.img', '/img');
+
 			}
 
 			return $this->_paging_limit
@@ -276,18 +284,86 @@
 			return $html;
 		}
 
+		public function _generate_page_list($params, &$smarty)
+		{
+			if(!$this->_init_paging_vars())
+				return '';
+
+			$html = '';
+			$pagecount = ceil($this->_paging_total_count/$this->_paging_limit);
+
+			$plr = 2;
+
+			$page = max($this->_paging_current_page-$plr, 1);
+
+			if($this->_paging_current_page>1) {
+				$html .= '<a href="'.$this->_paging_url.'/page/1">'
+					.'<img src="'.$this->_img_prefix.'/icons/resultset_first.png" />'
+					.'</a> ';
+
+				if($this->_paging_current_page>$plr+1)
+					$html .= '&hellip; ';
+
+				while($page<$this->_paging_current_page)
+					$html .= '<a href="'.$this->_paging_url.'/page/'.$page.'">'
+						.($page++).'</a> ';
+
+				$html .= '<a href="'.$this->_paging_url.'/page/'.($page-1).'">'
+					.'<img src="'.$this->_img_prefix.'/icons/resultset_previous.png" />'
+					.'</a> ';
+			}
+
+			$html .= $page.' ';
+			$page++;
+
+			if($this->_paging_current_page<$pagecount) {
+				$html .= '<a href="'.$this->_paging_url.'/page/'.$page.'">'
+					.'<img src="'.$this->_img_prefix.'/icons/resultset_next.png" />'
+					.'</a> ';
+
+				$end = min($this->_paging_current_page+$plr,
+					$pagecount);
+
+				while($page<=$end)
+					$html .= '<a href="'.$this->_paging_url.'/page/'.$page.'">'
+						.($page++).'</a> ';
+
+				if($page<$pagecount+1)
+					$html .= ' &hellip; ';
+
+				$html .= '<a href="'.$this->_paging_url.'/page/'.$pagecount.'">'
+					.'<img src="'.$this->_img_prefix.'/icons/resultset_last.png" />'
+					.'</a> ';
+			}
+
+			return $html;
+		}
+
+		/**
+		 * generate page first previous next last
+		 */
+		public function _generate_page_fpnl($params, &$smarty)
+		{
+			return
+				$this->_generate_page_first($params, $smarty)
+				.$this->_generate_page_previous($params, $smarty)
+				.$this->_generate_page_next($params, $smarty)
+				.$this->_generate_page_last($params, $smarty);
+		}
+
 		public function _generate_page_first($params, &$smarty)
 		{
 			if(!$this->_init_paging_vars())
 				return '';
 
-			$title = dgettext('swisdk', 'first page');
+			$title = '<img src="'.$this->_img_prefix
+				.'/icons/resultset_first.png" alt="first page" />';
 			if(isset($params['title']))
 				$title = $params['title'];
 
 			if($this->_paging_current_page==1)
 				return '';
-			return '<a href="'.$this->_paging_url.'">'.$title.'</a>';
+			return '<a href="'.$this->_paging_url.'/page/1">'.$title.'</a>';
 		}
 
 		public function _generate_page_last($params, &$smarty)
@@ -295,7 +371,8 @@
 			if(!$this->_init_paging_vars())
 				return '';
 
-			$title = dgettext('swisdk', 'last page');
+			$title = '<img src="'.$this->_img_prefix
+				.'/icons/resultset_last.png" alt="last page" />';
 			if(isset($params['title']))
 				$title = $params['title'];
 
@@ -306,12 +383,13 @@
 				.'">'.$title.'</a>';
 		}
 
-		public function _generate_page_forward($params, &$smarty)
+		public function _generate_page_next($params, &$smarty)
 		{
 			if(!$this->_init_paging_vars())
 				return '';
 
-			$title = dgettext('swisdk', 'page forward');
+			$title = '<img src="'.$this->_img_prefix
+				.'/icons/resultset_next.png" alt="next page" />';
 			if(isset($params['title']))
 				$title = $params['title'];
 
@@ -321,12 +399,13 @@
 				.($this->_paging_current_page+1).'">'.$title.'</a>';
 		}
 
-		public function _generate_page_backward($params, &$smarty)
+		public function _generate_page_previous($params, &$smarty)
 		{
 			if(!$this->_init_paging_vars())
 				return '';
 
-			$title = dgettext('swisdk', 'page backward');
+			$title = '<img src="'.$this->_img_prefix
+				.'/icons/resultset_previous.png" alt="previous page" />';
 			if(isset($params['title']))
 				$title = $params['title'];
 
