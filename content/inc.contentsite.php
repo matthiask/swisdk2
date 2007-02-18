@@ -44,7 +44,8 @@
 		protected $dbobj;
 
 		/**
-		 * can be one of feed, trackback, archive, single or default
+		 * can be feed, trackback, archive, single, default or something
+		 * else for which a handler method exists
 		 */
 		protected $mode = 'default';
 
@@ -214,6 +215,9 @@
 			$this->display('list');
 		}
 
+		/**
+		 * register smarty functions for paging
+		 */
 		protected function register_paging_functions()
 		{
 			$this->smarty->register_function('generate_pagelinks',
@@ -228,18 +232,28 @@
 				array(&$this, '_generate_page_backward'));
 		}
 
-		protected $_paging_total_count = null;
-		protected $_paging_current_page, $_paging_limit, $_paging_offset;
+		protected $_paging_limit = null;
+		protected $_paging_offset;
+		protected $_paging_current_page;
+		protected $_paging_total_count;
 		protected $_paging_url;
 
+		/**
+		 * returns false if no paging links should be shown (paging is deactivated
+		 * or all elements fit on one page)
+		 */
 		protected function _init_paging_vars()
 		{
-			if($this->_paging_total_count===null) {
-				$this->_paging_total_count = $this->dbobj->total_count();
+			if($this->_paging_limit===null) {
+				$this->_paging_limit = $this->find_config_value('default_limit', 10);
+				if(!$this->_paging_limit)
+					return false;
+
 				$this->_paging_current_page =
 					isset($this->request['page'])?$this->request['page']:1;
-				list($this->_paging_offset, $this->_paging_limit) =
-					$this->_limits();
+				$this->_paging_offset =
+					($this->_paging_current_page-1)*$this->_paging_limit;
+				$this->_paging_total_count = $this->dbobj->total_count();
 				$this->_paging_url = preg_replace('/\/page\/[0-9]+/', '',
 					rtrim(Swisdk::config_value('runtime.request.uri'), '/'));
 			}
@@ -516,16 +530,10 @@
 		protected function filter_limit()
 		{
 			if($limit = $this->find_config_value('default_limit', 10)) {
-				list($offset, $limit) = $this->_limits();
-				$this->dbobj->set_limit($offset, $limit);
+				$limit = $this->find_config_value('default_limit', 10);
+				$page = isset($this->request['page'])?$this->request['page']:1;
+				$this->dbobj->set_limit(($page-1)*$limit, $limit);
 			}
-		}
-
-		protected function _limits()
-		{
-			$limit = $this->find_config_value('default_limit', 10);
-			$page = isset($this->request['page'])?$this->request['page']:1;
-			return array(($page-1)*$limit, $limit);
 		}
 
 		/**

@@ -136,7 +136,13 @@ ContentSite uses the following config values:
 	instances (content.xy_enabled) or only for a certain
 	DBObject class (content.dbo_class.xy_enabled)
 * cut_off_archive (bool, true)
-	Apply cut-off if archive mode is archive
+	Apply cut-off if ContentSite is in archive mode. You might
+	want to deactivate this for event calendars. Otherwise,
+	past events cannot be seen even if accessed like
+	/events/2003/12/ . On the other hand, you want to activate
+	archive cut-off for an article site: Otherwise, a visitor
+	can see articles which have a publication date in the
+	future by providing a date in the URL.
 * cut_off_past (string, NULL)
 	Which field (type unix timestamp) should be used to hide
 	entries with past dates. (f.e. start dttm of an event in
@@ -163,8 +169,8 @@ ContentSite uses the following config values:
 	True if a Category DBObject table exists and there is an
 	n-to-m relation from content items to categories.
 * realm_links (bool, false)
-	Should PermissionManager::add_realm_clause() be callled
-	with the DBOContainer?
+	Are the content DBObjects associated with a primary realm
+	which should be displayed?
 * permission_filter (bool, false)
 	Should permission filtering be applied to the content?
 * active_filter (bool, false)
@@ -181,3 +187,22 @@ The template keys which ContentSite tries to use are the following:
 The template source is resolved using Swisdk::template(). You should
 use the template inheritance mechanism (not SmartyMaster) if you need
 the ContentSite's functionality.
+
+## ContentSite smarty extensions
+
+### Paging
+
+* {generate_pagelinks}
+  Creates a list of offsets with direct links to the corresponding
+  pages:
+  0 5 10 15 20 25 30 ...
+
+The following functions return nothing if clicking the links would
+not change the user's current position.
+
+The titles are optional.
+
+* {generate_page_first [title="optional title"]}
+* {generate_page_last [title="optional title"]}
+* {generate_page_forward [title="optional title"]}
+* {generate_page_backward [title="optional title"]}
