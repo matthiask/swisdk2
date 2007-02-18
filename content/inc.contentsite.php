@@ -211,7 +211,7 @@
 			}
 			$this->register_paging_functions();
 			$this->run_website_components($this->smarty);
-			$this->smarty->display_template($this->template('list'));
+			$this->display('list');
 		}
 
 		protected function register_paging_functions()
@@ -412,7 +412,7 @@
 			if(!$dbo)
 				return $this->handle_none();
 			$this->_single_handler($dbo);
-			$this->smarty->display_template($this->template('single'));
+			$this->display('single');
 		}
 
 		protected function handle_trackback()
@@ -462,7 +462,7 @@
 			$smarty->assign('items', array());
 			$this->register_paging_functions();
 			$this->run_website_components($smarty);
-			$smarty->display_template($this->template('list'));
+			$this->display('list');
 		}
 
 
@@ -677,9 +677,9 @@
 			return null;
 		}
 
-		protected function template($action)
+		protected function display($action)
 		{
-			return $this->dbo_class.'.'.$action;
+			$this->smarty->display_template($this->dbo_class.'.'.$action);
 		}
 	}
 
