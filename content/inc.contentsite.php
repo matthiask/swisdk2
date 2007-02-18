@@ -209,60 +209,117 @@
 				$this->smarty->assign('realms', DBOContainer::find('Realm')
 					->collect('id', 'title'));
 			}
-			$this->smarty->register_function('generate_pagelinks',
-				array(&$this, '_generate_pagelinks'));
-			$this->smarty->register_function('generate_page_forward',
-				array(&$this, '_generate_page_forward'));
-			$this->smarty->register_function('generate_page_backward',
-				array(&$this, '_generate_page_backward'));
+			$this->register_paging_functions();
 			$this->run_website_components($this->smarty);
 			$this->smarty->display_template($this->template('list'));
 		}
 
+		protected function register_paging_functions()
+		{
+			$this->smarty->register_function('generate_pagelinks',
+				array(&$this, '_generate_pagelinks'));
+			$this->smarty->register_function('generate_page_first',
+				array(&$this, '_generate_page_first'));
+			$this->smarty->register_function('generate_page_last',
+				array(&$this, '_generate_page_last'));
+			$this->smarty->register_function('generate_page_forward',
+				array(&$this, '_generate_page_forward'));
+			$this->smarty->register_function('generate_page_backward',
+				array(&$this, '_generate_page_backward'));
+		}
+
+		protected $_paging_total_count = null;
+		protected $_paging_current_page, $_paging_limit, $_paging_offset;
+		protected $_paging_url;
+
+		protected function _init_paging_vars()
+		{
+			if($this->_paging_total_count===null) {
+				$this->_paging_total_count = $this->dbobj->total_count();
+				$this->_paging_current_page =
+					isset($this->request['page'])?$this->request['page']:1;
+				list($this->_paging_offset, $this->_paging_limit) =
+					$this->_limits();
+				$this->_paging_url = preg_replace('/\/page\/[0-9]+/', '',
+					rtrim(Swisdk::config_value('runtime.request.uri'), '/'));
+			}
+
+			return $this->_paging_limit
+				&& $this->_paging_total_count>$this->_paging_limit;
+		}
+
 		public function _generate_pagelinks($params, &$smarty)
 		{
+			if(!$this->_init_paging_vars())
+				return '';
+
 			$html = '<ul class="pagelinks">';
-			$limit = $this->find_config_value('default_limit', 10);
-			if($limit) {
-				$count = $this->dbobj->total_count();
-				$page = 1;
-				$url = preg_replace('/\/page\/[0-9]+/', '',
-					rtrim(Swisdk::config_value('runtime.request.uri'), '/'));
-				if($count<=$limit)
-					return;
-				for($entry=0; $entry+$limit<$count; $entry+=$limit)
-					$html .= '<li><a href="'.$url.'/page/'.($page++).'">'.$entry.'</a></li>';
-			}
+			$page = 1;
+			for($i=0; $i<$this->_paging_total_count; $i+=$this->_paging_limit)
+				$html .= '<li><a href="'.$this->_paging_url
+					.'/page/'.($page++).'">'.$i.'</a></li>';
 			$html .= '</ul>';
 			return $html;
 		}
 
+		public function _generate_page_first($params, &$smarty)
+		{
+			if(!$this->_init_paging_vars())
+				return '';
+
+			$title = dgettext('swisdk', 'first page');
+			if(isset($params['title']))
+				$title = $params['title'];
+
+			if($this->_paging_current_page==1)
+				return '';
+			return '<a href="'.$this->_paging_url.'">'.$title.'</a>';
+		}
+
+		public function _generate_page_last($params, &$smarty)
+		{
+			if(!$this->_init_paging_vars())
+				return '';
+
+			$title = dgettext('swisdk', 'last page');
+			if(isset($params['title']))
+				$title = $params['title'];
+
+			if($this->_paging_offset+$this->_paging_limit>$this->_paging_total_count)
+				return '';
+			return '<a href="'.$this->_paging_url.'/page/'
+				.ceil($this->_paging_total_count/$this->_paging_limit)
+				.'">'.$title.'</a>';
+		}
+
 		public function _generate_page_forward($params, &$smarty)
 		{
+			if(!$this->_init_paging_vars())
+				return '';
+
 			$title = dgettext('swisdk', 'page forward');
 			if(isset($params['title']))
 				$title = $params['title'];
-			$url = preg_replace('/\/page\/[0-9]+/', '',
-				rtrim(Swisdk::config_value('runtime.request.uri'), '/'));
-			$page = isset($this->request['page'])?$this->request['page']:1;
-			$count = $this->dbobj->total_count();
-			list($offset, $limit) = $this->_limits();
-			if($offset+$limit>$count)
+
+			if($this->_paging_offset+$this->_paging_limit>$this->_paging_total_count)
 				return '';
-			return '<a href="'.$url.'/page/'.($page+1).'">'.$title.'</a>';
+			return '<a href="'.$this->_paging_url.'/page/'
+				.($this->_paging_current_page+1).'">'.$title.'</a>';
 		}
 
 		public function _generate_page_backward($params, &$smarty)
 		{
+			if(!$this->_init_paging_vars())
+				return '';
+
 			$title = dgettext('swisdk', 'page backward');
 			if(isset($params['title']))
 				$title = $params['title'];
-			$url = preg_replace('/\/page\/[0-9]+/', '',
-				rtrim(Swisdk::config_value('runtime.request.uri'), '/'));
-			$page = isset($this->request['page'])?$this->request['page']:1;
-			if($page==1)
+
+			if($this->_paging_current_page==1)
 				return '';
-			return '<a href="'.$url.'/page/'.($page-1).'">'.$title.'</a>';
+			return '<a href="'.$this->_paging_url.'/page/'
+				.($this->_paging_current_page-1).'">'.$title.'</a>';
 		}
 
 		protected function handle_feed()
@@ -403,8 +460,7 @@
 		{
 			$smarty = new SwisdkSmarty();
 			$smarty->assign('items', array());
-			$smarty->register_function('generate_pagelinks',
-				array(&$smarty, '_generate_pagelinks'));
+			$this->register_paging_functions();
 			$this->run_website_components($smarty);
 			$smarty->display_template($this->template('list'));
 		}
