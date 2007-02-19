@@ -29,6 +29,11 @@
 			SwisdkError::handle(new FatalError('Cannot spam-check '.$class));
 		}
 
+		public function error()
+		{
+			return $this->akismet->error;
+		}
+
 		public function spam($dbo)
 		{
 			$class = $dbo->_class();
