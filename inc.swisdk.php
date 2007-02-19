@@ -80,7 +80,7 @@
 
 			SwisdkError::setup();
 			Swisdk::require_data_directory(CACHE_ROOT);
-			Swisdk::read_configfile();
+			Swisdk::init_config();
 			Swisdk::init_language();
 
 			Swisdk::$load_bases = array(CONTENT_ROOT, SWISDK_ROOT.'content/', SWISDK_ROOT);
@@ -108,10 +108,22 @@
 
 		protected static $config;
 
-		public static function read_configfile()
+		public static function init_config()
 		{
-			if(file_exists(APP_ROOT.'webapp/config.ini')) {
-				$cfg = parse_ini_file(APP_ROOT.'webapp/config.ini', true);
+			Swisdk::read_configfile(WEBAPP_ROOT.'config.ini');
+			if($core_cfg = Swisdk::config_value('core.include'))
+				Swisdk::read_configfile(WEBAPP_ROOT.$core_cfg);
+		}
+
+		public static function read_configfile($file, $prefix = '', $throw=true)
+		{
+			if($file{0}!='/')
+				$file = CONTENT_ROOT.$file;
+			if($prefix)
+				$prefix .= '.';
+
+			if(file_exists($file)) {
+				$cfg = parse_ini_file($file, true);
 				foreach($cfg as $section => $array) {
 					$section = preg_replace('/^([\w]+)\ "(.*)"$/', '\1.\2', $section);
 					// special handling for sections which have a dot
@@ -121,20 +133,16 @@
 					// Use Swisdk::dump() to see what this piece of code
 					// does
 					if(($pos=strpos($section, '.'))!==false) {
-						$name = 'runtime.parser.'.substr($section, 0, $pos);
-						if(!isset(Swisdk::$config[$name])
-								|| !is_array(Swisdk::$config[$name]))
-							Swisdk::$config[$name] = array();
-						array_unshift(Swisdk::$config[$name],
-							substr($section, $pos+1));
+						$name = $prefix.'runtime.parser.'.substr($section, 0, $pos);
+						Swisdk::$config[$name][] = substr($section, $pos+1);
 					}
 					// flatten config hierarchy
 					foreach($array as $key => $value)
-						Swisdk::$config[$section.'.'.$key] = $value;
+						Swisdk::$config[$prefix.$section.'.'.$key] = $value;
 				}
-			} else {
-				SwisdkError::handle(new FatalError(
-					dgettext('swisdk', 'No configuration file found')));
+			} else if($throw) {
+				SwisdkError::handle(new FatalError(sprintf(
+					dgettext('swisdk', 'Configuration file %s not found'), $file)));
 			}
 		}
 

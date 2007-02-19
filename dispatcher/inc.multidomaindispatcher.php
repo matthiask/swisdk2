@@ -44,6 +44,8 @@
 				Swisdk::set_config_value('runtime.website', Swisdk::config_value(
 					'domain.'.$out.'.website'));
 				Swisdk::add_loader_base(CONTENT_ROOT.$out.'/');
+				if($cfg = Swisdk::config_value('domain.'.$out.'.include'))
+					Swisdk::read_configfile($cfg);
 			} else {
 				SwisdkError::handle(new FatalError(dgettext('swisdk',
 					'No matching host found')));
