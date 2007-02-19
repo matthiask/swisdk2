@@ -37,6 +37,9 @@
 		 *
 		 * This function accepts everything which can be passed to
 		 * DBObject::get()
+		 *
+		 * If you prepend a '<' sign, the field name will be evaluated
+		 * as a relation specification
 		 */
 		public function set_field_list($class, $fields)
 		{
@@ -49,16 +52,20 @@
 		public function fetch()
 		{
 			$xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<xml-export>\n";
-			foreach($this->data as &$entry) {
-				if($entry instanceof DBObject)
-					$xml .= $this->_handle_dbobject($entry);
-				else if($entry instanceof DBOContainer)
-					$xml .= $this->_handle_dbocontainer($entry);
-				else
-					$xml .= "<oops/>\n";
-			}
+			foreach($this->data as &$entry)
+				$xml .= $this->_handle($entry);
 			$xml .= "</xml-export>\n";
 			return $xml;
+		}
+
+		protected function _handle($entry)
+		{
+			if($entry instanceof DBObject)
+				return $this->_handle_dbobject($entry);
+			else if($entry instanceof DBOContainer)
+				return $this->_handle_dbocontainer($entry);
+			else
+				return "<oops/>\n";
 		}
 
 		protected function _handle_dbobject($dbo)
@@ -68,6 +75,15 @@
 			$xml = "<$classelem id=\"$classelem-".$dbo->id()."\">\n";
 			if(isset($this->field_list[$class])) {
 				foreach($this->field_list[$class] as $k) {
+					if($k{0}=='<') {
+						$r = substr($k, 1);
+						$elem = $this->_elementify($r);
+						$xml .= "<$elem>"
+							.$this->_handle_relation($dbo, $r)
+							."</$elem>\n";
+						continue;
+					}
+
 					$elem = $this->_elementify($dbo->shortname($k));
 					$xml .= "<$elem>"
 						.$this->_handle_value($dbo->get($k))
@@ -85,9 +101,17 @@
 			return $xml;
 		}
 
+		protected function _handle_relation($dbo, $class)
+		{
+			$rels = $dbo->relations();
+			if(!isset($rels[$class]))
+				return "<oops />";
+			return $this->_handle($dbo->related($class));
+		}
+
 		protected function _handle_dbocontainer($dboc)
 		{
-			$class = $this->_elementify($dboc->dbobj()->_class());
+			$class = $this->_elementify($dboc->dbobj()->_class()).'-container';
 			$xml = "<$class>\n";
 			foreach($dboc as $dbo)
 				$xml .= $this->_handle_dbobject($dbo);
