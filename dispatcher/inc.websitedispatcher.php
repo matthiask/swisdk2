@@ -16,7 +16,7 @@
 		public function collect_informations()
 		{
 			$input = $this->input();
-			$websites = Swisdk::config_value('runtime.parser.website');
+			$websites = array_reverse(Swisdk::config_value('runtime.parser.website'));
 			$website = 'default';
 			foreach($websites as $w) {
 				$regex = str_replace('/', '\/',
