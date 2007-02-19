@@ -54,6 +54,9 @@
 		 */
 		protected $archive_mode, $archive_dttm;
 
+		protected $template_list = 'list';
+		protected $template_single = 'single';
+
 		/**
 		 * parser tokens
 		 *
@@ -118,8 +121,11 @@
 						$this->request[$arg] = array_shift($args);
 					else
 						$this->request[$arg] = true;
-					if(isset($this->parser_config[$arg]['mode']))
-						$this->mode = $this->parser_config[$arg]['mode'];
+
+					$vars = array('mode', 'template_single', 'template_list');
+					foreach($vars as $v)
+						if(isset($this->parser_config[$arg][$v]))
+						$this->$v = $this->parser_config[$arg][$v];
 				} else {
 					if(is_numeric($arg)) {
 						$this->request['date'][] = $arg;
@@ -212,7 +218,7 @@
 			}
 			$this->register_paging_functions();
 			$this->run_website_components($this->smarty);
-			$this->display('list');
+			$this->display($this->template_list);
 		}
 
 		/**
@@ -505,7 +511,7 @@
 			if(!$dbo)
 				return $this->handle_none();
 			$this->_single_handler($dbo);
-			$this->display('single');
+			$this->display($this->template_single);
 		}
 
 		protected function handle_trackback()
@@ -555,7 +561,7 @@
 			$smarty->assign('items', array());
 			$this->register_paging_functions();
 			$this->run_website_components($smarty);
-			$this->display('list');
+			$this->display($this->template_list);
 		}
 
 
