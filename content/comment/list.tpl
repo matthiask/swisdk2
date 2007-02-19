@@ -1,6 +1,5 @@
 <div id="comments">
 <a name="comments"></a>
-<h2>Comments on this item</h2>
 {if count($comments)}
 {foreach from=$comments item=c}
 <div class="comment">
