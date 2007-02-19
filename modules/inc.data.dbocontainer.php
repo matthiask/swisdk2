@@ -487,6 +487,10 @@
 		{
 			$args = func_get_args();
 			$ret = array();
+
+			if(!count($this->data))
+				return array();
+
 			foreach($this->data as &$dbo)
 				foreach($args as $arg)
 					$ret[$arg][] = $dbo->$arg;
