@@ -82,6 +82,8 @@
 							.substr($page['url'], 1).'/');
 						Swisdk::set_config_value('runtime.website.url',
 							$page['url'].'/');
+						if($cfg = Swisdk::config_value('website.'.$v.'.include'))
+							Swisdk::read_configfile($cfg);
 						break;
 					case 'title':
 						Swisdk::set_config_value('runtime.page.title',
