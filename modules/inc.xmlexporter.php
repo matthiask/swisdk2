@@ -65,7 +65,7 @@
 		{
 			$class = $dbo->_class();
 			$classelem = $this->_elementify($class);
-			$xml = "<$classelem>\n";
+			$xml = "<$classelem id=\"$classelem-".$dbo->id()."\">\n";
 			if(isset($this->field_list[$class])) {
 				foreach($this->field_list[$class] as $k) {
 					$elem = $this->_elementify($dbo->shortname($k));
@@ -75,7 +75,7 @@
 				}
 			} else {
 				foreach($dbo as $k => $v) {
-					$elem = $dbo->shortname($k);
+					$elem = $this->_elementify($dbo->shortname($k));
 					$xml .= "<$elem>"
 						.$this->_handle_value($v)
 						."</$elem>\n";
@@ -120,8 +120,12 @@
 
 		protected function _elementify($str)
 		{
-			$str = strtolower(preg_replace('/([A-Z])/', '_\1', $str));
-			if($str{0}=='_')
+			$str = strtolower(
+				preg_replace(
+					array('/([A-Z])/', '/_/'),
+					array('-\1', '-'),
+					$str));
+			if($str{0}=='-')
 				return substr($str, 1);
 			return $str;
 		}
