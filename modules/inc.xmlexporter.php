@@ -58,28 +58,29 @@
 			return $xml;
 		}
 
-		protected function _handle($entry)
+		protected function _handle($entry, $id_prefix=null)
 		{
 			if($entry instanceof DBObject)
-				return $this->_handle_dbobject($entry);
+				return $this->_handle_dbobject($entry, $id_prefix);
 			else if($entry instanceof DBOContainer)
-				return $this->_handle_dbocontainer($entry);
+				return $this->_handle_dbocontainer($entry, $id_prefix);
 			else
 				return "<oops/>\n";
 		}
 
-		protected function _handle_dbobject($dbo)
+		protected function _handle_dbobject($dbo, $id_prefix=null)
 		{
 			$class = $dbo->_class();
 			$classelem = $this->_elementify($class);
-			$xml = "<$classelem id=\"$classelem-".$dbo->id()."\">\n";
+			$xml = "<$classelem id=\"$id_prefix$classelem-".$dbo->id()."\">\n";
 			if(isset($this->field_list[$class])) {
 				foreach($this->field_list[$class] as $k) {
 					if($k{0}=='<') {
 						$r = substr($k, 1);
 						$elem = $this->_elementify($r);
 						$xml .= "<$elem>"
-							.$this->_handle_relation($dbo, $r)
+							.$this->_handle_relation($dbo, $r,
+								$classelem.'-'.$dbo->id().'-')
 							."</$elem>\n";
 						continue;
 					}
@@ -101,20 +102,20 @@
 			return $xml;
 		}
 
-		protected function _handle_relation($dbo, $class)
+		protected function _handle_relation($dbo, $class, $id_prefix=null)
 		{
 			$rels = $dbo->relations();
 			if(!isset($rels[$class]))
 				return "<oops />";
-			return $this->_handle($dbo->related($class));
+			return $this->_handle($dbo->related($class), $id_prefix);
 		}
 
-		protected function _handle_dbocontainer($dboc)
+		protected function _handle_dbocontainer($dboc, $id_prefix=null)
 		{
 			$class = $this->_elementify($dboc->dbobj()->_class()).'-container';
 			$xml = "<$class>\n";
 			foreach($dboc as $dbo)
-				$xml .= $this->_handle_dbobject($dbo);
+				$xml .= $this->_handle_dbobject($dbo, $id_prefix);
 			$xml .= "</$class>\n";
 			return $xml;
 		}
