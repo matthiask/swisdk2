@@ -300,7 +300,8 @@ EOD;
 
 			return array($first = $data[$p.'start']+1,
 				$count = $this->obj->total_count(),
-				min($count, $first+$data[$p.'limit']-1));
+				min($count, $first+$data[$p.'limit']-1),
+				$data[$p.'limit']);
 		}
 
 		/**
@@ -428,13 +429,13 @@ EOD;
 			if(!$this->enabled('paging'))
 				return;
 
-			list($first, $count, $last) = $this->list_position();
+			list($first, $count, $last, $step) = $this->list_position();
 
 			$str = sprintf(dgettext('swisdk', 'displaying %s &ndash; %s of %s'), $first, $last, $count);
 			$skim = sprintf(dgettext('swisdk', 'skim %sbackwards%s or %sforwards%s'),
-				'<a href="javascript:skim(-'.$this->items_on_page.')">',
+				'<a href="javascript:skim(-'.$step.')">',
 				'</a>',
-				'<a href="javascript:skim('.$this->items_on_page.')">',
+				'<a href="javascript:skim('.$step.')">',
 				'</a>');
 			return $str.' | '.$skim;
 		}
