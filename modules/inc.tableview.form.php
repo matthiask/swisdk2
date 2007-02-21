@@ -50,7 +50,6 @@
 
 		public function setup_order()
 		{
-			$p = $this->dbobj()->_prefix();
 			$box = $this->box('search');
 			$box->add($this->dbobj->name('order'), new HiddenInput());
 			$box->add($this->dbobj->name('dir'), new HiddenInput());
@@ -59,7 +58,6 @@
 
 		public function setup_paging()
 		{
-			$p = $this->dbobj()->_prefix();
 			$box = $this->box('search');
 			$box->add($this->dbobj->name('start'), new HiddenInput());
 			$box->add($this->dbobj->name('limit'), new HiddenInput());
