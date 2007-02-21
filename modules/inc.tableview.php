@@ -51,7 +51,8 @@
 			'multi' => true,
 			'order' => true,
 			'paging' => true,
-			'search' => true);
+			'search' => true,
+			'persistence' => true);
 
 		/**
 		 * search form default values

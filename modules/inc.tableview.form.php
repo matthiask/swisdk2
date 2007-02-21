@@ -65,6 +65,33 @@
 			$box->add($this->dbobj->name('limit'), new HiddenInput());
 		}
 
+		public function setup_persistence()
+		{
+			$url = Swisdk::config_value('runtime.controller.url');
+
+			if(getInput('swisdk2_persistence_reset')
+					&& isset($_SESSION['swisdk2']['am_list_persistence'][$url]))
+				unset($_SESSION['swisdk2']['am_list_persistence'][$url]);
+
+			if(isset($_SESSION['swisdk2']['am_list_persistence'][$url])
+					&& ((isset($_SERVER['HTTP_REFERER'])
+						&& strpos($_SERVER['HTTP_REFERER'],
+							$url.'_list')===false)
+					|| count($_POST)==0)) {
+				$this->dbobj->set_data(unserialize(
+					$_SESSION['swisdk2']['am_list_persistence'][$url]));
+			}
+
+			$_SESSION['swisdk2']['am_list_persistence'][$url] =
+					serialize($this->dbobj->data());
+
+			$this->set_title($this->title
+				.' <small>(<a href="?swisdk2_persistence_reset=1">'
+				.dgettext('swisdk', 'reset listing')
+				.'</a>)</small>');
+
+		}
+
 		/**
 		 * add fulltext search field to form
 		 */
