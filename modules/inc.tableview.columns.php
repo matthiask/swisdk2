@@ -20,7 +20,10 @@
 		public function name()		{ return $this->column; }
 		public function set_title($t)
 		{
-			$this->title = dgettext('swisdk', $t);
+			if($t)
+				$this->title = dgettext('swisdk', $t);
+			else
+				$this->title = '';
 		}
 		
 		public function css_class()
