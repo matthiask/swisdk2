@@ -53,7 +53,6 @@
 			$box = $this->box('search');
 			$box->add($this->dbobj->name('order'), new HiddenInput());
 			$box->add($this->dbobj->name('dir'), new HiddenInput());
-
 		}
 
 		public function setup_paging()

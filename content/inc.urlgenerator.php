@@ -5,6 +5,22 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
+	/**
+	 * Unified DBObject URL generator
+	 *
+	 * This URL generator uses the configuration keys
+	 * runtime.urlgenerator.<dbo_class> as controller URL and appends a query string
+	 * which the controller should be able to evaluate.
+	 *
+	 * Default implementations for Article, Event and Download DBObjects are provided.
+	 *
+	 * The URLGenerator should be loaded via Swisdk::load_instance('UrlGenerator') so
+	 * that another developer might override or add other generator methods.
+	 *
+	 * If you extend the UrlGenerator with your own class, you should set the
+	 * configuration key runtime.loader.urlgenerator to the class name of your own
+	 * class so that Swisdk::load_instance() returns an instance of your class.
+	 */
 	class UrlGenerator {
 		protected $controller_url;
 
@@ -46,6 +62,9 @@
 					$this->controller_url).'/'.$obj->file_name;
 		}
 
+		/**
+		 * generate <controller>/year/month/day/post-slug/ style URLs
+		 */
 		protected function _generate_wp_style_url($db_class, $obj)
 		{
 			$date = getdate($obj->start_dttm);

@@ -72,8 +72,11 @@
 	}
 
 	/**
-	 * Example template:
-	 * <a href="/overview/{item_id}">{item_title}</a>
+	 * Example:
+	 *
+	 * $tableview->append_column(new TemplateTableViewColumn(
+	 * 	'item_title', 'Title',
+	 * 	'<a href="/overview/{item_id}">{item_title}</a>'));
 	 */
 	class TemplateTableViewColumn extends TableViewColumn {
 		public function html(&$data)
@@ -103,7 +106,8 @@
 	}
 
 	/**
-	 * third parameter: strftime(3)-formatted string
+	 * third parameter: strftime(3)-formatted string. If not specified,
+	 * a default string is used.
 	 */
 	class DateTableViewColumn extends TableViewColumn {
 		public function html(&$data)
@@ -122,6 +126,10 @@
 
 	/**
 	 * pass a callback instead of a field name
+	 *
+	 * Example:
+	 * $tableview->append_column(new CallbackTableViewColumn(
+	 * 	'callback', 'Whatever'));
 	 */
 	class CallbackTableViewColumn extends TableViewColumn {
 		public function html(&$data)

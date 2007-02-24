@@ -35,6 +35,9 @@
 	 * email_recipient
 	 * email_subject
 	 * email_message
+	 *
+	 * The following properties are respected too:
+	 *
 	 * email_from (defaults to messenger@HTTP_HOST)
 	 * email_reply_to (defauls to email_from)
 	 */

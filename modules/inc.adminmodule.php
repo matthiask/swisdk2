@@ -15,10 +15,31 @@
 	require_once MODULE_ROOT.'inc.tableview.php';
 	require_once MODULE_ROOT.'inc.builder.php';
 
+	/**
+	 * AdminModule
+	 *
+	 * Reusable and extensible components using which you can build your own
+	 * administration modules (create/edit/delete/list database entries)
+	 */
+
 	class AdminModule extends Site {
+		/**
+		 * DBObject class
+		 *
+		 * set multilanguage to true if the AdminModule should automatically
+		 * handle a DBObjectML
+		 */
 		protected $dbo_class;
-		protected $arguments;
 		protected $multilanguage = false;
+
+		/**
+		 * temporary storage for component arguments
+		 */
+		protected $arguments;
+
+		/**
+		 * the minimal role which is needed to access this AdminModule
+		 */
 		protected $role = ROLE_MANAGER;
 
 		/**
@@ -75,12 +96,12 @@
 			}
 
 			$cmp->set_module($this);
-			$cmp->set_template_keys(array_reverse(array(
-				'base.full',
-				'base.admin',
-				'swisdk.adminmodule.'.$cmd,
+			$cmp->set_template_keys(array(
+				'admin.'.$this->dbo_class.'.'.$cmd,
 				'admin.'.$this->dbo_class.'.index',
-				'admin.'.$this->dbo_class.'.'.$cmd)));
+				'swisdk.adminmodule.'.$cmd,
+				'base.admin',
+				'base.full'));
 
 			return $cmp;
 		}
@@ -93,6 +114,9 @@
 			$cmp->display();
 		}
 
+		/**
+		 * @return the DBObject class
+		 */
 		public function dbo_class()
 		{
 			return $this->dbo_class;
@@ -117,14 +141,37 @@
 
 	abstract class AdminComponent implements IHtmlComponent {
 		/**
-		 * these variables are all initialized in AdminComponent::set_module
+		 * the following four variables are all initialized in AdminComponent::set_module
+		 */
+		/**
+		 * AdminModule URL
 		 */
 		protected $module_url;
+
+		/**
+		 * DBObject class
+		 */
 		protected $dbo_class;
+
+		/**
+		 * AdminComponent arguments
+		 */
 		protected $args;
+
+		/**
+		 * multilanguage flag
+		 */
 		protected $multilanguage;
 
+		/**
+		 * a list of template keys which should be used to display this
+		 * AdminComponent
+		 */
 		protected $template_keys;
+
+		/**
+		 * SwisdkSmarty instance
+		 */
 		protected $smarty;
 
 		/**
@@ -175,6 +222,11 @@
 
 		/**
 		 * goto - i can't get started without you!
+		 *
+		 * Shortcut to redirect the user to another AdminComponent
+		 *
+		 * Usage:
+		 * $this->goto('_list');
 		 */
 		public function goto($tok)
 		{
@@ -217,6 +269,12 @@
 		}
 	}
 
+	/**
+	 * Create your own specialization of AdminComponent_index to override the default
+	 * action for an adminmodule!
+	 *
+	 * The default is to redirect the user to the entry list
+	 */
 	class AdminComponent_index extends AdminComponent {
 		public function run()
 		{
@@ -225,6 +283,18 @@
 		}
 	}
 
+	/**
+	 * Create your own AdminComponent_DBOClass_Ajax_Server to provide ajax services
+	 * for a Form
+	 *
+	 * This is used f.e. by the UpdateOnChangeAjaxBehavior
+	 *
+	 * See
+	 * http://spinlock.ch/pub/git/?p=swisdk2/webapp.git;a=tree;h=multi-domain;hb=multi-domain
+	 *
+	 * files content/inc.common.php and content/admin/article_ctrl.php and the function
+	 * FormUtil::realmed_relation() for an usage example
+	 */
 	class AdminComponent_ajax extends AdminComponent {
 		public function run()
 		{
@@ -237,12 +307,45 @@
 		}
 	}
 
+	/**
+	 * Edit or create a database entry
+	 */
 	class AdminComponent_edit extends AdminComponent {
+		/**
+		 * Form object
+		 */
 		protected $form;
+
+		/**
+		 * DBObject or DBOContainer (if $muliple is true)
+		 */
 		protected $obj;
+
+		/**
+		 * Note! You might want to take a look at the default CmdsTableViewColumn
+		 * implementation first!
+		 */
+
+		/**
+		 * Edit or create multiple entries at once
+		 */
 		protected $multiple = false;
+
+		/**
+		 * Create a copy of another entry
+		 *
+		 * This will be set to the ID of the entry which shall be copied
+		 */
 		protected $copy = null;
+
+		/**
+		 * This will be set to false if the user wants to create new entries
+		 */
 		protected $editmode = true;
+
+		/**
+		 * The ID of the entry which the user is currently editing
+		 */
 		protected $id = false;
 
 		public function run()
@@ -410,8 +513,18 @@
 		}
 	}
 
+	/**
+	 * list all available entries and optionally also search and sort them
+	 */
 	class AdminComponent_list extends AdminComponent {
+		/**
+		 * TableView instance
+		 */
 		protected $tableview;
+
+		/**
+		 * Show "Create Entry" button?
+		 */
 		protected $creation_enabled = true;
 
 		public function get_dbobj()
@@ -427,6 +540,10 @@
 			$this->tableview = new TableView($this->get_dbobj());
 		}
 
+		/**
+		 * the TableView will create a TableViewForm itself if no instance
+		 * has been assigned
+		 */
 		public function init_tableview_form()
 		{
 			if(class_exists($c = 'TableViewForm_'.$this->dbo_class))
@@ -456,13 +573,28 @@
 
 		protected function execute_actions()
 		{
+			// hook
 		}
 
 		protected function complete_columns()
 		{
+			// hook
 		}
 	}
 
+	/**
+	 * delete one or more entries
+	 *
+	 * This function is guarded by a token to prevent CSRF attacks
+	 *
+	 * The standard CmdsTableViewColumn delete action will automatically add the
+	 * token to the query string. If the token does not match (or no token has
+	 * been passed, f.e. if javascript is deactivated) the user will have to
+	 * confirm the request in a simple yes/no form.
+	 *
+	 * The confirmation page will only be shown in single mode (multiple deletion
+	 * mode can only be activated if javascript is enabled anyway)
+	 */
 	class AdminComponent_delete extends AdminComponent {
 		public function run()
 		{

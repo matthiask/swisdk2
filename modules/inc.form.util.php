@@ -80,6 +80,11 @@
 			}
 		}
 
+		/**
+		 * Add a textarea or richtextarea depending on the current content and on the
+		 * preferences of the user (if core.user_config is true, see
+		 * Swisdk::user_config_value)
+		 */
 		public static function textarea($formbox, $field, $title=null, $default=true,
 			$config_key='richtextarea')
 		{
@@ -90,6 +95,19 @@
 				return $formbox->add($field, new Textarea(), $title);
 		}
 
+		/**
+		 * Example:
+		 *
+		 * Add a category multiselect item which depends on a realm dropdown
+		 * (the categories are assigned to realms and should only be shown if
+		 * the correspoding realm has been selected.)
+		 *
+		 * Note! You need to provide an Ajax_Server! See AdminComponent_ajax to
+		 * find out how to do that.
+		 *
+		 * FormUtil::realmed_relation($form, 'Category',
+		 * 	FormUtil::realm_dropdown($form));
+		 */
 		public static function realmed_relation($formbox, $relation, $realm_obj=null, $realm=null)
 		{
 			if(!$realm) {
@@ -115,6 +133,14 @@
 			return $elem;
 		}
 
+		/**
+		 * assign the returned objects to the main tag input!
+		 *
+		 * Usage:
+		 * $tag_inp = $form->add_auto('Tag');
+		 * $tag_sel = FormUtil::tag_multiselect($form, 'themes.%')
+		 * $tag_inp->add_tag_formitems($tag_sel);
+		 */
 		public static function tag_multiselect($formbox, $query=null)
 		{
 			$sql = 'SELECT tag_title FROM tbl_tag WHERE 1';

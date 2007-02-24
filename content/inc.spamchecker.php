@@ -7,6 +7,12 @@
 
 	require_once SWISDK_ROOT.'lib/contrib/class.microakismet.inc.php';
 
+	/**
+	 * SpamChecker
+	 *
+	 * This is a simple wrapper around MicroAkismet which only understands
+	 * Comment DBObject instances.
+	 */
 	class SpamChecker {
 		protected $akismet;
 
