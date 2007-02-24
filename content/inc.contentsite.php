@@ -255,6 +255,9 @@
 		 */
 		protected function _init_paging_vars()
 		{
+			if(!$this->dbobj instanceof DBOContainer)
+				return false;
+
 			if($this->_paging_limit===null) {
 				$this->_paging_limit = $this->find_config_value('default_limit', 10);
 				if(!$this->_paging_limit)
