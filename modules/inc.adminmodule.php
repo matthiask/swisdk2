@@ -547,7 +547,6 @@
 			$class = $dbo->_class();
 			$id = $dbo->id();
 			$title = $dbo->title();
-			$name = $dbo->file_name;
 
 			$question_title = dgettext('swisdk', 'Confirmation required');
 			$question_text = sprintf(dgettext('swisdk', 'Do you really want to delete %s?'),
@@ -565,7 +564,7 @@
 </tr>
 <tr>
 	<td></td>
-	<td>$question_text (<a href="/download/$name">$title</a>)?</td>
+	<td>$question_text ($title)?</td>
 </tr>
 <tr class="sf-button">
 	<td colspan="2">
