@@ -1,6 +1,6 @@
 <?php
 	/*
-	*	Copyright (c) 2006, Matthias Kestenholz <mk@spinlock.ch>, Moritz Zumbühl <mail@momoetomo.ch>
+	*	Copyright (c) 2006, Matthias Kestenholz <mk@spinlock.ch>, Moritz Zumb√ºhl <mail@momoetomo.ch>
 	*	Distributed under the GNU General Public License.
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
