@@ -318,11 +318,11 @@ EOD;
 		public static function log($message, $log='error')
 		{
 			Swisdk::require_data_directory('log');
-			$fname = Swisdk::config_value($log.'.logfile');
+			$fname = Swisdk::config_value('error.logfile');
 			if(!$fname)
 				return;
 			$fp = @fopen(DATA_ROOT.'log/'.$fname, 'a');
-			@fwrite($fp, date(DATE_W3C).' '.$message."\n");
+			@fwrite($fp, date(DATE_W3C).' |'.strtoupper(str_pad($log, 10)).'| '.$message."\n\0");
 			@fclose($fp);
 		}
 
