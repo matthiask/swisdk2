@@ -50,6 +50,8 @@
 					return $this->create_textarea($field, $title);
 				case DB_FIELD_DATE:
 					return $this->create_date($field, $title);
+				case DB_FIELD_DTTM:
+					return $this->create_dttm($field, $title);
 				case DB_FIELD_FOREIGN_KEY|(DB_REL_SINGLE<<10):
 					$relations = $dbobj->relations();
 					return $this->create_rel_single($field, $title,
@@ -111,6 +113,11 @@
 		 * create a date widget
 		 */
 		abstract public function create_date($fname, $title);
+
+		/**
+		 * create a datetime widget
+		 */
+		abstract public function create_dttm($fname, $title);
 
 		/**
 		 * create a textarea widget (f.e. length-limited for TableView)
@@ -267,6 +274,12 @@
 
 		public function create_date($fname, $title)
 		{
+			return $this->form->add($fname, new DateInput(), $title)
+				->disable_time();
+		}
+
+		public function create_dttm($fname, $title)
+		{
 			return $this->form->add($fname, new DateInput(), $title);
 		}
 
@@ -397,6 +410,12 @@
 		}
 
 		public function create_date($fname, $title)
+		{
+			$this->tv->append_column(
+				new DateTableViewColumn($fname, $title, '%d.%m.%Y'));
+		}
+
+		public function create_dttm($fname, $title)
 		{
 			$this->tv->append_column(
 				new DateTableViewColumn($fname, $title));

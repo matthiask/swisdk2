@@ -1292,8 +1292,10 @@
 					}
 
 					// determine field type
-					if(stripos($field,'dttm')!==false) {
+					if(stripos($field,'date')!==false) {
 						$fl[$field] = DB_FIELD_DATE;
+					} else if(stripos($type, 'dttm')!==false) {
+						$fl[$field] = DB_FIELD_DTTM;
 					} else if(stripos($type, 'text')!==false) {
 						$fl[$field] = DB_FIELD_LONGTEXT;
 					} else if($type=='tinyint(1)') {
@@ -1318,8 +1320,10 @@
 					}
 
 					// determine field type
-					if(stripos($field,'dttm')!==false) {
+					if(stripos($field,'date')!==false) {
 						$fl[$field] = DB_FIELD_DATE;
+					} else if(stripos($type, 'dttm')!==false) {
+						$fl[$field] = DB_FIELD_DTTM;
 					} else if(stripos($type, 'BLOB')!==false) {
 						$fl[$field] = DB_FIELD_LONGTEXT;
 					} else if($type=='BOOL') {
