@@ -107,7 +107,7 @@
 				} else
 					echo '+:'.$resp;
 			}
-			exit();
+			Swisdk::shutdown();
 		}
 
 		protected $export_list = null;

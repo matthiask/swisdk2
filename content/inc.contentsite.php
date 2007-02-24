@@ -1249,7 +1249,7 @@
 			echo "<error>0</error>\n";
 			echo "</response>";
 		}
-		exit();
+		Swisdk::shutdown();
 	}
 
 

@@ -201,7 +201,7 @@
 			require_once MODULE_ROOT.'inc.smarty.php';
 			$smarty = new SwisdkSmarty();
 			$smarty->display_template('swisdk.error.404');
-			exit();
+			Swisdk::shutdown();
 		}
 	}
 
@@ -214,7 +214,7 @@
 			require_once MODULE_ROOT.'inc.smarty.php';
 			$smarty = new SwisdkSmarty();
 			$smarty->display_template('swisdk.error.401');
-			exit();
+			Swisdk::shutdown();
 		}
 	}
 

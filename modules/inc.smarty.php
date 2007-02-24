@@ -87,12 +87,31 @@
 			if($key{0}=='/')
 				return $key;
 
-			$bases = Swisdk::loader_bases();
-			$tmpl = $this->_template($key);
+			$realm = Swisdk::config_value('runtime.realm', '#');
+			if($realm==='#')
+				$realm = 0;
+			else
+				$realm = $realm['realm_id'];
 
-			foreach($bases as $b)
-				if($this->template_exists($b.$tmpl))
+			if(isset(Swisdk::$cache['smarty'][$realm][$key])
+					&& $t = Swisdk::$cache['smarty'][$realm][$key])
+				return $t;
+
+
+			Swisdk::log('Searching for '.$key, 'smarty');
+
+			$tmpl = $this->_template($key);
+			$bases = Swisdk::loader_bases();
+
+			foreach($bases as $b) {
+				Swisdk::log('Probing '.$b.$tmpl, 'smarty');
+				if($this->template_exists($b.$tmpl)) {
+					Swisdk::log('Found '.$b.$tmpl, 'smarty');
+					Swisdk::$cache['smarty'][$realm][$key] = $b.$tmpl;
+					Swisdk::$cache_modified = true;
 					return $b.$tmpl;
+				}
+			}
 
 			if($throw)
 				SwisdkError::handle(new FatalError('Could not resolve template '.$key));

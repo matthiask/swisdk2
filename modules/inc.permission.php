@@ -27,12 +27,6 @@
 		}
 
 		/**
-		 * every realm the user has siteadmin role for (either through
-		 * his user groups or directly)
-		 */
-		protected static $siteadmin_realms = array();
-
-		/**
 		 * return all realms the user has siteadmin role for
 		 */
 		public static function siteadmin_realms($uid=null)
@@ -40,8 +34,14 @@
 			if(!$uid=intval($uid))
 				$uid = SessionHandler::user()->id();
 
-			if(isset(PermissionManager::$siteadmin_realms[$uid]))
-				return PermissionManager::$siteadmin_realms[$uid];
+			// <caching>
+			if(isset(Swisdk::$cache['permission']['siteadmin_realms']['user'.$uid]))
+				return Swisdk::$cache['permission']['siteadmin_realms']['user'.$uid];
+			else
+				Swisdk::$cache['permission']['siteadmin_realms']['user'.$uid] = null;
+
+			$ref =& Swisdk::$cache['permission']['siteadmin_realms']['user'.$uid];
+			// </caching>
 
 			$sql = 'SELECT tbl_realm.realm_id, realm_url FROM tbl_realm '
 				.'JOIN tbl_user_to_realm '
@@ -56,6 +56,7 @@
 						.'uug_user_group_id '
 				.'WHERE uug_user_id='.$uid.' AND ugrr_role_id>='.ROLE_SITEADMIN;
 			$urls = DBObject::db_get_array($sql, array('realm_id', 'realm_url'));
+
 			if(count($urls)) {
 				$sql = 'SELECT * FROM tbl_realm WHERE ';
 				$clauses = array();
@@ -63,12 +64,13 @@
 					$clauses[] = 'realm_url LIKE \''.$url.'%\'';
 				$sql .= implode(' OR ', $clauses);
 				$urls = DBObject::db_get_array($sql, array('realm_id', 'realm_title'));
-				PermissionManager::$siteadmin_realms[$uid] = $urls;
-			} else {
-				PermissionManager::$siteadmin_realms[$uid] = array();
-			}
+			} else
+				$urls = array();
 
-			return PermissionManager::$siteadmin_realms[$uid];
+			$ref = $urls;
+			Swisdk::$cache_modified = true;
+
+			return $urls;
 		}
 
 		public static function check($role=null, $url=null)
@@ -100,8 +102,16 @@
 
 		public static function realm_for_url($url=null)
 		{
-			if(is_null($url))
+			$current = false;
+
+			if(is_null($url)) {
 				$url = Swisdk::config_value('runtime.request.uri');
+				$current = true;
+			}
+
+			if($current && $r = Swisdk::config_value('runtime.realm'))
+				return $r;
+
 			if($url{0}=='/')
 				$url = substr($url, 1);
 
@@ -120,10 +130,13 @@
 				$clauses[] = DBObject::db_escape($d.implode('/', $tokens));
 				array_pop($tokens);
 			}
-			return DBObject::db_get_row(
+			$res = DBObject::db_get_row(
 				'SELECT realm_id,realm_role_id FROM tbl_realm WHERE '
 				.'(realm_url='.implode(' OR realm_url=', $clauses)
 				.' OR realm_url=\''.$d.'\') ORDER BY realm_url DESC LIMIT 1');
+			if($current)
+				Swisdk::set_config_value('runtime.realm', $res);
+			return $res;
 		}
 
 		public static function check_realm_role($realm, $role, $uid=null)
@@ -133,9 +146,18 @@
 			if(is_null($uid))
 				$uid = SessionHandler::user()->id();
 
+			// <caching>
+			$token = $realm.'_'.$role.'_'.$uid;
+			if(isset(Swisdk::$cache['permission'][$token]))
+				return Swisdk::$cache['permission'][$token];
+			// </caching>
+
 			$siteadmin_realms = PermissionManager::siteadmin_realms($uid);
-			if(isset($siteadmin_realms[$realm]))
+			if(isset($siteadmin_realms[$realm])) {
+				Swisdk::$cache['permission'][$token] = true;
+				Swisdk::$cache_modified = true;
 				return true;
+			}
 
 			$perms = DBObject::db_get_row('SELECT urr_role_id AS role_id '
 				.'FROM tbl_user_to_realm WHERE urr_user_id='
@@ -150,8 +172,11 @@
 			// the amount of data which will be necessary once you have some
 			// realms in the system. (Roughly #users * #realms)
 			//
-			if($perms && $perms['role_id']>=$role)
+			if($perms && $perms['role_id']>=$role) {
+				Swisdk::$cache['permission'][$token] = true;
+				Swisdk::$cache_modified = true;
 				return true;
+			}
 
 			//
 			// check user's groups for sufficient permissions
@@ -162,13 +187,19 @@
 					.'ON ugrr_user_group_id='
 						.'uug_user_group_id '
 				.'WHERE uug_user_id='.$uid.' AND ugrr_realm_id='.$realm);
-			foreach($perms as &$p)
-				if($p['role_id']>=$role)
+			foreach($perms as &$p) {
+				if($p['role_id']>=$role) {
+					Swisdk::$cache['permission'][$token] = true;
+					Swisdk::$cache_modified = true;
 					return true;
+				}
+			}
 
 			//
 			// insufficient roles everywhere... check failed!
 			//
+			Swisdk::$cache['permission'][$token] = false;
+			Swisdk::$cache_modified = true;
 			return false;
 		}
 
@@ -191,7 +222,7 @@
 			$smarty = new SwisdkSmarty();
 			$smarty->assign('content', $form->html());
 			$smarty->display_template('swisdk.login');
-			exit();
+			Swisdk::shutdown();
 		}
 
 		/**
@@ -233,12 +264,26 @@
 			} else {
 				$rsql = 'realm_id='.intval($realm);
 			}
+
+			// <caching>
+			if(!isset(Swisdk::$cache['permission']['role_for_realm']['user'.$uid]))
+				Swisdk::$cache['permission']['role_for_realm']['user'.$uid] = array();
+
+			$ref =& Swisdk::$cache['permission']['role_for_realm']['user'.$uid];
+
+			if(isset($ref[$rsql]))
+				return $ref[$rsql];
+			// </caching>
+
 			$rid = intval($realm);
 			$usql = 'SELECT urr_role_id,urr_realm_id FROM tbl_user_to_realm WHERE urr_user_id='.$uid.' AND urr_'.$rsql
 				.' GROUP BY urr_realm_id';
 			$gsql = 'SELECT MAX(ugrr_role_id) AS ugrr_role_id,ugrr_realm_id FROM tbl_user_group_to_realm, tbl_user_to_user_group '
 				.'WHERE ugrr_user_group_id=uug_user_group_id'
 				.' AND uug_user_id='.$uid.' AND ugrr_'.$rsql.' GROUP BY ugrr_realm_id';
+
+			$role = null;
+
 			if(is_array($realm)) {
 				$user = DBObject::db_get_array($usql, array('urr_realm_id', 'urr_role_id'));
 				$group = DBObject::db_get_array($gsql, array('ugrr_realm_id', 'ugrr_role_id'));
@@ -248,12 +293,16 @@
 					$ret[$realm] = max(
 						isset($user[$realm])?$user[$realm]:0,
 						isset($group[$realm])?$group[$realm]:0);
-				return $ret;
+				$role = $ret;
 			} else {
 				$user = DBObject::db_get_row($usql);
 				$group = DBObject::db_get_row($gsql);
-				return max($user['urr_role_id'], $group['ugrr_role_id']);
+				$role = max($user['urr_role_id'], $group['ugrr_role_id']);
 			}
+
+			$ref[$rsql] = $role;
+			Swisdk::$cache_modified = true;
+			return $role;
 		}
 
 		/**

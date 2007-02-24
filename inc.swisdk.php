@@ -123,9 +123,13 @@ EOD;
 
 			SwisdkError::setup();
 			Swisdk::init_config();
+			Swisdk::init_cache();
 
 			define('HTDOCS_DATA_ROOT', HTDOCS_ROOT.
 				Swisdk::config_value('runtime.webroot.data', 'data').'/');
+
+			Swisdk::log(str_repeat('*', 80), 'swisdk');
+			Swisdk::log("Initializing", 'swisdk');
 
 			Swisdk::require_data_directory(CACHE_ROOT);
 			Swisdk::init_language();
@@ -154,7 +158,52 @@ EOD;
 			// the response
 			require_once SWISDK_ROOT . 'site/inc.handlers.php';
 			SwisdkSiteHandler::run();
+
+			Swisdk::shutdown(false);
 		}
+
+		public static function shutdown($exit = true)
+		{
+			Swisdk::save_cache();
+			if($exit)
+				exit();
+		}
+
+		/**
+		 * caching
+		 *
+		 * this variable will be exported to a php file and read back in when
+		 * initializing SWISDK
+		 *
+		 * Please behave yourself when putting data in here!
+		 */
+		public static $cache = array();
+		public static $cache_modified = false;
+
+		protected static function init_cache()
+		{
+			if(file_exists(CACHE_ROOT.'cache.php'))
+				require_once CACHE_ROOT.'cache.php';
+		}
+
+		protected static function save_cache()
+		{
+			if(Swisdk::$cache_modified) {
+				file_put_contents(CACHE_ROOT.'cache.php', '<?php Swisdk::$cache = '
+					.var_export(Swisdk::$cache, true).'; ?>');
+			}
+		}
+
+		public static function kill_cache($section = null)
+		{
+			if($section)
+				Swisdk::$cache[$section] = array();
+			else
+				Swisdk::$cache = array();
+
+			Swisdk::$cache_modified = true;
+		}
+
 
 		protected static $config;
 
@@ -501,7 +550,7 @@ EOD;
 		public static function load($class, $prefix_path = null)
 		{
 			return Swisdk::load_file(
-				sprintf('%s/inc.%s.php', $prefix_path, strtolower($class)));
+				'inc.'.strtolower($class).'.php', $prefix_path);
 		}
 
 		public static function load_file($path, $prefix_path = null)
@@ -509,11 +558,26 @@ EOD;
 			if($prefix_path)
 				$path = $prefix_path.'/'.$path;
 
+			$realm = isset(Swisdk::$config['runtime.realm'])?
+				Swisdk::$config['runtime.realm']['realm_id']:0;
+
+			if(isset(Swisdk::$cache['loader'][$realm][$path])
+					&& $p = Swisdk::$cache['loader'][$realm][$path]) {
+				require_once $p;
+				return true;
+			}
+
+			Swisdk::log('Searching for '.$path, 'loader');
+
 			$bases = Swisdk::$load_bases;
 
 			while(count($bases)) {
 				$base = array_shift($bases);
+				Swisdk::log('Probing '.$base.$path, 'loader');
 				if(file_exists($base.$path)) {
+					Swisdk::log('Found '.$base.$path, 'loader');
+					Swisdk::$cache['loader'][$realm][$path] = $base.$path;
+					Swisdk::$cache_modified = true;
 					require_once $base.$path;
 					return true;
 				}
