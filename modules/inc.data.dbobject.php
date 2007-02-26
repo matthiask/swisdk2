@@ -1292,9 +1292,9 @@
 					}
 
 					// determine field type
-					if(stripos($field,'date')!==false) {
+					if(stripos($field, 'date')!==false) {
 						$fl[$field] = DB_FIELD_DATE;
-					} else if(stripos($type, 'dttm')!==false) {
+					} else if(stripos($field, 'dttm')!==false) {
 						$fl[$field] = DB_FIELD_DTTM;
 					} else if(stripos($type, 'text')!==false) {
 						$fl[$field] = DB_FIELD_LONGTEXT;
@@ -1320,9 +1320,9 @@
 					}
 
 					// determine field type
-					if(stripos($field,'date')!==false) {
+					if(stripos($field, 'date')!==false) {
 						$fl[$field] = DB_FIELD_DATE;
-					} else if(stripos($type, 'dttm')!==false) {
+					} else if(stripos($field, 'dttm')!==false) {
 						$fl[$field] = DB_FIELD_DTTM;
 					} else if(stripos($type, 'BLOB')!==false) {
 						$fl[$field] = DB_FIELD_LONGTEXT;
