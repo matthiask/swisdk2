@@ -370,7 +370,7 @@
 			return
 				$this->_generate_page_previous($params, $smarty)
 				.' '.$this->_paging_current_page.'/'
-				.$this->_paging_total_count.' '
+				.ceil($this->_paging_total_count/$this->_paging_limit)
 				.$this->_generate_page_next($params, $smarty);
 		}
 
