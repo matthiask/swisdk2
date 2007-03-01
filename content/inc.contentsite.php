@@ -240,6 +240,8 @@
 				array(&$this, '_generate_page_previous'));
 			$this->smarty->register_function('generate_page_fpnl',
 				array(&$this, '_generate_page_fpnl'));
+			$this->smarty->register_function('generate_page_pcn',
+				array(&$this, '_generate_page_pcn'));
 		}
 
 		protected $_paging_limit = null;
@@ -358,6 +360,18 @@
 				.$this->_generate_page_previous($params, $smarty)
 				.$this->_generate_page_next($params, $smarty)
 				.$this->_generate_page_last($params, $smarty);
+		}
+
+		public function _generate_page_pcn($params, &$smarty)
+		{
+			if(!$this->_init_paging_vars())
+				return '';
+
+			return
+				$this->_generate_page_previous($params, $smarty)
+				.' '.$this->_paging_current_page.'/'
+				.$this->_paging_total_count.' '
+				.$this->_generate_page_next($params, $smarty);
 		}
 
 		public function _generate_page_first($params, &$smarty)
