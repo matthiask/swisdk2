@@ -226,6 +226,8 @@
 		 */
 		protected function register_paging_functions()
 		{
+			$this->smarty->register_function('generate_paging',
+				array(&$this, '_generate_paging'));
 			$this->smarty->register_function('generate_pagelinks',
 				array(&$this, '_generate_pagelinks'));
 			$this->smarty->register_function('generate_page_list',
@@ -248,6 +250,7 @@
 		protected $_paging_offset;
 		protected $_paging_current_page;
 		protected $_paging_total_count;
+		protected $_paging_page_count;
 		protected $_paging_url;
 		protected $_img_prefix;
 
@@ -270,6 +273,8 @@
 				$this->_paging_offset =
 					($this->_paging_current_page-1)*$this->_paging_limit;
 				$this->_paging_total_count = $this->dbobj->total_count();
+				$this->_paging_page_count = ceil($this->_paging_total_count/
+					$this->_paging_limit);
 				$this->_paging_url = preg_replace('/\/page\/[0-9]+/', '',
 					rtrim(Swisdk::config_value('runtime.request.uri'), '/'));
 
@@ -279,6 +284,124 @@
 
 			return $this->_paging_limit
 				&& $this->_paging_total_count>$this->_paging_limit;
+		}
+
+		protected $_paging_config;
+
+		/**
+		 * {generate_paging fmt="%p %c %n"}
+		 *
+		 * Available types:
+		 *
+		 * %f: First page
+		 * %p: Previous page
+		 * %n: Next page
+		 * %l: Last page
+		 *
+		 * %c: Counter (current/total)
+		 *
+		 * You can also pass mode bits:
+		 *
+		 * %img.f: First page, force image link
+		 * %txt.n: Next page, force text link
+		 *
+		 * You can also specify your own link text or image:
+		 *
+		 * {generate_paging "%txt.p %txt.n" p_txt="Zurück" n_img="/media/prev.png"}
+		 */
+		public function _generate_paging($params, &$smarty)
+		{
+			if(!$this->_init_paging_vars())
+				return '';
+
+			$this->_paging_config = $params;
+
+			return preg_replace_callback(
+				'/%(([\S]*)\.)?([a-z])([\s])?/',
+				array(&$this, '_paging_fmt_func'),
+				$params['fmt']);
+		}
+
+		protected function _paging_fmt_func($match)
+		{
+			$mode = $match[2];
+			$type = $match[3];
+
+			$img = null;
+			$txt = null;
+			$lnk = null;
+
+			$show_img = true;
+			$show_txt = true;
+
+			switch($type) {
+				case 'f':
+					if($this->_paging_current_page==1)
+						return '';
+					$img = $this->_img_prefix.'/icons/resultset_first.png';
+					$txt = 'first page';
+					$lnk = '/page/1';
+					break;
+				case 'p':
+					if($this->_paging_current_page==1)
+						return;
+					$img = $this->_img_prefix.'/icons/resultset_previous.png';
+					$txt = 'previous page';
+					$lnk = '/page/'.($this->_paging_current_page-1);
+					break;
+				case 'n':
+					if($this->_paging_current_page==$this->_paging_page_count)
+						return;
+					$img = $this->_img_prefix.'/icons/resultset_next.png';
+					$txt = 'next page';
+					$lnk = '/page/'.($this->_paging_current_page+1);
+					break;
+				case 'l':
+					if($this->_paging_current_page==$this->_paging_page_count)
+						return;
+					$img = $this->_img_prefix.'/icons/resultset_last.png';
+					$txt = 'last page';
+					$lnk = '/page/'.$this->_paging_page_count;
+					break;
+				case 'c':
+					$txt = $this->_paging_current_page.'/'
+						.$this->_paging_page_count.' ';
+					break;
+				default:
+					return 'invalid: '.$match[0];
+			}
+
+			switch($mode) {
+				case 'img':
+					$show_txt = false;
+					break;
+				case 'txt':
+					$show_img = false;
+					break;
+				default:
+			}
+
+			$cfg = array(
+				'img' => $type.'_img',
+				'txt' => $type.'_txt',
+				'show_img' => 'show_img',
+				'show_txt' => 'show_txt');
+
+			foreach($cfg as $v => $k)
+				if(isset($this->_paging_config[$k]))
+					$$v = $this->_paging_config[$k];
+
+			$html = '';
+			if($lnk)
+				$html = '<a href="'.$this->_paging_url.$lnk.'">';
+			if($show_img && $img)
+				$html .= '<img src="'.$img.'" alt="'.$txt.'" /> ';
+			if($show_txt && $txt)
+				$html .= $txt;
+			if($lnk)
+				$html .= '</a>';
+
+			return $html;
 		}
 
 		public function _generate_pagelinks($params, &$smarty)
@@ -355,23 +478,17 @@
 		 */
 		public function _generate_page_fpnl($params, &$smarty)
 		{
-			return
-				$this->_generate_page_first($params, $smarty)
-				.$this->_generate_page_previous($params, $smarty)
-				.$this->_generate_page_next($params, $smarty)
-				.$this->_generate_page_last($params, $smarty);
+			return $this->_generate_paging(array(
+				'fmt' => '%img.f %img.p %img.n %img.l'), $smarty);
 		}
 
+		/**
+		 * generate page first counter last
+		 */
 		public function _generate_page_pcn($params, &$smarty)
 		{
-			if(!$this->_init_paging_vars())
-				return '';
-
-			return
-				$this->_generate_page_previous($params, $smarty)
-				.' '.$this->_paging_current_page.'/'
-				.ceil($this->_paging_total_count/$this->_paging_limit)
-				.$this->_generate_page_next($params, $smarty);
+			return $this->_generate_paging(array(
+				'fmt' => '%img.p %c %img.n'), $smarty);
 		}
 
 		public function _generate_page_first($params, &$smarty)
