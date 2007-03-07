@@ -152,6 +152,13 @@
 			return DBObject::$error_obj;
 		}
 
+		protected static $versioned = array();
+
+		public static function versioned($class, $versioning = true)
+		{
+			DBObject::$versioned[$class] = $versioning;
+		}
+
 		/**
 		 * @param $setup_dbvars: Should the DB vars be determined or should we wait
 		 * until later (See DBObject::create)
@@ -197,6 +204,8 @@
 			$obj = new DBObject(false);
 			$obj->class = $class;
 			$obj->_setup_dbvars();
+			if(!isset(DBObject::$versioned[$class]))
+				DBObject::$versioned[$class] = false;
 			return $obj;
 		}
 
@@ -304,6 +313,11 @@
 			$vals_sql = implode(',', $vals);
 
 			DBObject::db_start_transaction($this->db_connection_id);
+			if(DBObject::$versioned[$this->class])
+				DBObject::db_query('INSERT IGNORE INTO _log_'.$this->table.' SELECT '
+					.'UNIX_TIMESTAMP(), '.$this->table.'.* FROM '
+					.$this->table.' WHERE '
+					.$this->primary.'='.$this->id());
 			$res = DBObject::db_query('UPDATE ' . $this->table . ' SET '
 				. $vals_sql . ' WHERE '
 				. $this->primary . '=' . $this->id(),
