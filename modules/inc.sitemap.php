@@ -74,8 +74,14 @@
 					$prc = new XSLTProcessor();
 					$xsl = new DOMDocument();
 					$xml = new DOMDocument();
-					$xml->load($xmlfile);
-					$xsl->load($xslfile);
+					if(!$xml->load($xmlfile))
+						SwisdkError::handle(new FatalError(sprintf(
+							dgettext('swisdk', 'Could not load sitemap %s'),
+							$xmlfile)));
+					if(!$xsl->load($xslfile))
+						SwisdkError::handle(new FatalError(sprintf(
+							dgettext('swisdk', 'Could not load sitemap xsl %s'),
+							$xslfile)));
 					$prc->importStyleSheet($xsl);
 					file_put_contents($phpfile, $prc->transformToXML($xml));
 				}
