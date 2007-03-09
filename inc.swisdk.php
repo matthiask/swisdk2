@@ -88,6 +88,9 @@
 			Swisdk::init_language();
 
 			Swisdk::$load_bases = array(CONTENT_ROOT, SWISDK_ROOT.'content/', SWISDK_ROOT);
+
+			require_once MODULE_ROOT.'inc.session.php';
+			SessionHandler::instance();
 		}
 
 		protected static $load_bases;
