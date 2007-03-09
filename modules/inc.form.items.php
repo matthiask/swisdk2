@@ -918,7 +918,6 @@ EOD;
 		{
 			if(($v=$this->value())
 					&& !strcasecmp($v, $this->captcha_code)) {
-				@unlink(HTDOCS_DATA_ROOT.'captcha/'.$this->token.'.png');
 				unset($_SESSION['swisdk2']['captcha'][$this->token]);
 				return true;
 			}
@@ -938,6 +937,7 @@ EOD;
 
 			require_once SWISDK_ROOT.'lib/contrib/captcha.class.php';
 			Swisdk::require_htdocs_data_directory('captcha');
+			Swisdk::clean_data_directory(HTDOCS_DATA_ROOT.'captcha', 86400);
 
 			$c = new Captcha(4);
 			$this->captcha_code = $c->Generate(HTDOCS_DATA_ROOT

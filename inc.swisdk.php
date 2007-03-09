@@ -194,6 +194,24 @@
 		}
 
 		/**
+		 * Example:
+		 * Swisdk::clean_data_directory(HTDOCS_DATA_ROOT.'captcha/', 43200);
+		 */
+		public static function clean_data_directory($dir, $age=86400)
+		{
+			$dir = str_replace('//', '/', $dir.'/');
+
+			if($dh = opendir($dir)) {
+				while(($file = readdir($dh))!==false) {
+					$s = stat($dir.$file);
+					if(($s['mode'] & 0170000)==0100000
+							&& $s['mtime']<(time()-$age))
+						@unlink($dir.$file);
+				}
+			}
+		}
+
+		/**
 		 * debugging functions
 		 */
 
