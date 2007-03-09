@@ -46,6 +46,8 @@
 		public function handle()
 		{
 			$includefile = Swisdk::config_value('runtime.includefile');
+
+			require_once SWISDK_ROOT.'site/inc.site.php';
 			require_once $includefile;
 
 			// get the controller class  out of the config , the include file
