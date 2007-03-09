@@ -71,7 +71,6 @@
 
 			$headers = implode("\r\n", array(
 					'From: '.$from,
-					'To: '.$to,
 					'Cc: ',
 					'Bcc: '.Swisdk::config_value('core.admin_email'),
 					'Reply-To: '.$reply_to,
