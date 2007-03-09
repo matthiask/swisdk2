@@ -81,6 +81,9 @@
 			SwisdkError::setup();
 			Swisdk::init_config();
 
+			define('HTDOCS_DATA_ROOT', HTDOCS_ROOT.
+				Swisdk::config_value('runtime.webroot.data', 'data').'/');
+
 			Swisdk::require_data_directory(CACHE_ROOT);
 			Swisdk::init_language();
 
@@ -163,6 +166,26 @@
 			if(!file_exists($dir))
 				if(!@mkdir($dir, 0775, true))
 					SwisdkError::handle(new ExtremelyFatalError(sprintf(
+						dgettext('swisdk', 'Could not create data directory %s'),
+						$dir)));
+		}
+
+		/**
+		 * create a subdirectory for webserver-managed data below HTDOCS_DATA_ROOT
+		 */
+		public static function require_htdocs_data_directory($dir)
+		{
+			if(preg_match('/[^A-Za-z0-9\.-_\/\-]/', $dir)
+					|| strpos($dir, '..')!==false)
+				SwisdkError::handle(new FatalError(sprintf(
+					dgettext('swisdk', 'Invalid path passed to require_htdocs_data_directory: %s'),
+					$dir)));
+			if($dir{0}!='/')
+				$dir = HTDOCS_DATA_ROOT.$dir;
+			umask(0002);
+			if(!file_exists($dir))
+				if(!@mkdir($dir, 0775, true))
+					SwisdkError::handle(new FatalError(sprintf(
 						dgettext('swisdk', 'Could not create data directory %s'),
 						$dir)));
 		}
