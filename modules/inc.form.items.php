@@ -910,15 +910,15 @@ EOD;
 		public function captcha_html()
 		{
 			return '<img src="'
-				.Swisdk::config_value('runtime.webroot.data', '/data')
-				.'/captcha/'.$this->token.'.png" /><br />';
+				.Swisdk::config_value('runtime.webroot.data', '/data').'/captcha/'
+				.$this->captcha_id.$this->token.'.png" /><br />';
 		}
 
 		public function validation_cb($item)
 		{
 			if(($v=$this->value())
 					&& !strcasecmp($v, $this->captcha_code)) {
-				unset($_SESSION['swisdk2']['captcha'][$this->token]);
+				unset($_SESSION['swisdk2']['captcha'][$this->captcha_id]);
 				return true;
 			}
 
@@ -927,11 +927,13 @@ EOD;
 
 		public function generate_captcha()
 		{
-			$this->token = md5($this->id());
+			$this->captcha_id = $this->id();
 
-			if(isset($_SESSION['swisdk2']['captcha'][$this->token])) {
+			if(isset($_SESSION['swisdk2']['captcha'][$this->captcha_id]['code'])) {
 				$this->captcha_code =
-					$_SESSION['swisdk2']['captcha'][$this->token];
+					$_SESSION['swisdk2']['captcha'][$this->captcha_id]['code'];
+				$this->token =
+					$_SESSION['swisdk2']['captcha'][$this->captcha_id]['token'];
 				return;
 			}
 
@@ -939,13 +941,19 @@ EOD;
 			Swisdk::require_htdocs_data_directory('captcha');
 			Swisdk::clean_data_directory(HTDOCS_DATA_ROOT.'captcha', 86400);
 
+			$this->token = '_'.uniqid();
+
 			$c = new Captcha(4);
 			$this->captcha_code = $c->Generate(HTDOCS_DATA_ROOT
-				.'captcha/'.$this->token.'.png');
+				.'captcha/'.$this->captcha_id.$this->token.'.png');
 
-			$_SESSION['swisdk2']['captcha'][$this->token] = $this->captcha_code;
+			$_SESSION['swisdk2']['captcha'][$this->captcha_id]['code'] =
+				$this->captcha_code;
+			$_SESSION['swisdk2']['captcha'][$this->captcha_id]['token'] =
+				$this->token;
 		}
 
+		protected $captcha_id;
 		protected $captcha_code;
 		protected $token;
 	}
