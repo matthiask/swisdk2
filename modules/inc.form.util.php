@@ -6,6 +6,17 @@
 	*/
 
 	class FormUtil {
+		public static function add_captcha($form)
+		{
+			$box = $form->box('zzz_captcha');
+
+			$c = $box->add('captcha', new CaptchaInput());
+			$c->generate_captcha();
+			$c->add_rule(new CallbackRule(
+				array($c, 'validation_cb'),
+				'Captcha input does not match'));
+		}
+
 		public static function submit_bar($form)
 		{
 			$box = $form->box('zzz_last')->add(new GroupItemBar())->box();

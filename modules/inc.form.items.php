@@ -906,6 +906,50 @@ EOD;
 		}
 	}
 
+	class CaptchaInput extends TextInput {
+		public function captcha_html()
+		{
+			return '<img src="'
+				.Swisdk::config_value('runtime.webroot.data', '/data')
+				.'/captcha/'.$this->token.'.png" /><br />';
+		}
+
+		public function validation_cb($item)
+		{
+			if(($v=$this->value())
+					&& !strcasecmp($v, $this->captcha_code)) {
+				@unlink(HTDOCS_DATA_ROOT.'captcha/'.$this->token.'.png');
+				unset($_SESSION['swisdk2']['captcha'][$this->token]);
+				return true;
+			}
+
+			return false;
+		}
+
+		public function generate_captcha()
+		{
+			$this->token = md5($this->id());
+
+			if(isset($_SESSION['swisdk2']['captcha'][$this->token])) {
+				$this->captcha_code =
+					$_SESSION['swisdk2']['captcha'][$this->token];
+				return;
+			}
+
+			require_once SWISDK_ROOT.'lib/contrib/captcha.class.php';
+			Swisdk::require_htdocs_data_directory('captcha');
+
+			$c = new Captcha(4);
+			$this->captcha_code = $c->Generate(HTDOCS_DATA_ROOT
+				.'captcha/'.$this->token.'.png');
+
+			$_SESSION['swisdk2']['captcha'][$this->token] = $this->captcha_code;
+		}
+
+		protected $captcha_code;
+		protected $token;
+	}
+
 	class PickerBase extends FormItem {
 		public function __construct($class=null)
 		{

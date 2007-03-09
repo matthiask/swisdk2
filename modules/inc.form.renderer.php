@@ -253,6 +253,13 @@ function validate_'.$id.'()
 			$this->_render($obj, $this->_simpleinput_html($obj));
 		}
 
+		protected function visit_CaptchaInput($obj)
+		{
+			$this->_collect_javascript($obj);
+			$this->_render($obj, $obj->captcha_html()
+				.$this->_simpleinput_html($obj));
+		}
+
 		protected function visit_TagInput($obj)
 		{
 			$this->_collect_javascript($obj);
