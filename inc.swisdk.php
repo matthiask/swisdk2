@@ -79,8 +79,9 @@
 			require_once SWISDK_ROOT . 'core/inc.error.php';
 
 			SwisdkError::setup();
-			Swisdk::require_data_directory(CACHE_ROOT);
 			Swisdk::init_config();
+
+			Swisdk::require_data_directory(CACHE_ROOT);
 			Swisdk::init_language();
 
 			Swisdk::$load_bases = array(CONTENT_ROOT, SWISDK_ROOT.'content/', SWISDK_ROOT);
