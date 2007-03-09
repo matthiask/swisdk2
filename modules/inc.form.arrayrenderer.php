@@ -43,8 +43,12 @@
 					&& $this->form->submitted()) {
 				$valid = $obj->is_valid();
 			}
+
+			$name = $obj->name();
+			if(!$name)
+				$name = uniqid();
 		
-			$this->stack[$this->ref][$obj->name()] = array(
+			$this->stack[$this->ref][$name] = array(
 				'type' => get_class($obj),
 				'name' => $obj->name(),
 				'html' => $field_html,
