@@ -117,14 +117,14 @@
 
 		public function title()			{ return $this->title; }
 		public function info()			{ return $this->info; }
-		public function set_info($info)
+		public function set_info($info=null)
 		{
 			$this->info = $info;
 			return $this;
 		}
 
 		public function message()		{ return $this->message; }
-		public function set_message($message)
+		public function set_message($message=null)
 		{
 			$this->message = $message;
 			return $this;
@@ -145,9 +145,9 @@
 			return $this;
 		}
 
-		public function set_title($title)
+		public function set_title($title=null)
 		{
-			$this->title = dgettext('swisdk', $title);
+			$this->title = $title?dgettext('swisdk', $title):null;
 			return $this;
 		}
 
