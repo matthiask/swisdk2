@@ -975,6 +975,20 @@ EOD;
 				'sf-button');
 		}
 
+		protected function visit_ResetButton($obj)
+		{
+			$this->_collect_javascript($obj);
+			$name = $obj->name();
+			$value = htmlspecialchars($obj->value());
+			if(!$value)
+				$value = 'Reset';
+			$this->_render_bar($obj,
+				'<input type="reset" '.$this->_attribute_html($obj->attributes())
+				.($name?' name="'.$name.'"':'')
+				.' value="'.$value.'" />',
+				'sf-button');
+		}
+
 		protected function _title_html($obj)
 		{
 			return '<label for="'.$obj->id().'">'.$obj->title().'</label>';
