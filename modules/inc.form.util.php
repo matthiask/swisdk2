@@ -6,6 +6,13 @@
 	*/
 
 	class FormUtil {
+		public static function submit_bar($form)
+		{
+			$box = $form->box('zzz_last')->add(new GroupItemBar())->box();
+			$box->add(new SubmitButton());
+			$box->add(new ResetButton());
+		}
+
 		public static function realm_dropdown($formbox, $id='Realm', $role=ROLE_MANAGER)
 		{
 			$rel = $formbox->dbobj()->relations();
