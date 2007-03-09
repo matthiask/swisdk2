@@ -921,6 +921,16 @@ EOD;
 
 		protected function visit_GroupItem($obj)
 		{
+			$this->_render($obj, $this->_groupitem_helper($obj));
+		}
+
+		protected function visit_GroupItemBar($obj)
+		{
+			$this->_render_bar($obj, $this->_groupitem_helper($obj));
+		}
+
+		protected function _groupitem_helper($obj)
+		{
 			require_once MODULE_ROOT.'inc.form.arrayrenderer.php';
 			$renderer = new ArrayFormRenderer();
 
@@ -948,7 +958,7 @@ EOD;
 
 			$s = $obj->separator();
 
-			$this->_render($obj, implode($s, $html).implode($s, $msg));
+			return implode($s, $html).implode($s, $msg);
 		}
 
 		protected function visit_SubmitButton($obj)

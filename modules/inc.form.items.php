@@ -1001,4 +1001,7 @@ EOD;
 		}
 	}
 
+	class GroupItemBar extends GroupItem {
+	}
+
 ?>
