@@ -1376,6 +1376,11 @@
 			print_r(DBObject::$dbhandle);
 			echo '</pre>';
 		}
+
+		public function generate_url()
+		{
+			return Swisdk::load_instance('UrlGenerator')->generate_url($this);
+		}
 	}
 
 ?>
