@@ -223,6 +223,10 @@
 	 */
 	function _smarty_swisdk_db_assign($params, &$smarty)
 	{
+		if(isset($params['id']) && $id = $params['id']) {
+			$smarty->assign($params['name'], DBObject::find($params['class'], $id));
+			return;
+		}
 		$clauses = array();
 		if(isset($params['order']) && $order = $params['order'])
 			$clauses[':order'] = $order;
