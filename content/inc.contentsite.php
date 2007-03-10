@@ -636,15 +636,16 @@
 						$dbo->related('Realm'));
 				}
 			}
+			$this->register_paging_functions();
 			$this->run_website_components($this->smarty);
 		}
 
 		protected function handle_single()
 		{
-			$dbo = $this->_single_get_dbobj();
-			if(!$dbo)
+			$this->dbobj = $this->_single_get_dbobj();
+			if(!$this->dbobj)
 				return $this->handle_none();
-			$this->_single_handler($dbo);
+			$this->_single_handler($this->dbobj);
 			$this->display($this->template_single);
 		}
 
