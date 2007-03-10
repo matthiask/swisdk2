@@ -249,6 +249,8 @@
 				array(&$this, '_generate_item_previous_url'));
 			$this->smarty->register_function('generate_item_next_url',
 				array(&$this, '_generate_item_next_url'));
+			$this->smarty->register_function('generate_page_list_from_item',
+				array(&$this, '_generate_page_list_from_item'));
 		}
 
 		protected $_paging_limit = null;
@@ -429,51 +431,90 @@
 				return '';
 
 			$html = '';
+			$template_first_incl = '<a href="%u"><img src="'.$this->_img_prefix.'/icons/resultset_first.png" /></a> ';
+			$template_last_incl = '<a href="%u"><img src="'.$this->_img_prefix.'/icons/resultset_first.png" /></a> ';
+			$template_first = $template_first_incl.'&hellip; ';
+			$template_last = '&hellip; '.$template_last_incl;
+			$template_page = '<a href="%u">%p</a> ';
+			$template_current = '<a href="%u">%p</a> ';
+			$template_previous = '<a href="%u"><img src="'.$this->_img_prefix.'/icons/resultset_previous.png" /></a> ';
+			$template_next = '<a href="%u"><img src="'.$this->_img_prefix.'/icons/resultset_next.png" /></a> ';
+			$template_previous = '';
+			$template_next = '';
+			$delimiter = ' ';
+			$prevnext_count = 2;
+
+			foreach(array('template_first',	'template_last',
+					'template_first_incl', 'template_last_incl',
+					'template_page',
+					'template_current', 'template_previous',
+					'template_next', 'delimiter',
+					'prevnext_count') as $s)
+				if(isset($params[$s]))
+					$$s = $params[$s];
+
 			$pagecount = ceil($this->_paging_total_count/$this->_paging_limit);
 
-			$plr = 2;
+			$plr = $prevnext_count;
 
 			$page = max($this->_paging_current_page-$plr, 1);
 
-			if($this->_paging_current_page>1) {
-				$html .= '<a href="'.$this->_paging_url.'/page/1">'
-					.'<img src="'.$this->_img_prefix.'/icons/resultset_first.png" />'
-					.'</a> ';
+			$pattern = array('%u', '%p');
+			$repl = array(0, 1);
 
-				if($this->_paging_current_page>$plr+1)
-					$html .= '&hellip; ';
+			// previous
+			$repl[0] = $this->_paging_url.'/page/1';
+			$repl[1] = 1;
+			if($this->_paging_current_page==$plr+2)
+				$html .= str_replace($pattern, $repl, $template_first_incl)
+					.str_replace($pattern, $repl, $template_page)
+					.$delimiter;
+			else if($this->_paging_current_page>$plr+1)
+				$html .= str_replace($pattern, $repl, $template_first);
+			else
+				$html .= str_replace($pattern, $repl, $template_first_incl);
 
-				while($page<$this->_paging_current_page)
-					$html .= '<a href="'.$this->_paging_url.'/page/'.$page.'">'
-						.($page++).'</a> ';
-
-				$html .= '<a href="'.$this->_paging_url.'/page/'.($page-1).'">'
-					.'<img src="'.$this->_img_prefix.'/icons/resultset_previous.png" />'
-					.'</a> ';
+			while($page<$this->_paging_current_page) {
+				$repl[0] = $this->_paging_url.'/page/'.$page;
+				$repl[1] = $page;
+				$html .= str_replace($pattern, $repl, $template_page)
+					.$delimiter;
+				$page++;
 			}
 
-			$html .= $page.' ';
+			$html .= str_replace($pattern, $repl, $template_previous);
+
+			// current
+			$repl[0] = $this->_paging_url.'/page/'.$page;
+			$repl[1] = $page;
+			$html .= str_replace($pattern, $repl, $template_current);
 			$page++;
 
-			if($this->_paging_current_page<$pagecount) {
-				$html .= '<a href="'.$this->_paging_url.'/page/'.$page.'">'
-					.'<img src="'.$this->_img_prefix.'/icons/resultset_next.png" />'
-					.'</a> ';
+			// next
+			$repl[0] = $this->_paging_url.'/page/'.$page;
+			$repl[1] = $page;
+			$html .= str_replace($pattern, $repl, $template_next);
 
-				$end = min($this->_paging_current_page+$plr,
-					$pagecount);
+			$end = min($this->_paging_current_page+$plr,
+				$pagecount);
 
-				while($page<=$end)
-					$html .= '<a href="'.$this->_paging_url.'/page/'.$page.'">'
-						.($page++).'</a> ';
-
-				if($page<$pagecount+1)
-					$html .= ' &hellip; ';
-
-				$html .= '<a href="'.$this->_paging_url.'/page/'.$pagecount.'">'
-					.'<img src="'.$this->_img_prefix.'/icons/resultset_last.png" />'
-					.'</a> ';
+			while($page<=$end) {
+				$repl[0] = $this->_paging_url.'/page/'.$page;
+				$repl[1] = $page;
+				$html .= $delimiter
+					.str_replace($pattern, $repl, $template_page);
+				$page++;
 			}
+
+			$repl[0] = $this->_paging_url.'/page/'.$pagecount;
+			$repl[1] = $pagecount;
+			if($page==$pagecount)
+				$html .= $delimiter.str_replace($pattern, $repl, $template_page)
+					.str_replace($pattern, $repl, $template_last_incl);
+			else if($page<$pagecount+1)
+				$html .= str_replace($pattern, $repl, $template_last);
+			else
+				$html .= str_replace($pattern, $repl, $template_last_incl);
 
 			return $html;
 		}
@@ -606,6 +647,65 @@
 			}
 
 			return null;
+		}
+
+		public function _generate_page_list_from_item($params, &$smarty)
+		{
+			$item = $params['item'];
+
+			$prev_count = $this->_page_list_from_item_helper($item, false);
+			$next_count = $this->_page_list_from_item_helper($item, true);
+
+			$this->_paging_limit = $this->find_config_value('default_limit', 10);
+			if(!$this->_paging_limit)
+				return false;
+
+			$this->_paging_current_page =
+				intval(ceil(($prev_count+1)/$this->_paging_limit));
+			$this->_paging_offset =
+				($this->_paging_current_page-1)*$this->_paging_limit;
+			$this->_paging_total_count = $prev_count+1+$next_count;
+			$this->_paging_page_count = ceil($this->_paging_total_count/
+				$this->_paging_limit);
+			$this->_paging_url = preg_replace('/\/page\/[0-9]+/', '',
+				rtrim(Swisdk::config_value('runtime.request.uri'), '/'));
+
+			$this->_img_prefix = Swisdk::config_value('runtime.webroot.img', '/img');
+
+			$dbo = $this->dbobj;
+			$this->dbobj = DBOContainer::create($this->dbo_class);
+			$html = $this->_generate_page_list($params, $smarty);
+			$this->dbobj = $dbo;
+
+			return $html;
+		}
+
+		protected function _page_list_from_item_helper($dbo, $reverse)
+		{
+			$dbo = $this->dbobj;
+
+			$this->dbobj = DBOContainer::create($this->dbo_class);
+			$this->filter('!order,!limit');
+
+			if($order = $this->find_config_value('order', '#')) {
+				if($order=='#')
+					$order = $this->dbobj->dbobj()->name('start_dttm');
+				$tokens = explode(':', $order);
+
+				$dir = $tokens[1]=='DESC';
+				if($reverse)
+					$dir = !$dir;
+
+				$this->dbobj->add_order_column($tokens[0],
+					(isset($tokens[1]) && $dir?'ASC':'DESC'));
+
+				$this->dbobj->add_clause($tokens[0]
+					.($dir?'>':'<'), $dbo->get($tokens[0]));
+			}
+
+			$count = $this->dbobj->total_count();
+			$this->dbobj = $dbo;
+			return $count;
 		}
 
 		protected function handle_feed()
