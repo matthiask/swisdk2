@@ -244,6 +244,11 @@
 				array(&$this, '_generate_page_fpnl'));
 			$this->smarty->register_function('generate_page_pcn',
 				array(&$this, '_generate_page_pcn'));
+
+			$this->smarty->register_function('generate_item_previous_url',
+				array(&$this, '_generate_item_previous_url'));
+			$this->smarty->register_function('generate_item_next_url',
+				array(&$this, '_generate_item_next_url'));
 		}
 
 		protected $_paging_limit = null;
@@ -553,6 +558,54 @@
 				return '';
 			return '<a href="'.$this->_paging_url.'/page/'
 				.($this->_paging_current_page-1).'">'.$title.'</a>';
+		}
+
+		public function _generate_item_previous_url($params, &$smarty)
+		{
+			return $this->_item_previous_next_url_helper($params, true);
+		}
+
+		public function _generate_item_next_url($params, &$smarty)
+		{
+			return $this->_item_previous_next_url_helper($params, false);
+		}
+
+		protected function _item_previous_next_url_helper($params, $reverse)
+		{
+			$dbo = $this->dbobj;
+
+			$this->dbobj = DBOContainer::create($this->dbo_class);
+			$this->filter('!order,!limit');
+
+			if($order = $this->find_config_value('order', '#')) {
+				if($order=='#')
+					$order = $this->dbobj->dbobj()->name('start_dttm');
+				$tokens = explode(':', $order);
+
+				$dir = $tokens[1]=='DESC';
+				if($reverse)
+					$dir = !$dir;
+
+				$this->dbobj->add_order_column($tokens[0],
+					(isset($tokens[1]) && $dir?'ASC':'DESC'));
+
+				$this->dbobj->add_clause($tokens[0]
+					.($dir?'>':'<'), $dbo->get($tokens[0]));
+				$this->dbobj->set_limit(1);
+			}
+
+			$this->dbobj->init();
+			$item = $this->dbobj->rewind();
+			$this->dbobj = $dbo;
+
+			if($item) {
+				$url = Swisdk::load_instance('UrlGenerator')->generate_url($item);
+				if(isset($params['template']))
+					return sprintf($params['template'], $url);
+				return $url;
+			}
+
+			return null;
 		}
 
 		protected function handle_feed()
