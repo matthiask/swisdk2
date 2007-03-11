@@ -38,6 +38,10 @@
 			}
 
 			Swisdk::require_data_directory($this->compile_dir);
+
+			$sc = array('SwisdkCustom', 'swisdksmarty');
+			if(is_callable($sc))
+				call_user_func($sc, $this);
 		}
 
 		public function display($resource_name, $cache_id=null, $compile_id=null)
