@@ -275,11 +275,13 @@
 		public function add_order_column($column, $dir=null, $prepend=false)
 		{
 			if(strtoupper($column)=='RAND') {
-				switch($this->obj->driver()) {
+				switch($this->obj->db_driver()) {
 					case 'mysql':
 						$this->order_columns[] = ' RAND()';
+						break;
 					case 'sqlite':
 						$this->order_columns[] = ' RANDOM()';
+						break;
 				}
 				return;
 			}
