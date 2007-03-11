@@ -228,14 +228,32 @@
 			return;
 		}
 		$clauses = array();
-		if(isset($params['order']) && $order = $params['order'])
-			$clauses[':order'] = $order;
-		if(isset($params['limit']) && $limit = $params['limit'])
-			$clauses[':limit'] = $limit;
-		if(isset($params['cut_off_future']) && $cof = $params['cut_off_future'])
-			$clauses[$cof.'<'] = time();
-		if(isset($params['cut_off_past']) && $cop = $params['cut_off_past'])
-			$clauses[$cop.'<'] = time();
+		foreach($params as $k => $v) {
+			switch($k) {
+				case 'order':
+					$clauses[':order'] = $v;
+					break;
+				case 'limit':
+					$clauses[':limit'] = $v;
+					break;
+				case 'join':
+					$clauses[':join'] = $v;
+					break;
+				case 'cut_off_future':
+					$clauses[$v.'<'] = time();
+					break;
+				case 'cut_off_past':
+					$clauses[$v.'>'] = time();
+					break;
+				case 'class':
+				case 'name':
+				case 'id':
+					break;
+				default:
+					$tokens = explode(':', $v);
+					$clauses[$tokens[0]] = $tokens[1];
+			}
+		}
 
 		$class = $params['class'];
 		$name = $params['name'];
