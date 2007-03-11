@@ -427,8 +427,7 @@
 
 		public function _generate_page_list($params, &$smarty)
 		{
-			if(!$this->_init_paging_vars())
-				return '';
+			$this->_init_paging_vars();
 
 			$html = '';
 			$template_first_incl = '<a href="%u"><img src="'.$this->_img_prefix.'/icons/resultset_first.png" /></a> ';
