@@ -23,7 +23,7 @@ add_event(window, 'load', focus_input);
 {/literal}
 </script>
 
-<form action="." method="post">
+<form action="{swisdk_runtime_value key="controller.url"}" method="post">
 	<fieldset>
 
 		<label for="login_username">Username</label>
