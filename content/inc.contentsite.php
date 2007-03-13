@@ -208,6 +208,14 @@
 				foreach($_i2c as $row)
 					$i2c[$row[$r['link_here']]][] = $row[$r['link_there']];
 				$this->smarty->assign('items_to_categories', $i2c);
+
+				if($this->find_config_value('group_listing_by_category')) {
+					$c2i = array();
+					foreach($i2c as $i => $cs)
+						foreach($cs as $c)
+							$c2i[$c][] = $i;
+					$this->smarty->assign('categories_to_items', $c2i);
+				}
 			}
 
 			if($this->find_config_value('realm_links')) {
