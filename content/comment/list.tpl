@@ -4,14 +4,14 @@
 {foreach from=$comments item=c}
 <div class="comment">
 	<a name="comment{$c.comment_id}"></a>
-	<p><strong>
+	<div class="comment_title"><strong>
 	{if $c.comment_author_url}
 		<a href="{$c.comment_author_url}">{$c.comment_author}</a>
 	{else}
 		{$c.comment_author}
 	{/if}
-	</strong> wrote on {$c.comment_creation_dttm|date_format:"%d.%m.%Y, %H:%M"}:</p>
-	<p>{$c.comment_text|markdown}</p>
+	</strong> <span>wrote on {$c.comment_creation_dttm|date_format:"%d.%m.%Y, %H:%M"}:</span></div>
+	<div class="comment_text">{$c.comment_text|markdown}</div>
 </div>
 {/foreach}
 {else}
