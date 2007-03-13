@@ -916,10 +916,23 @@
 		 */
 		protected function filter_cutoff()
 		{
+			$time = time();
 			if($cop = $this->find_config_value('cut_off_past'))
-				$this->dbobj->add_clause($cop.'>='.time());
+				$this->dbobj->add_clause($cop.'>='.$time);
 			if($cof = $this->find_config_value('cut_off_future'))
-				$this->dbobj->add_clause($cof.'<'.time());
+				$this->dbobj->add_clause($cof.'<'.$time);
+			if($coe = $this->find_config_value('cut_off_end')) {
+				if($coef = $this->find_config_value('cut_off_end_flag')) {
+					$mode = $coef{0}=='!';
+					$this->dbobj->add_clause('('
+						.($mode
+							?substr($coef, 1).'!='
+							:$coef.'=')
+						.'0 OR '
+						.$coe.'>'.$time.')');
+				} else
+					$this->dbobj->add_clause($coe.'>'.$time);
+			}
 		}
 
 		/**
