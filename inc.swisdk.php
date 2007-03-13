@@ -29,14 +29,57 @@
 			 * so we use the SCRIPT_NAME and assume that the file is in
 			 * APP_ROOT/swisdk/commandline.php
 			 */
-			define('APP_ROOT', dirname(dirname(__FILE__)).'/');
 
-			$requestUri = '';
-			if( isset( $_SERVER['argv'][1]) ) {
-				$requestUri = $_SERVER['argv'][1];
+			$options = array(
+				'--app-root=' => 'app_root',
+				'--controller=' => 'controller');
+			$app_root = null;
+			$controller = null;
+			$requestUri = null;
+
+			$cmd_iface = array_shift($_SERVER['argv']);
+
+			foreach($_SERVER['argv'] as $arg) {
+				foreach($options as $o => $v) {
+					if(strpos($arg, '--')!==0)
+						$requestUri = $arg;
+					else if(strpos($arg, $o)===0) {
+						$$v = substr($arg, strlen($o));
+					}
+				}
 			}
 
-			Swisdk::run( array( 'REQUEST_URI' => $requestUri  ) );
+			if($app_root)
+				define('APP_ROOT', realpath($app_root).'/');
+			else
+				define('APP_ROOT', dirname(dirname(__FILE__)).'/');
+
+			if($requestUri) {
+				Swisdk::run(array('REQUEST_URI' => $requestUri));
+			} else if($controller) {
+				// initialize core components
+				Swisdk::init();
+
+				Swisdk::set_config_value('runtime.includefile',
+					realpath($controller));
+
+				// load common settings and relations
+				Swisdk::load_file('inc.common.php');
+
+				// Everything is ready to really rock now. Generate and display
+				// the response
+				require_once SWISDK_ROOT . 'site/inc.handlers.php';
+				$handler = new PhpSiteHandler();
+				$handler->handle();
+			} else {
+				$usage = <<<EOD
+SWISDK2 Commandline Interface
+php $cmd_iface 'http://example.com/test/'
+php $cmd_iface --app-root=\$dir --controller=controller.php
+
+EOD;
+				die($usage);
+			}
 		}
 
 		/**
