@@ -796,6 +796,18 @@
 						$dbo->related('Realm'));
 				}
 			}
+			if($this->find_config_value('trackback_enabled')){
+				$urlgen = Swisdk::load_instance('UrlGenerator');
+				$proto = Swisdk::config_value('runtime.request.protocol');
+				$host = Swisdk::config_value('runtime.request.host');
+				$url = "$proto//$host{$urlgen->generate_url($dbo)}";
+				$this->smarty->assign('trackback_enabled', true);
+				$this->smarty->assign('trackback_about', $url);
+				$this->smarty->assign('trackback_url', "{$url}trackback");
+			} else {
+				$this->smarty->assign('trackback_enabled', 'false');
+			}
+
 			$this->register_paging_functions();
 			$this->run_website_components($this->smarty);
 		}
