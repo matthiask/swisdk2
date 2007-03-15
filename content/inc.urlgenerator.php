@@ -62,6 +62,15 @@
 					$this->controller_url).'/'.$obj->file_name;
 		}
 
+		public function generate_comment_url($obj)
+		{
+			$tokens = explode('_', $obj->realm);
+			return Swisdk::config_value('runtime.urlgenerator.'.$tokens[0],
+					'/'.$tokens[0])
+				.'/?p='.$tokens[1].'#comment'.$obj->id();
+
+		}
+
 		/**
 		 * generate <controller>/year/month/day/post-slug/ style URLs
 		 */
