@@ -754,8 +754,9 @@
 
 			$feed->encoding = 'UTF-8';
 
-			$feed->saveFeed('RSS2.0', HTDOCS_ROOT.'feeds/rss20-'
-				.sha1($_SERVER['REQUEST_URI']).'.xml');
+			$feed->saveFeed('RSS2.0', HTDOCS_ROOT
+				.substr(Swisdk::config_value('runtime.webroot.feeds', '/feeds'), 1)
+				.'/rss20-'.sha1($_SERVER['REQUEST_URI']).'.xml');
 		}
 
 		protected function handle_comment_feed()
@@ -797,8 +798,9 @@
 
 			$feed->encoding = 'UTF-8';
 
-			$feed->saveFeed('RSS2.0', HTDOCS_ROOT.'feeds/rss20-'
-				.sha1($_SERVER['REQUEST_URI']).'.xml');
+			$feed->saveFeed('RSS2.0', HTDOCS_ROOT
+				.substr(Swisdk::config_value('runtime.webroot.feeds', '/feeds'), 1)
+				.'/rss20-'.sha1($_SERVER['REQUEST_URI']).'.xml');
 		}
 
 		protected function _single_get_dbobj()
