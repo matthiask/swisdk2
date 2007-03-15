@@ -814,6 +814,8 @@
 
 			$ug = Swisdk::load_instance('UrlGenerator');
 			$this->dbobj = $this->_single_get_dbobj();
+			if(!$this->dbobj)
+				return $this->handle_none();
 
 			require_once SWISDK_ROOT.'lib/contrib/feedcreator.class.php';
 			require_once SWISDK_ROOT.'lib/contrib/markdown.php';
