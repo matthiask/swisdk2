@@ -89,6 +89,9 @@
 			'comment_feed' => array(
 				CONTENT_SITE_PARAM_NONE,
 				'mode' => 'comment_feed'),
+			'feed_comments' => array(
+				CONTENT_SITE_PARAM_NONE,
+				'mode' => 'feed_comments'),
 			'trackback' => array(
 				CONTENT_SITE_PARAM_NONE,
 				'mode' => 'trackback'));
@@ -748,6 +751,46 @@
 				$item->date = date(DATE_W3C, $dbo->start_dttm);
 				$item->author = $authors[$dbo->author_id]->forename.' '
 					.$authors[$dbo->author_id]->name;
+
+				$feed->addItem($item);
+			}
+
+			$feed->encoding = 'UTF-8';
+
+			$feed->saveFeed('RSS2.0', HTDOCS_ROOT
+				.substr(Swisdk::config_value('runtime.webroot.feeds', '/feeds'), 1)
+				.'/rss20-'.sha1($_SERVER['REQUEST_URI']).'.xml');
+		}
+
+		protected function handle_feed_comments()
+		{
+			if(!$this->find_config_value('feed_enabled'))
+				SwisdkError::handle(new FatalError('Feed is disabled'));
+			if(!$this->find_config_value('comments_enabled'))
+				SwisdkError::handle(new FatalError('Comments are disabled'));
+
+			require_once SWISDK_ROOT.'lib/contrib/feedcreator.class.php';
+			require_once SWISDK_ROOT.'lib/contrib/markdown.php';
+			$feed = new UniversalFeedCreator();
+			$feed->title = Swisdk::config_value('runtime.website.title')
+				.' | '.dgettext('swisdk', 'Comments');
+			$feed->description = $feed->title;
+			$feed->link = 'http://'.Swisdk::config_value('runtime.request.host');
+			$feed->syndicationURL = $_SERVER['REQUEST_URI'];
+
+			$ug = Swisdk::load_instance('UrlGenerator');
+
+			$comments = DBOContainer::find('Comment', array(
+				':order' => array('comment_creation_dttm', 'DESC'),
+				':limit' => 20));
+
+			foreach($comments as $c) {
+				$item = new FeedItem();
+				$item->title = ellipsize(strip_tags($c->text));
+				$item->link = $feed->link.$ug->generate_url($c);
+				$item->description = Markdown($c->text);
+				$item->date = date(DATE_W3C, $c->creation_dttm);
+				$item->author = $c->author;
 
 				$feed->addItem($item);
 			}
