@@ -86,6 +86,9 @@
 			'feed' => array(
 				CONTENT_SITE_PARAM_NONE,
 				'mode' => 'feed'),
+			'comment_feed' => array(
+				CONTENT_SITE_PARAM_NONE,
+				'mode' => 'comment_feed'),
 			'trackback' => array(
 				CONTENT_SITE_PARAM_NONE,
 				'mode' => 'trackback'));
@@ -745,6 +748,49 @@
 				$item->date = date(DATE_W3C, $dbo->start_dttm);
 				$item->author = $authors[$dbo->author_id]->forename.' '
 					.$authors[$dbo->author_id]->name;
+
+				$feed->addItem($item);
+			}
+
+			$feed->encoding = 'UTF-8';
+
+			$feed->saveFeed('RSS2.0', HTDOCS_ROOT.'feeds/rss20-'
+				.sha1($_SERVER['REQUEST_URI']).'.xml');
+		}
+
+		protected function handle_comment_feed()
+		{
+			if(!$this->find_config_value('feed_enabled'))
+				SwisdkError::handle(new FatalError('Feed is disabled'));
+
+			require_once SWISDK_ROOT.'lib/contrib/feedcreator.class.php';
+			require_once SWISDK_ROOT.'lib/contrib/markdown.php';
+
+			$ug = Swisdk::load_instance('UrlGenerator');
+			$this->dbobj = $this->_single_get_dbobj();
+			$dbo = $this->dbobj;
+			$proto = Swisdk::config_value('runtime.request.protocol');
+			$host = Swisdk::config_value('runtime.request.host');
+			$url = "$proto//$host{$ug->generate_article_url($dbo)}";
+
+			$feed = new UniversalFeedCreator();
+			$feed->title = $dbo->title;
+			$feed->description = Swisdk::language() == 1 ? "Kommentare fÃ¼r \"$dbo->title\"" : "Commentaires pour \"$dbo->title\"";
+			$feed->link = $url;
+			$feed->syndicationURL = $_SERVER['REQUEST_URI'];
+
+			$dboc = DBOContainer::create('Comment');
+			$dboc->add_clause('comment_realm=', $this->dbobj->comment_realm);
+			$dboc->init();
+
+			foreach($dboc as $comment) {
+				$item = new FeedItem();
+				$item->title = strlen($comment->text) < 30 ?
+					$comment->text : substr($comment->text, 0, 30) . '...';
+				$item->link = "{$feed->link}#comment{$comment->id}";
+				$item->description = Markdown($comment->teaser);
+				$item->date = date(DATE_W3C, $comment->creation_dttm);
+				$item->author = $comment->author;
 
 				$feed->addItem($item);
 			}
