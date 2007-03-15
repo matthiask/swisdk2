@@ -392,3 +392,9 @@ msgstr "In %s"
 
 msgid "right now"
 msgstr "Jetzt"
+
+msgid "Comments"
+msgstr "Kommentare"
+
+msgid "Comments for '%s'"
+msgstr "Kommentare für '%s'"

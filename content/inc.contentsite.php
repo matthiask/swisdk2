@@ -89,6 +89,9 @@
 			'comment_feed' => array(
 				CONTENT_SITE_PARAM_NONE,
 				'mode' => 'comment_feed'),
+			'comments' => array(
+				CONTENT_SITE_PARAM_NONE,
+				'mode' => 'comment_feed'),
 			'feed_comments' => array(
 				CONTENT_SITE_PARAM_NONE,
 				'mode' => 'feed_comments'),
@@ -775,18 +778,18 @@
 			$feed->title = Swisdk::config_value('runtime.website.title')
 				.' | '.dgettext('swisdk', 'Comments');
 			$feed->description = $feed->title;
-			$feed->link = 'http://'.Swisdk::config_value('runtime.request.host');
+			$feed->link = Swisdk::config_value('runtime.request.protocol')
+				.'//'.Swisdk::config_value('runtime.request.host');
 			$feed->syndicationURL = $_SERVER['REQUEST_URI'];
 
 			$ug = Swisdk::load_instance('UrlGenerator');
-
 			$comments = DBOContainer::find('Comment', array(
 				':order' => array('comment_creation_dttm', 'DESC'),
 				':limit' => 20));
 
 			foreach($comments as $c) {
 				$item = new FeedItem();
-				$item->title = ellipsize(strip_tags($c->text));
+				$item->title = ellipsize(strip_tags($c->text), 50, '...');
 				$item->link = $feed->link.$ug->generate_url($c);
 				$item->description = Markdown($c->text);
 				$item->date = date(DATE_W3C, $c->creation_dttm);
@@ -806,35 +809,34 @@
 		{
 			if(!$this->find_config_value('feed_enabled'))
 				SwisdkError::handle(new FatalError('Feed is disabled'));
-
-			require_once SWISDK_ROOT.'lib/contrib/feedcreator.class.php';
-			require_once SWISDK_ROOT.'lib/contrib/markdown.php';
+			if(!$this->find_config_value('comments_enabled'))
+				SwisdkError::handle(new FatalError('Comments are disabled'));
 
 			$ug = Swisdk::load_instance('UrlGenerator');
 			$this->dbobj = $this->_single_get_dbobj();
-			$dbo = $this->dbobj;
-			$proto = Swisdk::config_value('runtime.request.protocol');
-			$host = Swisdk::config_value('runtime.request.host');
-			$url = "$proto//$host{$ug->generate_article_url($dbo)}";
 
+			require_once SWISDK_ROOT.'lib/contrib/feedcreator.class.php';
+			require_once SWISDK_ROOT.'lib/contrib/markdown.php';
 			$feed = new UniversalFeedCreator();
-			$feed->title = $dbo->title;
-			$feed->description = Swisdk::language() == 1 ? "Kommentare fÃ¼r \"$dbo->title\"" : "Commentaires pour \"$dbo->title\"";
-			$feed->link = $url;
+			$feed->title = $this->dbobj->title
+				.' | '.dgettext('swisdk', 'Comments');
+			$feed->description = sprintf(dgettext('swisdk', 'Comments for \'%s\''),
+				$this->dbobj->title);
+			$feed->link = Swisdk::config_value('runtime.request.protocol')
+				.'//'.Swisdk::config_value('runtime.request.host')
+				.$ug->generate_url($this->dbobj);
 			$feed->syndicationURL = $_SERVER['REQUEST_URI'];
 
-			$dboc = DBOContainer::create('Comment');
-			$dboc->add_clause('comment_realm=', $this->dbobj->comment_realm);
-			$dboc->init();
+			$comments = DBOContainer::find('Comment', array(
+				'comment_realm=' => $this->dbobj->comment_realm));
 
-			foreach($dboc as $comment) {
+			foreach($comments as $c) {
 				$item = new FeedItem();
-				$item->title = strlen($comment->text) < 30 ?
-					$comment->text : substr($comment->text, 0, 30) . '...';
-				$item->link = "{$feed->link}#comment{$comment->id}";
-				$item->description = Markdown($comment->teaser);
-				$item->date = date(DATE_W3C, $comment->creation_dttm);
-				$item->author = $comment->author;
+				$item->title = ellipsize(strip_tags($c->text), 50, '...');
+				$item->link = $feed->link.'#comment'.$c->id();
+				$item->description = Markdown($c->text);
+				$item->date = date(DATE_W3C, $c->creation_dttm);
+				$item->author = $c->author;
 
 				$feed->addItem($item);
 			}

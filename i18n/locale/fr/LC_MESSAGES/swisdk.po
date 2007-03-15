@@ -251,3 +251,8 @@ msgstr "Could not load %s"
 msgid "Could not create instance of class %s"
 msgstr "Could not create instance of class %s"
 
+msgid "Comments"
+msgstr "Commentaires"
+
+msgid "Comments for '%s'"
+msgstr "Commentaires pour '%s'"
