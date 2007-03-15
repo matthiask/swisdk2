@@ -825,7 +825,8 @@
 		{
 			if(!$this->find_config_value('trackback_enabled'))
 				SwisdkError::handle(new FatalError('Trackback is disabled'));
-			$dbo = $this->dbobj->rewind();
+
+			$this->dbobj = $this->_single_get_dbobj();
 			$url = getInput('url');
 			$title = getInput('title');
 			$excerpt = getInput('excerpt');
@@ -847,7 +848,7 @@
 
 			if($url && $title) {
 				$comment = DBObject::create('Comment');
-				$comment->realm = $dbo->comment_realm;
+				$comment->realm = $this->dbobj->comment_realm;
 				$comment->author = $blog_name;
 				$comment->author_url = $url;
 				$comment->text = "<strong>$title</strong>\n\n$excerpt";
