@@ -73,8 +73,8 @@
 	 */
 	function slugify($string)
 	{
-		$fr = array('ä', 'ö', 'ü', 'ß', 'à','á','è','é','î','ô');
-		$to = array('ae','oe','ue','ss','a','a','e','e','i','o');
+		$fr = array('ä', 'ö', 'ü', 'ß', 'à','á','è','é','î','ô','ç');
+		$to = array('ae','oe','ue','ss','a','a','e','e','i','o','c');
 
 		return preg_replace('/[-\s]+/', '-',
 			trim(

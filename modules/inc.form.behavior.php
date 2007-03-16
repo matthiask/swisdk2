@@ -189,7 +189,8 @@ function urlify_behavior_handler_$n1()
 		['è', 'e'],
 		['é', 'e'],
 		['î', 'i'],
-		['ô', 'o']];
+		['ô', 'o'],
+		['ç', 'c']];
 	r = new RegExp('\\b(' + removelist.join('|') + ')\\b', 'gi');
 	for(i=0; i<replacement.length; i++)
 		str = str.replace(new RegExp(replacement[i][0]), replacement[i][1]);
