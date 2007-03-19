@@ -21,6 +21,7 @@
 			$this->security = false;
 			$this->register_function('swisdk_runtime_value',
 				'_smarty_swisdk_runtime_value');
+			$this->register_function('webroot', '_smarty_swisdk_webroot');
 			$this->register_block('block', '_smarty_swisdk_process_block');
 			$this->register_function('extends', '_smarty_swisdk_extends');
 			$this->register_function('db_assign', '_smarty_swisdk_db_assign');
@@ -137,6 +138,16 @@
 		if(isset($params['format']) && $val)
 			return sprintf($params['format'], $val);
 		return $val;
+	}
+
+	function _smarty_swisdk_webroot($params, &$smarty)
+	{
+		static $values = array();
+		$key = $params['key'];
+		if(!isset($values[$key]))
+			$values[$key] = Swisdk::config_value(
+				'runtime.webroot.'.$key, '/'.$key);
+		return $values[$key];
 	}
 
 	function _smarty_swisdk_css_classify($params, &$smarty)
