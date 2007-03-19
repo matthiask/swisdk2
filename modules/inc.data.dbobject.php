@@ -1124,6 +1124,13 @@
 			$this->data = array_merge($this->data, $data);
 		}
 
+		public function set_data_with_prefix($data, $prefix)
+		{
+			$this->dirty = true;
+			foreach($data as $k => $v)
+				$this->data[$prefix.$k] = $v;
+		}
+
 		/**
 		 * Clear the contents of this DBObject
 		 */
