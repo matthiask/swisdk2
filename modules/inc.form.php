@@ -144,6 +144,11 @@
 			return $this->boxrefs[$id];
 		}
 
+		public function &boxes()
+		{
+			return $this->boxrefs;
+		}
+
 		/**
 		 * add a validation message to the FormBox (will be displayed after
 		 * everything else)
