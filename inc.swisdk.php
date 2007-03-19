@@ -304,7 +304,7 @@ EOD;
 			Swisdk::$config[strtolower($key)] = $value;
 		}
 
-		public static function config_value($key, $default = null)
+		public static function config_value($key, $default = null, $throw = false)
 		{
 			if(!is_array($key))
 				$key = array($key);
@@ -314,6 +314,10 @@ EOD;
 				if(isset(Swisdk::$config[$k]))
 					return Swisdk::$config[$k];
 			}
+
+			if($throw)
+				SwisdkError::handle(new FatalError(
+					'No configuration for "'.implode(', ', $key).'" found'));
 
 			return $default;
 		}
