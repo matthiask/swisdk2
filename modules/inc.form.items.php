@@ -773,8 +773,12 @@ EOD;
 			parent::init_value($dbobj);
 			$value = $this->value();
 			if(!is_array($value)) {
-				$this->set_value(array_map('trim',
-					explode(',', $this->value())));
+				$_v = array_map('trim', explode(',', $value));
+				$value = array();
+				foreach($_v as $v)
+					if($v)
+						$value[] = $v;
+				$this->set_value($value);
 			}
 		}
 
