@@ -233,7 +233,7 @@
 				$this->smarty->assign('realms', DBOContainer::find('Realm')
 					->collect('id', 'title'));
 			}
-			$this->register_paging_functions();
+			$this->register_functions();
 			$this->run_website_components($this->smarty);
 			$this->display($this->template_list);
 		}
@@ -241,7 +241,7 @@
 		/**
 		 * register smarty functions for paging
 		 */
-		protected function register_paging_functions()
+		protected function register_functions()
 		{
 			$this->smarty->register_function('generate_paging',
 				array(&$this, '_generate_paging'));
@@ -268,6 +268,9 @@
 				array(&$this, '_generate_item_next_url'));
 			$this->smarty->register_function('generate_page_list_from_item',
 				array(&$this, '_generate_page_list_from_item'));
+
+			$this->smarty->register_function('generate_date',
+				array(&$this, '_generate_date'));
 		}
 
 		protected $_paging_limit = null;
@@ -724,6 +727,41 @@
 			return $count;
 		}
 
+		protected $_generate_date_data = array();
+
+		public function _generate_date($params, &$smarty)
+		{
+			$ref =& $this->_generate_date_data;
+			if(isset($params['name']) && $n = $params['name']) {
+				if(!isset($ref[$n]))
+					$ref[$n] = array();
+				$ref =& $ref[$n];
+			}
+
+			$item = $params['item'];
+			$fmt = $params['fmt'];
+
+			if(!isset($ref[$fmt])) {
+				$pubdate_field = $this->find_config_value('pubdate_field', '#');
+				if($pubdate_field=='#')
+					$pubdate_field = $this->dbobj->dbobj()->name('start_dttm');
+
+				$ref[$fmt] = array(
+					'pubdate_field' => $pubdate_field,
+					'last_str' => '');
+			}
+
+			$ref =& $ref[$fmt];
+			$str = strftime($fmt, $item->get($ref['pubdate_field']));
+
+			if($str!=$ref['last_str']) {
+				$ref['last_str'] = $str;
+				return $str;
+			}
+
+			return '';
+		}
+
 		protected function handle_feed()
 		{
 			if(!$this->find_config_value('feed_enabled'))
@@ -903,7 +941,7 @@
 				$this->smarty->assign('trackback_enabled', 'false');
 			}
 
-			$this->register_paging_functions();
+			$this->register_functions();
 			$this->run_website_components($this->smarty);
 		}
 
@@ -962,7 +1000,7 @@
 		{
 			$smarty = new SwisdkSmarty();
 			$smarty->assign('items', array());
-			$this->register_paging_functions();
+			$this->register_functions();
 			$this->run_website_components($smarty);
 			$this->display($this->template_list);
 		}
