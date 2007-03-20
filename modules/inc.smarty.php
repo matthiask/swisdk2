@@ -31,6 +31,8 @@
 			$this->assign_by_ref('_swisdk_smarty_instance', $this);
 			$this->register_function('css_classify', '_smarty_swisdk_css_classify');
 			$this->register_function('generate_url', '_smarty_swisdk_generate_url');
+			$this->register_function('generate_image_url',
+				'_smarty_swisdk_generate_image_url');
 			$this->register_function('dttm_range', '_smarty_swisdk_dttm_range');
 
 			if($assign) {
@@ -161,6 +163,20 @@
 		if($generator===null)
 			$generator = Swisdk::load_instance('UrlGenerator');
 		return $generator->generate_url($params['item']);
+	}
+
+	function _smarty_swisdk_generate_image_url($params, &$smarty)
+	{
+		$a = $params['album']->name;
+		$i = $params['image'];
+		$t = $params['type'];
+
+		if(isset($params['generate']) && $params['generate'])
+			ImageManager::generate_type(GALLERY_INCOMING_ROOT.$a.'/'.$i->file,
+				$t, 'gallery/'.$a);
+
+		return Swisdk::config_value('runtime.webroot.data', '/data')
+			.'/gallery/'.$a.'/'.$i->{'filename_'.$t};
 	}
 
 	function _smarty_swisdk_dttm_range($params, &$smarty)
