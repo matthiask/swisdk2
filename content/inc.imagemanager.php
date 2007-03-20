@@ -42,7 +42,7 @@
 		{
 			foreach(ImageManager::$types as $type => &$dummy)
 				ImageManager::generate($file, $type, $htdocs_data_dir,
-					arary(), $regenerate);
+					array(), $regenerate);
 		}
 
 		/**
@@ -87,6 +87,15 @@
 			}
 
 			return $thumb_name;
+		}
+
+		public static function process_types($file, $htdocs_data_dir, $commands)
+		{
+			foreach(ImageManager::$types as $type => &$dummy) {
+				$fname = HTDOCS_DATA_ROOT.$htdocs_data_dir.'/'
+					.ImageManager::filename($file, $type);
+				ImageManager::process_commands($fname, $commands);
+			}
 		}
 
 		/**
