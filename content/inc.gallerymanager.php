@@ -73,7 +73,8 @@
 		public static function images($album)
 		{
 			$args = func_get_args();
-			$args[0] = $args[0]->related('GalleryImage');
+			$args[0] = $args[0]->related('GalleryImage', array(
+					':order' => 'gallery_image_sortkey'));
 			return call_user_func_array(array('GalleryManager', 'add_type_filename'),
 				$args);
 		}
