@@ -130,6 +130,11 @@
 					?' ORDER BY '.implode(',', $this->order_columns)
 					:'')
 				. $this->limit;
+			return $this->init_by_sql($sql);
+		}
+
+		public function init_by_sql($sql)
+		{
 			$res = DBObject::db_query($sql, $this->obj->db_connection());
 			if($res===false)
 				return false;
