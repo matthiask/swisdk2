@@ -103,16 +103,22 @@
 			if(method_exists($this, $method)) {
 				call_user_func(array($this, $method), $obj);
 				return;
-			} else {
-				$parents = class_parents($class);
-				foreach($parents as $p) {
-					$method = 'visit_'.$p.$suffix;
-					if(method_exists($this, $method)) {
-						call_user_func(array($this, $method),
-							$obj);
-						return;
-					}
+			}
+
+			$parents = class_parents($class);
+			foreach($parents as $p) {
+				$method = 'visit_'.$p.$suffix;
+				if(method_exists($this, $method)) {
+					call_user_func(array($this, $method),
+						$obj);
+					return;
 				}
+			}
+
+			if(method_exists($obj, 'html')) {
+				$this->_collect_javascript($obj);
+				$this->_render($obj, $obj->html());
+				return;
 			}
 
 			SwisdkError::handle(new FatalError(sprintf(
