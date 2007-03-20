@@ -40,7 +40,9 @@
 		public static function rescan_directory($album)
 		{
 			$directory = GALLERY_INCOMING_ROOT.$album->name.'/';
-			$files = scandir($directory);
+			$files = array();
+			if(file_exists($directory))
+				$files = scandir($directory);
 			$images = $album->related('GalleryImage')->collect('file', 'id');
 
 			foreach($files as $file) {
@@ -126,6 +128,7 @@
 			$image->title = pathinfo($image->original_file, PATHINFO_FILENAME);
 			$image->set_owner($album);
 
+			Swisdk::require_data_directory('gallery/'.$album->name);
 			rename($fdata['path'], GALLERY_INCOMING_ROOT.$album->name.'/'.$image->file);
 
 			$image->store();
