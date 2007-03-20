@@ -72,10 +72,17 @@
 
 		public static function images($album)
 		{
-			$types = func_get_args();
-			$album = array_shift($types);
+			$args = func_get_args();
+			$args[0] = $args[0]->related('GalleryImage');
+			return call_user_func_array(array('GalleryManager', 'add_type_filename'),
+				$args);
+		}
 
-			$images = $album->related('GalleryImage');
+		public static function add_type_filename($images)
+		{
+			$types = func_get_args();
+			$images = array_shift($types);
+
 			foreach($images as $image) {
 				$paths = ImageManager::filename($image->file, $types);
 				$image->set_data_with_prefix($paths, 'gallery_image_filename_');
@@ -133,6 +140,24 @@
 
 			$image->store();
 			return $image;
+		}
+
+		public static function album_one_image($albums, $type='thumb')
+		{
+			$images = DBOContainer::create('GalleryImage');
+			$ids = implode(',', $albums->ids());
+			$sql = <<<EOD
+SELECT * FROM tbl_gallery_image
+	JOIN tbl_gallery_album ON gallery_image_gallery_album_id=gallery_album_id
+	WHERE gallery_album_id IN ($ids) AND gallery_image_id IN
+		(SELECT MAX(gallery_image_id) FROM tbl_gallery_image gi
+			WHERE gallery_image_gallery_album_id=gi.gallery_image_gallery_album_id
+			GROUP BY gallery_image_gallery_album_id)
+EOD;
+			$images->set_index('gallery_album_id');
+			$images->init_by_sql($sql);
+
+			return GalleryManager::add_type_filename($images, $type);
 		}
 	}
 
