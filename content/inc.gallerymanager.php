@@ -104,6 +104,9 @@
 
 			$dir = HTDOCS_ROOT.GALLERY_HTDOCS_ROOT.$album->name.'/';
 
+			if(!file_exists($dir))
+				return;
+
 			$generated_files = scandir($dir);
 			foreach($generated_files as $gf) {
 				if($gf{0}=='.')
