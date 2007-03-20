@@ -10,8 +10,13 @@
 	DBObject::has_many('GalleryAlbum', 'GalleryImage');
 
 	class GalleryManager {
-		public static function setup($root=null)
+		protected static $initialized = false;
+
+		public static function init($root=null)
 		{
+			if(GalleryManager::$initialized)
+				return;
+
 			Swisdk::require_htdocs_data_directory('gallery');
 			define('GALLERY_HTDOCS_ROOT',
 				substr(Swisdk::config_value('runtime.webroot.data', '/data')
@@ -19,10 +24,14 @@
 
 			Swisdk::require_data_directory('gallery');
 			define('GALLERY_INCOMING_ROOT', DATA_ROOT.'gallery/');
+
+			GalleryManager::$initialized = true;
 		}
 
 		public static function generate_images($album, $type1='thumb', $type2='full')
 		{
+			GalleryManager::init();
+
 			$types = func_get_args();
 			$album = array_shift($types);
 
@@ -39,6 +48,8 @@
 
 		public static function rescan_directory($album)
 		{
+			GalleryManager::init();
+
 			$directory = GALLERY_INCOMING_ROOT.$album->name.'/';
 			$files = array();
 			if(file_exists($directory))
@@ -72,6 +83,8 @@
 
 		public static function images($album)
 		{
+			GalleryManager::init();
+
 			$args = func_get_args();
 			$args[0] = $args[0]->related('GalleryImage', array(
 					':order' => 'gallery_image_sortkey'));
@@ -81,6 +94,8 @@
 
 		public static function add_type_filename($images)
 		{
+			GalleryManager::init();
+
 			$types = func_get_args();
 			$images = array_shift($types);
 
@@ -94,6 +109,8 @@
 
 		public static function cleanup($album)
 		{
+			GalleryManager::init();
+
 			Swisdk::clean_data_directory(DATA_ROOT.'scratch/');
 
 			$images = $album->related('GalleryImage');
@@ -118,6 +135,8 @@
 
 		public static function nuke($album)
 		{
+			GalleryManager::init();
+
 			$dir = HTDOCS_ROOT.GALLERY_HTDOCS_ROOT.$album->name.'/';
 			$generated_files = scandir($dir);
 			foreach($generated_files as $gf) {
@@ -130,6 +149,8 @@
 
 		public static function add_image_from_fileupload($album, $fileupload)
 		{
+			GalleryManager::init();
+
 			$fdata = $fileupload->files_data();
 
 			$image = DBObject::create('GalleryImage');
@@ -148,6 +169,8 @@
 
 		public static function album_one_image($albums, $type='thumb')
 		{
+			GalleryManager::init();
+
 			$images = DBOContainer::create('GalleryImage');
 			$ids = implode(',', $albums->ids());
 			$sql = <<<EOD
