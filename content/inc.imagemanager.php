@@ -11,9 +11,9 @@
 		/**
 		* Register a ImageManager command array for a type.
 		*/
-		public static function register_type($type, $commands)
+		public static function register_type($type, $config)
 		{
-			ImageManager::$types[$type] = $commands;
+			ImageManager::$types[$type] = $config;
 		}
 
 		/**
@@ -22,6 +22,28 @@
 		public static function type_exists($type)
 		{
 			return isset(ImageManager::$types[$type]);
+		}
+
+		/**
+		 *
+		 */
+		public static function types_by_feature($feature)
+		{
+			$ret = array();
+			foreach(ImageManager::$types as $type => $config) {
+				if(isset($config[$feature]) && $config[$feature])
+					$ret[$type] = $config;
+			}
+
+			return $ret;
+		}
+
+		/**
+		 *
+		 */
+		public static function types()
+		{
+			return ImageManager::$types;
 		}
 
 		/**
@@ -82,7 +104,7 @@
 				ImageManager::process_commands($tmp, $commands);
 				if(ImageManager::type_exists($type))
 					ImageManager::process_commands($tmp,
-						ImageManager::$types[$type]);
+						ImageManager::$types[$type]['commands']);
 				rename($tmp, $thumb);
 			}
 
@@ -221,7 +243,7 @@
 		 */
 		public static function transform_crop($file, $width, $height, $x, $y)
 		{
-			$cmd = sprintf('mogrify -quality 100 -crop %dx%d+%d+%d %s',
+			$cmd = sprintf('mogrify -quality 100 -crop %dx%d+%d+%d! %s',
 				intval($width),
 				intval($height),
 				intval($x),
@@ -231,16 +253,16 @@
 		}
 
 		/**
-		 * Tint an image
+		 * Colorize an image
 		 *
-		 * @param $percent 	Tint (0-100)
 		 * @param $color 	Color which should be used
+		 * @param $percent 	Colorize (0-100)
 		 */
-		public static function transform_tint($file, $percent, $color)
+		public static function transform_colorize($file, $color, $percent)
 		{
-			$cmd = sprintf('mogrify -quality 100 -tint %d%% -fill %s %s',
-				$percent,
+			$cmd = sprintf('mogrify -quality 100 -fill %s -colorize %s %s',
 				escapeshellarg($color),
+				intval($percent),
 				escapeshellarg($file));
 			exec($cmd);
 		}
@@ -279,6 +301,36 @@
 			return $info['filename']
 				.'__'.$token.'.'.$info['extension'];
 		}
+
+		/**
+		 *
+		 */
+		public static function add_type_filename($images)
+		{
+			$types = func_get_args();
+			$images = array_shift($types);
+			return ImageManager::add_type_filename_a($images, $types);
+		}
+
+		public static function add_type_filename_a($images, $types)
+		{
+			if($images instanceof DBOContainer) {
+				if($images->count()) {
+					$p = $images->rewind()->_prefix();
+					foreach($images as $image) {
+						$paths = ImageManager::filename($image->file, $types);
+						$image->set_data_with_prefix($paths, $p.'filename_');
+					}
+				}
+			} else {
+				$p = $images->_prefix();
+				$paths = ImageManager::filename($images->file, $types);
+				$images->set_data_with_prefix($paths, $p.'filename_');
+			}
+
+			return $images;
+		}
+
 	}
 
 ?>

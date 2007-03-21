@@ -28,12 +28,23 @@
 			GalleryManager::$initialized = true;
 		}
 
-		public static function generate_images($album, $type1='thumb', $type2='full')
+		public static function image_fullpath($album, $image)
 		{
 			GalleryManager::init();
 
+			return GALLERY_INCOMING_ROOT.$album->name.'/'.$image->file;
+		}
+
+		public static function generate_images($album, $type1='thumb', $type2='full')
+		{
 			$types = func_get_args();
 			$album = array_shift($types);
+			return GalleryManager::generate_images_a($album, $types);
+		}
+
+		public static function generate_images_a($album, $types)
+		{
+			GalleryManager::init();
 
 			$images = $album->related('GalleryImage');
 
@@ -83,28 +94,18 @@
 
 		public static function images($album)
 		{
-			GalleryManager::init();
-
-			$args = func_get_args();
-			$args[0] = $args[0]->related('GalleryImage', array(
-					':order' => 'gallery_image_sortkey'));
-			return call_user_func_array(array('GalleryManager', 'add_type_filename'),
-				$args);
+			$types = func_get_args();
+			$album = array_shift($types);
+			return GalleryManager::images_a($album, $types);
 		}
 
-		public static function add_type_filename($images)
+		public static function images_a($album, $types)
 		{
 			GalleryManager::init();
 
-			$types = func_get_args();
-			$images = array_shift($types);
-
-			foreach($images as $image) {
-				$paths = ImageManager::filename($image->file, $types);
-				$image->set_data_with_prefix($paths, 'gallery_image_filename_');
-			}
-
-			return $images;
+			$images = $album->related('GalleryImage', array(
+					':order' => 'gallery_image_sortkey'));
+			return ImageManager::add_type_filename_a($images, $types);
 		}
 
 		public static function cleanup($album)
@@ -184,7 +185,25 @@ EOD;
 			$images->set_index('gallery_album_id');
 			$images->init_by_sql($sql);
 
-			return GalleryManager::add_type_filename($images, $type);
+			return ImageManager::add_type_filename($images, $type);
+		}
+
+		/**
+		 *
+		 */
+		public static function reorder_images($album, $order)
+		{
+			$images = $album->related('GalleryImage');
+
+			if(!is_array($order))
+				return;
+
+			$sortkey = 1;
+			foreach($order as $id) {
+				$obj =& $images[$id];
+				$obj->sortkey = $sortkey++;
+			}
+			$images->store();
 		}
 	}
 
