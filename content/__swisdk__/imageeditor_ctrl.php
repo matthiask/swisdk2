@@ -41,7 +41,7 @@
 				switch($cmd) {
 					case 'restart':
 						foreach($work_types as $t)
-							unlink($base.$image->{'filename_'.$t});
+							unlink($base.$image_files[$t]);
 						break;
 					case 'rotate_clockwise':
 						foreach($work_types as $t)
