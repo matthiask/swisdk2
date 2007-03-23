@@ -106,15 +106,15 @@
 	<div id="tools">
 		<a href="{$this_url_type}cmd=restart"
 				title="Start over">
-			<img src="/media/img/icons/star.png" />
+			<img src="{webroot key=img}/icons/star.png" />
 		</a>
 		<a href="{$this_url_type}cmd=rotate_clockwise"
 				title="Rotate clockwise">
-			<img src="/media/img/icons/shape_rotate_clockwise.png" />
+			<img src="{webroot key=img}/icons/shape_rotate_clockwise.png" />
 		</a>
 		<a href="{$this_url_type}cmd=rotate_anticlockwise"
 				title="Rotate anti-clockwise">
-			<img src="/media/img/icons/shape_rotate_anticlockwise.png" />
+			<img src="{webroot key=img}/icons/shape_rotate_anticlockwise.png" />
 		</a>
 		<a href="{$this_url_type}cmd=grayscale"
 				title="Convert to grayscale">
@@ -134,7 +134,7 @@
 		</a>
 		<a href="{$this_url_type}cmd=crop"
 				title="Crop image">
-			<img src="/media/img/icons/shape_handles.png" />
+			<img src="{webroot key=img}/icons/shape_handles.png" />
 		</a>
 	</div>
 
