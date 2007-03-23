@@ -71,6 +71,16 @@
 		}
 	}
 
+	class ChoiceTableViewColumn extends TableViewColumn {
+		public function html(&$data)
+		{
+			$value = $data[$this->column];
+			if(isset($this->args[0][$value]))
+				return $this->args[0][$value];
+			return $value;
+		}
+	}
+
 	/**
 	 * Example:
 	 *
