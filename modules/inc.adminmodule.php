@@ -269,7 +269,7 @@
 		 */
 		public function form_renderer()
 		{
-			return new TableFormRenderer();
+			return new NoTableFormRenderer();
 		}
 	}
 
