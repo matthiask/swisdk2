@@ -63,6 +63,8 @@
 
 			$cmd = '';
 
+			$m_url = Swisdk::config_value('runtime.controller.url');
+
 			if(isset($args[0]) && $args[0]) {
 				$cmp_class = 'AdminComponent_'.$this->dbo_class.$args[0];
 				if(class_exists($cmp_class)) {
@@ -81,8 +83,10 @@
 					$cmp = new AdminComponent_edit();
 					$cmd = 'new';
 				}
-				array_shift($args);
+				$m_url .= array_shift($args);
 			}
+
+			Swisdk::set_config_value('runtime.adminmodule.url', $m_url);
 
 			$this->arguments = $args;
 
