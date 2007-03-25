@@ -463,17 +463,6 @@
 		}
 
 		/**
-		 * search and return a FormItem
-		 */
-		public function item($name)
-		{
-			foreach($this->boxes as &$box)
-				if($item =& $box->item($name))
-					return $item;
-			return null;
-		}
-
-		/**
 		 * accept the FormRenderer
 		 */
 		public function accept($renderer)
@@ -496,7 +485,7 @@
 		public function is_valid()
 		{
 			if(!$this->submitted()) {
-				$this->box()->add_message(dgettext('swisdk', 'Could not validate form submission'));
+				$this->add_message(dgettext('swisdk', 'Could not validate form submission'));
 				return false;
 			}
 
