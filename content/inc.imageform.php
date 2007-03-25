@@ -18,6 +18,9 @@
 			$filename = $this->dbobj->{$this->file_variable};
 			$file = DATA_ROOT.$this->image_htdocs_root.'/'.$filename;
 
+			if(!is_file($file))
+				return '';
+
 			$ipath = Swisdk::config_value('runtime.webroot.data', '/data').'/'
 				.$this->image_htdocs_root.'/'
 				.ImageManager::generate_type($file, $this->preview,
