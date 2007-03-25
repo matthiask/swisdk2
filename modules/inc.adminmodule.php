@@ -352,6 +352,11 @@
 		 */
 		protected $id = false;
 
+		/**
+		 * Preview mode active
+		 */
+		protected $preview = false;
+
 		public function run()
 		{
 			// if multiple is passed, the IDs of the records which should
@@ -452,10 +457,32 @@
 				if(!$this->editmode || $this->copy)
 					$this->obj->unset_primary();
 				$this->post_process();
-				$this->obj->store();
-				$this->goto('_index');
-			} else
-				$this->html = $this->form->html($this->form_renderer());
+				if(getInput('sf_publish')) {
+					$this->obj->active = 1;
+					$this->obj->store();
+					$this->goto('_index');
+				} else if(getInput('sf_save_and_continue')) {
+					$this->obj->store();
+					if(!$this->editmode)
+						$this->goto('_edit/'.$this->obj->id());
+				} else {
+					$this->obj->store();
+					$this->goto('_index');
+				}
+			}
+
+			$this->html = $this->form->html($this->form_renderer())
+				.$this->preview();
+		}
+
+		public function preview()
+		{
+			if(!$this->preview || !$this->editmode)
+				return;
+
+			return '<br /><br /><iframe src="'
+				.Swisdk::load_instance('UrlGenerator')->generate_url($this->obj)
+				.'" style="width:900px;height:700px;background:#fff"></iframe>';
 		}
 
 		public function post_process()
@@ -514,6 +541,23 @@
 			$this->build_form($this->form);
 
 			$this->execute();
+		}
+
+		protected function add_submit_buttons($box=null)
+		{
+			if($box===null)
+				$box = $this->form->box('zzz_last');
+
+			$item = $box->add(new GroupItem());
+
+			$item->add(new SubmitButton('sf_save_and_continue'))
+				->set_value('Save and continue editing');
+			$item->add(new SubmitButton('sf_submit'))
+				->set_value('Save')
+				->set_attributes(array('style' => 'font-weight:bold'));
+			$item->add(new SubmitButton('sf_publish'))
+				->set_value('Publish');
+
 		}
 	}
 
