@@ -253,6 +253,25 @@ tr.severity-enhancement {
 		<h1>{swisdk_runtime_value key="website.title"}</h1>
 
 		<div id="navigation">
+			{literal}
+			<script type="text/javascript">
+			function n_toggle(elem)
+			{
+				var group = elem.parentNode.parentNode;
+				var list_id = group.id+'-list';
+
+				$A($('navigation').getElementsByTagName('ul')).each(function(elem){
+					if(elem.id==list_id)
+						elem.style.display = (elem.style.display=='block'?'none':'block');
+					else
+						elem.style.display = 'none';
+				});
+
+				return false;
+			}
+			</script>
+			{/literal}
+
 			{block name="navigation"}
 			{/block}
 		</div>

@@ -141,6 +141,23 @@
 		{
 			return $this->multilanguage;
 		}
+
+		/**
+		 * @return various informations about this module
+		 */
+		public function info()
+		{
+			return array(
+				'class' => $this->dbo_class,
+				'multilanguage' => $this->multilanguage,
+				'role' => $this->role,
+				'actions' => $this->info_actions());
+		}
+
+		public function info_actions()
+		{
+			return array();
+		}
 	}
 
 	abstract class AdminComponent implements IHtmlComponent {
