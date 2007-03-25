@@ -44,7 +44,8 @@
 
 		public function add_default_items()
 		{
-			$this->set_title(dgettext('swisdk', 'Search form'));
+			$this->box('search')->set_title(dgettext('swisdk', 'Search form'));
+			$this->box('action')->set_title('blah');
 			$this->search->add(new SubmitButton());
 		}
 
@@ -82,7 +83,7 @@
 			$_SESSION['swisdk2']['am_list_persistence'][$url] =
 					serialize($this->dbobj->data());
 
-			$this->set_title($this->title
+			$this->box('search')->set_title($this->box('search')->title
 				.' <small>(<a href="?swisdk2_persistence_reset=1">'
 				.dgettext('swisdk', 'reset listing')
 				.'</a>)</small>');
@@ -120,9 +121,9 @@
 		}
 	}
 
-	class TableViewFormRenderer extends TableFormRenderer {
+	class TableViewFormRenderer extends NoTableFormRenderer {
 		protected $current = 'search';
-		protected $grids = array();
+		protected $html_fragments = array();
 
 		public function __construct()
 		{
@@ -131,12 +132,12 @@
 
 		public function html_start()
 		{
-			return $this->html_start.$this->grid('search')->html().'<br />';
+			return $this->html_start.$this->html_fragments['search'].'<br />';
 		}
 
 		public function html_end()
 		{
-			return $this->grid('action')->html()
+			return $this->html_fragments['action']
 				.'<script type="text/javascript">'."\n"
 				."//<![CDATA[\n"
 				.$this->javascript
@@ -144,22 +145,33 @@
 				.$this->html_end;
 		}
 
-		protected function &grid($which = null)
+		protected function visit_Form_start($obj)
 		{
-			if(!$which)
-				$which = $this->current;
-			if(!isset($this->grids[$which]))
-				$this->grids[$which] = new Layout_Grid();
-			return $this->grids[$which];
+			$this->form_submitted = $obj->submitted();
 		}
 
-		protected function visit_FormBox_start($obj)
+		protected function visit_Form_end($obj)
 		{
-			if($obj->name()==='search')
-				$this->current = 'search';
-			else
-				$this->current = 'action';
-			parent::visit_FormBox_start($obj);
+			$this->_collect_javascript($obj);
+
+			$valid = '';
+			list($html, $js) = $this->_validation_html($obj);
+			$this->add_html_start(
+				'<form method="post" action="'.htmlspecialchars($_SERVER['REQUEST_URI'])
+				.'" id="'.$obj->id()."\" $html class=\"sf-form\" "
+				."accept-charset=\"utf-8\">\n<div>\n".$js);
+			$this->add_html_end($this->_message_html($obj));
+			$this->add_html_end($this->_info_html($obj));
+			$this->add_html_end("</div></form>\n");
+		}
+
+
+
+		protected function visit_FormBox_end($obj)
+		{
+			parent::visit_FormBox_end($obj);
+			$this->html_fragments[$obj->name()] = $this->html;
+			$this->html = '';
 		}
 	}
 
