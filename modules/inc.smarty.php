@@ -34,6 +34,7 @@
 			$this->register_function('generate_image_url',
 				'_smarty_swisdk_generate_image_url');
 			$this->register_function('dttm_range', '_smarty_swisdk_dttm_range');
+			$this->register_modifier('pluralize', 'pluralize');
 
 			if($assign) {
 				$this->assign('swisdk_user', SessionHandler::user()->data());
