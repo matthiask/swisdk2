@@ -1090,4 +1090,83 @@ EOD;
 		}
 	}
 
+	class NoTableFormRenderer extends FormRenderer {
+		protected $html;
+		protected $odd = true;
+
+		public function html()
+		{
+			return $this->html_start
+				.$this->html
+				.$this->html_end;
+		}
+
+		protected function visit_Form_start($obj)
+		{
+			$this->form_submitted = $obj->submitted();
+			$this->html .= '<fieldset>';
+			if($title = $obj->title())
+				$this->html .= '<legend>'.$title.'</legend>';
+		}
+
+		protected function visit_Form_end($obj)
+		{
+			$this->html .= '</fieldset>';
+			$this->_collect_javascript($obj);
+
+			$upload = '';
+			$valid = '';
+			if($this->file_upload)
+				$upload = 'enctype="multipart/form-data">'."\n"
+					.'<input type="hidden" name="MAX_FILE_SIZE" '
+					.'value="'
+					.str_replace(array('k', 'm'), array('000', '000000'),
+						strtolower(ini_get('upload_max_filesize')))
+					.'"';
+			list($html, $js) = $this->_validation_html($obj);
+			$this->add_html_start(
+				'<form method="post" action="'.htmlspecialchars($_SERVER['REQUEST_URI'])
+				.'" id="'.$obj->id()."\" $html class=\"sf-form\" "
+				."accept-charset=\"utf-8\" $upload>\n<div>\n".$js);
+			$this->add_html_end($this->_message_html($obj));
+			$this->add_html_end($this->_info_html($obj));
+			$this->add_html_end("</div></form>\n");
+		}
+
+		protected function visit_FormBox_start($obj)
+		{
+			// FIXME placement of message div should not always be at the
+			// end of form (end of FormBox!)
+			$this->html .= '<fieldset>';
+			if($title = $obj->title())
+				$this->html .= '<legend>'.$title.'</legend>';
+		}
+
+		protected function visit_FormBox_end($obj)
+		{
+			$this->html .= $this->_message_html($obj);
+			$this->html .= '</fieldset>';
+		}
+
+		protected function _render($obj, $field_html, $row_class=null)
+		{
+			if(!$this->odd)
+				$row_class .= ' even';
+			$this->odd = !$this->odd;
+
+			$this->html .= '<div class="sf-element '.$row_class.'">';
+			$this->html .= $this->_title_html($obj)
+				.$field_html
+				.'<span class="sf-info">'
+				.$this->_info_html($obj)
+				.$this->_message_html($obj)
+				.'</span></div>';
+		}
+
+		protected function _render_bar($obj, $html, $row_class=null)
+		{
+			$this->_render($obj, $html, $row_class);
+		}
+	}
+
 ?>
