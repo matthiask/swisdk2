@@ -8,7 +8,7 @@
 {literal}
 body {
 	font-family: Helvetica, Arial, sans-serif;
-	font-size: 12px;
+	font-size: 14px;
 	margin: 0;
 	padding: 0;
 }
@@ -21,7 +21,7 @@ body {
 
 #head, #foot {
 	position: relative;
-	height: 11px;
+	height: 13px;
 }
 
 #head #version {
@@ -41,13 +41,12 @@ body {
 #body {
 	background: #efe8d7;
 	margin: 1px;
-	font-size: 12px;
 	position: relative;
 }
 
 #body #logout {
 	position: absolute;
-	top: 6px;
+	top: 5px;
 	right: 3px;
 }
 
@@ -58,10 +57,14 @@ h1 {
 	border-bottom: 1px solid #cfc7b7;
 }
 
-fieldset {
-	border: none;
+h2 {
 	margin: 0;
-	padding: 0;
+	padding: 12px 5px 3px 5px;
+	font-size: 15px;
+}
+
+h2 a {
+	color: #000;
 }
 
 label {
@@ -74,25 +77,21 @@ label {
 	padding: 7px 5px 3px 5px;
 }
 
+div.sf-element.even {
+	background: #dfd8c7;
+}
+
 input, button, select, textarea {
-	float: left;
-	border: 1px solid #cfc7b7;
 	margin: 5px;
 	padding: 3px;
-	width: 180px;
+	width: 280px;
 }
 
 input[type="checkbox"] {
 	width: auto;
 }
 
-input[type="text"] {
-	width: 172px;
-}
-
 input[type="submit"], button {
-	clear: left;
-	float: none;
 	width: auto;
 	margin: 5px 5px 5px 3px;
 	padding: 2px 10px;
