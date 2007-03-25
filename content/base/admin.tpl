@@ -103,6 +103,10 @@ textarea {
 	font-size: 12px;
 }
 
+fieldset fieldset {
+	margin-top: 10px;
+}
+
 #head a, #foot a {
 	color: #000;
 	text-decoration: none;
