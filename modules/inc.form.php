@@ -432,6 +432,14 @@
 				$this->items[$offset] = $value;
 		}
 		public function offsetUnset($offset) { unset($this->items[$offset]); }
+
+		/**
+		 * Is the FormBox empty?
+		 */
+		public function is_empty()
+		{
+			return !count($this->items) && !count($this->boxrefs);
+		}
 	}
 
 	class Form extends FormBox {
