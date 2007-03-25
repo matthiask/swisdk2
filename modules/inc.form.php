@@ -583,7 +583,7 @@
 		public function is_valid()
 		{
 			if(!$this->submitted()) {
-				$this->box()->add_message(dgettext('swisdk', 'Could not validate form submission'));
+				$this->add_message(dgettext('swisdk', 'Could not validate form submission'));
 				return false;
 			}
 
