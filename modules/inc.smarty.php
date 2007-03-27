@@ -94,7 +94,7 @@
 				$realm = $realm['realm_id'];
 
 			if(isset(Swisdk::$cache['smarty'][$realm][$key])
-					&& $t = Swisdk::$cache['smarty'][$realm][$key])
+					&& ($t = Swisdk::$cache['smarty'][$realm][$key])!==null)
 				return $t;
 
 
@@ -112,6 +112,10 @@
 					return $b.$tmpl;
 				}
 			}
+
+			Swisdk::$cache['smarty'][$realm][$key] = false;
+			Swisdk::$cache_modified = true;
+			Swisdk::log('No match for '.$key, 'smarty');
 
 			if($throw)
 				SwisdkError::handle(new FatalError('Could not resolve template '.$key));
