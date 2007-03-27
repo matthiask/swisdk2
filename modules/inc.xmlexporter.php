@@ -47,6 +47,17 @@
 		}
 
 		/**
+		* Send the XML document
+		*/
+		public function send()
+		{
+			header('Content-type: text/xml');
+			echo $this->fetch();
+			Swisdk::shutdown();
+		}
+
+
+		/**
 		 * Fetch the XML document
 		 */
 		public function fetch()
