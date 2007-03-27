@@ -295,14 +295,18 @@ EOD;
 
 		protected function list_position()
 		{
-			$formobj = $this->form->dbobj();
-			$p = $formobj->_prefix();
-			$data = $formobj->data();
+			static $position = null;
+			if($position===null) {
+				$formobj = $this->form->dbobj();
+				$p = $formobj->_prefix();
+				$data = $formobj->data();
 
-			return array($first = $data[$p.'start']+1,
-				$count = $this->obj->total_count(),
-				min($count, $first+$data[$p.'limit']-1),
-				$data[$p.'limit']);
+				$position = array($first = $data[$p.'start']+1,
+					$count = $this->obj->total_count(),
+					min($count, $first+$data[$p.'limit']-1),
+					$data[$p.'limit']);
+			}
+			return $position;
 		}
 
 		/**
