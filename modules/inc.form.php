@@ -21,6 +21,9 @@
 	define('FORMRENDERER_VISIT_START', 1);
 	define('FORMRENDERER_VISIT_END', 2);
 
+	define('FORM_EXPANDER_SHOW', 'block');
+	define('FORM_EXPANDER_HIDE', 'none');
+
 	/**
 	 * scroll down for Form class definition
 	 */
@@ -82,7 +85,22 @@
 		 */
 		protected $name;
 		public function name() { return $this->name; }
-		public function set_name($name) { $this->name = $name; }
+		public function set_name($name)
+		{
+			$this->name = $name;
+			return $this;
+		}
+
+		/**
+		 * expander?
+		 */
+		protected $expander = null;
+		public function expander() { return $this->expander; }
+		public function set_expander($expander)
+		{
+			$this->expander = $expander;
+			return $this;
+		}
 
 		/**
 		 * @param $dbobj: the DBObject bound to the Form
