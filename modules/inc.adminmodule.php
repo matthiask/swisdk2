@@ -352,11 +352,6 @@
 		 */
 		protected $id = false;
 
-		/**
-		 * Preview mode active
-		 */
-		protected $preview = false;
-
 		public function run()
 		{
 			// if multiple is passed, the IDs of the records which should
@@ -471,18 +466,7 @@
 				}
 			}
 
-			$this->html = $this->form->html($this->form_renderer())
-				.$this->preview();
-		}
-
-		public function preview()
-		{
-			if(!$this->preview || !$this->editmode)
-				return;
-
-			return '<br /><br /><iframe src="'
-				.Swisdk::load_instance('UrlGenerator')->generate_url($this->obj)
-				.'" style="width:900px;height:700px;background:#fff"></iframe>';
+			$this->html = $this->form->html($this->form_renderer());
 		}
 
 		public function post_process()
@@ -557,7 +541,19 @@
 				->set_attributes(array('style' => 'font-weight:bold'));
 			$item->add(new SubmitButton('sf_publish'))
 				->set_value('Publish');
+		}
 
+		protected function add_preview($box=null)
+		{
+			if(!$this->editmode)
+				return;
+
+			if($box===null)
+				$box = $this->form->box('zzzz_preview');
+
+			$box->set_title('Preview');
+			$box->set_expander(FORM_EXPANDER_SHOW);
+			$box->add(new PreviewFormItem());
 		}
 	}
 

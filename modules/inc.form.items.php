@@ -1082,4 +1082,21 @@ EOD;
 	class GroupItemBar extends GroupItem {
 	}
 
+	class PreviewFormItem extends FormItem {
+		public function init_value($dbobj)
+		{
+			$this->dbobj = $dbobj;
+		}
+
+		public function html()
+		{
+			if(!$this->dbobj->id())
+				return;
+
+			return '<iframe src="'
+				.Swisdk::load_instance('UrlGenerator')->generate_url($this->dbobj)
+				.'" style="width:900px;height:700px;background:#fff"></iframe>';
+		}
+	}
+
 ?>
