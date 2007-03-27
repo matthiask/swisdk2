@@ -196,7 +196,7 @@ function urlify_behavior_handler_$n1()
 		str = str.replace(new RegExp(replacement[i][0]), replacement[i][1]);
 	document.getElementById('$n2').value = $date_js str.replace(r, '').replace(r, '')
 		.replace(/[^-A-Z0-9\s]/gi, '').replace(/^\s+|\s+$/g, '')
-		.replace(/[-\s]+/g, '_').toLowerCase();
+		.replace(/[_\s]+/g, '-').toLowerCase();
 }
 
 EOD;
