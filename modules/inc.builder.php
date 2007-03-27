@@ -174,9 +174,6 @@
 						||$data['type']==DB_REL_TAGS)
 					$this->create_field($key);
 			}
-
-			if($submitbtn)
-				$this->form->box('zzz_last')->add(new SubmitButton());
 		}
 
 		/**
@@ -194,7 +191,7 @@
 
 				foreach($languages as $lid => &$l) {
 					$key = $l['language_key'];
-					$box = $form->box($key);
+					$box = $form->box('lang_'.$key);
 					if(!isset($dbobjml[$lid]))
 						$dbobjml[$lid] =
 							DBObject::create($dbobj->_class().'Content');
@@ -214,7 +211,7 @@
 							$this->create_field($fname);
 				}
 			} else {
-				$box = $form->box($dbobj->language());
+				$box = $form->box('lang_'.$dbobj->language());
 				$box->bind($dbobjml);
 
 				// work on the language form box (don't need to keep a
@@ -229,8 +226,6 @@
 					if(!preg_match($ninc_regex, $fname))
 						$this->create_field($fname);
 			}
-
-			$this->form->box('zzz_last')->add(new SubmitButton());
 		}
 
 		public function dbobj()

@@ -442,10 +442,10 @@
 		public function build_form($box = null)
 		{
 			$builder = $this->form_builder();
-			if($box)
-				$builder->build($box);
-			else
-				$builder->build($this->form);
+			if(!$box)
+				$box = $this->form;
+			$builder->build($box);
+			FormUtil::submit_bar($box);
 		}
 
 		/**
