@@ -1104,6 +1104,7 @@ EOD;
 
 		protected function visit_Form_start($obj)
 		{
+			$this->_collect_javascript($obj);
 			$this->form_submitted = $obj->submitted();
 			$this->html .= '<fieldset id="'.$obj->id().'">';
 			if($title = $obj->title())
@@ -1137,6 +1138,7 @@ EOD;
 
 		protected function visit_FormBox_start($obj)
 		{
+			$this->_collect_javascript($obj);
 			if($obj->is_empty() || strpos($obj->name(), 'zzz_')===0)
 				return;
 			// FIXME placement of message div should not always be at the
