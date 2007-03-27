@@ -97,6 +97,22 @@
 		{
 			require_once MODULE_ROOT.'inc.smarty.php';
 			$smarty = new SwisdkSmarty();
+
+			$components = explode(',', Swisdk::website_config_value('components'));
+
+			foreach($components as &$c) {
+				$c = trim($c);
+				if(!$c)
+					continue;
+				$cmp = Swisdk::load_instance($c.'Component', 'components');
+				if($cmp instanceof IComponent)
+					$cmp->run();
+				if($cmp instanceof IHtmlComponent)
+					$smarty->assign(strtolower($c), $cmp->html());
+				if($cmp instanceof ISmartyComponent)
+					$cmp->set_smarty($smarty);
+			}
+
 			$smarty->display_template(Swisdk::config_value('runtime.includefile'));
 		}
 	}
