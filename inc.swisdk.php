@@ -188,7 +188,7 @@ EOD;
 
 		protected static function save_cache()
 		{
-			if(Swisdk::$cache_modified) {
+			if(Swisdk::$cache_modified && Swisdk::config_value('core.cache')) {
 				file_put_contents(CACHE_ROOT.'cache.php', '<?php Swisdk::$cache = '
 					.var_export(Swisdk::$cache, true).'; ?>');
 			}
