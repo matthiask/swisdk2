@@ -1136,7 +1136,7 @@ EOD;
 
 		protected function visit_FormBox_start($obj)
 		{
-			if($obj->is_empty())
+			if($obj->is_empty() || strpos($obj->name(), 'zzz_')===0)
 				return;
 			// FIXME placement of message div should not always be at the
 			// end of form (end of FormBox!)
@@ -1147,7 +1147,7 @@ EOD;
 
 		protected function visit_FormBox_end($obj)
 		{
-			if($obj->is_empty())
+			if($obj->is_empty() || strpos($obj->name(), 'zzz_')===0)
 				return;
 			$this->html .= $this->_message_html($obj);
 			$this->html .= '</fieldset>';
