@@ -1108,6 +1108,7 @@ EOD;
 			$this->html .= '<fieldset id="'.$obj->id().'">';
 			if($title = $obj->title())
 				$this->html .= '<legend>'.$title.'</legend>';
+			$this->html .= "\n";
 		}
 
 		protected function visit_Form_end($obj)
@@ -1143,6 +1144,7 @@ EOD;
 			$this->html .= '<fieldset id="'.$obj->id().'">';
 			if($title = $obj->title())
 				$this->html .= '<legend>'.$title.'</legend>';
+			$this->html .= "\n";
 		}
 
 		protected function visit_FormBox_end($obj)
@@ -1151,6 +1153,7 @@ EOD;
 				return;
 			$this->html .= $this->_message_html($obj);
 			$this->html .= '</fieldset>';
+			$this->html .= "\n";
 		}
 
 		protected function _render($obj, $field_html, $row_class=null)
@@ -1160,12 +1163,16 @@ EOD;
 			$this->odd = !$this->odd;
 
 			$this->html .= '<div class="sf-element '.$row_class.'">';
+			$this->html .= "\n";
 			$this->html .= $this->_title_html($obj)
+				."\n"
 				.$field_html
+				."\n"
 				.'<span class="sf-info">'
 				.$this->_info_html($obj)
 				.$this->_message_html($obj)
 				.'</span></div>';
+			$this->html .= "\n";
 		}
 
 		protected function _render_bar($obj, $html, $row_class=null)
