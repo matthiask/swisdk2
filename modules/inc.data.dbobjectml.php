@@ -19,6 +19,11 @@
 		protected $obj;
 
 		/**
+		 * content DBObject instance
+		 */
+		protected $content_dbobj;
+
+		/**
 		 * the language id of this DBObjectML or one of the
 		 * LANGUAGE_* constants
 		 */
@@ -51,7 +56,7 @@
 		public function dbobj()
 		{
 			if(!$this->obj) {
-				$tmp = DBObject::create($this->tclass);
+				$tmp = $this->content_dbobj;
 				if($this->language == LANGUAGE_ALL) {
 					if($id = $this->id()) {
 						$this->obj = DBOContainer::find($this->tclass, array(
@@ -78,6 +83,11 @@
 			return $this->obj;
 		}
 
+		public function &content_dbobj()
+		{
+			return $this->content_dbobj;
+		}
+
 		public function translation($language_id)
 		{
 			if($this->language!=LANGUAGE_ALL)
@@ -101,6 +111,7 @@
 				$this->tclass = $this->class.'Content';
 			DBObject::has_many($this, $this->tclass);
 			DBObject::has_a($this->tclass, 'Language');
+			$this->content_dbobj = DBObject::create($this->tclass);
 		}
 
 		public function __construct($language = LANGUAGE_DEFAULT, $setup_dbvars = true)
@@ -244,7 +255,7 @@
 
 		public function set_data($data)
 		{
-			$p = DBObject::create($this->tclass)->_prefix();
+			$p = $this->content_dbobj->_prefix();
 			$lkey = $p.'language_id';
 			if(isset($data['translations'])) {
 				$this->language = LANGUAGE_ALL;
@@ -329,8 +340,7 @@
 				DBObject::$_fulltext_fields[$this->db_connection_id]
 					[$this->class] =
 					array_merge($mine,
-						DBObject::create($this->tclass)
-						->_fulltext_fields());
+						$this->content_dbobj->_fulltext_fields());
 			}
 
 			return DBObject::$_fulltext_fields[$this->db_connection_id][$this->class];
@@ -339,7 +349,7 @@
 
 		public function _select_sql($joins)
 		{
-			$tmp = DBObject::create($this->tclass);
+			$tmp = $this->content_dbobj;
 			$lang_clause = '';
 			if(($lang_id = $this->language())!=LANGUAGE_ALL)
 				$lang_clause = ' AND '.$tmp->name('language_id').'='.$lang_id;
