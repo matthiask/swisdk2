@@ -135,6 +135,16 @@
 	}
 
 	/**
+	 * show a dttm range
+	 */
+	class DttmRangeTableViewColumn extends TableViewColumn {
+		public function html(&$data)
+		{
+			return dttmRange($data);
+		}
+	}
+
+	/**
 	 * pass a callback instead of a field name
 	 *
 	 * Example:
