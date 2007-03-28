@@ -274,7 +274,8 @@
 				return $start;
 			else
 				return $start.' &ndash; openend';
-		}
+		} else if($dbobj->endless)
+			return $start.' &ndash; endless';
 
 		$end = strftime($fmt, $dbobj->end_dttm);
 
