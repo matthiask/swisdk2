@@ -32,49 +32,88 @@
 		 */
 		public function create_field($field, $title = null)
 		{
+			$c_field = null;
+			$c_type = null;
+
 			$dbobj = $this->dbobj();
 			$field_list = $dbobj->field_list();
-			if(!isset($field_list[$field])&&isset($field_list[$tmp=$dbobj->name($field)]))
-				$field = $tmp;
+			if(!isset($field_list[$field])) {
+				if(isset($field_list[$tmp=$dbobj->name($field)])) {
+					$c_field = $tmp;
+					$c_type = $field_list[$c_field];
+				} else if($dbobj instanceof DBObjectML) {
+					$content_dbobj = $dbobj->content_dbobj();
+					$field_list_c = $content_dbobj->field_list();
+					if(isset($field_list_c[$tmp=$dbobj->name($field)])) {
+						$c_field = $tmp;
+						$c_type = $field_list_c[$c_field];
+					} else if(isset($field_list_c[
+							$tmp=$content_dbobj->name($field)])) {
+						$c_field = $tmp;
+						$c_type = $field_list_c[$c_field];
+					}
+
+					if($title === null)
+						$title = $content_dbobj->pretty($c_field);
+				}
+			} else {
+				$c_field = $field;
+				$c_type = $field_list[$c_field];
+			}
+
 			if($title === null)
 				$title = $dbobj->pretty($field);
 
 			// field from main table
-			switch(isset($field_list[$field])?$field_list[$field]:null) {
+			switch($c_type) {
 				case DB_FIELD_BOOL:
-					return $this->create_bool($field, $title);
+					return $this->create_bool($c_field, $title);
 				case DB_FIELD_STRING:
 				case DB_FIELD_INTEGER:
-					return $this->create_text($field, $title);
+					return $this->create_text($c_field, $title);
 				case DB_FIELD_LONGTEXT:
-					return $this->create_textarea($field, $title);
+					return $this->create_textarea($c_field, $title);
 				case DB_FIELD_DATE:
-					return $this->create_date($field, $title);
+					return $this->create_date($c_field, $title);
 				case DB_FIELD_DTTM:
-					return $this->create_dttm($field, $title);
+					return $this->create_dttm($c_field, $title);
 				case DB_FIELD_FOREIGN_KEY|(DB_REL_SINGLE<<10):
 					$relations = $dbobj->relations();
-					return $this->create_rel_single($field, $title,
-						$relations[$field]['foreign_class']);
+					if(isset($relations[$c_field]))
+						return $this->create_rel_single($c_field, $title,
+							$relations[$c_field]['foreign_class']);
+					else if($dbobj instanceof DBObjectML) {
+						$relations_c = $dbobj->content_dbobj()->relations();
+						if(isset($relations_c[$c_field]))
+							return $this->create_rel_single($c_field, $title,
+								$relations_c[$c_field]['foreign_class']);
+					}
 			}
 
 			// field from a related table
+			$relation = null;
 			$relations = $dbobj->relations();
 			if(isset($relations[$field]['type'])) {
-				switch($relations[$field]['type']) {
-					case DB_REL_MANY:
-						return $this->create_rel_many($field, $title,
-							$relations[$field]['foreign_class']);
-					case DB_REL_N_TO_M:
-						return $this->create_rel_manytomany($field, $title,
-							$relations[$field]['foreign_class']);
-					case DB_REL_3WAY:
-						return $this->create_rel_3way($field, $title,
-							$relations[$field]['foreign_class'],
-							$relations[$field]['foreign_primary']);
-					case DB_REL_TAGS:
-						return $this->create_rel_tags($field, $title);
-				}
+				$relation = $relations[$field];
+			} else if($dbobj instanceof DBObjectML) {
+				$relations_c = $dbobj->content_dbobj()->relations();
+				if(isset($relations_c[$field]['type']))
+					$relation = $relations_c[$field];
+			}
+
+			switch($relation['type']) {
+				case DB_REL_MANY:
+					return $this->create_rel_many($field, $title,
+						$relation['foreign_class']);
+				case DB_REL_N_TO_M:
+					return $this->create_rel_manytomany($field, $title,
+						$relation['foreign_class']);
+				case DB_REL_3WAY:
+					return $this->create_rel_3way($field, $title,
+						$relation['foreign_class'],
+						$relation['foreign_primary']);
+				case DB_REL_TAGS:
+					return $this->create_rel_tags($field, $title);
 			}
 		}
 
