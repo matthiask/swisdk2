@@ -426,68 +426,68 @@
 
 		public function create_rel_single($fname, $title, $class)
 		{
-			$this->tv->append_column(new DBTableViewColumn(
+			return $this->tv->append_column(new DBTableViewColumn(
 				$fname, $title, $class, $this->dbobj));
 		}
 
 		public function create_rel_many($fname, $title, $class)
 		{
-			$this->tv->append_column(new ManyDBTableViewColumn(
+			return $this->tv->append_column(new ManyDBTableViewColumn(
 				$fname, $title, $class, $this->dbobj));
 		}
 
 		public function create_rel_manytomany($fname, $title, $class)
 		{
-			$this->tv->append_column(new ManyToManyDBTableViewColumn(
+			return $this->tv->append_column(new ManyToManyDBTableViewColumn(
 				$fname, $title, $class, $this->dbobj));
 		}
 
 		public function create_rel_3way($fname, $title, $class, $field)
 		{
 			// TODO show information from choices ($field) too
-			$this->tv->append_column(new ManyToManyDBTableViewColumn(
+			return $this->tv->append_column(new ManyToManyDBTableViewColumn(
 				$fname, $title, $class, $this->dbobj));
 		}
 
 		public function create_rel_tags($fname, $title)
 		{
-			$this->tv->append_column(new ManyToManyDBTableViewColumn(
+			return $this->tv->append_column(new ManyToManyDBTableViewColumn(
 				$fname, $title, 'Tag', $this->dbobj));
 		}
 
 		public function create_date($fname, $title)
 		{
-			$this->tv->append_column(
+			return $this->tv->append_column(
 				new DateTableViewColumn($fname, $title, '%d.%m.%Y'));
 		}
 
 		public function create_dttm($fname, $title)
 		{
-			$this->tv->append_column(
+			return $this->tv->append_column(
 				new DateTableViewColumn($fname, $title));
 		}
 
 		public function create_textarea($fname, $title)
 		{
-			$this->tv->append_column(
+			return $this->tv->append_column(
 				new TextTableViewColumn($fname, $title, 40));
 		}
 
 		public function create_bool($fname, $title)
 		{
-			$this->tv->append_column(
+			return $this->tv->append_column(
 				new BoolTableViewColumn($fname, $title));
 		}
 
 		public function create_float($fname, $title)
 		{
-			$this->tv->append_column(
+			return $this->tv->append_column(
 				new NumberTableViewColumn($fname, $title));
 		}
 
 		public function create_text($fname, $title)
 		{
-			$this->tv->append_column(
+			return $this->tv->append_column(
 				new TextTableViewColumn($fname, $title, 40));
 		}
 	}
