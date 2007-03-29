@@ -179,6 +179,11 @@ EOD;
 				return $builder->create_auto($this, $field, $title);
 		}
 
+		public function append_auto_c($fields)
+		{
+			return $this->append_auto(explode(',', $fields));
+		}
+
 		/**
 		 * Append or prepend TableViewColumn (column renderers) to the tableview
 		 */

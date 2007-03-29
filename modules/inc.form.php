@@ -276,6 +276,11 @@
 				return $builder->create_auto($this, $field, $title);
 		}
 
+		public function add_auto_c($fields)
+		{
+			return $this->add_auto(explode(',', $fields));
+		}
+
 		/**
 		 * handle add(FormItem) case
 		 */
