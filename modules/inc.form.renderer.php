@@ -297,8 +297,8 @@ function validate_'.$id.'()
 			$name = $obj->id();
 			$this->_render($obj, sprintf(
 				'<input type="checkbox" name="%s" id="%s" %s value="1" />'
-				.'<input type="hidden" name="__check_'.$name
-				.'" value="1" />',
+				.'<input type="hidden" name="'.$name
+				.'__check" value="1" />',
 				$name, $name,
 				($obj->value()?'checked="checked" ':' ')
 				.$this->_attribute_html($obj->attributes())));

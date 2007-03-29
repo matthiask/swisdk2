@@ -506,7 +506,7 @@ EOD;
 			$name = $this->name();
 			$id = $this->id();
 
-			if(isset($_POST['__check_'.$id])) {
+			if(isset($_POST[$id.'__check'])) {
 				if(getInput($id))
 					$dbobj->set($name, 1);
 				else

@@ -225,7 +225,7 @@ EOD;
 
 		public function name()
 		{
-			return '__cmd_'.$this->column;
+			return $this->column.'__cmd';
 		}
 
 		public function disable_copy($enabled=false)
@@ -466,7 +466,7 @@ EOD;
 
 		public function name()
 		{
-			return '__id_'.$this->column;
+			return $this->column.'__id';
 		}
 
 		public function title()
