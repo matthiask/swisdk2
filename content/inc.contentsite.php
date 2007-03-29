@@ -1103,9 +1103,12 @@
 			if($order = $this->find_config_value('order', '#')) {
 				if($order=='#')
 					$order = $this->dbobj->dbobj()->name('start_dttm');
-				$tokens = explode(':', $order);
-				$this->dbobj->add_order_column($tokens[0],
-					(isset($tokens[1]) && $tokens[1]=='DESC'?'DESC':'ASC'));
+				$columns = explode(',', $order);
+				foreach($columns as $o) {
+					$tokens = explode(':', $o);
+					$this->dbobj->add_order_column($tokens[0],
+						(isset($tokens[1]) && $tokens[1]=='DESC'?'DESC':'ASC'));
+				}
 			}
 		}
 
