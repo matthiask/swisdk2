@@ -42,6 +42,7 @@
 		 * DBObject or DBOContainer instance
 		 */
 		protected $dbobj;
+		protected $multilanguage = false;
 
 		/**
 		 * can be feed, trackback, archive, single, default or something
@@ -1013,7 +1014,12 @@
 				$this->smarty->assign('title', $this->title);
 			}
 			if($container) {
-				$this->dbobj = DBOContainer::create($this->dbo_class);
+				if($this->multilanguage)
+					$this->dbobj = DBOContainer::create(
+						DBObjectML::create($this->dbo_class));
+				else
+					$this->dbobj = DBOContainer::create(
+						$this->dbo_class);
 			}
 		}
 
@@ -1149,8 +1155,14 @@
 		{
 			if(isset($this->request['slug']) && $slug_field =
 					$this->find_config_value('slug_field', '#')) {
-				if($slug_field=='#')
-					$slug_field = $this->dbobj->dbobj()->name('name');
+				if($slug_field=='#') {
+					if($this->multilanguage)
+						$slug_field = $this->dbobj->dbobj()
+							->content_dbobj()->name('name');
+					else
+						$slug_field = $this->dbobj->dbobj()
+							->name('name');
+				}
 				$this->dbobj->add_clause($slug_field.'=',
 					$this->request['slug']);
 			}
@@ -1167,6 +1179,14 @@
 			if($this->find_config_value('active_filter'))
 				$this->dbobj->add_clause($this->dbobj->dbobj()->name('active')
 					.'!=0');
+		}
+
+		protected function filter_language()
+		{
+			if($this->multilanguage)
+				$this->dbobj->add_clause($this->dbobj->dbobj()
+					->content_dbobj()->name('language_id').'=',
+					Swisdk::language());
 		}
 
 
