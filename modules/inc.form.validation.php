@@ -249,7 +249,8 @@ EOD;
 
 		protected function is_valid_impl()
 		{
-			return is_numeric($this->item->value());
+			$v = $this->item->value();
+			return !$v || is_numeric($v);
 		}
 
 		protected function validation_js_impl($set_sent=true)
@@ -263,7 +264,7 @@ EOD;
 function formitem_numeric_rule(id)
 {
 	var value = document.getElementById(id).value;
-	return value.match(/^[0-9\.]$/);
+	return !value || value.match(/^[0-9\.]*$/);
 }
 
 EOD;
