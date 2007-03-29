@@ -24,6 +24,31 @@
 			$box->add(new ResetButton());
 		}
 
+		/**
+		 * move file to DATA_ROOT and return sanitized and uniquified filename
+		 *
+		 * @param $fileupload	FileUpload instance
+		 * @param $data_dir	directory below DATA_ROOT which should be used
+		 * 			to store the file
+		 * @return sanitized and uniquified filename
+		 */
+		public static function post_process_file_upload($fileupload, $data_dir)
+		{
+			if($fileupload->no_upload())
+				return null;
+
+			$fdata = $fileupload->files_data();
+			if($data_dir) {
+				Swisdk::require_data_directory($data_dir);
+				$data_dir .= '/';
+			}
+
+			$fname = uniquifyFilename(sanitizeFilename($fdata['name']));
+			rename($fdata['path'], DATA_ROOT.$data_dir.$fname);
+
+			return $fname;
+		}
+
 		public static function realm_dropdown($formbox, $id='Realm', $role=ROLE_MANAGER)
 		{
 			$rel = $formbox->dbobj()->relations();
