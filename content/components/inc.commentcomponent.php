@@ -72,8 +72,6 @@
 			$text->set_attributes(array('style'
 				=> 'width:300px;height:250px'));
 
-			$form->add_rule(new NoSpamRule());
-
 			if($form->is_valid() && !empty($_SERVER['HTTP_USER_AGENT'])) {
 				$dbo->realm = $this->realm;
 				$dbo->author_ip = $_SERVER['REMOTE_ADDR'];
@@ -81,8 +79,14 @@
 				$dbo->state = 'new';
 				$dbo->type = 'comment';
 				$dbo->text = nl2br(strip_tags($dbo->text));
+				if(Swisdk::load_instance('SpamChecker')->is_spam($dbo)) {
+					$dbo->state = 'maybe-spam';
+					$smarty->assign('commentform',
+						'<p>Your comment has been classified as spam. '
+						.'A moderator will approve it if it\'s not.</p>');
+				} else
+					$smarty->assign('commentform', '<p>Thanks!</p>');
 				$dbo->store();
-				$smarty->assign('commentform', '<p>Thanks!</p>');
 
 				if($user->id==SWISDK2_VISITOR) {
 					setcookie('swisdk2_comment_author',
@@ -106,23 +110,13 @@
 
 			$this->dbobj = DBOContainer::find('Comment', array(
 				'comment_realm=' => $this->realm,
+				'(comment_state!=\'maybe-spam\' AND comment_state!=\'spam\''
+					.' AND comment_state!=\'moderated\')' => null,
 				':order' => array('comment_creation_dttm', 'ASC')));
 
 			$smarty->assign('comments', $this->dbobj->data());
 
 			$this->html = $smarty->fetch_template('comment.list');
-		}
-	}
-
-	class NoSpamRule extends FormRule {
-		public function __construct()
-		{
-			$this->message = dgettext('swisdk', 'Comment has been classified as spam!');
-		}
-
-		public function is_valid_impl()
-		{
-			return !Swisdk::load_instance('SpamChecker')->check($this->form->dbobj());
 		}
 	}
 
