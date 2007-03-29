@@ -24,6 +24,11 @@
 				Swisdk::version());
 		}
 
+		public function is_spam($dbo)
+		{
+			return $this->check($dbo);
+		}
+
 		public function check($dbo)
 		{
 			$class = $dbo->_class();
