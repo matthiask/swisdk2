@@ -77,6 +77,10 @@ label.sf-label {
 	padding: 7px 5px 3px 5px;
 }
 
+div.sf-element-ext {
+	margin-left: 160px;
+}
+
 div.sf-element.even {
 	background: #dfd8c7;
 }

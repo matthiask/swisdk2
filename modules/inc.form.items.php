@@ -527,6 +527,38 @@ EOD;
 
 	class Textarea extends FormItem {
 		protected $attributes = array('class' => 'sf-textarea');
+		protected $auto_xss_protection = true;
+
+		public function auto_xss_protection()
+		{
+			return $this->auto_xss_protection;
+		}
+
+		public function set_auto_xss_protection($enabled=true)
+		{
+			$this->auto_xss_protection = $enabled;
+			// XXX hack! init_value should get called later (Form-level change)
+			$this->init_value($this->dbobj);
+			return $this;
+		}
+
+		public function init_value($dbobj)
+		{
+			$this->dbobj = $dbobj;
+
+			$name = $this->name();
+			$id = $this->id();
+
+			if($v = getInputRaw($id)) {
+				if($this->auto_xss_protection
+						|| getInput($id.'__xss'))
+					$dbobj->set($name, cleanInput($v));
+				else
+					$dbobj->set($name, cleanInput($v, false));
+			}
+
+			$this->set_value($dbobj->get($name));
+		}
 	}
 
 	/**

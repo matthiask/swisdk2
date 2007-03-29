@@ -356,15 +356,32 @@ function formitem_tristate(elem)
 			$js = '';
 		}
 
+		protected function _auto_xss_helper($obj)
+		{
+			if($obj->auto_xss_protection())
+				return;
+
+			$id = $obj->id().'__xss';
+			return sprintf(<<<EOD
+<div class="sf-element-ext">
+	<input type="checkbox" id="%s" name="%s" checked="checked" />
+	<label for="%s">%s</label>
+</div>
+EOD
+,
+				$id, $id, $id, dgettext('swisdk', 'Automatic XSS protection'));
+		}
+
 		protected function visit_Textarea($obj)
 		{
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
 			$this->_render($obj, sprintf(
-				'<textarea name="%s" id="%s" %s>%s</textarea>',
+				'<textarea name="%s" id="%s" %s>%s</textarea>%s',
 				$name, $name,
 				$this->_attribute_html($obj->attributes()),
-				$obj->value()));
+				$obj->value(),
+				$this->_auto_xss_helper($obj)));
 		}
 
 		protected function visit_RichTextarea($obj)
@@ -375,6 +392,7 @@ function formitem_tristate(elem)
 			$value = htmlspecialchars($obj->value());
 			$attributes = $this->_attribute_html($obj->attributes());
 			$type = $obj->type();
+			$auto_xss_protection = $this->_auto_xss_helper($obj);
 			$html = <<<EOD
 <textarea name="$name" id="$name" $attributes>$value</textarea>
 <script type="text/javascript" src="$prefix/util.js"></script>
@@ -392,6 +410,7 @@ oFCKeditor.ReplaceTextarea();
 add_event(window,'load',load_editor_$name);
 //]]>
 </script>
+$auto_xss_protection
 
 EOD;
 			$this->_render($obj, $html);
