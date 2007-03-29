@@ -145,8 +145,7 @@
 		 * return the FormBox with the given ID (this ID has no further
 		 * meaning)
 		 *
-		 * This function should also be used to create FormBoxes (FormML
-		 * returns FormMLBox)
+		 * This function should also be used to create FormBoxes
 		 */
 		public function box($id=0)
 		{
@@ -491,104 +490,6 @@
 		{
 			$id = $dbo->id();
 			return 'sf_'.$dbo->table().'_'.($id?$id:0);
-		}
-
-		/**
-		 * accept the FormRenderer
-		 */
-		public function accept($renderer)
-		{
-			//
-			// this guard entry serves two purposes
-			// 1. When there are more than one form on one page, this entry
-			//    can be used to tell, which form was submitted.
-			// 2. The ID should be unique and not predictable. This is used
-			//    as a safeguard against CSRF attacks
-			//
-			$this->add(new HiddenInput('__guard_'.$this->id()))->set_value(guardToken());
-
-			parent::accept($renderer);
-		}
-
-		/**
-		 * validate the form
-		 */
-		public function is_valid()
-		{
-			if(!$this->submitted()) {
-				$this->add_message(dgettext('swisdk', 'Could not validate form submission'));
-				return false;
-			}
-
-			return parent::is_valid();
-		}
-
-		public function submitted()
-		{
-			return isset($_POST['__guard_'.$this->id()])
-				&& $_POST['__guard_'.$this->id()]==guardToken();
-		}
-	}
-
-	/**
-	 * Multi-language forms are implemented by binding the parent DBObject and the
-	 * translation DBObject to two FormBoxes, which are both part of the main
-	 * Form
-	 */
-
-	class FormMLBox extends FormBox {
-		public function box($id=0)
-		{
-			if(!$id && count($this->boxrefs))
-				return reset($this->boxrefs);
-
-			if(!isset($this->boxrefs[$id])) {
-				$this->boxrefs[$id] = new FormBox();
-				$this->boxrefs[$id]->set_name($id);
-				if($obj = $this->dbobj())
-					$this->boxrefs[$id]->bind($obj);
-			}
-			return $this->boxrefs[$id];
-		}
-	}
-
-	class FormML extends FormMLBox {
-		public function id()
-		{
-			if(!$this->id)
-				$this->generate_form_id();
-			return $this->id;
-		}
-
-		/**
-		 * generate an id for this form
-		 *
-		 * the id is used to track which form has been submitted if there
-		 * were multiple forms on one page. See also is_valid()
-		 */
-		public function generate_form_id()
-		{
-			$this->id = Form::to_form_id($this->dbobj());
-		}
-
-		/**
-		 * take a DBObject and return a form id
-		 */
-		public static function to_form_id($dbo, $id=0)
-		{
-			$id = $dbo->id();
-			return '__sf_'.$dbo->table().'_'.($id?$id:0);
-		}
-
-		/**
-		 * search and return a FormItem
-		 */
-		public function item($name)
-		{
-			foreach($this->boxes as &$box)
-				if($item =& $box->item($name))
-					return $item;
-			return null;
 		}
 
 		/**

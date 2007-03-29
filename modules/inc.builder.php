@@ -177,7 +177,7 @@
 	class FormBuilder extends BuilderBase {
 		public function build(&$form)
 		{
-			if(($form instanceof FormML) || ($form instanceof FormMLBox))
+			if($form->dbobj() instanceof DBObjectML)
 				return $this->build_ml($form);
 			else
 				return $this->build_simple($form);

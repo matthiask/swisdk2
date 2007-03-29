@@ -157,16 +157,6 @@
 			$this->add_html_end("</div></form>\n");
 		}
 
-		protected function visit_FormML_start($obj)
-		{
-			$this->visit_Form_start($obj);
-		}
-
-		protected function visit_FormML_end($obj)
-		{
-			$this->visit_Form_end($obj);
-		}
-
 		protected function _validation_html($obj)
 		{
 			$js = '<script type="text/javascript">

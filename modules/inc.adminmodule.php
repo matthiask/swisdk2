@@ -438,14 +438,11 @@
 		}
 
 		/**
-		 * init Form or FormML
+		 * init Form
 		 */
 		public function init_form()
 		{
-			if($this->multilanguage)
-				$this->form = new FormML();
-			else
-				$this->form = new Form();
+			$this->form = new Form();
 		}
 
 		/**
