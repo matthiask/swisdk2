@@ -65,7 +65,7 @@
 			if($field == $this->primary)
 				return 'ID';
 			return ucwords(str_replace('_', ' ', preg_replace(
-				'/('.$this->prefix.')?(.*?)(_id|_dttm)?/',
+				'/('.$this->prefix.')?(.*?)(_id|_dttm|_date)?/',
 				'\2',
 				$field
 			)));
