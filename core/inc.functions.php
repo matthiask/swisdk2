@@ -47,7 +47,7 @@
 	/**
 	 * Clean HTML, hopefully disabling XSS attack vectors
 	 */
-	function cleanInput($value)
+	function cleanInput($value, $xss_protection=true)
 	{
 		if(!$value || is_numeric($value))
 			return $value;
@@ -55,6 +55,8 @@
 			require_once UTF8.'/utils/bad.php';
 			$value = utf8_bad_replace($value);
 		}
+		if(!$xss_protection)
+			return $value;
 		require_once SWISDK_ROOT.'lib/contrib/externalinput.php';
 		return popoon_classes_externalinput::basicClean($value);
 	}
