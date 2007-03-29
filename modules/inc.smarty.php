@@ -168,12 +168,7 @@
 
 	function _smarty_swisdk_webroot($params, &$smarty)
 	{
-		static $values = array();
-		$key = $params['key'];
-		if(!isset($values[$key]))
-			$values[$key] = Swisdk::config_value(
-				'runtime.webroot.'.$key, '/'.$key);
-		return $values[$key];
+		return Swisdk::webroot($params['key']);
 	}
 
 	function _smarty_swisdk_css_classify($params, &$smarty)

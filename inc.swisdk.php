@@ -126,7 +126,8 @@ EOD;
 			Swisdk::init_cache();
 
 			define('HTDOCS_DATA_ROOT', HTDOCS_ROOT.
-				Swisdk::config_value('runtime.webroot.data', 'data').'/');
+				substr(Swisdk::config_value('runtime.webroot.data', '/data'), 1)
+				.'/');
 
 			Swisdk::log(str_repeat('*', 80), 'swisdk');
 			Swisdk::log("Initializing", 'swisdk');
@@ -369,6 +370,11 @@ EOD;
 					'No configuration for "'.implode(', ', $key).'" found'));
 
 			return $default;
+		}
+
+		public static function webroot($key)
+		{
+			return Swisdk::config_value('runtime.webroot.'.$key, '/'.$key);
 		}
 
 		/**
