@@ -146,6 +146,9 @@
 	class DateTableViewColumn extends TableViewColumn {
 		public function html(&$data)
 		{
+			if(!$data[$this->column])
+				return $this->never;
+
 			if($this->fmt === null) {
 				if(isset($this->args[0]) && $this->args[0])
 					$this->fmt = $this->args[0];
@@ -156,6 +159,7 @@
 		}
 
 		protected $fmt = null;
+		protected $never = '(never)';
 	}
 
 	/**
