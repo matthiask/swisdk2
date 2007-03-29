@@ -1,0 +1,42 @@
+<?php
+	require_once MODULE_ROOT.'inc.adminmodule.php';
+
+	class __CLASS__AdminModule extends AdminModule {
+		protected $dbo_class = '__CLASS__';
+		protected $multilanguage = false;
+
+		public function info_actions()
+		{
+			return array(
+				'create' => '_new',
+				'manage' => '_list'
+				);
+		}
+	}
+
+	Swisdk::register('__CLASS__AdminModule');
+
+	class AdminComponent___CLASS___edit extends AdminComponent_edit {
+		public function build_form($box=null)
+		{
+			parent::build_form($box);
+		}
+	}
+
+	class TableViewForm___CLASS__ extends TableViewForm {
+		public function setup_search()
+		{
+			$this->add_fulltext_field();
+			$this->add_default_items();
+		}
+	}
+
+	class AdminComponent___CLASS___list extends AdminComponent_list {
+		protected $creation_enabled = false;
+
+		public function build_tableview()
+		{
+			parent::build_tableview();
+		}
+	}
+?>

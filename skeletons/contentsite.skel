@@ -1,0 +1,9 @@
+<?php
+	require_once SWISDK_ROOT.'content/inc.contentsite.php';
+
+	class __CLASS__Site extends ContentSite {
+		protected $dbo_class = '__CLASS__';
+	}
+
+	Swisdk::register('__CLASS__Site');
+?>
