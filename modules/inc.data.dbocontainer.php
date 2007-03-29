@@ -284,9 +284,6 @@
 					case 'mysql':
 						$this->order_columns[] = ' RAND()';
 						break;
-					case 'sqlite':
-						$this->order_columns[] = ' RANDOM()';
-						break;
 				}
 				return;
 			}

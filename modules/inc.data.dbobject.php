@@ -1314,35 +1314,6 @@
 					}
 				}
 				$field_list[$this->class] = $fl;
-
-			} else if($driver=='sqlite') {
-				$columns = DBObject::db_get_array('PRAGMA table_info(\''
-					.$this->table().'\')', array('name', 'type'));
-				foreach($columns as $field => $type) {
-					// relations?
-					if(isset($relations[$field])) {
-						$fl[$field] = DB_FIELD_FOREIGN_KEY
-							|($relations[$field]['type']<<10);
-						continue;
-					}
-
-					// determine field type
-					if(stripos($field, 'date')!==false) {
-						$fl[$field] = DB_FIELD_DATE;
-					} else if(stripos($field, 'dttm')!==false) {
-						$fl[$field] = DB_FIELD_DTTM;
-					} else if(stripos($type, 'BLOB')!==false) {
-						$fl[$field] = DB_FIELD_LONGTEXT;
-					} else if($type=='BOOL') {
-						$fl[$field] = DB_FIELD_BOOL;
-					} else if(stripos($type, 'INTEGER')!==false) {
-						$fl[$field] = DB_FIELD_INTEGER;
-					} else {
-						$fl[$field] = DB_FIELD_STRING;
-					}
-
-				}
-				$field_list[$this->class] = $fl;
 			} else {
 				SwisdkError::handle(new FatalError(sprintf(
 					dgettext('swisdk', 'Cannot act on PDO DB type %s'), $driver)));
