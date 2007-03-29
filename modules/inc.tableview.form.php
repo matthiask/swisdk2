@@ -36,6 +36,8 @@
 				foreach($defaults as $k => $v)
 					$this->dbobj->$k = $v;
 			}
+
+			$this->init();
 		}
 
 		public function setup_search()
