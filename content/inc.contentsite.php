@@ -635,7 +635,7 @@
 		{
 			$dbo = $this->dbobj;
 
-			$this->dbobj = DBOContainer::create($this->dbo_class);
+			$this->init_dbobj();
 			$this->filter('!order,!limit');
 
 			if($order = $this->find_config_value('order', '#')) {
@@ -693,7 +693,7 @@
 			$this->_img_prefix = Swisdk::config_value('runtime.webroot.img', '/img');
 
 			$dbo = $this->dbobj;
-			$this->dbobj = DBOContainer::create($this->dbo_class);
+			$this->init_dbobj();
 			$html = $this->_generate_page_list($params, $smarty);
 			$this->dbobj = $dbo;
 
@@ -704,7 +704,7 @@
 		{
 			$dbo = $this->dbobj;
 
-			$this->dbobj = DBOContainer::create($this->dbo_class);
+			$this->init_dbobj();
 			$this->filter('!order,!limit');
 
 			if($order = $this->find_config_value('order', '#')) {
@@ -767,7 +767,7 @@
 		{
 			if(!$this->find_config_value('feed_enabled'))
 				SwisdkError::handle(new FatalError('Feed is disabled'));
-			$this->dbobj = DBOContainer::create($this->dbo_class);
+			$this->init_dbobj();
 			$this->filter();
 			$this->dbobj->init();
 
@@ -1013,14 +1013,18 @@
 				$this->smarty = new SwisdkSmarty();
 				$this->smarty->assign('title', $this->title);
 			}
-			if($container) {
-				if($this->multilanguage)
-					$this->dbobj = DBOContainer::create(
-						DBObjectML::create($this->dbo_class));
-				else
-					$this->dbobj = DBOContainer::create(
-						$this->dbo_class);
-			}
+			if($container)
+				$this->init_dbobj();
+		}
+
+		protected function init_dbobj()
+		{
+			if($this->multilanguage)
+				$this->dbobj = DBOContainer::create(
+					DBObjectML::create($this->dbo_class));
+			else
+				$this->dbobj = DBOContainer::create(
+					$this->dbo_class);
 		}
 
 
