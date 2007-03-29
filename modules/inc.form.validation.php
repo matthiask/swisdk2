@@ -263,7 +263,7 @@ EOD;
 function formitem_numeric_rule(id)
 {
 	var value = document.getElementById(id).value;
-	return value.match(/[0-9]*/);
+	return value.match(/^[0-9\.]$/);
 }
 
 EOD;
