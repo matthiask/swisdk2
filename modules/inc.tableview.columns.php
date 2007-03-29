@@ -203,6 +203,11 @@ EOD;
 		{
 			return '__cmd_'.$this->column;
 		}
+
+		public function disable_copy($enabled=false)
+		{
+			$this->copy_enabled = $enabled;
+		}
 	}
 
 	/**

@@ -191,6 +191,7 @@ EOD;
 		{
 			$column->set_tableview($this);
 			$this->columns[$column->name()] = $column;
+			return $column;
 		}
 
 		public function prepend_column(TableViewColumn $column)
