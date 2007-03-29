@@ -995,7 +995,7 @@ EOD;
 
 		protected function _title_html($obj)
 		{
-			return '<label for="'.$obj->id().'">'.$obj->title().'</label>';
+			return '<label class="sf-label" for="'.$obj->id().'">'.$obj->title().'</label>';
 		}
 
 		protected function _message_html($obj)

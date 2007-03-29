@@ -67,7 +67,7 @@ h2 a {
 	color: #000;
 }
 
-label {
+label.sf-label {
 	width: 150px;
 	text-align: right;
 	display: block;
