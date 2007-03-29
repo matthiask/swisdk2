@@ -1138,6 +1138,7 @@ EOD;
 
 		protected function visit_FormBox_start($obj)
 		{
+			$this->odd = true;
 			$this->_collect_javascript($obj);
 			if($obj->is_empty() || strpos($obj->name(), 'zzz_')===0)
 				return;
