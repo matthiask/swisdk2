@@ -1309,6 +1309,10 @@
 						$fl[$field] = DB_FIELD_BOOL;
 					} else if(stripos($type, 'int')!==false) {
 						$fl[$field] = DB_FIELD_INTEGER;
+					} else if(stripos($type, 'float')!==false
+							|| stripos($type, 'double')!==false
+							|| stripos($type, 'decimal')!==false) {
+						$fl[$field] = DB_FIELD_FLOAT;
 					} else {
 						$fl[$field] = DB_FIELD_STRING;
 					}

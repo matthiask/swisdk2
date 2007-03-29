@@ -77,6 +77,8 @@
 					return $this->create_date($c_field, $title);
 				case DB_FIELD_DTTM:
 					return $this->create_dttm($c_field, $title);
+				case DB_FIELD_FLOAT:
+					return $this->create_float($c_field, $title);
 				case DB_FIELD_FOREIGN_KEY|(DB_REL_SINGLE<<10):
 					$relations = $dbobj->relations();
 					if(isset($relations[$c_field]))
@@ -167,6 +169,11 @@
 		 * checkbox or true/false column
 		 */
 		abstract public function create_bool($fname, $title);
+
+		/**
+		 * float widget
+		 */
+		abstract public function create_float($fname, $title);
 
 		/**
 		 * everything else
@@ -327,6 +334,11 @@
 			return $this->form->add($fname, new CheckboxInput(), $title);
 		}
 
+		public function create_float($fname, $title)
+		{
+			return $this->form->add($fname, new TextInput(), $title);
+		}
+
 		public function create_text($fname, $title)
 		{
 			return $this->form->add($fname, new TextInput(), $title);
@@ -465,6 +477,12 @@
 		{
 			$this->tv->append_column(
 				new BoolTableViewColumn($fname, $title));
+		}
+
+		public function create_float($fname, $title)
+		{
+			$this->tv->append_column(
+				new TextTableViewColumn($fname, $title));
 		}
 
 		public function create_text($fname, $title)
