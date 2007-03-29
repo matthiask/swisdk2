@@ -9,6 +9,7 @@
 		public static function add_captcha($form)
 		{
 			$box = $form->box('zzz_captcha');
+			$box->set_widget(false);
 
 			$c = $box->add('captcha', new CaptchaInput());
 			$c->generate_captcha();
@@ -19,7 +20,8 @@
 
 		public static function submit_bar($form)
 		{
-			$box = $form->box('zzz_last')->add(new GroupItemBar())->box();
+			$box = $form->box('zzz_last')->set_widget(false)
+				->add(new GroupItemBar())->box();
 			$box->add(new SubmitButton());
 			$box->add(new ResetButton());
 		}

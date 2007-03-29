@@ -1147,12 +1147,11 @@ EOD;
 
 		protected function visit_FormBox_start($obj)
 		{
-			$this->odd = true;
 			$this->_collect_javascript($obj);
-			if($obj->is_empty() || strpos($obj->name(), 'zzz_')===0)
+			if($obj->is_empty() || !$obj->widget())
 				return;
-			// FIXME placement of message div should not always be at the
-			// end of form (end of FormBox!)
+
+			$this->odd = true;
 			$this->html .= '<fieldset id="'.$obj->id().'">';
 			if($title = $obj->title())
 				$this->html .= '<legend>'
@@ -1186,7 +1185,7 @@ EOD;
 
 		protected function visit_FormBox_end($obj)
 		{
-			if($obj->is_empty() || strpos($obj->name(), 'zzz_')===0)
+			if($obj->is_empty() || !$obj->widget())
 				return;
 			$this->html .= $this->_message_html($obj);
 			$this->html .= '</div></fieldset>';

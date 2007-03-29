@@ -543,8 +543,10 @@
 
 		protected function add_submit_buttons($box=null)
 		{
-			if($box===null)
+			if($box===null) {
 				$box = $this->form->box('zzz_last');
+				$box->set_widget(false);
+			}
 
 			$item = $box->add(new GroupItem());
 

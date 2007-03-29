@@ -92,6 +92,17 @@
 		}
 
 		/**
+		 * show formbox as own widget
+		 */
+		protected $widget = true;
+		public function widget() { return $this->widget; }
+		public function set_widget($widget)
+		{
+			$this->widget = $widget;
+			return $this;
+		}
+
+		/**
 		 * expander?
 		 */
 		protected $expander = null;
