@@ -214,15 +214,22 @@
 			return $this->rules;
 		}
 
+		protected $initialized = false;
+
 		/**
-		 * refresh all FormItem's values (read values from DBObject)
+		 * initialize all FormItem's values
 		 */
-		public function refresh()
+		public function init($reinitialize=false)
 		{
+			if($this->initialized && !$reinitialize)
+				return;
+
 			foreach($this->items as &$item)
-				$item->refresh($this->dbobj());
+				$item->init_value();
 			foreach($this->boxrefs as &$boxref)
-				$boxref->refresh($this->dbobj());
+				$boxref->init();
+
+			$this->initialized = true;
 		}
 
 		/**
@@ -298,7 +305,7 @@
 		{
 			$obj->set_preinitialized();
 			$obj->set_form_box($this);
-			$obj->init_value($this->dbobj());
+			$obj->bind($this->dbobj());
 			if($obj->name())
 				$this->items[$obj->name()] =& $obj;
 			else
@@ -322,7 +329,7 @@
 			$obj->set_title($title);
 			$obj->set_name($field);
 			$obj->set_form_box($this);
-			$obj->init_value($dbobj);
+			$obj->bind($dbobj);
 
 			$this->items[$field] = $obj;
 
@@ -364,8 +371,6 @@
 
 		/**
 		 * @return the FormBox html
-		 *
-		 * NOTE! This is not used when calling Form::html()
 		 */
 		public function html($arg = 'TableFormRenderer')
 		{
@@ -401,6 +406,8 @@
 		 */
 		public function is_valid()
 		{
+			$this->init();
+
 			$valid = true;
 			// loop over FormRules
 			foreach($this->rules as &$rule)
@@ -525,6 +532,8 @@
 		 */
 		public function is_valid()
 		{
+			$this->init();
+
 			if(!$this->submitted()) {
 				$this->add_message(dgettext('swisdk', 'Could not validate form submission'));
 				return false;

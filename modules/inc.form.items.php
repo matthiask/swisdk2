@@ -87,6 +87,12 @@
 			return $this->dbobj;
 		}
 
+		public function bind($dbobj)
+		{
+			$this->dbobj = $dbobj;
+			return $this;
+		}
+
 		/**
 		 * accessors and mutators
 		 */
@@ -101,10 +107,11 @@
 			return $this;
 		}
 
+		protected $default_value;
+
 		public function set_default_value($value)
 		{
-			if(!$this->dbobj->get($this->name))
-				$this->dbobj->set($this->name, $value);
+			$this->default_value = $value;
 			return $this;
 		}
 
@@ -187,10 +194,8 @@
 		 * get the value from the user and store it in this FormItem
 		 * and also in the corresponding field in the bound DBObject
 		 */
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			$this->dbobj = $dbobj;
-
 			$name = $this->name();
 			$id = $this->id();
 			$val = null;
@@ -201,36 +206,29 @@
 					$array = null;
 					$pname = substr($id, 0, $pos);
 					if($val = getInput($pname)) {
-						$array = $dbobj->get($pname);
+						$array = $this->dbobj->get($pname);
 						$array[$idx] = $val[$idx];
-						$dbobj->set($pname, $array);
+						$this->dbobj->set($pname, $array);
 					} else
-						$array = $dbobj->get($pname);
-					if(!$array)
-						$array = array();
+						$array = $this->dbobj->get($pname);
+					if(!$array) {
+						if($this->default_value)
+							$array = $this->default_value;
+						else
+							$array = array();
+					}
 
 					$this->set_value($array[$idx]);
 				}
 			} else {
 				if(($val = getInput($this->id()))!==null) {
 					if(is_array($val))
-						$dbobj->set($name, $val);
+						$this->dbobj->set($name, $val);
 					else
-						$dbobj->set($name, stripslashes($val));
-				}
-
-				$this->set_value($dbobj->get($name));
+						$this->dbobj->set($name, stripslashes($val));
+				} else if($this->dbobj->get($name)===null)
+					$this->dbobj->set($name, $this->default_value);
 			}
-		}
-
-		/**
-		 * refresh the FormItem's value (read value from DBObject)
-		 */
-		public function refresh($dbobj=null)
-		{
-			if($dbobj)
-				$this->dbobj = $dbobj;
-			$this->set_value($this->dbobj->get($this->name));
 		}
 
 		/**
@@ -362,10 +360,8 @@ EOD;
 		protected $files_data;
 		protected $no_upload = true;
 
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			$this->dbobj = $dbobj;
-
 			$name = $this->id();
 			if(isset($_FILES[$name])
 					&& ($this->files_data = $_FILES[$name])
@@ -377,7 +373,7 @@ EOD;
 				Swisdk::require_data_directory(CACHE_ROOT.'upload');
 				if(move_uploaded_file($this->files_data['tmp_name'],
 						$this->files_data['path'])) {
-					$dbobj->set($this->name(), $fname);
+					$this->dbobj->set($this->name(), $fname);
 					$this->no_upload = false;
 					$this->files_data['cache_file'] = $fname;
 				}
@@ -446,25 +442,26 @@ EOD;
 	}
 
 	class DBFileUpload extends FileUpload {
-		protected $current_value = null;
+		protected $current_value_field = null;
 		protected $delete_file = false;
+		protected $download_controller = '/download';
 
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			parent::init_value($dbobj);
-			$this->current_value = $dbobj->get($this->name().'_name');
+			parent::init_value();
+			$this->current_value = $this->dbobj->get($this->name().'_name');
 			if(!$this->no_upload) {
 				$name = $this->name();
-				$dbobj[$name.'_file'] = $dbobj[$name];
-				$dbobj[$name.'_name'] = $this->files_data['name'];
-				$dbobj[$name.'_mimetype'] = $this->files_data['type'];
-				$dbobj[$name.'_size'] = $this->files_data['size'];
-				unset($dbobj[$name]);
+				$this->dbobj[$name.'_file'] = $this->dbobj[$name];
+				$this->dbobj[$name.'_name'] = $this->files_data['name'];
+				$this->dbobj[$name.'_mimetype'] = $this->files_data['type'];
+				$this->dbobj[$name.'_size'] = $this->files_data['size'];
+				unset($this->dbobj[$name]);
 			}
 
 			// automatically call $this->store_file() while
 			// storing the DBObject. Magic!
-			$dbobj->listener_add('pre-store', array($this, 'store_file'));
+			$this->dbobj->listener_add('pre-store', array($this, 'store_file'));
 
 			if(getInput($this->id().'___delete'))
 				$this->delete_file = true;
@@ -488,7 +485,26 @@ EOD;
 
 		public function current_value()
 		{
-			return $this->current_value;
+			if(!$this->current_value_field)
+				return $this->dbobj->get($this->name().'_name');
+			return $this->dbobj->get($this->current_value_field);
+		}
+
+		public function set_current_value_field($field)
+		{
+			return $this->current_value_field = $field;
+			return $this;
+		}
+
+		public function download_controller()
+		{
+			return $this->download_controller;
+		}
+
+		public function set_download_controller($ctrl)
+		{
+			$this->download_controller = $ctrl;
+			return $this;
 		}
 	}
 
@@ -499,21 +515,20 @@ EOD;
 	class CheckboxInput extends FormItem {
 		protected $type = 'checkbox';
 
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			$this->dbobj = $dbobj;
-
 			$name = $this->name();
 			$id = $this->id();
 
 			if(isset($_POST[$id.'__check'])) {
 				if(getInput($id))
-					$dbobj->set($name, 1);
+					$this->dbobj->set($name, 1);
 				else
-					$dbobj->set($name, 0);
+					$this->dbobj->set($name, 0);
 			}
 
-			$this->set_value($dbobj->get($name));
+			if($this->dbobj->get($name)===null)
+				$this->dbobj->set($name, $this->default_value);
 		}
 	}
 
@@ -538,26 +553,25 @@ EOD;
 		{
 			$this->auto_xss_protection = $enabled;
 			// XXX hack! init_value should get called later (Form-level change)
-			$this->init_value($this->dbobj);
+			//$this->init_value($this->dbobj);
 			return $this;
 		}
 
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			$this->dbobj = $dbobj;
-
 			$name = $this->name();
 			$id = $this->id();
 
 			if($v = getInputRaw($id)) {
 				if($this->auto_xss_protection
 						|| getInput($id.'__xss'))
-					$dbobj->set($name, cleanInput($v));
+					$this->dbobj->set($name, cleanInput($v));
 				else
-					$dbobj->set($name, cleanInput($v, false));
+					$this->dbobj->set($name, cleanInput($v, false));
 			}
 
-			$this->set_value($dbobj->get($name));
+			if($this->dbobj->get($name)===null)
+				$this->dbobj->set($name, $this->default_value);
 		}
 	}
 
@@ -568,9 +582,9 @@ EOD;
 		protected $attributes = array('class' => 'sf-richtextarea');
 		protected $type = 'Standard';
 
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			parent::init_value($dbobj);
+			parent::init_value();
 			$value = $this->value();
 			$new = preg_replace('/^<!--.*-->/u', '', $value);
 			if(strpos($value, '<!-- NORT -->')===0)
@@ -633,15 +647,17 @@ EOD;
 	}
 
 	class DropdownInput extends SelectionFormItem {
-		public function init_value($dbobj)
+		public function init_value()
 		{
 			// only allow values from the items array
 			$name = $this->name();
-			$value = $dbobj->get($name);
-			parent::init_value($dbobj);
+			$value = $this->dbobj->get($name);
+			parent::init_value();
 			if(!isset($this->items[$this->value()])) {
-				$dbobj->set($name, $value);
-				$this->refresh($dbobj);
+				if($value)
+					$this->dbobj->set($name, $value);
+				else
+					$this->dbobj->set($name, $this->default_value);
 			}
 		}
 	}
@@ -658,9 +674,9 @@ EOD;
 			$this->class = $class;
 		}
 
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			parent::init_value($dbobj);
+			parent::init_value();
 			$name = $this->name();
 			$value = $this->value();
 			if(!is_numeric($value)) {
@@ -670,7 +686,7 @@ EOD;
 					return;
 				$dbo->title = $value;
 				$dbo->store();
-				$dbobj->set($name, $dbo->id());
+				$this->dbobj->set($name, $dbo->id());
 			}
 		}
 	}
@@ -684,15 +700,14 @@ EOD;
 			return $val;
 		}
 
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			parent::init_value($dbobj);
+			parent::init_value();
 			$name = $this->name();
-			$newvalue = $dbobj->get($name);
+			$newvalue = $this->dbobj->get($name);
 			if(is_array($newvalue)) {
-				$dbobj->set($name, array_intersect($newvalue,
+				$this->dbobj->set($name, array_intersect($newvalue,
 					array_keys($this->items)));
-				$this->refresh($dbobj);
 			}
 		}
 	}
@@ -700,9 +715,9 @@ EOD;
 	class ThreewayInput extends FormItem {
 		protected $relation;
 
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			parent::init_value($dbobj);
+			parent::init_value();
 			$id = $this->id();
 			if(isset($_POST['__check_'.$id])
 					&& !getInput($id)) {
@@ -745,10 +760,10 @@ EOD;
 			$this->fields = $fields;
 		}
 
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			$dboc = $dbobj->related($this->class);
-			parent::init_value($dbobj);
+			$dboc = $this->dbobj->related($this->class);
+			parent::init_value();
 			$values = $this->value();
 			if(is_array(reset($values))) {
 				$ids = array_flip($dboc->ids());
@@ -800,9 +815,9 @@ EOD;
 		protected $attributes = array('class' => 'sf-textinput');
 		protected $tag_formitems = array();
 
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			parent::init_value($dbobj);
+			parent::init_value();
 			$value = $this->value();
 			if(!is_array($value)) {
 				$_v = array_map('trim', explode(',', $value));
@@ -857,10 +872,8 @@ EOD;
 	class SubmitButton extends FormBar {
 		protected $value;
 
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			$this->dbobj = $dbobj;
-
 			$this->value = dgettext('swisdk', 'Submit');
 		}
 
@@ -879,10 +892,8 @@ EOD;
 	class ResetButton extends FormBar {
 		protected $value;
 
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			$this->dbobj = $dbobj;
-
 			$this->value = dgettext('swisdk', 'Reset');
 		}
 
@@ -902,9 +913,9 @@ EOD;
 		protected $time = true;
 		protected $actions = array();
 
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			parent::init_value($dbobj);
+			parent::init_value();
 
 			if(!is_numeric($val = $this->value())) {
 				$new = strtotime($val);
@@ -1094,9 +1105,8 @@ EOD;
 				$box, 'add_auto'), $args);
 		}
 
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			$this->dbobj = $dbobj;
 		}
 
 		public function set_separator($separator)
@@ -1115,9 +1125,8 @@ EOD;
 	}
 
 	class PreviewFormItem extends FormItem {
-		public function init_value($dbobj)
+		public function init_value()
 		{
-			$this->dbobj = $dbobj;
 		}
 
 		public function html()
