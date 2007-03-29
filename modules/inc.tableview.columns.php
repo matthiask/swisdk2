@@ -58,6 +58,30 @@
 		}
 	}
 
+	class NumberTableViewColumn extends TableViewColumn {
+		protected $fmt = null;
+
+		public function html(&$data)
+		{
+			static $initialized = false;
+			if(!$initialized) {
+				if(!$this->fmt && isset($this->args[0]))
+					$this->fmt = $this->args[0];
+				$initialized = true;
+			}
+
+			if($this->fmt)
+				return sprintf($this->fmt, $data[$this->column]);
+			return $data[$this->column];
+		}
+
+		public function set_format($format)
+		{
+			$this->fmt = $format;
+			return $this;
+		}
+	}
+
 	class BoolTableViewColumn extends TableViewColumn {
 		public function html(&$data)
 		{

@@ -482,7 +482,7 @@
 		public function create_float($fname, $title)
 		{
 			$this->tv->append_column(
-				new TextTableViewColumn($fname, $title));
+				new NumberTableViewColumn($fname, $title));
 		}
 
 		public function create_text($fname, $title)
