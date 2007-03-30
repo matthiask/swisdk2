@@ -20,6 +20,12 @@
 			$this->stack[0] =& $this->array;
 		}
 
+		protected function visit_Form_start($obj)
+		{
+			$this->form = $obj;
+			parent::visit_Form_start($obj);
+		}
+
 		protected function visit_FormBox_start($obj)
 		{
 			$this->form = $obj;
