@@ -15,6 +15,9 @@
 			$path = $this->args[1];
 			$fname = $data[$this->column];
 
+			if(!$fname)
+				return '(none)';
+
 			return '<img src="'
 				.Swisdk::config_value('runtime.webroot.data', '/data')
 				.'/'.$path.'/'
