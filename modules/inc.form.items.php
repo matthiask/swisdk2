@@ -651,13 +651,9 @@ EOD;
 		{
 			// only allow values from the items array
 			$name = $this->name();
-			$value = $this->dbobj->get($name);
 			parent::init_value();
 			if(!isset($this->items[$this->value()])) {
-				if($value)
-					$this->dbobj->set($name, $value);
-				else
-					$this->dbobj->set($name, $this->default_value);
+				$this->dbobj->set($name, $this->default_value);
 			}
 		}
 	}

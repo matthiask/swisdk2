@@ -429,7 +429,7 @@ EOD;
 				$html .= '<option ';
 				if((is_numeric($id) && $id===intval($value))
 						|| (!is_numeric($id) && $id==="$value"))
-					$html .= 'selected="selected" ';
+					$html .= ' checked="checked" ';
 				$html .= 'value="'.htmlspecialchars($id).'">'
 					.htmlspecialchars($title)."</option>\n";
 			}
@@ -453,7 +453,7 @@ EOD;
 					.htmlspecialchars($name).'"';
 				if((is_numeric($id) && $id===intval($value))
 						|| (!is_numeric($id) && $id==="$value"))
-					$html .= 'selected="selected" ';
+					$html .= ' checked="checked" ';
 				$html .= 'value="'.htmlspecialchars($id).'"><label for="'
 					.htmlspecialchars($name.$id).'">'
 					.htmlspecialchars($title)."</label></span>\n";
@@ -474,7 +474,7 @@ EOD;
 				$html .= '<option ';
 				if((is_numeric($id) && $id===intval($value))
 						|| (!is_numeric($id) && $id==="$value"))
-					$html .= 'selected="selected" ';
+					$html .= ' checked="checked" ';
 				$html .= 'value="'.htmlspecialchars($id).'">'
 					.htmlspecialchars($title)."</option>\n";
 			}
@@ -512,7 +512,7 @@ EOD;
 			foreach($items as $k => $v) {
 				$html .= '<option ';
 				if(in_array($k,$value))
-					$html .= 'selected="selected" ';
+					$html .= ' selected="selected" ';
 				$html .= 'value="'.htmlspecialchars($k).'">'
 					.$v."</option>\n";
 			}
