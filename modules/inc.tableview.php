@@ -274,7 +274,7 @@ EOD;
 			$dbo->order = s_get($this->form_defaults, 'order', $dbo->primary());
 			$dbo->order = s_get($this->form_defaults, 'dir', 'ASC');
 			$dbo->start = s_get($this->form_defaults, 'start', 0);
-			$dbo->Limit = s_get($this->form_defaults, 'limit', $this->items_on_page);
+			$dbo->limit = s_get($this->form_defaults, 'limit', $this->items_on_page);
 
 			$this->form->bind($dbo);
 
