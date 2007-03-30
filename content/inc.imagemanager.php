@@ -54,7 +54,9 @@
 			$regenerate=false)
 		{
 			if(!ImageManager::type_exists($type))
-				return false;
+				SwisdkError::handle(new FatalError(sprintf(
+					dgettext('swisdk', 'Type %s does not exist'),
+					$type)));
 			return ImageManager::generate($file, $type, $htdocs_data_dir,
 				array(), $regenerate);
 		}
@@ -91,7 +93,7 @@
 			$commands=array(), $regenerate=false)
 		{
 			if(!file_exists($file))
-				return null;
+				return false;
 
 			Swisdk::require_htdocs_data_directory($htdocs_data_dir);
 			$thumb_name = ImageManager::filename($file, $type);
