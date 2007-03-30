@@ -659,6 +659,7 @@ EOD;
 	}
 
 	class RadioButtons extends DropdownInput {
+		protected $attributes = array('class' => 'sf-radiobuttons');
 	}
 
 	class ComboBox extends SelectionFormItem {

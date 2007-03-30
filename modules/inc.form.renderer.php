@@ -442,7 +442,7 @@ EOD;
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
 			$attributes = $this->_attribute_html($obj->attributes());
-			$html = '<span class="sf-radiobuttons" '
+			$html = '<span '
 				.$this->_attribute_html($obj->attributes())
 				.'>';
 			$value = $obj->value();
