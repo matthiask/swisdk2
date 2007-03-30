@@ -272,7 +272,7 @@ EOD;
 			$dbo = $this->obj->dbobj_clone();
 
 			$dbo->order = s_get($this->form_defaults, 'order', $dbo->primary());
-			$dbo->order = s_get($this->form_defaults, 'dir', 'ASC');
+			$dbo->dir = s_get($this->form_defaults, 'dir', 'ASC');
 			$dbo->start = s_get($this->form_defaults, 'start', 0);
 			$dbo->limit = s_get($this->form_defaults, 'limit', $this->items_on_page);
 
