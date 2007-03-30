@@ -118,7 +118,7 @@
 			$this->request = array();
 
 			// handle /controller?p=<numeric> specially
-			if(isset($_GET['p']) && $id = intval($_GET['p'])) {
+			if($id = s_get($_GET, 'p')) {
 				$this->request['id'] = $id;
 				$this->mode = 'single';
 				return;
@@ -135,7 +135,7 @@
 					$vars = array('mode', 'template_single', 'template_list');
 					foreach($vars as $v)
 						if(isset($this->parser_config[$arg][$v]))
-						$this->$v = $this->parser_config[$arg][$v];
+							$this->$v = $this->parser_config[$arg][$v];
 				} else {
 					if(is_numeric($arg)) {
 						$this->request['date'][] = $arg;
@@ -296,8 +296,7 @@
 				if(!$this->_paging_limit)
 					return false;
 
-				$this->_paging_current_page =
-					isset($this->request['page'])?$this->request['page']:1;
+				$this->_paging_current_page = s_get($this->request, 'page', 1);
 				$this->_paging_offset =
 					($this->_paging_current_page-1)*$this->_paging_limit;
 				$this->_paging_total_count = $this->dbobj->total_count();
@@ -1070,7 +1069,7 @@
 		{
 			if($limit = $this->find_config_value('default_limit', 10)) {
 				$limit = $this->find_config_value('default_limit', 10);
-				$page = isset($this->request['page'])?$this->request['page']:1;
+				$page = s_get($this->request, 'page', 1);
 				$this->dbobj->set_limit(($page-1)*$limit, $limit);
 			}
 		}
@@ -1130,8 +1129,7 @@
 			if(!$this->find_config_value('categories'))
 				return;
 
-			if(isset($this->request['category'])
-					&& $this->request['category']) {
+			if(s_test($this->request, 'category')) {
 				$dbo = $this->dbobj->dbobj_clone();
 				$p = $dbo->_prefix();
 				$this->dbobj->add_join('Category');
@@ -1297,8 +1295,7 @@
 
 		public function filter_category()
 		{
-			if(isset($this->request['category'])
-					&& $this->request['category']) {
+			if(s_test($this->request, 'category')) {
 				$dbo = $this->dbobj->dbobj_clone();
 				$p = $dbo->_prefix();
 				$this->dbobj->add_join('Category');

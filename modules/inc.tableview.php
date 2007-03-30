@@ -83,7 +83,7 @@
 
 		public function enabled($feature)
 		{
-			return isset($this->features[$feature]) && $this->features[$feature];
+			return s_test($this->features, $feature);
 		}
 
 		public function set_feature_state($features, $state)
@@ -197,8 +197,7 @@ EOD;
 		public function prepend_column(TableViewColumn $column)
 		{
 			$name = $column->name();
-			if(isset($this->columns[$name]))
-				unset($this->columns[$name]);
+			s_unset($this->columns, $name);
 			$this->columns = array_merge(
 				array($name => $column),
 				$this->columns);
@@ -272,14 +271,10 @@ EOD;
 
 			$dbo = $this->obj->dbobj_clone();
 
-			$dbo->order = isset($this->form_defaults['order'])?
-				$this->form_defaults['order']:$dbo->primary();
-			$dbo->dir = isset($this->form_defaults['dir'])?
-				$this->form_defaults['dir']:'ASC';
-			$dbo->start = isset($this->form_defaults['start'])?
-				$this->form_defaults['start']:0;
-			$dbo->limit = isset($this->form_defaults['limit'])?
-				$this->form_defaults['limit']:$this->items_on_page;
+			$dbo->order = s_get($this->form_defaults, 'order', $dbo->primary());
+			$dbo->order = s_get($this->form_defaults, 'dir', 'ASC');
+			$dbo->start = s_get($this->form_defaults, 'start', 0);
+			$dbo->Limit = s_get($this->form_defaults, 'limit', $this->items_on_page);
 
 			$this->form->bind($dbo);
 

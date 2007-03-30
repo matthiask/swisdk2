@@ -52,7 +52,7 @@
 		public function html(&$data)
 		{
 			$str = strip_tags($data[$this->column]);
-			if(isset($this->args[0]) && $ml = $this->args[0])
+			if($ml = s_get($this->args, 0))
 				return ellipsize($str, $ml);
 			return $data[$this->column];
 		}
@@ -99,9 +99,7 @@
 		public function html(&$data)
 		{
 			$value = $data[$this->column];
-			if(isset($this->args[0][$value]))
-				return $this->args[0][$value];
-			return $value;
+			return s_get($this->args[0], $value, $value);
 		}
 	}
 
@@ -119,8 +117,7 @@
 				$matches = array();
 				preg_match_all('/\{([A-Za-z_0-9]+)}/', $this->args[0],
 					$matches, PREG_PATTERN_ORDER);
-				if(isset($matches[1]))
-					$this->vars = $matches[1];
+				$this->vars = s_get($matches, 1);
 				foreach($this->vars as $v)
 					$this->patterns[] = '/\{' . $v . '\}/';
 			}
@@ -150,7 +147,7 @@
 				return $this->never;
 
 			if($this->fmt === null) {
-				if(isset($this->args[0]) && $this->args[0])
+				if(s_test($this->args, 0))
 					$this->fmt = $this->args[0];
 				else
 					$this->fmt = '%d.%m.%Y : %H:%M';
@@ -250,12 +247,11 @@ EOD;
 
 			$this->db_class = $this->args[0];
 
-			if(isset($this->args[2]) && $t = $this->args[2]) {
+			if($t = s_get($this->args, 2)) {
 				$matches = array();
 				preg_match_all('/\{([A-Za-z_0-9]+)}/', $t,
 					$matches, PREG_PATTERN_ORDER);
-				if(isset($matches[1]))
-					$this->vars = $matches[1];
+				$this->vars = s_get($matches, 1);
 				foreach($this->vars as $v)
 					$this->patterns[] = '/\{' . $v . '\}/';
 
@@ -280,9 +276,7 @@ EOD;
 				return preg_replace($this->patterns, $vals, $this->args[2]);
 			} else {
 				$val = $data[$this->column];
-				if(!isset($this->db_data[$val]))
-					return $this->no_data;
-				return $this->db_data[$val];
+				return s_get($this->db_data, $val, $this->no_data);
 			}
 		}
 
@@ -322,7 +316,7 @@ EOD;
 			$clause = array($rel['field'].' IN {ids}' => array(
 				'ids' => $this->tableview->dbobj()->ids()));
 
-			if(isset($this->args[2]) && $t = $this->args[2]) {
+			if($t = s_get($this->args, 2)) {
 				$matches = array();
 				preg_match_all('/\{([A-Za-z_0-9]+)}/', $t,
 					$matches, PREG_PATTERN_ORDER);

@@ -7,6 +7,25 @@
 	*/
 
 	/**
+	 * shortcut accessor functions
+	 */
+	function s_get(&$array, $var, $default=null)
+	{
+		return isset($array[$var])?$array[$var]:$default;
+	}
+
+	function s_test(&$array, $var)
+	{
+		return isset($array[$var]) && $array[$var];
+	}
+
+	function s_unset(&$array, $var)
+	{
+		if(isset($array[$var]))
+			unset($array[$var]);
+	}
+
+	/**
 	* redirects the client browser to the new location
 	*/
 	function redirect($url)
@@ -25,7 +44,7 @@
 	*/
 	function getInputRaw($var, $default = null)
 	{
-		return isset($_REQUEST[$var])?$_REQUEST[$var]:$default;
+		return s_get($_REQUEST, $var, $default);
 	}
 
 	/**
