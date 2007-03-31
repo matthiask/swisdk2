@@ -586,7 +586,7 @@ EOD;
 		{
 			parent::init_value();
 			$value = $this->value();
-			$new = preg_replace('/^<!--.*-->/u', '', $value);
+			$new = preg_replace('/^<!-- (NO)?RT -->/u', '', $value);
 			if(strpos($value, '<!-- NORT -->')===0)
 				$this->set_value($new);
 			else

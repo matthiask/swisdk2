@@ -429,7 +429,7 @@ EOD;
 				$html .= '<option ';
 				if((is_numeric($id) && $id===intval($value))
 						|| (!is_numeric($id) && $id==="$value"))
-					$html .= ' checked="checked" ';
+					$html .= ' selected="selected" ';
 				$html .= 'value="'.htmlspecialchars($id).'">'
 					.htmlspecialchars($title)."</option>\n";
 			}
@@ -474,7 +474,7 @@ EOD;
 				$html .= '<option ';
 				if((is_numeric($id) && $id===intval($value))
 						|| (!is_numeric($id) && $id==="$value"))
-					$html .= ' checked="checked" ';
+					$html .= ' selected="selected" ';
 				$html .= 'value="'.htmlspecialchars($id).'">'
 					.htmlspecialchars($title)."</option>\n";
 			}
