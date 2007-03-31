@@ -14,6 +14,7 @@
 	require_once MODULE_ROOT.'inc.tableview.php';
 	require_once MODULE_ROOT.'inc.tableview.php';
 	require_once MODULE_ROOT.'inc.builder.php';
+	require_once MODULE_ROOT.'inc.event-broadcaster.php';
 
 	/**
 	 * AdminModule
@@ -160,7 +161,7 @@
 		}
 	}
 
-	abstract class AdminComponent implements IHtmlComponent {
+	abstract class AdminComponent extends Broadcaster implements IHtmlComponent {
 		/**
 		 * the following four variables are all initialized in AdminComponent::set_module
 		 */
@@ -369,6 +370,16 @@
 		 */
 		protected $id = false;
 
+		public function dbobj()
+		{
+			return $this->obj;
+		}
+
+		public function form()
+		{
+			return $this->form;
+		}
+
 		public function run()
 		{
 			// if multiple is passed, the IDs of the records which should
@@ -465,10 +476,13 @@
 			if($this->form->is_valid()) {
 				if(!$this->editmode || $this->copy)
 					$this->obj->unset_primary();
+				$this->listener_call('post-process');
 				$this->post_process();
 				if(getInput('sf_publish')) {
+					$this->listener_call('pre-publish');
 					$this->obj->active = 1;
 					$this->obj->store();
+					$this->listener_call('publish');
 					$this->goto('_index');
 				} else if(getInput('sf_save_and_continue')) {
 					$this->obj->store();
