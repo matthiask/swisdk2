@@ -88,7 +88,7 @@ div.sf-element.even {
 input, button, select, textarea {
 	margin: 5px;
 	padding: 3px;
-	width: 280px;
+	width: 530px;
 }
 
 input[type="checkbox"] {
