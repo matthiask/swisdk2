@@ -14,6 +14,12 @@
 		return isset($array[$var])?$array[$var]:$default;
 	}
 
+	function s_set(&$array, $var, $value)
+	{
+		if(!isset($array[$var]))
+			$array[$var] = $value;
+	}
+
 	function s_test(&$array, $var)
 	{
 		return isset($array[$var]) && $array[$var];
