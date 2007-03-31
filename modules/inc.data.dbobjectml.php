@@ -315,9 +315,8 @@
 			$fields = $dbo->field_list();
 			if(isset($fields[$var]))
 				return $dbo->get($var);
-			if(isset($this->data[$var]))
-				return $this->data[$var];
-			return null;
+
+			return parent::get($var);
 		}
 
 		public function set($var, $value)
