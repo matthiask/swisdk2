@@ -517,6 +517,7 @@ EOD;
 					.$v."</option>\n";
 			}
 			$html .= "</select>\n";
+			$html .= '<input type="hidden" name="'.$name.'__check" value="1" />'."\n";
 			$this->_render($obj, $html);
 		}
 

@@ -699,13 +699,20 @@ EOD;
 
 		public function init_value()
 		{
-			parent::init_value();
 			$name = $this->name();
-			$newvalue = $this->dbobj->get($name);
-			if(is_array($newvalue)) {
-				$this->dbobj->set($name, array_intersect($newvalue,
-					array_keys($this->items)));
-			}
+			$id = $this->id();
+
+			$values = array_keys($this->items);
+
+			if(s_test($_POST, $this->id().'__check')) {
+				if(($val = getInput($id)) && is_array($val))
+					$this->dbobj->set($name,
+						array_intersect($values, $val));
+				else
+					$this->dbobj->set($name, array());
+			} else if(!$this->dbobj->get($name)
+					&& is_array($this->default_value))
+				$this->dbobj->set($name, $this->default_value);
 		}
 	}
 
