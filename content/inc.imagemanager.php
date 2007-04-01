@@ -280,6 +280,17 @@
 		}
 
 		/**
+		 * Change the image gamma
+		 */
+		public static function transform_gamma($file, $gamma)
+		{
+			$cmd = sprintf('mogrify -quality 100 -gamma %f %s',
+				floatval($gamma),
+				escapeshellarg($file));
+			exec($cmd);
+		}
+
+		/**
 		 * Filename mangling
 		 *
 		 * Example:
