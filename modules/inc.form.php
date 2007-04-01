@@ -522,7 +522,8 @@
 			// 2. The ID should be unique and not predictable. This is used
 			//    as a safeguard against CSRF attacks
 			//
-			$this->add(new HiddenInput('__guard_'.$this->id()))->set_value(guardToken());
+			$this->add(new HiddenInput($this->id().'__guard'))
+				->set_value(guardToken());
 
 			parent::accept($renderer);
 		}
@@ -535,7 +536,8 @@
 			$this->init();
 
 			if(!$this->submitted()) {
-				$this->add_message(dgettext('swisdk', 'Could not validate form submission'));
+				$this->add_message(
+					dgettext('swisdk', 'Could not validate form submission'));
 				return false;
 			}
 
@@ -544,8 +546,7 @@
 
 		public function submitted()
 		{
-			return isset($_POST['__guard_'.$this->id()])
-				&& $_POST['__guard_'.$this->id()]==guardToken();
+			return s_get($_POST, $this->id().'__guard')==guardToken();
 		}
 	}
 

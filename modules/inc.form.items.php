@@ -463,7 +463,7 @@ EOD;
 			// storing the DBObject. Magic!
 			$this->dbobj->listener_add('pre-store', array($this, 'store_file'));
 
-			if(getInput($this->id().'___delete'))
+			if(getInput($this->id().'__delete'))
 				$this->delete_file = true;
 		}
 
@@ -723,7 +723,7 @@ EOD;
 		{
 			parent::init_value();
 			$id = $this->id();
-			if(isset($_POST['__check_'.$id])
+			if(isset($_POST[$id.'__check'])
 					&& !getInput($id)) {
 				$this->set_value(array());
 			}

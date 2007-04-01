@@ -284,7 +284,7 @@ function validate_'.$id.'()
 				($current
 					?sprintf('Current: <a href="%s/%s">%s</a>, '
 						.'remove? <input type="checkbox" '
-							.'name="%s___delete" id="%s___delete" /><br />',
+							.'name="%s__delete" id="%s__delete" /><br />',
 						$obj->download_controller(),
 						$current, $current, $name, $name)
 					:''),
@@ -313,8 +313,8 @@ function validate_'.$id.'()
 //<![CDATA[
 function formitem_tristate(elem)
 {
-	var value = document.getElementById(elem.id.replace(/^__cont_/, ''));
-	var cb = document.getElementById('__cb_'+value.id);
+	var value = document.getElementById(elem.id.replace(/__cont$/, ''));
+	var cb = document.getElementById(value.id+'__cb');
 
 	switch(value.value) {
 		case 'checked':
@@ -348,8 +348,8 @@ function formitem_tristate(elem)
 			$this->_render($obj, $js.sprintf(
 '<span style="position:relative;">
 	<div style="position:absolute;top:0;left:0;width:20px;height:20px;"
-		id="__cont_%s" onclick="formitem_tristate(this)"></div>
-	<input type="checkbox" name="__cb_%s" id="__cb_%s" %s />
+		id="%s__cont" onclick="formitem_tristate(this)"></div>
+	<input type="checkbox" name="%s__cb" id="%s__cb" %s />
 	<input type="hidden" name="%s" id="%s" value="%s" />
 </span>'."\n", $name, $name, $name, $cb_html, $name, $name, htmlspecialchars($value)));
 
@@ -601,7 +601,7 @@ add_event(window, 'load', load_$name);
 </script>
 
 <div id="$name">
-	<input type="hidden" name="__check_{$name}" value="1" />
+	<input type="hidden" name="{$name}__check" value="1" />
 
 EOD;
 
