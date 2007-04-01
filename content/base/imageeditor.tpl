@@ -132,6 +132,14 @@
 				title="Colorize image with blue color">
 			colorize blue
 		</a>
+		<a href="{$this_url_type}cmd=darken"
+				title="Darken image">
+			darken
+		</a>
+		<a href="{$this_url_type}cmd=lighten"
+				title="Lighten image">
+			lighten
+		</a>
 		<a href="{$this_url_type}cmd=crop"
 				title="Crop image">
 			<img src="{webroot key=img}/icons/shape_handles.png" />

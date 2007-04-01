@@ -79,6 +79,18 @@
 								$base.$image_files[$t], array(
 								array('colorize', '#00f', 5)));
 						break;
+					case 'darken':
+						foreach($work_types as $t)
+							ImageManager::process_commands(
+								$base.$image_files[$t], array(
+								array('gamma', 0.95)));
+						break;
+					case 'lighten':
+						foreach($work_types as $t)
+							ImageManager::process_commands(
+								$base.$image_files[$t], array(
+								array('gamma', 1.05)));
+						break;
 					case 'crop':
 						$file = ImageManager::filename($file, 'crop');
 						$image_files['crop'] = $file;
