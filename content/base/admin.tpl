@@ -3,7 +3,7 @@
 <head>
 <title>{swisdk_runtime_value key="website.title"}</title>
 <script type="text/javascript" src="{webroot key=js}/util.js"></script>
-<script type="text/javascript" src="{webroot key=js}/scriptaculous/prototype.js"></script>
+<script type="text/javascript" src="{webroot key=js}/jquery/jquery.js"></script>
 <style type="text/css">
 {literal}
 body {
@@ -280,11 +280,11 @@ tr.severity-enhancement {
 				var group = elem.parentNode.parentNode;
 				var list_id = group.id+'-list';
 
-				$A($('navigation').getElementsByTagName('ul')).each(function(elem){
-					if(elem.id==list_id)
-						elem.style.display = (elem.style.display=='block'?'none':'block');
+				$('#navigation').find('ul').each(function(){
+					if(this.id==list_id)
+						this.style.display = (this.style.display=='block'?'none':'block');
 					else
-						elem.style.display = 'none';
+						this.style.display = 'none';
 				});
 
 				return false;
