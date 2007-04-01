@@ -308,7 +308,9 @@ function validate_'.$id.'()
 		protected function visit_TristateInput($obj)
 		{
 			$this->_collect_javascript($obj);
-			static $js = "
+			static $js = '#';
+			if($js=='#')
+				$js = <<<EOD
 <script type=\"text/javascript\">
 //<![CDATA[
 function formitem_tristate(elem)
@@ -337,7 +339,9 @@ function formitem_tristate(elem)
 	return false;
 }
 //]]>
-</script>";
+</script>
+
+EOD;
 			$name = $obj->id();
 			$value = $obj->value();
 			$cb_html = '';
