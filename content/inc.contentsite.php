@@ -124,6 +124,9 @@
 				return;
 			}
 
+			if(!count($args))
+				$this->mode = 'home';
+
 			while(count($args)) {
 				$arg = array_shift($args);
 				if(isset($this->parser_config[$arg])) {
@@ -146,6 +149,11 @@
 					}
 				}
 			}
+		}
+
+		protected function handle_home()
+		{
+			$this->handle_default();
 		}
 
 		protected function handle_default()
