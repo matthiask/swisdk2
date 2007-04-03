@@ -1,6 +1,17 @@
 <div id="comments">
 <a name="comments"></a>
 {if count($comments)}
+
+<ul class="pagelinks">
+{foreach from=$paging.links key=page item=link}
+	<li>
+		<a style="border:1px solid #000;padding:5px"
+			href="?{$link}"{if $paging.current==$page} class="current"{/if}>{$page}</a>
+	</li>
+{/foreach}
+</ul>
+<br style="clear:both" />
+
 {foreach from=$comments item=c}
 <div class="comment">
 	<a name="comment{$c->id}"></a>

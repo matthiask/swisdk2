@@ -15,6 +15,13 @@
 		protected $realm;	///> comment realm
 		protected $dbobj;	///> Comment DBOContainer
 
+		/**
+		 * comment paging vars
+		 */
+		protected $total_count;	///> total comment count
+		protected $limit = 10;	///> comments per page
+		protected $current_page;	///> current page
+
 		protected $form;	///> comment form
 		protected $cdbo;	///> Comment DBObject (bound to form)
 
@@ -50,6 +57,7 @@
 
 			$csmarty->assign('comments', $this->dbobj);
 			$csmarty->assign('mode', $this->mode);
+			$csmarty->assign('paging', $this->paging_links());
 
 			$smarty->assign('comments', $csmarty->fetch_template('comment.list'));
 			$smarty->assign('comment_count', $this->dbobj->count());
@@ -111,12 +119,54 @@
 
 		public function init_container()
 		{
-			$this->dbobj = DBOContainer::find('Comment', array(
-				'comment_realm=' => $this->realm,
-				'(comment_state!=\'maybe-spam\' AND comment_state!=\'spam\''
-					.' AND comment_state!=\'moderated\')' => null,
-				':order' => array('comment_creation_dttm', 'ASC')));
+			$this->dbobj = DBOContainer::create('Comment');
+			$this->dbobj->add_clause('comment_realm=', $this->realm);
+			$this->dbobj->add_clause('(comment_state!=\'maybe-spam\''
+				.' AND comment_state!=\'spam\' AND comment_state!=\'moderated\')');
+			$this->dbobj->add_order_column('comment_creation_dttm');
+
+
+			$inp = getInput('cc__');
+
+			$offset = 0;
+			if($count = intval(s_get($inp, 'count', $this->limit))) {
+				$this->total_count = $this->dbobj->total_count();
+				$this->limit = $count;
+
+				if($p = intval(s_get($inp, 'page'))) {
+					$this->current_page = $p;
+					$offset = ($p-1)*$count;
+				} else {
+					$this->current_page = 1;
+					$offset = 0; // $this->total_count-$count;
+				}
+
+				$this->dbobj->set_limit($offset, $count);
+			}
+
+			$this->dbobj->init();
+
 			return $this->dbobj;
+		}
+
+		public function paging_links()
+		{
+			$paging = array();
+
+			if($this->total_count) {
+				$pages = ceil(1.0*$this->total_count/$this->limit);
+
+				$links = array();
+
+				for($i=1; $i<=$pages; $i++) {
+					$paging['links'][$i] = 'cc__[page]='.$i;
+				}
+
+				$paging['current'] = $this->current_page;
+				$paging['total_count'] = $this->total_count;
+			}
+
+			return $paging;
 		}
 
 		public function init_dbobj()
