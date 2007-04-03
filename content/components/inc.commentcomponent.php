@@ -105,8 +105,6 @@
 
 			$text->set_title('Comment');
 			$text->add_rule(new RequiredRule());
-			$text->set_attributes(array('style'
-				=> 'width:300px;height:250px'));
 
 			return $this->form;
 		}
