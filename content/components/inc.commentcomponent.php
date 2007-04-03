@@ -12,8 +12,13 @@
 
 	class CommentComponent implements ISmartyComponent {
 
-		protected $realm;
-		protected $dbobj;
+		protected $realm;	///> comment realm
+		protected $dbobj;	///> Comment DBOContainer
+
+		protected $form;	///> comment form
+		protected $cdbo;	///> Comment DBObject (bound to form)
+
+		protected $mode = 'write';	///> comment component mode
 
 		protected $html;
 
@@ -22,30 +27,51 @@
 			$this->realm = $realm;
 		}
 
+		public function mode()
+		{
+			return $this->mode;
+		}
+
+		public function comments()
+		{
+			return $this->dbobj;
+		}
+
+		public function form()
+		{
+			return $this->form;
+		}
+
 		public function set_smarty(&$smarty)
 		{
-			$smarty->assign('comments', $this->html);
+			$csmarty = new SwisdkSmarty();
+			if($this->mode=='write')
+				$csmarty->assign('commentform', $this->form->html());
+
+			$csmarty->assign('comments', $this->dbobj);
+			$csmarty->assign('mode', $this->mode);
+
+			$smarty->assign('comments', $csmarty->fetch_template('comment.list'));
 			$smarty->assign('comment_count', $this->dbobj->count());
 		}
 
-
-		public function run()
+		public function init_form()
 		{
-			$smarty = new SwisdkSmarty();
+			$this->form = new Form();
+			$this->form->bind($this->cdbo);
+
+			$this->form->set_title('Post a comment!');
+
 			$user = SessionHandler::user();
 
-			$dbo = DBObject::create('Comment');
-			$dbo->realm = $this->realm;
-			$dbo->user_id = SessionHandler::user()->id();
-			$form = new Form($dbo);
-			$form->set_title('Post a comment!');
 			if($user->id==SWISDK2_VISITOR) {
-				$author = $form->add_auto('author');
-				$email = $form->add_auto('author_email');
-				$url = $form->add_auto('author_url');
+				$author = $this->form->add_auto('author');
+				$email = $this->form->add_auto('author_email');
+				$url = $this->form->add_auto('author_url');
 
 				$author->set_title('Your Name');
-				$email->set_title('Your Email<br /><small>(will not be shown)</small>');
+				$email->set_title('Your Email');
+				$email->set_info('Will not be shown');
 				$url->set_title('Your Website');
 
 				$author->add_rule(new RequiredRule());
@@ -54,69 +80,76 @@
 				$email->add_rule(new RequiredRule());
 
 				$url->add_rule(new UrlRule());
-			} else {
-				$author = $form->add('comment_author', new HiddenInput());
-				$email = $form->add('comment_author_email', new HiddenInput());
-				$url = $form->add('comment_author_url', new HiddenInput());
 
-				$email->set_value($user->email);
-				$author->set_value($user->forename.' '.$user->name);
-				$url->set_value($user->url);
-			}
-
-			$text = $form->add_auto('text');
-			$form->add(new SubmitButton());
-
-			$text->set_title('Comment');
-			$text->add_rule(new RequiredRule());
-			$text->set_attributes(array('style'
-				=> 'width:300px;height:250px'));
-
-			if($form->is_valid() && !empty($_SERVER['HTTP_USER_AGENT'])) {
-				$dbo->realm = $this->realm;
-				$dbo->author_ip = $_SERVER['REMOTE_ADDR'];
-				$dbo->author_agent = $_SERVER['HTTP_USER_AGENT'];
-				$dbo->state = 'new';
-				$dbo->type = 'comment';
-				$dbo->text = nl2br(strip_tags($dbo->text));
-				if(Swisdk::load_instance('SpamChecker')->is_spam($dbo)) {
-					$dbo->state = 'maybe-spam';
-					$smarty->assign('commentform',
-						'<p>Your comment has been classified as spam. '
-						.'A moderator will approve it if it\'s not.</p>');
-				} else
-					$smarty->assign('commentform', '<p>Thanks!</p>');
-				$dbo->store();
-
-				if($user->id==SWISDK2_VISITOR) {
-					setcookie('swisdk2_comment_author',
-						$dbo->author."\n"
-						.$dbo->author_email."\n"
-						.$dbo->author_url,
-						time()+90*86400);
-				}
-			} else {
-				if($user->id==SWISDK2_VISITOR && isset($_COOKIE['swisdk2_comment_author'])) {
-					$comment_author = explode("\n", $_COOKIE['swisdk2_comment_author']);
+				if(isset($_COOKIE['swisdk2_comment_author'])) {
+					$comment_author = explode("\n",
+						$_COOKIE['swisdk2_comment_author']);
 					if(count($comment_author)==3) {
 						$author->set_value($comment_author[0]);
 						$email->set_value($comment_author[1]);
 						$url->set_value($comment_author[2]);
 					}
 				}
+			} else {
+				$author = $this->form->add('comment_author', new HiddenInput());
+				$email = $this->form->add('comment_author_email', new HiddenInput());
+				$url = $this->form->add('comment_author_url', new HiddenInput());
 
-				$smarty->assign('commentform', $form->html());
+				$email->set_value($user->email);
+				$author->set_value($user->forename.' '.$user->name);
+				$url->set_value($user->url);
 			}
 
+			$text = $this->form->add_auto('text');
+			$this->form->add('submit', new SubmitButton());
+
+			$text->set_title('Comment');
+			$text->add_rule(new RequiredRule());
+			$text->set_attributes(array('style'
+				=> 'width:300px;height:250px'));
+
+			return $this->form;
+		}
+
+		public function init_container()
+		{
 			$this->dbobj = DBOContainer::find('Comment', array(
 				'comment_realm=' => $this->realm,
 				'(comment_state!=\'maybe-spam\' AND comment_state!=\'spam\''
 					.' AND comment_state!=\'moderated\')' => null,
 				':order' => array('comment_creation_dttm', 'ASC')));
+			return $this->dbobj;
+		}
 
-			$smarty->assign('comments', $this->dbobj->data());
+		public function run()
+		{
+			$this->cdbo = DBObject::create('Comment');
+			$this->cdbo->realm = $this->realm;
 
-			$this->html = $smarty->fetch_template('comment.list');
+			$this->init_form();
+
+			if($this->form->is_valid() && !empty($_SERVER['HTTP_USER_AGENT'])) {
+				$this->cdbo->realm = $this->realm;
+				$this->cdbo->author_ip = $_SERVER['REMOTE_ADDR'];
+				$this->cdbo->author_agent = $_SERVER['HTTP_USER_AGENT'];
+				$this->cdbo->state = 'new';
+				$this->cdbo->type = 'comment';
+				$this->cdbo->text = nl2br(strip_tags($this->cdbo->text));
+				if(Swisdk::load_instance('SpamChecker')->is_spam($this->cdbo)) {
+					$this->cdbo->state = 'maybe-spam';
+					$this->mode = 'maybe-spam';
+				} else
+					$this->mode = 'accepted';
+				$this->cdbo->store();
+
+				setcookie('swisdk2_comment_author',
+					$this->cdbo->author."\n"
+					.$this->cdbo->author_email."\n"
+					.$this->cdbo->author_url,
+					time()+90*86400);
+			}
+
+			$this->init_container();
 		}
 	}
 

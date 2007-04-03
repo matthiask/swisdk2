@@ -3,19 +3,26 @@
 {if count($comments)}
 {foreach from=$comments item=c}
 <div class="comment">
-	<a name="comment{$c.comment_id}"></a>
+	<a name="comment{$c->id}"></a>
 	<div class="comment_title"><strong>
-	{if $c.comment_author_url}
-		<a href="{$c.comment_author_url}">{$c.comment_author}</a>
+	{if $c->author_url}
+		<a href="{$c->author_url}">{$c->author}</a>
 	{else}
-		{$c.comment_author}
+		{$c->author}
 	{/if}
-	</strong> <span>wrote on {$c.comment_creation_dttm|date_format:"%d.%m.%Y, %H:%M"}:</span></div>
-	<div class="comment_text">{$c.comment_text|markdown}</div>
+	</strong> <span>wrote on {$c->creation_dttm|date_format:"%d.%m.%Y, %H:%M"}:</span></div>
+	<div class="comment_text">{$c->text|markdown}</div>
 </div>
 {/foreach}
 {else}
 <p>No comments yet!</p>
 {/if}
+
 {$commentform}
+
+{if $mode=='maybe-spam'}
+	<p>Your message has been classified as spam. A moderator will aprove it if it's not.</p>
+{elseif $mode=='accepted'}
+	<p>Thanks!</p>
+{/if}
 </div>
