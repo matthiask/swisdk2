@@ -3,6 +3,17 @@
 
 	class __CLASS__Site extends ContentSite {
 		protected $dbo_class = '__CLASS__';
+		protected $multilanguage = false;
+
+		public function __construct()
+		{
+			parent::__construct();
+		}
+
+		public function display($action)
+		{
+			$this->smarty->display_template($this->dbo_class.'.'.$action);
+		}
 	}
 
 	Swisdk::register('__CLASS__Site');
