@@ -876,9 +876,16 @@ EOD;
 	class SubmitButton extends FormBar {
 		protected $value;
 
+		public function __construct($name=null)
+		{
+			if($name)
+				$this->name = $name;
+
+			$this->value = dgettext('swisdk', 'Submit');
+		}
+
 		public function init_value()
 		{
-			$this->value = dgettext('swisdk', 'Submit');
 		}
 
 		public function value()
@@ -896,9 +903,16 @@ EOD;
 	class ResetButton extends FormBar {
 		protected $value;
 
+		public function __construct($name=null)
+		{
+			if($name)
+				$this->name = $name;
+
+			$this->value = dgettext('swisdk', 'Reset');
+		}
+
 		public function init_value()
 		{
-			$this->value = dgettext('swisdk', 'Reset');
 		}
 
 		public function value()
