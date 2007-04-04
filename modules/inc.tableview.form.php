@@ -67,6 +67,8 @@
 
 		public function setup_persistence()
 		{
+			$this->init();
+
 			$url = Swisdk::config_value('runtime.controller.url');
 
 			if(getInput('swisdk2_persistence_reset')
