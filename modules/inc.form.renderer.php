@@ -311,7 +311,7 @@ function validate_'.$id.'()
 			static $js = '#';
 			if($js=='#')
 				$js = <<<EOD
-<script type=\"text/javascript\">
+<script type="text/javascript">
 //<![CDATA[
 function formitem_tristate(elem)
 {
