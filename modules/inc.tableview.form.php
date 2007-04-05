@@ -47,7 +47,7 @@
 		public function add_default_items()
 		{
 			$this->box('search')->set_title(dgettext('swisdk', 'Search form'));
-			$this->box('action')->set_title('blah');
+			$this->box('action')->set_title(dgettext('swisdk', 'Actions'));
 			$this->search->add(new SubmitButton());
 		}
 
