@@ -93,6 +93,9 @@
 			else
 				$realm = $realm['realm_id'];
 
+			// append current website to realm (realm is used as cache key only)
+			$realm .= '_'.Swisdk::config_value('runtime.website');
+
 			if(isset(Swisdk::$cache['smarty'][$realm][$key])
 					&& ($t = Swisdk::$cache['smarty'][$realm][$key])!==null)
 				return $t;
