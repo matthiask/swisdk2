@@ -115,6 +115,14 @@
 			return $this;
 		}
 
+		protected $force_value;
+
+		public function force_value($value)
+		{
+			$this->force_value = $value;
+			return $this;
+		}
+
 		public function name()			{ return $this->name; }
 		public function set_name($name)
 		{
@@ -229,6 +237,9 @@
 				} else if($this->dbobj->get($name)===null)
 					$this->dbobj->set($name, $this->default_value);
 			}
+
+			if($this->force_value!==null)
+				$this->dbobj->set($name, $this->force_value);
 		}
 
 		/**
@@ -529,6 +540,9 @@ EOD;
 
 			if($this->dbobj->get($name)===null)
 				$this->dbobj->set($name, $this->default_value);
+
+			if($this->force_value!==null)
+				$this->dbobj->set($name, $this->force_value);
 		}
 	}
 
@@ -552,8 +566,6 @@ EOD;
 		public function set_auto_xss_protection($enabled=true)
 		{
 			$this->auto_xss_protection = $enabled;
-			// XXX hack! init_value should get called later (Form-level change)
-			//$this->init_value($this->dbobj);
 			return $this;
 		}
 
@@ -572,6 +584,9 @@ EOD;
 
 			if($this->dbobj->get($name)===null)
 				$this->dbobj->set($name, $this->default_value);
+
+			if($this->force_value!==null)
+				$this->dbobj->set($name, $this->force_value);
 		}
 	}
 
@@ -591,6 +606,9 @@ EOD;
 				$this->set_value($new);
 			else
 				$this->set_value('<!-- RT -->'.$new);
+
+			if($this->force_value!==null)
+				$this->dbobj->set($name, $this->force_value);
 		}
 
 		public function type()
@@ -713,6 +731,9 @@ EOD;
 			} else if(!$this->dbobj->get($name)
 					&& is_array($this->default_value))
 				$this->dbobj->set($name, $this->default_value);
+
+			if($this->force_value!==null)
+				$this->dbobj->set($name, $this->force_value);
 		}
 	}
 
