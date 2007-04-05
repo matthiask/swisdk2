@@ -228,6 +228,22 @@ tr.severity-enhancement {
 	border: 1px solid #cfc7b7;
 }
 
+.s-table tr.c-new {
+	color: #080;
+}
+
+.s-table tr.c-maybe-spam {
+	color: #800;
+}
+
+.s-table tr.c-spam {
+	color: #888;
+}
+
+.s-table tr.c-moderated {
+	color: #888;
+}
+
 
 {/literal}
 
