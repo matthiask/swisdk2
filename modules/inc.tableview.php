@@ -348,7 +348,7 @@ function tv_delete()
 }
 function tv_toggle(elem)
 {
-	var elems = document.getElementById('$id').getElementsByTagName('tbody')[1].getElementsByTagName('input');
+	var elems = document.getElementById('$id').getElementsByTagName('tbody')[0].getElementsByTagName('input');
 	for(i=0; i<elems.length; i++) {
 		elems[i].checked = elem.checked;
 		var node = elems[i].parentNode.parentNode;
