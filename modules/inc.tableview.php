@@ -407,9 +407,17 @@ EOD;
 		}
 
 		protected $odd = false;
+		protected $rowclass_callback = null;
+
+		public function set_rowclass_callback($callback)
+		{
+			$this->rowclass_callback = $callback;
+		}
 
 		protected function render_row(&$row, $class=null)
 		{
+			if($this->rowclass_callback)
+				$class = call_user_func($this->rowclass_callback, $row);
 			$this->odd = !$this->odd;
 			if($this->odd)
 				$class .= ' odd';
