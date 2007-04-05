@@ -180,16 +180,18 @@ EOD;
 		 */
 		public static $cache = array();
 		public static $cache_modified = false;
+		protected static $cache_active = false;
 
 		protected static function init_cache()
 		{
-			if(file_exists(CACHE_ROOT.'cache.php'))
+			Swisdk::$cache_active = Swisdk::config_value('core.cache');
+			if(Swisdk::$cache_active && file_exists(CACHE_ROOT.'cache.php'))
 				require_once CACHE_ROOT.'cache.php';
 		}
 
 		protected static function save_cache()
 		{
-			if(Swisdk::$cache_modified && Swisdk::config_value('core.cache')) {
+			if(Swisdk::$cache_active && Swisdk::$cache_modified) {
 				file_put_contents(CACHE_ROOT.'cache.php', '<?php Swisdk::$cache = '
 					.var_export(Swisdk::$cache, true).'; ?>');
 			}
