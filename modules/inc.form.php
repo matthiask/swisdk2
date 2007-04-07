@@ -15,7 +15,6 @@
 	 */
 
 	require_once MODULE_ROOT . 'inc.data.php';
-	require_once MODULE_ROOT . 'inc.layout.php';
 
 	define('FORMRENDERER_VISIT_DEFAULT', 0);
 	define('FORMRENDERER_VISIT_START', 1);
@@ -555,5 +554,6 @@
 	require_once MODULE_ROOT.'inc.form.renderer.php';
 	require_once MODULE_ROOT.'inc.form.behavior.php';
 	require_once MODULE_ROOT.'inc.form.util.php';
+	require_once MODULE_ROOT.'inc.form.tablerenderer.php';
 
 ?>
