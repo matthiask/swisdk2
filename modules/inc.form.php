@@ -371,7 +371,7 @@
 		/**
 		 * @return the FormBox html
 		 */
-		public function html($arg = 'TableFormRenderer')
+		public function html($arg = 'NoTableFormRenderer')
 		{
 			$renderer = null;
 			if($arg instanceof FormRenderer)
@@ -554,6 +554,6 @@
 	require_once MODULE_ROOT.'inc.form.renderer.php';
 	require_once MODULE_ROOT.'inc.form.behavior.php';
 	require_once MODULE_ROOT.'inc.form.util.php';
-	require_once MODULE_ROOT.'inc.form.tablerenderer.php';
+	require_once MODULE_ROOT.'inc.form.notablerenderer.php';
 
 ?>
