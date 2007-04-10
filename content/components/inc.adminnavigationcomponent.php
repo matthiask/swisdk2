@@ -54,15 +54,16 @@
 			$this->html = '';
 
 			$m_url = Swisdk::config_value('runtime.adminmodule.url');
+			$prepend = Swisdk::config_value('runtime.navigation.prepend');
 
 			foreach($actions as $action => $list) {
 				$display = 'none';
 				$list_html = '';
 				foreach($list as $module => $url) {
-					if($url==$m_url)
+					if($prepend.$url==$m_url)
 						$display = 'block';
 					$list_html .= <<<EOD
-		<li><a href="$url">$module</a></li>
+		<li><a href="$prepend$url">$module</a></li>
 
 EOD;
 				}
