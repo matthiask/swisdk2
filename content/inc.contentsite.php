@@ -916,19 +916,23 @@
 			}
 		}
 
-		protected function _single_handler($dbo)
+		protected function _single_comment_handler($dbo)
 		{
-			if($this->find_config_value('permission_filter'))
-				PermissionManager::check_access_throw($dbo);
-
-			$this->smarty->assign('item', $dbo);
-			$chtml = '';
 			if($this->find_config_value('comments_enabled')) {
 				Swisdk::load('CommentComponent', 'components');
 				$comments = new CommentComponent($dbo->comment_realm);
 				$comments->run();
 				$comments->set_smarty($this->smarty);
 			}
+		}
+
+		protected function _single_handler($dbo)
+		{
+			if($this->find_config_value('permission_filter'))
+				PermissionManager::check_access_throw($dbo);
+
+			$this->smarty->assign('item', $dbo);
+			$this->_single_comment_handler($dbo);
 			if($this->find_config_value('categories')) {
 				$this->smarty->assign('categories',
 					$dbo->related('Category'));
