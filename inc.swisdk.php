@@ -325,7 +325,7 @@ EOD;
 			if(!$fname)
 				return;
 			$fp = @fopen(DATA_ROOT.'log/'.$fname, 'a');
-			@fwrite($fp, date(DATE_W3C).' |'.strtoupper(str_pad($log, 10)).'| '.$message."\n\0");
+			@fwrite($fp, date(DATE_W3C).' |'.strtoupper(str_pad($log, 10)).'| '.$message."\n");
 			@fclose($fp);
 		}
 
