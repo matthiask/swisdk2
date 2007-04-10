@@ -9,15 +9,17 @@
 		public function collect_informations()
 		{
 			$matches = array();
-			$match = preg_match('/(http(s?):)\/\/([^\/]*)(:[0-9]+)?(.*)/',
+			$match = preg_match(
+				'/(?P<proto>http(s?):)\/\/(?P<host>[^\/]*)'
+					.'(:(?P<port>[0-9])+)?(?P<remainder>.*)/',
 				$this->input(), $matches);
-			$this->set_output($matches[5]);
+			$this->set_output($matches['remainder']);
 
-			Swisdk::set_config_value('runtime.request.protocol', $matches[1]);
-			Swisdk::set_config_value('runtime.request.host', $matches[3]);
-			Swisdk::set_config_value('runtime.request.uri', $matches[5]);
+			Swisdk::set_config_value('runtime.request.protocol', $matches['proto']);
+			Swisdk::set_config_value('runtime.request.host', $matches['host']);
+			Swisdk::set_config_value('runtime.request.uri', $matches['remainder']);
 
-			$host = preg_replace('/^www\./', '', $matches[3]);
+			$host = preg_replace('/^www\./', '', $matches['host']);
 			$out = null;
 
 			$domains = Swisdk::config_value('runtime.parser.domain');
@@ -38,8 +40,8 @@
 			if($out) {
 				$fd = Swisdk::config_value('domain.'.$out.'.force-domain');
 				if($fd && count($fd = explode(',', $fd))
-						&& !in_array($matches[3], $fd))
-					redirect('http://'.$fd[0].$matches[5]);
+						&& !in_array($matches['host'], $fd))
+					redirect('http://'.$fd[0].$matches['remainder']);
 				Swisdk::set_config_value('runtime.domain', $out);
 				Swisdk::set_config_value('runtime.website', Swisdk::config_value(
 					'domain.'.$out.'.website'));

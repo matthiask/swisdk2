@@ -380,17 +380,17 @@
 
 			foreach($tokens as $t) {
 				$matches = array();
-				preg_match('/^([+-])?(tag:)?(.*)$/', $t, $matches);
+				preg_match('/^(?P<inc>[+-])?(?P<tag>tag:)?(?P<q>.*)$/', $t, $matches);
 
-				if($matches[2]) {
-					if($matches[1]=='-')
-						$this->tags['exclude'][] = DBObject::db_escape($matches[3]);
+				if($matches['tag']) {
+					if($matches['inc']=='-')
+						$this->tags['exclude'][] = DBObject::db_escape($matches['q']);
 					else
-						$this->tags['include'][] = DBObject::db_escape($matches[3]);
-				} else if($matches[1]=='-')
-					$this->fulltext['exclude'][] = $this->_ft_escape($matches[3]);
+						$this->tags['include'][] = DBObject::db_escape($matches['q']);
+				} else if($matches['inc']=='-')
+					$this->fulltext['exclude'][] = $this->_ft_escape($matches['q']);
 				else
-					$this->fulltext['include'][] = $this->_ft_escape($matches[3]);
+					$this->fulltext['include'][] = $this->_ft_escape($matches['q']);
 			}
 		}
 
