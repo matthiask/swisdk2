@@ -519,6 +519,7 @@
 			$ret = DBObject::db_query('DELETE FROM ' . $this->table
 				. ' WHERE ' . $this->primary . '=' . $id,
 				$this->db_connection_id);
+			$this->__old_id = $id;
 			$this->unset_primary();
 			if(isset(DBObject::$relations[$this->class])) {
 				foreach(DBObject::$relations[$this->class] as &$rel) {
