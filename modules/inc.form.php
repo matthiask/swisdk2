@@ -226,7 +226,7 @@
 			foreach($this->items as &$item)
 				$item->init_value();
 			foreach($this->boxrefs as &$boxref)
-				$boxref->init();
+				$boxref->init($reinitialize);
 
 			$this->initialized = true;
 		}
