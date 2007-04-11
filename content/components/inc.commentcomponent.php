@@ -119,11 +119,15 @@
 			return $this->dbobj;
 		}
 
-		public function run()
+		public function init_dbobj()
 		{
 			$this->cdbo = DBObject::create('Comment');
 			$this->cdbo->realm = $this->realm;
+		}
 
+		public function run()
+		{
+			$this->init_dbobj();
 			$this->init_form();
 
 			if($this->form->is_valid() && !empty($_SERVER['HTTP_USER_AGENT'])) {
