@@ -175,6 +175,10 @@
 				$this->prefix = substr($tok,1) . '_';
 			if(is_null($this->primary))
 				$this->primary = $this->name('id');
+
+			$sc = array('SwisdkCustom', 'dbobject_'.strtolower($this->class));
+			if(is_callable($sc))
+				call_user_func($sc, $this);
 		}
 
 		/**
