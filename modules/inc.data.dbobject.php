@@ -317,6 +317,7 @@
 				return false;
 			}
 			$this->listener_call('store');
+			$this->listener_call('update');
 			DBObject::db_commit($this->db_connection_id);
 			$this->dirty = false;
 			return true;
@@ -362,6 +363,7 @@
 				return false;
 			}
 			$this->listener_call('store');
+			$this->listener_call('insert');
 			DBObject::db_commit($this->db_connection_id);
 			$this->dirty = false;
 			return true;
