@@ -115,6 +115,7 @@
 		 */
 		public function set_clauses(DBOContainer &$container)
 		{
+			$this->init(true);
 			$obj = $this->box('search')->dbobj();
 			$fields = $obj->field_list();
 			if(isset($fields[$obj->order]))
@@ -161,7 +162,9 @@
 			$valid = '';
 			list($html, $js) = $this->_validation_html($obj);
 			$this->add_html_start(
-				'<form method="post" action="'.htmlspecialchars($_SERVER['REQUEST_URI'])
+				'<form method="post" action="'
+				.htmlspecialchars(str_replace('?swisdk2_persistence_reset=1', '',
+					$_SERVER['REQUEST_URI']))
 				.'" id="'.$obj->id()."\" $html class=\"sf-form\" "
 				."accept-charset=\"utf-8\">\n<div>\n".$js);
 			$this->add_html_end($this->_message_html($obj));
