@@ -547,6 +547,42 @@
 		{
 			return s_get($_POST, $this->id().'__guard')==guardToken();
 		}
+
+		protected $redirection_items = null;
+		protected $redirection_urls = null;
+		protected $redirection_elem = null;
+
+		public function add_redirection($url, $title=null)
+		{
+			if(!$title)
+				$title = $url;
+
+			$idx = count($this->redirection_items)+1;
+
+			$this->redirection_items[$idx] = $title;
+			$this->redirection_urls[$idx] = $url;
+		}
+
+		public function generate_redirection()
+		{
+			$box = $this->box('zzz_redir');
+			$box->set_title('Go to');
+			$this->redirection_elem = $box->add(
+				'_redir', new RadioButtons());
+			$this->redirection_elem
+				->set_title('')
+				->set_items($this->redirection_items)
+				->set_default_value(1);
+		}
+
+		public function redirect()
+		{
+			if($this->is_valid()
+					&& $this->redirection_elem
+					&& $url = s_get($this->redirection_urls,
+						$this->redirection_elem->value()))
+				redirect($url);
+		}
 	}
 
 	require_once MODULE_ROOT.'inc.form.items.php';
