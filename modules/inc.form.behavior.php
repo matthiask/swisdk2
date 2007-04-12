@@ -89,20 +89,17 @@
 				return;
 			$valid = implode('(\''.$name.'\') && ', $rules).'(\''.$name.'\')';
 			$js = <<<EOD
-function enable_on_valid_behavior_handler_$name()
-{
+$(function(){
 	var disable = !($valid);
 	var elems = new Array($elems);
 	for(var i=0; i<elems.length; i++)
 		document.getElementById(elems[i]).disabled = disable;
-}
+});
 
 EOD;
 			return array(
-				"add_event(document.getElementById('$name'), 'blur',"
-					." enable_on_valid_behavior_handler_$name);\n\t"
-				."add_event(document.getElementById('$name'), 'change',"
-					." enable_on_valid_behavior_handler_$name);",
+				"$('#$name').blur(function(){enable_on_valid_behavior_handler_$name();});\n\t"
+				."$('#$name').change(function(){enable_on_valid_behavior_handler_$name();});",
 				$js, "enable_on_valid_behavior_handler_$name");
 		}
 	}
@@ -151,8 +148,7 @@ function update_on_change_ajax_behavior_handler_$n1()
 
 EOD;
 			return array(
-				"add_event(document.getElementById('$n1'), 'change',"
-					." update_on_change_ajax_behavior_handler_$n1);",
+				"$('#$n1').change(function(){update_on_change_ajax_behavior_handler_$n1();});",
 				$js, "update_on_change_ajax_behavior_handler_$n1");
 		}
 	}
@@ -201,8 +197,7 @@ function urlify_behavior_handler_$n1()
 
 EOD;
 			return array(
-				"add_event(document.getElementById('$n1'), 'change',"
-				." urlify_behavior_handler_$n1);",
+				"$('#$n1').change(function(){urlify_behavior_handler_$n1();});",
 				$js);
 		}
 	}
