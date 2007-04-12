@@ -252,25 +252,19 @@ function validate_'.$id.'()
 		protected function visit_SpinButton($obj)
 		{
 			$this->_collect_javascript($obj);
-			static $js = '#';
-			if($js=='#') {
-				$prefix = Swisdk::webroot('js');
-				$js = <<<EOD
-<link type="text/css" rel="stylesheet" href="$prefix/jquery/spinbutton/JQuerySpinBtn.css" />
-<script type="text/javascript" src="$prefix/jquery/jquery.js"></script>
-<script type="text/javascript" src="$prefix/jquery/spinbutton/JQuerySpinBtn.js"></script>
+			$id = $obj->id();
+			$js = <<<EOD
 <script type="text/javascript">
+//<![CDATA[
 $(function(){
-	$("INPUT.sf-spinbutton").SpinButton({min:0});
+	$("#$id").SpinButton({min:0});
 });
+//]]>
 </script>
 
 EOD;
-			}
 
 			$this->_render($obj, $js.$this->_simpleinput_html($obj));
-
-			$js = '';
 		}
 
 		protected function visit_CaptchaInput($obj)
@@ -424,19 +418,16 @@ EOD
 			$auto_xss_protection = $this->_auto_xss_helper($obj);
 			$html = <<<EOD
 <textarea name="$name" id="$name" $attributes>$value</textarea>
-<script type="text/javascript" src="$prefix/util.js"></script>
-<script type="text/javascript" src="$prefix/fckeditor/fckeditor.js"></script>
 <script type="text/javascript">
 //<![CDATA[
-function load_editor_$name(){
-var oFCKeditor = new FCKeditor('$name');
-oFCKeditor.BasePath = '$prefix/fckeditor/';
-oFCKeditor.Height = 450;
-oFCKeditor.Width = 550;
-oFCKeditor.ToolbarSet = '$type';
-oFCKeditor.ReplaceTextarea();
-}
-add_event(window,'load',load_editor_$name);
+$(function(){
+	var oFCKeditor = new FCKeditor('$name');
+	oFCKeditor.BasePath = '$prefix/fckeditor/';
+	oFCKeditor.Height = 450;
+	oFCKeditor.Width = 550;
+	oFCKeditor.ToolbarSet = '$type';
+	oFCKeditor.ReplaceTextarea();
+});
 //]]>
 </script>
 $auto_xss_protection
@@ -769,17 +760,6 @@ EOD;
 			$prefix = Swisdk::config_value('runtime.webroot.js', '/js');
 			$this->_collect_javascript($obj);
 			$html = '';
-			static $js_sent = false;
-			if(!$js_sent) {
-				$js_sent = true;
-				$html.=<<<EOD
-<link rel="stylesheet" type="text/css" media="all"
-	href="$prefix/calendar/calendar-win2k-1.css" title="win2k-cold-1" />
-<script type="text/javascript" src="$prefix/calendar/calendar.js"></script>
-<script type="text/javascript" src="$prefix/calendar/calendar-en.js"></script>
-<script type="text/javascript" src="$prefix/calendar/calendar-setup.js"></script>
-EOD;
-			}
 
 			$format = '%d.%m.%Y';
 

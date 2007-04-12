@@ -623,6 +623,28 @@ EOD;
 		{
 			return Swisdk::$load_bases;
 		}
+
+		/**
+		 * HTML Code for extension libraries
+		 */
+		protected static $needed_libraries = array();
+
+		public static function needs_library($lib)
+		{
+			Swisdk::$needed_libraries[] = $lib;
+		}
+
+		public static function needed_libraries()
+		{
+			return Swisdk::$needed_libraries;
+		}
+
+		public static function needed_libraries_html()
+		{
+			$provider = Swisdk::load_instance('LibraryProvider');
+			$provider->set_libraries(Swisdk::$needed_libraries);
+			return $provider->html();
+		}
 	}
 
 ?>

@@ -351,6 +351,12 @@ EOD;
 	class SpinButton extends SimpleInput {
 		protected $type = 'text';
 		protected $attributes = array('class' => 'sf-spinbutton');
+
+		public function __construct($name=null)
+		{
+			parent::__construct($name);
+			Swisdk::needs_library('jquery_spinbutton');
+		}
 	}
 
 	/**
@@ -605,6 +611,12 @@ EOD;
 	class RichTextarea extends Textarea {
 		protected $attributes = array('class' => 'sf-richtextarea');
 		protected $type = 'Standard';
+
+		public function __construct($name=null)
+		{
+			parent::__construct($name);
+			Swisdk::needs_library('fckeditor');
+		}
 
 		public function init_value()
 		{
@@ -960,6 +972,12 @@ EOD;
 	class DateInput extends FormItem {
 		protected $time = true;
 		protected $actions = array();
+
+		public function __construct($name=null)
+		{
+			parent::__construct($name);
+			Swisdk::needs_library('calendar');
+		}
 
 		public function init_value()
 		{
