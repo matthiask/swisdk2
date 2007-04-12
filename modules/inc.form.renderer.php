@@ -605,9 +605,8 @@ function select_$name(val, str)
 	elem.innerHTML += html;
 
 	// ... and restore them (they get clobbered when appending to innerHTML)
-	values.each(function(i){
+	for(i in values)
 		document.getElementById(i).value = values[i];
-	});
 }
 
 $(function(){
