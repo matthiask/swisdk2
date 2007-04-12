@@ -249,6 +249,30 @@ function validate_'.$id.'()
 			$this->_render($obj, $this->_simpleinput_html($obj));
 		}
 
+		protected function visit_SpinButton($obj)
+		{
+			$this->_collect_javascript($obj);
+			static $js = '#';
+			if($js=='#') {
+				$prefix = Swisdk::webroot('js');
+				$js = <<<EOD
+<link type="text/css" rel="stylesheet" href="$prefix/jquery/spinbutton/JQuerySpinBtn.css" />
+<script type="text/javascript" src="$prefix/jquery/jquery.js"></script>
+<script type="text/javascript" src="$prefix/jquery/spinbutton/JQuerySpinBtn.js"></script>
+<script type="text/javascript">
+$(function(){
+	$("INPUT.sf-spinbutton").SpinButton({min:0});
+});
+</script>
+
+EOD;
+			}
+
+			$this->_render($obj, $js.$this->_simpleinput_html($obj));
+
+			$js = '';
+		}
+
 		protected function visit_CaptchaInput($obj)
 		{
 			$this->_collect_javascript($obj);

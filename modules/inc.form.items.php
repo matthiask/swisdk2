@@ -348,6 +348,11 @@ EOD;
 		protected $attributes = array('class' => 'sf-textinput');
 	}
 
+	class SpinButton extends SimpleInput {
+		protected $type = 'text';
+		protected $attributes = array('class' => 'sf-spinbutton');
+	}
+
 	/**
 	 * hidden fields get special treatment (see also FormBox::html())
 	 */
