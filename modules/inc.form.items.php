@@ -171,8 +171,12 @@
 		 */
 		public function id()
 		{
-			return $this->preinitialized?$this->name:
-				$this->box_name.$this->name;
+			if($this->preinitialized)
+				return $this->name;
+			$id = $this->box_name.$this->name;
+			if(strlen($id)>64)
+				$id = md5($id);
+			return $id;
 		}
 
 		/**
