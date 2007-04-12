@@ -116,15 +116,12 @@ EOD;
 			$n2 = $this->args[0]->id();
 			$method = $this->args[2];
 
-			$client = new Ajax_Client($this->args[1],
-				sprintf('%s//%s%s_ajax',
-					Swisdk::config_value('runtime.request.protocol'),
-					Swisdk::config_value('runtime.request.host'),
-					Swisdk::config_value('runtime.controller.url')));
-			$js = $client->javascript();
+			$url = sprintf('%s//%s%s_ajax',
+				Swisdk::config_value('runtime.request.protocol'),
+				Swisdk::config_value('runtime.request.host'),
+				Swisdk::config_value('runtime.controller.url'));
 
-			$js .= <<<EOD
-// SWISDk2 Forms AJAX helpers
+			$js = <<<EOD
 function update_selection_box(elem, items)
 {
 	var options = document.getElementById(elem).options;
@@ -136,14 +133,17 @@ function update_selection_box(elem, items)
 	}
 }
 
-function update_on_change_ajax_behavior_handler_{$n1}_callback(items)
-{
-	update_selection_box('$n2', items);
-}
-
 function update_on_change_ajax_behavior_handler_$n1()
 {
-	x_$method(document.getElementById('$n1').value, update_on_change_ajax_behavior_handler_{$n1}_callback);
+	$.post('$url', {
+		rs: '$method',
+		rsargs: [$('#$n1').get(0).value]
+	},
+	function(data)
+	{
+		if(data.charAt(0)=='+')
+			update_selection_box('$n2', eval('('+data.substring(2)+')'));
+	});
 }
 
 EOD;
