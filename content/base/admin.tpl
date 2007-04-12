@@ -85,17 +85,8 @@ tr.severity-enhancement { color: #888; }
 			//<![CDATA[
 			function n_toggle(elem)
 			{
-				var group = elem.parentNode.parentNode;
-				var list_id = group.id+'-list';
-
-				$('#navigation').find('ul').each(function(){
-					if(this.id==list_id)
-						this.style.display = (this.style.display=='block'?'none':'block');
-					else
-						this.style.display = 'none';
-				});
-
-				return false;
+				$('#navigation ul:visible').hide("normal");
+				$('#'+elem.parentNode.parentNode.id+'-list').show("normal");
 			}
 			//]]>
 			</script>
