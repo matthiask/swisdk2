@@ -10,15 +10,13 @@ Login to {swisdk_runtime_value key="website.title"}
 <script type="text/javascript">
 {literal}
 //<![CDATA[
-function focus_input()
-{
+$(function(){
 	var user = document.getElementById('login_username');
 	if(user.value!='')
 		document.getElementById('login_password').focus();
 	else
 		user.focus();
-}
-add_event(window, 'load', focus_input);
+});
 //]]>
 {/literal}
 </script>

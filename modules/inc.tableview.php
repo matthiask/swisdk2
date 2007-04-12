@@ -471,8 +471,7 @@ EOD;
 			return $html.<<<EOD
 <script type="text/javascript">
 //<![CDATA[
-function init_tableview()
-{
+$(function(){
 	var tables = document.getElementsByTagName('table');
 	for(i=0; i<tables.length; i++) {
 		if(tables[i].className=='s-table') {
@@ -501,8 +500,7 @@ function init_tableview()
 			}
 		}
 	}
-}
-add_event(window, 'load', init_tableview);
+});
 //]]>
 </script>
 

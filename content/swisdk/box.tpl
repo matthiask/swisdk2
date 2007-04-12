@@ -2,7 +2,8 @@
 <body>
 <head>
 <title>{block name="title"}{$title}{/block}</title>
-<script type="text/javascript" src="{swisdk_runtime_value key="webroot.js" default="/js"}/util.js"></script>
+{swisdk_needs_library name="jquery"}
+{swisdk_libraries_html}
 <style type="text/css">
 {literal}
 body {

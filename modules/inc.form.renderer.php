@@ -610,12 +610,10 @@ function select_$name(val, str)
 	});
 }
 
-function load_$name()
-{
+$(function(){
 $set_value
-}
+});
 
-add_event(window, 'load', load_$name);
 //]]>
 </script>
 

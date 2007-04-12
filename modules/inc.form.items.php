@@ -307,15 +307,12 @@
 				$behavior_init_js .= $init."\n\t";
 
 			}
-			$id = $this->id();
 			return $this->javascript.<<<EOD
 $behavior_js
 
-function init_$id()
-{
+$(function(){
 	$behavior_init_js
-}
-add_event(window, 'load', init_$id);
+});
 
 EOD;
 		}
