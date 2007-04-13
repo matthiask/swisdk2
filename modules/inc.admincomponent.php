@@ -146,26 +146,9 @@
 	}
 
 	class DeleteComponent extends AdminComponent2 implements IHtmlComponent, ISmartyComponent {
-		public function run()
-		{
-			if(getInput('confirmation_command_delete')) {
-				$this->dbobj->delete();
-				$this->add_state(STATE_FINISHED);
-			} else if(getInput('confirmation_command_cancel'))
-				$this->add_state(STATE_FINISHED);
-		}
+		protected $form;
 
-		public function html()
-		{
-			$this->add_state(STATE_DISPLAYED);
-			return $this->display_confirmation_page();
-		}
-
-		public function set_smarty(&$smarty)
-		{
-			$this->add_state(STATE_DISPLAYED);
-		}
-		protected function display_confirmation_page()
+		public function init_form()
 		{
 			$question_title = dgettext('swisdk', 'Confirmation required');
 			$question_text = sprintf(dgettext('swisdk', 'Do you really want to delete %s (%s)?'),
@@ -174,16 +157,43 @@
 			$delete = dgettext('swisdk', 'Delete');
 			$cancel = dgettext('swisdk', 'Cancel');
 
-			$form = new Form($this->dbobj);
-			$form->set_title($question_title);
-			$form->add(new InfoItem($question_text));
-			$group = $form->add(new GroupItem());
+			$this->form = new Form($this->dbobj);
+			$this->form->set_title($question_title);
+			$this->form->add(new InfoItem($question_text));
+			$group = $this->form->add(new GroupItem());
 			$group->add(new SubmitButton('confirmation_command_delete'))
 				->set_caption('Delete');
-			$group->add(new SubmitButton('confirmation_command_cancel'))
-				->set_caption('Cancel');
-			$form->init();
-			return $form->html($this->form_renderer());
+			$group->add(new CancelButton());
+			$this->form->init();
+		}
+
+		public function run()
+		{
+			$state = Swisdk::guard_token_state_f('guard');
+			if($state==GUARD_VALID) {
+				$this->dbobj->delete();
+				$this->add_state(STATE_FINISHED);
+			}
+
+			$this->init_form();
+
+			if($this->form->canceled())
+				$this->add_state(STATE_FINISHED);
+			else if($this->form->is_valid()) {
+				$this->dbobj->delete();
+				$this->add_state(STATE_FINISHED);
+			}
+		}
+
+		public function html()
+		{
+			$this->add_state(STATE_DISPLAYED);
+			return $this->form->html($this->form_renderer());
+		}
+
+		public function set_smarty(&$smarty)
+		{
+			$this->add_state(STATE_DISPLAYED);
 		}
 	}
 
