@@ -39,6 +39,7 @@
 		protected $tags = array('include' => array(), 'exclude' => array());
 
 		public function &dbobj() { return $this->obj; }
+		public function _class() { return $this->class; }
 
 		/**
 		 * Use the code, luke!
