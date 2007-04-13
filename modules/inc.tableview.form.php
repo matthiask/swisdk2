@@ -76,16 +76,14 @@
 				unset($_SESSION['swisdk2']['am_list_persistence'][$url]);
 
 			if(isset($_SESSION['swisdk2']['am_list_persistence'][$url])
-					&& ((isset($_SERVER['HTTP_REFERER'])
-						&& strpos($_SERVER['HTTP_REFERER'],
-							$url.'_list')===false)
+					&& (strpos(s_get($_SERVER, 'HTTP_REFERER'), $url)===false
 					|| count($_POST)==0)) {
 				$this->dbobj->set_data(unserialize(
 					$_SESSION['swisdk2']['am_list_persistence'][$url]));
+			} else {
+				$_SESSION['swisdk2']['am_list_persistence'][$url] =
+						serialize($this->dbobj->data());
 			}
-
-			$_SESSION['swisdk2']['am_list_persistence'][$url] =
-					serialize($this->dbobj->data());
 
 			$this->box('search')->set_title($this->box('search')->title
 				.' <small>(<a href="?swisdk2_persistence_reset=1">'
