@@ -22,8 +22,12 @@
 		{
 			$box = $form->box('zzz_last')->set_widget(false)
 				->add(new GroupItemBar())->box();
-			$box->add(new SubmitButton());
-			$box->add(new ResetButton());
+			$box->add('sf_button_submit', new SubmitButton())
+				->set_title();
+			$box->add('sf_button_reset', new ResetButton())
+				->set_title();
+			$box->add('sf_button_cancel', new CancelButton())
+				->set_title();
 		}
 
 		/**
