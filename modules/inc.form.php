@@ -546,7 +546,10 @@
 					dgettext('swisdk', 'Could not validate form submission'));
 				return false;
 			case GUARD_VALID:
-				return parent::is_valid();
+				$valid = parent::is_valid();
+				if(!$valid)
+					Swisdk::guard_token_refresh($this->guard_input->value());
+				return $valid;
 			case GUARD_EXPIRED:
 				$this->add_message(
 					dgettext('swisdk', 'Request has expired. Please submit again'));
