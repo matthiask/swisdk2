@@ -1203,4 +1203,18 @@ EOD;
 		}
 	}
 
+	class InfoItem extends FormItem {
+		protected $info_text;
+
+		public function __construct($info_text)
+		{
+			$this->info_text = $info_text;
+		}
+
+		public function html()
+		{
+			return $this->info_text;
+		}
+	}
+
 ?>
