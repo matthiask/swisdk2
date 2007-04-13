@@ -662,10 +662,27 @@ EOD;
 		 */
 		public static function guard_token()
 		{
+			$guard_gc_used = 300;
+			$guard_gc_unused = 2700;
+
 			if(!session_id())
 				session_start();
+
+			$tokens =& $_SESSION['swisdk2']['guard_tokens'];
+
+			// clean guard token array
+			if(is_array($tokens)) {
+				$time = time();
+				foreach($tokens as $token => $t) {
+					if(isset($t[1]) && $t[0]<$time-$guard_gc_used)
+						unset($tokens[$token]);
+					else if($t[0]<$time-$guard_gc_unused)
+						unset($tokens[$token]);
+				}
+			}
+
 			$token = sha1(uniqid().Swisdk::config_value('core.token'));
-			$_SESSION['swisdk2']['guard_tokens'][$token] = array(time());
+			$tokens[$token] = array(time());
 			return $token;
 		}
 
@@ -677,6 +694,8 @@ EOD;
 		 */
 		public static function guard_token_state($token)
 		{
+			$guard_expire = 1800;
+
 			static $state = array();
 			if($s = s_get($state, $token))
 				return $s;
@@ -685,7 +704,7 @@ EOD;
 					$token)) {
 				if(s_get($t, 1))
 					$newstate = GUARD_USED;
-				else if($t[0]<time()-1800)
+				else if($t[0]<time()-$guard_expire)
 					$newstate = GUARD_EXPIRED;
 				else {
 					$_SESSION['swisdk2']['guard_tokens'][$token][1] = true;
