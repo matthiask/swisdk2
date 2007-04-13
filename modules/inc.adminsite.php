@@ -27,7 +27,8 @@
 				s_get($args, 0, '_create'),
 				s_get($args, 1));
 
-			$list = $this->create_list_component(DBObject::create($this->dbo_class));
+			$list = $this->create_list_component(
+				DBOContainer::create($this->dbo_class));
 			$list->run();
 
 			$smarty = new SwisdkSmarty();

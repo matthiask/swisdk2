@@ -208,7 +208,7 @@
 		public function init_tableview()
 		{
 			if(!$this->tableview) {
-				$this->tableview = new TableView($this->dbo_class);
+				$this->tableview = new TableView($this->dbobj);
 				if(class_exists($c = 'TableViewForm_'.$this->dbo_class))
 					$this->tableview->set_form(new $c());
 				$this->tableview->init();
