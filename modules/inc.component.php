@@ -65,4 +65,40 @@
 		abstract protected function cmd_index();
 	}
 
+	define('STATE_START', 1<<0);
+	define('STATE_INVALID', 1<<1);
+	define('STATE_FINISHED', 1<<2);
+	define('STATE_DISPLAYED', 1<<3);
+	define('STATE_RUN', 1<<4);
+
+	class StateComponent {
+		protected $state;
+
+		public function state()
+		{
+			return $this->state;
+		}
+
+		public function set_state($state)
+		{
+			$this->state = $state;
+			return $this;
+		}
+
+		public function add_state($state)
+		{
+			$this->state |= $state;
+		}
+
+		public function remove_state($state)
+		{
+			$this->state &= ~$state;
+		}
+
+		public function has_state($state)
+		{
+			return ($this->state & $state)==$state;
+		}
+	}
+
 ?>
