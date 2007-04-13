@@ -120,6 +120,10 @@
 			$box_id = $form_id.'search_';
 			$p = $this->form->dbobj()->_prefix();
 			list($first, $count, $last) = $this->list_position();
+
+			foreach(array('order','dir','start','limit') as $t)
+				$$t = $this->form->item($p.$t)->id();
+
 			$js = <<<EOD
 <script type="text/javascript">
 //<![CDATA[
@@ -130,8 +134,8 @@ EOD;
 				$js .= <<<EOD
 function order(col) {
 	var form = document.getElementById('$form_id');
-	var order = form.$box_id{$p}order;
-	var dir = form.$box_id{$p}dir;
+	var order = form.$order;
+	var dir = form.$dir;
 	if(order.value==col) {
 		dir.value=(dir.value=='DESC'?'ASC':'DESC');
 	} else {
@@ -147,13 +151,13 @@ EOD;
 function skim(step)
 {
 	var form = document.getElementById('$form_id');
-	var start = form.$box_id{$p}start;
+	var start = form.$start;
 	var sv = parseInt(start.value);
 	if(isNaN(sv))
 		sv = 0;
 	start.value=sv+step;
 	start.value = Math.min(Math.max(start.value,0),
-		$count-($count%parseInt(form.$box_id{$p}limit.value)));
+		$count-($count%parseInt(form.$limit.value)));
 	form.submit();
 }
 
