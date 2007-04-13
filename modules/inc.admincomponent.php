@@ -84,6 +84,11 @@
 			return $this;
 		}
 
+		public function editmode()
+		{
+			return $this->dbobj->id()>0;
+		}
+
 		public function init_form()
 		{
 			if(!$this->form)
@@ -97,7 +102,7 @@
 
 			$this->init_form();
 
-			if($this->dbobj->id()>0)
+			if($this->editmode())
 				$this->form->set_title('Edit '.$this->dbo_class.' '
 					.$this->dbobj->id());
 			else
