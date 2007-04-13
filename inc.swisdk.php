@@ -139,6 +139,11 @@ EOD;
 
 			require_once MODULE_ROOT.'inc.session.php';
 			SessionHandler::instance();
+
+			define('GUARD_UNKNOWN', 1);
+			define('GUARD_VALID', 2);
+			define('GUARD_EXPIRED', 3);
+			define('GUARD_USED', 4);
 		}
 
 		protected static $load_bases;
@@ -644,6 +649,92 @@ EOD;
 			$provider = Swisdk::load_instance('LibraryProvider');
 			$provider->set_libraries(Swisdk::$needed_libraries);
 			return $provider->html();
+		}
+
+		/**
+		 * CSRF and double-submit guard
+		 */
+
+		/**
+		 * Generates a unique ID which may be used to guard against CSRF attacks
+		 *
+		 * http://en.wikipedia.org/wiki/Cross-site_request_forgery
+		 */
+		public static function guard_token()
+		{
+			if(!session_id())
+				session_start();
+			$token = sha1(uniqid().Swisdk::config_value('core.token'));
+			$_SESSION['swisdk2']['guard_tokens'][$token] = array(time());
+			return $token;
+		}
+
+		/**
+		 * Get the validation state of this token
+		 *
+		 * @param $token	guard token
+		 * @return state
+		 */
+		public static function guard_token_state($token)
+		{
+			static $state = array();
+			if($s = s_get($state, $token))
+				return $s;
+
+			if($t = s_get($_SESSION['swisdk2']['guard_tokens'],
+					$token)) {
+				if(s_get($t, 1))
+					$newstate = GUARD_USED;
+				else if($t[0]<time()-1800)
+					$newstate = GUARD_EXPIRED;
+				else {
+					$_SESSION['swisdk2']['guard_tokens'][$token][1] = true;
+					$newstate = GUARD_VALID;
+
+				}
+			} else
+				$newstate = GUARD_UNKNOWN;
+
+			$state[$token] = $newstate;
+			return $newstate;
+		}
+
+		/**
+		 * Refresh a token, f.e. if it has expired.
+		 *
+		 * This can be used to let the user re-submit a request
+		 *
+		 * @param $token	guard token
+		 */
+		public static function guard_token_refresh($token)
+		{
+			$_SESSION['swisdk2']['guard_tokens'][$token] = array(time());
+		}
+
+		/**
+		 * Wrapper for Swisdk::guard_token() which takes a POST or GET variable
+		 * and only returns a new token if no value can be found inside POST or GET
+		 *
+		 * @param $id	POST or GET variable name
+		 */
+		public static function guard_token_f($id)
+		{
+			if($t = getInput($id))
+				return $t;
+			return Swisdk::guard_token();
+		}
+
+		/**
+		 * Wrapper for Swisdk::guard_token_state() which takes a POST or GET variable
+		 * and only checks the token for validity if it has been submitted by the user
+		 *
+		 * @param $id	POST or GET variable name
+		 */
+		public static function guard_token_state_f($id)
+		{
+			if($t = getInput($id))
+				return Swisdk::guard_token_state($t);
+			return null;
 		}
 	}
 

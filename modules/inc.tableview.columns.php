@@ -204,7 +204,7 @@
 		public function html(&$data)
 		{
 			$id = $data[$this->column];
-			$gid = guardToken('delete');
+			$gid = Swisdk::guard_token_f('guard');
 			$delete = dgettext('swisdk', 'Really delete?');
 			$prefix = Swisdk::config_value('runtime.webroot.img', '/img');
 			$html =<<<EOD

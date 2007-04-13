@@ -324,7 +324,7 @@ EOD;
 				return;
 
 			$id = $this->form->id();
-			$gid = guardToken('delete');
+			$gid = Swisdk::guard_token_f('guard');
 			$delete = dgettext('swisdk', 'Really delete?');
 			return '<div style="float:left">'
 				.sprintf(dgettext('swisdk', '%sedit%s or %sdelete%s checked'),

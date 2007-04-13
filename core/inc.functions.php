@@ -136,18 +136,6 @@
 	}
 
 	/**
-	 * generates a unique ID which may be used to guard against CSRF attacks
-	 *
-	 * http://en.wikipedia.org/wiki/Cross-site_request_forgery
-	 */
-	function guardToken($token = null)
-	{
-		if(!session_id())
-			session_start();
-		return sha1(session_id().Swisdk::config_value('core.token').$token);
-	}
-
-	/**
 	 * return the backtrace as a string
 	 */
 	function backtrace($limit=false)

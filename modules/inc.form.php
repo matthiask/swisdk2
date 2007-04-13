@@ -510,42 +510,60 @@
 		}
 
 		/**
-		 * accept the FormRenderer
-		 */
-		public function accept($renderer)
-		{
-			//
-			// this guard entry serves two purposes
-			// 1. When there are more than one form on one page, this entry
-			//    can be used to tell, which form was submitted.
-			// 2. The ID should be unique and not predictable. This is used
-			//    as a safeguard against CSRF attacks
-			//
-			$this->add(new HiddenInput($this->id().'__guard'))
-				->set_value(guardToken());
-
-			parent::accept($renderer);
-		}
-
-		/**
 		 * validate the form
 		 */
+		protected $guard_state;
+		protected $guard_input;
+
+		public function init($reinitialize=false)
+		{
+			if(!$this->guard_input) {
+				//
+				// this guard entry serves two purposes
+				// 1. When there are more than one form on one page, this entry
+				//    can be used to tell, which form was submitted.
+				// 2. The ID should be unique and not predictable. This is used
+				//    as a safeguard against CSRF attacks
+				//
+				$this->guard_input = $this->add(new HiddenInput($this->id().'__guard'));
+				$this->guard_input->set_value(
+					Swisdk::guard_token_f($this->guard_input->id()));
+			}
+
+			parent::init($reinitialize);
+		}
+
 		public function is_valid()
 		{
 			$this->init();
 
-			if(!$this->submitted()) {
+			if(!$this->submitted())
+				return false;
+
+			switch($this->guard_state) {
+			case GUARD_UNKNOWN:
 				$this->add_message(
 					dgettext('swisdk', 'Could not validate form submission'));
 				return false;
+			case GUARD_VALID:
+				return parent::is_valid();
+			case GUARD_EXPIRED:
+				$this->add_message(
+					dgettext('swisdk', 'Request has expired. Please submit again'));
+				Swisdk::guard_token_refresh($this->guard_input->value());
+				return false;
+			case GUARD_USED:
+				$this->add_message(
+					dgettext('swisdk', 'Form has already been submitted once'));
+				return false;
 			}
-
-			return parent::is_valid();
 		}
 
 		public function submitted()
 		{
-			return s_get($_POST, $this->id().'__guard')==guardToken();
+			$this->guard_state = Swisdk::guard_token_state_f(
+				$this->guard_input->id());
+			return $this->guard_state!=GUARD_UNKNOWN;
 		}
 
 		protected $redirection_items = null;

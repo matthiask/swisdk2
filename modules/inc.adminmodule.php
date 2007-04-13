@@ -12,7 +12,6 @@
 	require_once SWISDK_ROOT.'site/inc.site.php';
 	require_once MODULE_ROOT.'inc.form.php';
 	require_once MODULE_ROOT.'inc.tableview.php';
-	require_once MODULE_ROOT.'inc.tableview.php';
 	require_once MODULE_ROOT.'inc.builder.php';
 	require_once MODULE_ROOT.'inc.event-broadcaster.php';
 
@@ -680,7 +679,8 @@
 
 		protected function delete_multiple()
 		{
-			if(getInput('guard')!=guardToken('delete'))
+			$state = Swisdk::guard_token_state_f('guard');
+			if($state!=GUARD_VALID)
 				$this->goto('_index');
 
 			$dbo = null;
@@ -705,17 +705,29 @@
 		{
 			// has aready been on confirmation page?
 			if(getInput('delete_confirmation_page')
-					&& (getInput('confirmation_command')
-						!=dgettext('swisdk', 'Delete')))
+					&& (!getInput('confirmation_command_delete')))
+				$this->goto('_index');
+			if(getInput('confirmation_command_cancel'))
 				$this->goto('_index');
 
 			// invalid guard token? show confirmation page
-			if(getInput('guard')!=guardToken('delete')) {
-				$this->display_confirmation_page();
-				return;
+			$state = Swisdk::guard_token_state_f('guard');
+			switch($state) {
+			case GUARD_VALID:
+				return true;
+			case GUARD_UNKNOWN:
+				return $this->display_confirmation_page(
+					'Something went wrong');
+			case GUARD_EXPIRED:
+				Swisdk::guard_token_refresh(getInput('guard'));
+				return $this->display_confirmation_page(
+					'Request has expired. Please submit again');
+			case GUARD_USED:
+				return $this->display_confirmation_page(
+					'Request has already been submitted once');
+			default:
+				return $this->display_confirmation_page();
 			}
-
-			return true;
 		}
 
 		protected function delete_single()
@@ -737,7 +749,7 @@
 			$this->goto('_index');
 		}
 
-		protected function display_confirmation_page()
+		protected function display_confirmation_page($message=null)
 		{
 			$dbo = null;
 			if($this->multilanguage)
@@ -749,7 +761,7 @@
 					dgettext('swisdk', 'Can\'t find the data. Class: %s. Argument: %s'),
 					$this->dbo_class, intval($this->args[0]))));
 
-			$token = guardToken('delete');
+			$token = Swisdk::guard_token_f('guard');
 			$class = $dbo->_class();
 			$id = $dbo->id();
 			$title = $dbo->title();
@@ -760,27 +772,18 @@
 			$delete = dgettext('swisdk', 'Delete');
 			$cancel = dgettext('swisdk', 'Cancel');
 
-			$this->html = <<<EOD
-<form method="post" action="{$this->module_url}/_delete/$id" class="sf-form" accept-charset="utf-8">
-<input type="hidden" name="delete_confirmation_page" value="1" />
-<input type="hidden" name="guard" value="$token" />
-<table>
-<tr class="sf-form-title">
-	<td colspan="2"><big><strong>$question_title</strong></big></td>
-</tr>
-<tr>
-	<td></td>
-	<td>$question_text ($title)?</td>
-</tr>
-<tr class="sf-button">
-	<td colspan="2">
-		<input type="submit" name="confirmation_command" value="$delete" />
-		<input type="submit" name="confirmation_command" value="$cancel" />
-	</td>
-</tr>
-</table>
-</form>
-EOD;
+			$form = new Form($dbo);
+			$form->set_title($question_title);
+			$form->add(new InfoItem($question_text));
+			if($message)
+				$form->add(new InfoItem($message));
+			$group = $form->add(new GroupItem());
+			$group->add(new SubmitButton('confirmation_command_delete'))
+				->set_value('Delete');
+			$group->add(new SubmitButton('confirmation_command_cancel'))
+				->set_value('Cancel');
+			$form->init();
+			$this->html = $form->html();
 		}
 	}
 
