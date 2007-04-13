@@ -70,6 +70,7 @@
 	define('STATE_FINISHED', 1<<2);
 	define('STATE_DISPLAYED', 1<<3);
 	define('STATE_RUN', 1<<4);
+	define('STATE_INITIALIZED', 1<<5);
 
 	class StateComponent {
 		protected $state;
