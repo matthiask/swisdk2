@@ -137,12 +137,13 @@
 
 		public function html_start()
 		{
-			return $this->html_start.$this->html_fragments['search'].'<br />';
+			return $this->html_start
+				.s_get($this->html_fragments, 'search').'<br />';
 		}
 
 		public function html_end()
 		{
-			return $this->html_fragments['action']
+			return s_get($this->html_fragments, 'action')
 				.'<script type="text/javascript">'."\n"
 				."//<![CDATA[\n"
 				.$this->javascript
