@@ -201,10 +201,13 @@
 		protected $image_prefix = 'page_white_';
 		protected $copy_enabled = true;
 
+		protected $token = null;
+
 		public function html(&$data)
 		{
+			if(!$this->token)
+				$this->token = Swisdk::guard_token_f('guard');
 			$id = $data[$this->column];
-			$gid = Swisdk::guard_token_f('guard');
 			$delete = dgettext('swisdk', 'Really delete?');
 			$prefix = Swisdk::config_value('runtime.webroot.img', '/img');
 			$html =<<<EOD
@@ -217,7 +220,7 @@ EOD;
 
 EOD;
 			$html .=<<<EOD
-<a href="{$this->title}_delete/$id" title="delete" onclick="if(confirm('$delete')){this.href+='?guard=$gid';}else{this.parentNode.parentNode.onclick();return false;}">
+<a href="{$this->title}_delete/$id" title="delete" onclick="if(confirm('$delete')){this.href+='?guard={$this->token}';}else{this.parentNode.parentNode.onclick();return false;}">
 	<img src="$prefix/icons/{$this->image_prefix}delete.png" alt="delete" />
 </a>
 EOD;
