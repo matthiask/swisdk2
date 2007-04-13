@@ -630,6 +630,7 @@
 			$this->execute_actions();
 			$this->tableview->init();
 			$this->build_tableview();
+			$this->tableview->run();
 			$this->html = ($this->creation_enabled?'<button type="button" '
 				.'onclick="window.location.href=\''.$this->module_url
 					.'_new\'">'

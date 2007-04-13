@@ -231,6 +231,7 @@
 		public function run()
 		{
 			$this->init(true);
+			$this->tableview->run();
 		}
 
 		public function html()
