@@ -912,15 +912,27 @@ EOD;
 	class FormBar extends FormItem {
 	}
 
-	class SubmitButton extends FormBar {
+	class FormButton extends FormBar {
 		protected $value;
+		protected $caption = 'Submit';
 
 		public function __construct($name=null)
 		{
 			if($name)
 				$this->name = $name;
 
-			$this->value = dgettext('swisdk', 'Submit');
+			$this->caption = dgettext('swisdk', $this->caption);
+		}
+
+		public function caption()
+		{
+			return $this->caption;
+		}
+
+		public function set_caption($caption)
+		{
+			$this->caption = $caption;
+			return $this;
 		}
 
 		public function init_value()
@@ -939,31 +951,15 @@ EOD;
 		}
 	}
 
-	class ResetButton extends FormBar {
-		protected $value;
+	class SubmitButton extends FormButton {
+	}
 
-		public function __construct($name=null)
-		{
-			if($name)
-				$this->name = $name;
+	class ResetButton extends FormButton {
+		protected $caption = 'Reset';
+	}
 
-			$this->value = dgettext('swisdk', 'Reset');
-		}
-
-		public function init_value()
-		{
-		}
-
-		public function value()
-		{
-			return $this->value;
-		}
-
-		public function set_value($value)
-		{
-			$this->value = $value;
-			return $this;
-		}
+	class CancelButton extends FormButton {
+		protected $caption = 'Cancel';
 	}
 
 	class DateInput extends FormItem {

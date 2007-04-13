@@ -991,31 +991,17 @@ EOD;
 			return implode($s, $html).implode($s, $msg);
 		}
 
-		protected function visit_SubmitButton($obj)
+		protected function visit_FormButton($obj)
 		{
 			$this->_collect_javascript($obj);
 			$name = $obj->name();
-			$value = htmlspecialchars($obj->value());
-			if(!$value)
-				$value = 'Submit';
+			$caption = htmlspecialchars($obj->caption());
+			if(!$caption)
+				$caption = 'Submit';
 			$this->_render_bar($obj,
 				'<input type="submit" '.$this->_attribute_html($obj->attributes())
 				.($name?' name="'.$name.'"':'')
-				.' value="'.$value.'" />',
-				'sf-button');
-		}
-
-		protected function visit_ResetButton($obj)
-		{
-			$this->_collect_javascript($obj);
-			$name = $obj->name();
-			$value = htmlspecialchars($obj->value());
-			if(!$value)
-				$value = 'Reset';
-			$this->_render_bar($obj,
-				'<input type="reset" '.$this->_attribute_html($obj->attributes())
-				.($name?' name="'.$name.'"':'')
-				.' value="'.$value.'" />',
+				.' value="'.$caption.'" />',
 				'sf-button');
 		}
 
