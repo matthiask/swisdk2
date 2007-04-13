@@ -8,7 +8,7 @@
 	require_once MODULE_ROOT.'inc.tableview.columns.php';
 	require_once MODULE_ROOT.'inc.tableview.form.php';
 
-	class TableView implements Iterator, ArrayAccess {
+	class TableView implements Iterator, ArrayAccess, IHtmlComponent {
 
 		/**
 		 * TableViewColumn instances
@@ -209,8 +209,6 @@ EOD;
 
 		public function html()
 		{
-			$this->init();
-
 			if($this->enabled('multi'))
 				$this->prepend_column(new IDTableViewColumn(
 					$this->dbobj()->dbobj()->primary()));
@@ -282,6 +280,11 @@ EOD;
 
 			$this->form->bind($dbo);
 
+			$this->initialized = true;
+		}
+
+		public function run()
+		{
 			$form_enabled = array();
 			foreach($this->features as $feature => $enabled)
 				if($enabled)
@@ -289,8 +292,6 @@ EOD;
 			$this->form->setup($form_enabled);
 			$this->form->set_clauses($this->obj);
 			$this->obj->init();
-
-			$this->initialized = true;
 		}
 
 		public function column_count()
