@@ -136,7 +136,7 @@
 		public function html()
 		{
 			$this->add_state(STATE_DISPLAYED);
-			return $this->form->html();
+			return $this->form->html($this->form_renderer());
 		}
 
 		public function set_smarty(&$smarty)
@@ -183,7 +183,7 @@
 			$group->add(new SubmitButton('confirmation_command_cancel'))
 				->set_value('Cancel');
 			$form->init();
-			return $form->html();
+			return $form->html($this->form_renderer());
 		}
 	}
 
