@@ -564,12 +564,12 @@
 			$item = $box->add(new GroupItem());
 
 			$item->add(new SubmitButton('sf_save_and_continue'))
-				->set_value('Save and continue editing');
+				->set_caption('Save and continue editing');
 			$item->add(new SubmitButton('sf_submit'))
-				->set_value('Save')
+				->set_caption('Save')
 				->set_attributes(array('style' => 'font-weight:bold'));
 			$item->add(new SubmitButton('sf_publish'))
-				->set_value('Publish');
+				->set_caption('Publish');
 		}
 
 		protected function add_preview($box=null)
@@ -779,9 +779,9 @@
 				$form->add(new InfoItem($message));
 			$group = $form->add(new GroupItem());
 			$group->add(new SubmitButton('confirmation_command_delete'))
-				->set_value('Delete');
+				->set_caption('Delete');
 			$group->add(new SubmitButton('confirmation_command_cancel'))
-				->set_value('Cancel');
+				->set_caption('Cancel');
 			$form->init();
 			$this->html = $form->html();
 		}

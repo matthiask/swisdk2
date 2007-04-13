@@ -179,9 +179,9 @@
 			$form->add(new InfoItem($question_text));
 			$group = $form->add(new GroupItem());
 			$group->add(new SubmitButton('confirmation_command_delete'))
-				->set_value('Delete');
+				->set_caption('Delete');
 			$group->add(new SubmitButton('confirmation_command_cancel'))
-				->set_value('Cancel');
+				->set_caption('Cancel');
 			$form->init();
 			return $form->html($this->form_renderer());
 		}
