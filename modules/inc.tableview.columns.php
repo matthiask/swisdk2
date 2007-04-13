@@ -213,7 +213,7 @@
 EOD;
 			if($this->copy_enabled)
 				$html .=<<<EOD
-<a href="{$this->title}_new/from/$id" title="copy"><img src="$prefix/icons/page_white_copy.png" alt="copy" /></a>
+<a href="{$this->title}_copy/$id" title="copy"><img src="$prefix/icons/page_white_copy.png" alt="copy" /></a>
 
 EOD;
 			$html .=<<<EOD
