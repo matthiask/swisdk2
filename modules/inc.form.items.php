@@ -960,6 +960,7 @@ EOD;
 
 	class CancelButton extends FormButton {
 		protected $caption = 'Cancel';
+		protected $name = 'sf_button_cancel';
 	}
 
 	class DateInput extends FormItem {
