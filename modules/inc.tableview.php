@@ -271,20 +271,20 @@ EOD;
 			if(!$this->form)
 				$this->form = new TableViewForm();
 
-			$dbo = $this->obj->dbobj_clone();
-
-			$dbo->order = s_get($this->form_defaults, 'order', $dbo->primary());
-			$dbo->dir = s_get($this->form_defaults, 'dir', 'ASC');
-			$dbo->start = s_get($this->form_defaults, 'start', 0);
-			$dbo->limit = s_get($this->form_defaults, 'limit', $this->items_on_page);
-
-			$this->form->bind($dbo);
+			$this->form->bind($this->obj->dbobj_clone());
 
 			$this->initialized = true;
 		}
 
 		public function run()
 		{
+			$dbo = $this->form->dbobj();
+
+			$dbo->order = s_get($this->form_defaults, 'order', $dbo->primary());
+			$dbo->dir = s_get($this->form_defaults, 'dir', 'ASC');
+			$dbo->start = s_get($this->form_defaults, 'start', 0);
+			$dbo->limit = s_get($this->form_defaults, 'limit', $this->items_on_page);
+
 			$form_enabled = array();
 			foreach($this->features as $feature => $enabled)
 				if($enabled)
