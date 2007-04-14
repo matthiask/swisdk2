@@ -175,7 +175,7 @@
 				return $this->name;
 			$id = $this->box_name.$this->name;
 			if(strlen($id)>64)
-				$id = md5($id);
+				$id = 'elem_'.dechex(crc32($id)).'_'.substr($id, -40);
 			return $id;
 		}
 
