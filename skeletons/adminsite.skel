@@ -5,6 +5,8 @@
 		protected $dbo_class = '__CLASS__';
 		protected $multilanguage = false;
 
+		protected $mode = 'combined';
+
 		public function info_actions()
 		{
 			return array(

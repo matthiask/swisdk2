@@ -12,12 +12,28 @@
 		protected $dbo_class;
 		protected $multilanguage = false;
 
+		protected $mode = 'combined';
+
 		protected $role = ROLE_MANAGER;
 
 		public function run()
 		{
 			PermissionManager::check_throw($this->role);
-			$this->run_combined();
+			$this->{'run_'.$this->mode}();
+		}
+
+		protected function run_single()
+		{
+			$args = Swisdk::config_value('runtime.arguments');
+
+			$cmp = $this->dispatch(
+				s_get($args, 0, '_list'),
+				s_get($args, 1));
+
+			$smarty = new SwisdkSmarty();
+			$this->run_website_components($smarty);
+			$smarty->assign('content', $cmp->html());
+			$smarty->display_template('base.admin');
 		}
 
 		protected function run_combined()
@@ -72,6 +88,13 @@
 
 					if($cmp->has_state(STATE_FINISHED))
 						$this->goto();
+
+					return $cmp;
+				case '_list':
+					$dboc = DBOContainer::create(
+						$this->create_dbobject($this->dbo_class));
+					$cmp = $this->create_list_component($dboc);
+					$cmp->run();
 
 					return $cmp;
 			}
