@@ -58,34 +58,34 @@
 
 			$this->odd = true;
 			$this->html .= '<fieldset id="'.$obj->id().'">';
-			if($title = $obj->title())
-				$this->html .= '<legend>'
-					.$this->_expander_helper($obj, $title)
-					.'</legend>';
-			$this->html .= "\n";
-			$this->html .= '<div id="'.$obj->id().'__expander">';
-			$this->html .= "\n";
-		}
 
-		protected function _expander_helper($obj, $title)
-		{
+			$title = $obj->title();
 			$e = $obj->expander();
-			if($e===null)
-				return $title;
 
-			$id = $obj->id().'__expander';
+			if($e===null) {
+				if($title)
+					$this->html .= '<legend>'.$title."</legend>\n";
+			} else if($title) {
+				$id = $obj->id().'__expander';
 
-			return '<a href="#" onclick="Element.toggle($(\''.$id
-				.'\'));return false">'.$title.' (click to show/hide)</a>'
-				.<<<EOD
+				$this->html .= '<legend>'
+					.'<a href="#" onclick="$(\'#'.$id.'\').toggle();return false">'
+					.$title." (click to show/hide)</a></legend>\n";
+				$this->html .= '<div id="'.$id.'">';
+				$this->html .= "\n";
+				$this->html .= <<<EOD
 <script type="text/javascript">
 //<![CDATA[
-	Event.observe(window, 'load', function(){
-		$('$id').style.display = '$e';
+$(function(){
+	$('#$id').each(function(){
+		this.style.display = '$e';
 	});
+});
 //]]>
 </script>
+
 EOD;
+			}
 		}
 
 		protected function visit_FormBox_end($obj)

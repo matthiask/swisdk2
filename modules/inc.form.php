@@ -108,6 +108,7 @@
 		public function expander() { return $this->expander; }
 		public function set_expander($expander)
 		{
+			Swisdk::needs_library('jquery');
 			$this->expander = $expander;
 			return $this;
 		}
