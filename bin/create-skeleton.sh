@@ -11,12 +11,15 @@ create() {
 }
 
 usage() {
-	echo >&2 "$0 (adminmodule|contentsite) class"
+	echo >&2 "$0 (adminmodule|adminsite|contentsite) class"
 }
 
 case "$1" in
 	am|adminmodule)
 		create adminmodule $2 "`to_lower $2`_ctrl.php"
+		;;
+	as|adminsite)
+		create adminsite $2 "`to_lower $2`_ctrl.php"
 		;;
 	cs|contentsite)
 		create contentsite $2 All_ctrl.php
