@@ -273,7 +273,9 @@ EOD;
 			if(!$this->form)
 				$this->form = new TableViewForm();
 
-			$this->form->bind($this->obj->dbobj_clone());
+			$dbo = $this->obj->dbobj_clone();
+			$dbo->id = -999;
+			$this->form->bind($dbo);
 
 			$this->initialized = true;
 		}
