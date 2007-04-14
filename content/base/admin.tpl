@@ -2,8 +2,6 @@
 <html>
 <head>
 <title>{swisdk_runtime_value key="website.title"}</title>
-<script type="text/javascript" src="{webroot key=js}/util.js"></script>
-<script type="text/javascript" src="{webroot key=js}/jquery/jquery.js"></script>
 {swisdk_libraries_html}
 <style type="text/css">
 {literal}
