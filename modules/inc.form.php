@@ -575,7 +575,8 @@
 			$this->init();
 			$this->guard_state = Swisdk::guard_token_state_f(
 				$this->guard_input->id());
-			return $this->guard_state!=GUARD_UNKNOWN;
+			return $this->guard_state!==null
+				&& $this->guard_state!=GUARD_UNKNOWN;
 		}
 
 		public function canceled()
