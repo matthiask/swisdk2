@@ -41,6 +41,8 @@
 				->set_attributes(array('style' => 'font-weight:bold'));
 			$box->add(new SubmitButton('sf_button_publish'))
 				->set_caption('Publish');
+			$box->add('sf_button_cancel', new CancelButton())
+				->set_title();
 		}
 
 		/**
