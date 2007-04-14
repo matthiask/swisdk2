@@ -61,6 +61,14 @@ EOD;
 EOD;
 		}
 
+		public function provide_jquery_interface()
+		{
+			return $this->provide('jquery').<<<EOD
+<script type="text/javascript" src="{$this->js_prefix}/jquery/interface.js"></script>
+
+EOD;
+		}
+
 		public function provide_fckeditor()
 		{
 			return <<<EOD
