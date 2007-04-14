@@ -478,9 +478,9 @@
 		public function is_empty()
 		{
 			if(count($this->boxrefs))
-				return true;
-			if(!count($this->items))
 				return false;
+			if(!count($this->items))
+				return true;
 			foreach($this->items as &$item)
 				if(!($item instanceof HiddenInput))
 					return false;
