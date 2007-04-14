@@ -74,6 +74,8 @@
 				$this->bind($obj);
 			if($form)
 				$this->set_form($form);
+
+			Swisdk::needs_library('jquery');
 		}
 
 		public function features() { return $this->features; }
@@ -353,20 +355,18 @@ function tv_delete()
 }
 function tv_toggle(elem)
 {
-	var elems = document.getElementById('$id').getElementsByTagName('tbody')[0].getElementsByTagName('input');
-	for(i=0; i<elems.length; i++) {
-		elems[i].checked = elem.checked;
-		var node = elems[i].parentNode.parentNode;
-		if(node.tagName=='TR') {
-			if(elems[i].checked)
-				node.className += ' checked';
-			else
-				node.className = node.className.replace(/checked/g, '');
-		}
-	}
+	$('#$id tbody input:checkbox').each(function(){
+		this.checked = elem.checked;
+		var node = this.parentNode.parentNode;
+		if(elem.checked)
+			$(node).addClass('checked');
+		else
+			$(node).removeClass('checked');
+	});
 }
 //]]>
 </script>
+
 EOD;
 		}
 
@@ -477,34 +477,28 @@ EOD;
 <script type="text/javascript">
 //<![CDATA[
 $(function(){
-	var tables = document.getElementsByTagName('table');
-	for(i=0; i<tables.length; i++) {
-		if(tables[i].className=='s-table') {
-			var rows = tables[i].getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-			for(j=0; j<rows.length; j++) {
-				rows[j].onclick = function(){
-					var cb = this.getElementsByTagName('input')[0];
-					cb.checked = !cb.checked;
-					cb.onchange();
-				}
-				var cb = rows[j].getElementsByTagName('input')[0];
-				cb.onchange = function(){
-					var row = this.parentNode.parentNode;
-					if(this.checked)
-						row.className += ' checked';
-					else
-						row.className =
-							row.className.replace(/checked/g, '');
-				}
-				cb.onclick = function(){
-					// hack. revert toggle effect of tr.onclick
-					this.checked = !this.checked;
-				}
-				if(cb.checked)
-					rows[j].className += ' checked';
-			}
-		}
-	}
+	$('table.s-table tbody tr').each(function(){
+		var row = $(this);
+		var cb = $('input:checkbox', row).get(0);
+		row.click(function(){
+			cb.checked = !cb.checked;
+			if(cb.checked)
+				$(this).addClass('checked');
+			else
+				$(this).removeClass('checked');
+		});
+		$(cb).change(function(){
+			if(this.checked)
+				row.addClass('checked');
+			else
+				row.removeClass('checked');
+		});
+		$(cb).click(function(){
+			cb.checked = !this.checked;
+		});
+		if(cb.checked)
+			row.addClass('checked');
+	});
 });
 //]]>
 </script>
