@@ -10,6 +10,7 @@
 
 	abstract class AdminSite extends Site {
 		protected $dbo_class;
+		protected $multilanguage = false;
 
 		protected $role = ROLE_MANAGER;
 
@@ -28,7 +29,7 @@
 				s_get($args, 1));
 
 			$list = $this->create_list_component(
-				DBOContainer::create($this->dbo_class));
+				DBOContainer::create($this->create_dbobject($this->dbo_class)));
 			$list->run();
 
 			$smarty = new SwisdkSmarty();
@@ -44,12 +45,12 @@
 			switch($cmd) {
 				case '_edit':
 				case '_copy':
-					$dbo = DBObject::find($this->dbo_class, $id);
+					$dbo = $this->find_dbobject($this->dbo_class, $id);
 					if($dbo && $cmd=='_copy')
 						$dbo->unset_primary();
 				case '_create':
 					if(!isset($dbo) || !$dbo) {
-						$dbo = DBObject::create($this->dbo_class);
+						$dbo = $this->create_dbobject($this->dbo_class);
 						$dbo->id = -1;
 					}
 					$cmp = $this->create_edit_component($dbo);
@@ -62,7 +63,7 @@
 
 					return $cmp;
 				case '_delete':
-					$dbo = DBObject::find($this->dbo_class, $id);
+					$dbo = $this->find_dbobject($this->dbo_class, $id);
 					if(!$dbo)
 						$this->goto();
 
@@ -74,6 +75,22 @@
 
 					return $cmp;
 			}
+		}
+
+		protected function create_dbobject($class)
+		{
+			if($this->multilanguage)
+				return DBObjectML::create($class, LANGUAGE_ALL);
+			else
+				return DBObject::create($class);
+		}
+
+		protected function find_dbobject($class, $args)
+		{
+			if($this->multilanguage)
+				return DBObjectML::find($class, $args, LANGUAGE_ALL);
+			else
+				return DBObject::find($class, $args);
 		}
 
 		protected function create_edit_component($dbo)

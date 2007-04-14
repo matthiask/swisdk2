@@ -3,6 +3,7 @@
 
 	class __CLASS__AdminSite extends AdminSite {
 		protected $dbo_class = '__CLASS__';
+		protected $multilanguage = false;
 
 		public function info_actions()
 		{
