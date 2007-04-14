@@ -641,7 +641,7 @@
 
 		public function build_tableview()
 		{
-			$this->tableview_builder()->build($this->tableview);
+			$this->tableview_builder()->build($this->tableview, true);
 			$this->complete_columns();
 		}
 

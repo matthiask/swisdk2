@@ -349,15 +349,15 @@
 		protected $tv;
 		protected $dbobj;
 
-		public function build(&$tableview)
+		public function build(&$tableview, $finalize = false)
 		{
 			$this->tv = $tableview;
 			$this->dbobj = $tableview->dbobj()->dbobj();
 
 			if($tableview->dbobj()->dbobj() instanceof DBObjectML)
-				return $this->build_ml();
+				return $this->build_ml($finalize);
 			else
-				return $this->build_simple();
+				return $this->build_simple($finalize);
 		}
 
 		/**
@@ -370,7 +370,7 @@
 			return $this->create_field($field, $title);
 		}
 
-		public function build_simple($finalize = true)
+		public function build_simple($finalize = false)
 		{
 			$dbobj = $this->dbobj();
 			$fields = array_keys($dbobj->field_list());
@@ -394,9 +394,9 @@
 					Swisdk::config_value('runtime.controller.url')));
 		}
 
-		public function build_ml()
+		public function build_ml($finalize = false)
 		{
-			$this->build_simple(false);
+			$this->build_simple();
 
 			$primary = $this->dbobj->primary();
 			$this->dbobj = $this->dbobj->dbobj();
@@ -415,8 +415,9 @@
 					$this->create_field($key);
 			}
 
-			$this->tv->append_column(new CmdsTableViewColumn($primary,
-				Swisdk::config_value('runtime.controller.url')));
+			if($finalize)
+				$this->tv->append_column(new CmdsTableViewColumn($primary,
+					Swisdk::config_value('runtime.controller.url')));
 		}
 
 		public function dbobj()
