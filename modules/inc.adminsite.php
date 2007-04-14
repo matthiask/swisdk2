@@ -57,6 +57,8 @@
 
 					if($cmp->has_state(STATE_FINISHED))
 						$this->goto();
+					if($cmp->has_state(STATE_CONTINUE) && $cmd!='_edit')
+						$this->goto('_edit/'.$dbo->id());
 
 					return $cmp;
 				case '_delete':

@@ -124,9 +124,18 @@
 				$this->add_state(STATE_FINISHED);
 			else if($this->form->is_valid()) {
 				$dbo = $this->form->dbobj();
-				$dbo->store();
 				$this->remove_state(STATE_INVALID);
-				$this->add_state(STATE_FINISHED);
+				if(getInput('sf_button_publish')) {
+					$dbo->active = 1;
+					$dbo->store();
+					$this->add_state(STATE_FINISHED);
+				} else if(getInput('sf_button_save_and_continue')) {
+					$dbo->store();
+					$this->add_state(STATE_CONTINUE);
+				} else {
+					$dbo->store();
+					$this->add_state(STATE_FINISHED);
+				}
 			} else
 				$this->add_state(STATE_INVALID);
 

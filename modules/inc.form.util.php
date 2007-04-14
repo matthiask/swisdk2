@@ -30,6 +30,19 @@
 				->set_title();
 		}
 
+		public static function save_and_publish_bar($form)
+		{
+			$box = $form->box('zzz_last')->set_widget(false)
+				->add(new GroupItemBar())->box();
+			$box->add(new SubmitButton('sf_button_save_and_continue'))
+				->set_caption('Save and continue editing');
+			$box->add(new SubmitButton('sf_button_submit'))
+				->set_caption('Save')
+				->set_attributes(array('style' => 'font-weight:bold'));
+			$box->add(new SubmitButton('sf_button_publish'))
+				->set_caption('Publish');
+		}
+
 		/**
 		 * move file to DATA_ROOT and return sanitized and uniquified filename
 		 *
