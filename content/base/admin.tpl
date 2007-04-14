@@ -2,6 +2,7 @@
 <html>
 <head>
 <title>{swisdk_runtime_value key="website.title"}</title>
+{swisdk_needs_library name=jquery}
 {swisdk_libraries_html}
 <style type="text/css">
 {literal}
