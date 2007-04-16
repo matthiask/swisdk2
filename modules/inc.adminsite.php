@@ -16,6 +16,13 @@
 
 		protected $role = ROLE_MANAGER;
 
+		protected $smarty;
+
+		public function init()
+		{
+			$this->smarty = new SwisdkSmarty();
+		}
+
 		public function run()
 		{
 			PermissionManager::check_throw($this->role);
@@ -24,20 +31,22 @@
 
 		protected function run_single()
 		{
+			$this->init();
 			$args = Swisdk::config_value('runtime.arguments');
 
 			$cmp = $this->dispatch(
 				s_get($args, 0, '_list'),
 				s_get($args, 1));
 
-			$smarty = new SwisdkSmarty();
-			$this->run_website_components($smarty);
-			$smarty->assign('content', $cmp->html());
-			$smarty->display_template('base.admin');
+			$this->smarty = new SwisdkSmarty();
+			$this->run_website_components($this->smarty);
+			$this->smarty->assign('content', $cmp->html());
+			$this->smarty->display_template('base.admin');
 		}
 
 		protected function run_combined()
 		{
+			$this->init();
 			$args = Swisdk::config_value('runtime.arguments');
 
 			$cmp = $this->dispatch(
@@ -48,12 +57,12 @@
 				DBOContainer::create($this->create_dbobject($this->dbo_class)));
 			$list->run();
 
-			$smarty = new SwisdkSmarty();
-			$this->run_website_components($smarty);
-			$smarty->assign('content',
+			$this->smarty = new SwisdkSmarty();
+			$this->run_website_components($this->smarty);
+			$this->smarty->assign('content',
 				$list->html()
 				.($cmp?$cmp->html():''));
-			$smarty->display_template('base.admin');
+			$this->smarty->display_template('base.admin');
 		}
 
 		protected function dispatch($cmd, $id=null)
