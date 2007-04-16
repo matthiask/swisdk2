@@ -265,6 +265,19 @@
 		return $fname;
 	}
 
+	function isAbsolutePath($path)
+	{
+		if($path{0}=='/')
+			return true;
+
+		if(defined('OS_WINDOWS')
+				&& (substr($path, 1, 2)==':/'
+					|| substr($path, 1, 2)==':\\'))
+			return true;
+
+		return false;
+	}
+
 	/**
 	 * add ellipsis to a string if it is too long
 	 */

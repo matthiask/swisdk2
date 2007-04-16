@@ -88,7 +88,7 @@
 					SwisdkError::handle(new FatalError('Could not resolve template '.$key));
 			}
 
-			if($key{0}=='/')
+			if(isAbsolutePath($key))
 				return $key;
 
 			$realm = Swisdk::config_value('runtime.realm', '#');

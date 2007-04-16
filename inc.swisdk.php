@@ -224,7 +224,7 @@ EOD;
 
 		public static function read_configfile($file, $prefix = '', $throw=true)
 		{
-			if($file{0}!='/')
+			if(!isAbsolutePath($file))
 				$file = CONTENT_ROOT.$file;
 			if($prefix)
 				$prefix .= '.';
@@ -263,7 +263,7 @@ EOD;
 				SwisdkError::handle(new FatalError(sprintf(
 					dgettext('swisdk', 'Invalid path passed to require_data_directory: %s'),
 					$dir)));
-			if($dir{0}!='/')
+			if(!isAbsolutePath($dir))
 				$dir = DATA_ROOT.$dir;
 			umask(0002);
 			if(!file_exists($dir))
@@ -283,7 +283,7 @@ EOD;
 				SwisdkError::handle(new FatalError(sprintf(
 					dgettext('swisdk', 'Invalid path passed to require_htdocs_data_directory: %s'),
 					$dir)));
-			if($dir{0}!='/')
+			if(!isAbsolutePath($dir))
 				$dir = HTDOCS_DATA_ROOT.$dir;
 			umask(0002);
 			if(!file_exists($dir))
