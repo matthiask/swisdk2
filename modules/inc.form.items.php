@@ -1204,9 +1204,14 @@ EOD;
 	class InfoItem extends FormItem {
 		protected $info_text;
 
-		public function __construct($info_text)
+		public function __construct($info_text=null)
 		{
 			$this->info_text = $info_text;
+		}
+
+		public function set_html($html)
+		{
+			$this->info_text = $html;
 		}
 
 		public function html()
