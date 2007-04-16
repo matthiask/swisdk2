@@ -41,7 +41,7 @@
 			$this->smarty = new SwisdkSmarty();
 			$this->run_website_components($this->smarty);
 			$this->smarty->assign('content', $cmp->html());
-			$this->smarty->display_template('base.admin');
+			$this->display();
 		}
 
 		protected function run_combined()
@@ -62,6 +62,11 @@
 			$this->smarty->assign('content',
 				$list->html()
 				.($cmp?$cmp->html():''));
+			$this->display();
+		}
+
+		protected function display()
+		{
 			$this->smarty->display_template('base.admin');
 		}
 
