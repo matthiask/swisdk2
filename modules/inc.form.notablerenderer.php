@@ -69,8 +69,13 @@
 				$id = $obj->id().'__expander';
 
 				$this->html .= '<legend>'
-					.'<a href="#" onclick="$(\'#'.$id.'\').toggle();return false">'
-					.$title." (click to show/hide)</a></legend>\n";
+					.'<a href="#" onclick="$(\'#'.$id.'_s\').val(1-$(\'#'
+						.$id.'_s\').val());$(\'#'.$id.'\').toggle();'
+						.'return false">'
+					.$title." (click to show/hide)</a></legend>\n"
+					.'<input type="hidden" id="'.$id.'_s" name="'.$id.'_s"'
+						.' value="'.intval($e==FORM_EXPANDER_SHOW).'" />';
+				$this->html .= "\n";
 				$this->html .= '<div id="'.$id.'">';
 				$this->html .= "\n";
 				$this->html .= <<<EOD

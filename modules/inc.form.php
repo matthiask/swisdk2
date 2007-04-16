@@ -105,7 +105,19 @@
 		 * expander?
 		 */
 		protected $expander = null;
-		public function expander() { return $this->expander; }
+		public function expander()
+		{
+			if($this->expander!==null) {
+				$s = getInput($this->id().'__expander_s');
+				if($s===null)
+					return $this->expander;
+				else if($s)
+					return FORM_EXPANDER_SHOW;
+				else
+					return FORM_EXPANDER_HIDE;
+			}
+			return null;
+		}
 		public function set_expander($expander)
 		{
 			Swisdk::needs_library('jquery');
