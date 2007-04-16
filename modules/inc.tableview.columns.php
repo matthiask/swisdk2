@@ -211,16 +211,16 @@
 			$delete = dgettext('swisdk', 'Really delete?');
 			$prefix = Swisdk::config_value('runtime.webroot.img', '/img');
 			$html =<<<EOD
-<a href="{$this->title}_edit/$id" title="edit"><img src="$prefix/icons/{$this->image_prefix}edit.png" alt="edit" /></a>
+<a href="{$this->title}edit/$id" title="edit"><img src="$prefix/icons/{$this->image_prefix}edit.png" alt="edit" /></a>
 
 EOD;
 			if($this->copy_enabled)
 				$html .=<<<EOD
-<a href="{$this->title}_copy/$id" title="copy"><img src="$prefix/icons/page_white_copy.png" alt="copy" /></a>
+<a href="{$this->title}copy/$id" title="copy"><img src="$prefix/icons/page_white_copy.png" alt="copy" /></a>
 
 EOD;
 			$html .=<<<EOD
-<a href="{$this->title}_delete/$id" title="delete" onclick="if(confirm('$delete')){this.href+='?guard={$this->token}';}else{this.parentNode.parentNode.onclick();return false;}">
+<a href="{$this->title}delete/$id" title="delete" onclick="if(confirm('$delete')){this.href+='?guard={$this->token}';}else{this.parentNode.parentNode.onclick();return false;}">
 	<img src="$prefix/icons/{$this->image_prefix}delete.png" alt="delete" />
 </a>
 EOD;

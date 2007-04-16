@@ -35,7 +35,7 @@
 			$args = Swisdk::config_value('runtime.arguments');
 
 			$cmp = $this->dispatch(
-				s_get($args, 0, '_list'),
+				s_get($args, 0, 'list'),
 				s_get($args, 1));
 
 			$this->smarty = new SwisdkSmarty();
@@ -50,7 +50,7 @@
 			$args = Swisdk::config_value('runtime.arguments');
 
 			$cmp = $this->dispatch(
-				s_get($args, 0, '_create'),
+				s_get($args, 0, 'create'),
 				s_get($args, 1));
 
 			$list = $this->create_list_component(
@@ -73,12 +73,12 @@
 		protected function dispatch($cmd, $id=null)
 		{
 			switch($cmd) {
-				case '_edit':
-				case '_copy':
+				case 'edit':
+				case 'copy':
 					$dbo = $this->find_dbobject($this->dbo_class, $id);
 					if($dbo && $cmd=='_copy')
 						$dbo->unset_primary();
-				case '_create':
+				case 'create':
 					if(!isset($dbo) || !$dbo) {
 						$dbo = $this->create_dbobject($this->dbo_class);
 						$dbo->id = -1;
@@ -92,7 +92,7 @@
 						$this->goto('_edit/'.$dbo->id());
 
 					return $cmp;
-				case '_delete':
+				case 'delete':
 					$dbo = $this->find_dbobject($this->dbo_class, $id);
 					if(!$dbo)
 						$this->goto();
@@ -104,7 +104,7 @@
 						$this->goto();
 
 					return $cmp;
-				case '_list':
+				case 'list':
 					$dboc = DBOContainer::create(
 						$this->create_dbobject($this->dbo_class));
 					$cmp = $this->create_list_component($dboc);
