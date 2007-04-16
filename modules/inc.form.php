@@ -550,6 +550,11 @@
 			if(!$this->submitted())
 				return false;
 
+			return $this->handle_guard_state();
+		}
+
+		protected function handle_guard_state()
+		{
 			switch($this->guard_state) {
 			case GUARD_UNKNOWN:
 				$this->add_message(
