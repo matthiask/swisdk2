@@ -393,11 +393,13 @@
 		public function accept($renderer)
 		{
 			ksort($this->boxrefs);
-			$renderer->visit($this, FORMRENDERER_VISIT_START);
-			foreach($this->items as &$item)
-				$item->accept($renderer);
-			foreach($this->boxrefs as &$boxref)
-				$boxref->accept($renderer);
+			// skip all items and boxes if the visitor method returns false
+			if($renderer->visit($this, FORMRENDERER_VISIT_START)!==false) {
+				foreach($this->items as &$item)
+					$item->accept($renderer);
+				foreach($this->boxrefs as &$boxref)
+					$boxref->accept($renderer);
+			}
 			$renderer->visit($this, FORMRENDERER_VISIT_END);
 		}
 

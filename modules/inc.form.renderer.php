@@ -101,17 +101,15 @@
 			$class = get_class($obj);
 			$method = 'visit_'.$class.$suffix;
 			if(method_exists($this, $method)) {
-				call_user_func(array($this, $method), $obj);
-				return;
+				return call_user_func(array($this, $method), $obj);
 			}
 
 			$parents = class_parents($class);
 			foreach($parents as $p) {
 				$method = 'visit_'.$p.$suffix;
 				if(method_exists($this, $method)) {
-					call_user_func(array($this, $method),
+					return call_user_func(array($this, $method),
 						$obj);
-					return;
 				}
 			}
 
