@@ -384,6 +384,11 @@ EOD;
 			return Swisdk::config_value('runtime.webroot.'.$key, '/'.$key);
 		}
 
+		public static function arguments()
+		{
+			return Swisdk::config_value('runtime.arguments');
+		}
+
 		/**
 		 * returns a website config value, for example the website title
 		 *
