@@ -166,7 +166,7 @@ EOD;
 		{
 			$v = trim($this->item->value());
 			if($this->item instanceof SelectionFormItem) {
-				return $v!='' && $v!=0 && $v!=array();
+				return $v!=='' && $v!==0 && $v!==array();
 			} else
 				return $v!='';
 		}
