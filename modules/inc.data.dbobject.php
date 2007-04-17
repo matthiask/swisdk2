@@ -1306,10 +1306,12 @@
 					}
 
 					// determine field type
-					if(stripos($field, 'date')!==false) {
+					if(stripos($field, '_date')!==false) {
 						$fl[$field] = DB_FIELD_DATE;
-					} else if(stripos($field, 'dttm')!==false) {
+					} else if(stripos($field, '_dttm')!==false) {
 						$fl[$field] = DB_FIELD_DTTM;
+					} else if(stripos($field, '_time')!==false) {
+						$fl[$field] = DB_FIELD_TIME;
 					} else if(stripos($type, 'text')!==false) {
 						$fl[$field] = DB_FIELD_LONGTEXT;
 					} else if($type=='tinyint(1)') {

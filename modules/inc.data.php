@@ -25,8 +25,9 @@
 	define('DB_FIELD_DATE', 16);
 	define('DB_FIELD_DTTM', 32);
 	define('DB_FIELD_FLOAT', 64);
+	define('DB_FIELD_TIME', 128);
 	// DB_FIELD_FOREIGN_KEY may be OR'ed with DB_REL_*<<10
-	define('DB_FIELD_FOREIGN_KEY', 128);
+	define('DB_FIELD_FOREIGN_KEY', 256);
 
 	require_once MODULE_ROOT.'inc.data.dbobject.php';
 	require_once MODULE_ROOT.'inc.data.dbocontainer.php';

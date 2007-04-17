@@ -436,11 +436,20 @@ EOD;
 
 		protected function visit_DropdownInput($obj)
 		{
+			$this->dropdown_helper($obj, $obj->value());
+		}
+
+		protected function visit_TimeInput($obj)
+		{
+			$this->dropdown_helper($obj, $obj->value()+86400+82800);
+		}
+
+		protected function dropdown_helper($obj, $value)
+		{
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
 			$html = '<select name="'.$name.'" id="'.$name.'"'
 				.$this->_attribute_html($obj->attributes()).">\n";
-			$value = $obj->value();
 			$items = $obj->items();
 			foreach($items as $id => $title) {
 				$html .= '<option ';

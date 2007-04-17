@@ -159,6 +159,13 @@
 		protected $never = '(never)';
 	}
 
+	class TimeTableViewColumn extends TableViewColumn {
+		public function html(&$data)
+		{
+			return strftime('%H:%M', $data[$this->column]+82800);
+		}
+	}
+
 	/**
 	 * show a dttm range
 	 */

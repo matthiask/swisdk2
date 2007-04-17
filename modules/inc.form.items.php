@@ -695,6 +695,36 @@ EOD;
 		}
 	}
 
+	class TimeInput extends DropdownInput {
+		public function __construct($name=null)
+		{
+			parent::__construct($name);
+			$items = array();
+			for($i=86400+82800; $i<82800+2*86400; $i+=15*60)
+				$items[$i] = strftime('%H:%M', $i);
+
+			$this->set_items($items);
+		}
+
+		public function init_value()
+		{
+			$name = $this->name();
+			$id = $this->id();
+
+			if($v = getInput($id))
+				$this->dbobj->set($name, cleanInput($v, false));
+
+			if($this->dbobj->get($name)===null)
+				$this->dbobj->set($name, $this->default_value);
+
+			if($this->force_value!==null)
+				$this->dbobj->set($name, $this->force_value);
+
+			if(($value = $this->dbobj->get($name))>100000)
+				$this->dbobj->set($name, $value-86400-82800);
+		}
+	}
+
 	class RadioButtons extends DropdownInput {
 		protected $attributes = array('class' => 'sf-radiobuttons');
 	}

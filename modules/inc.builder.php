@@ -77,6 +77,8 @@
 					return $this->create_date($c_field, $title);
 				case DB_FIELD_DTTM:
 					return $this->create_dttm($c_field, $title);
+				case DB_FIELD_TIME:
+					return $this->create_time($c_field, $title);
 				case DB_FIELD_FLOAT:
 					return $this->create_float($c_field, $title);
 				case DB_FIELD_FOREIGN_KEY|(DB_REL_SINGLE<<10):
@@ -159,6 +161,11 @@
 		 * create a datetime widget
 		 */
 		abstract public function create_dttm($fname, $title);
+
+		/**
+		 * create a time widget
+		 */
+		abstract public function create_time($fname, $title);
 
 		/**
 		 * create a textarea widget (f.e. length-limited for TableView)
@@ -324,6 +331,11 @@
 			return $this->form->add($fname, new DateInput(), $title);
 		}
 
+		public function create_time($fname, $title)
+		{
+			return $this->form->add($fname, new TimeInput(), $title);
+		}
+
 		public function create_textarea($fname, $title)
 		{
 			return $this->form->add($fname, new Textarea(), $title);
@@ -466,6 +478,12 @@
 		{
 			return $this->tv->append_column(
 				new DateTableViewColumn($fname, $title));
+		}
+
+		public function create_time($fname, $title)
+		{
+			return $this->tv->append_column(
+				new TimeTableViewColumn($fname, $title));
 		}
 
 		public function create_textarea($fname, $title)
