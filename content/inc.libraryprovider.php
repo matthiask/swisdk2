@@ -69,6 +69,30 @@ EOD;
 EOD;
 		}
 
+		public function provide_jquery_cookie()
+		{
+			return $this->provide('jquery').<<<EOD
+<script type="text/javascript" src="{$this->js_prefix}/jquery/jquery.cookie.js"></script>
+
+EOD;
+		}
+
+		public function provide_jquery_deserialize()
+		{
+			return $this->provide('jquery').<<<EOD
+<script type="text/javascript" src="{$this->js_prefix}/jquery/jquery.deserialize.js"></script>
+
+EOD;
+		}
+
+		public function provide_jquery_form()
+		{
+			return $this->provide('jquery').<<<EOD
+<script type="text/javascript" src="{$this->js_prefix}/jquery/jquery.form.js"></script>
+
+EOD;
+		}
+
 		public function provide_fckeditor()
 		{
 			return <<<EOD
