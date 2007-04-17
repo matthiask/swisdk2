@@ -14,6 +14,8 @@
 		protected $ref;
 		protected $form;
 
+		protected $form_id;
+
 		public function __construct()
 		{
 			$this->ref = 0;
@@ -24,6 +26,8 @@
 		{
 			$this->form = $obj;
 			parent::visit_Form_start($obj);
+
+			$this->form_id = $obj->id();
 		}
 
 		protected function visit_FormBox_start($obj)
@@ -86,6 +90,8 @@
 			$this->array['form'] = array_merge($this->array['form'], array(
 				'start' => $this->html_start,
 				'end' => $this->html_end));
+			if($this->form_id)
+				$this->array['id'] = $this->form_id;
 			return $this->array;
 		}
 	}
