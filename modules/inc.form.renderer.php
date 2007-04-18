@@ -195,9 +195,7 @@ function validate_'.$id.'()
 
 		protected function _collect_javascript($obj)
 		{
-			// add add_javascript() fragments
-			if(!$obj instanceof Form && !$obj instanceof FormBox)
-				$this->javascript .= $obj->javascript();
+			$this->javascript .= $obj->javascript();
 
 			if(!$this->js_validation)
 				return;

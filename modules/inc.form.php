@@ -126,6 +126,22 @@
 		}
 
 		/**
+		 * javascript fragments
+		 */
+		protected $javascript;
+
+		public function add_javascript($javascript)
+		{
+			$this->javascript .= $javascript;
+			return $this;
+		}
+
+		public function javascript()
+		{
+			return $this->javascript;
+		}
+
+		/**
 		 * @param $dbobj: the DBObject bound to the Form
 		 */
 		public function __construct($dbobj=null)
