@@ -158,6 +158,7 @@ EOD;
 		public function set_form_item(&$item)
 		{
 			parent::set_form_item($item);
+			$item->add_css_class('required');
 			$item->set_title($item->title()
 				.'<span style="color:red">*</span>');
 		}
