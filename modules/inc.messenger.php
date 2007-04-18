@@ -63,7 +63,8 @@
 		{
 			$from = $this->dbobj->from;
 			if(!$from)
-				$from = 'Messenger <messenger@'.preg_replace('/^www\./', '',
+				$from = Swisdk::config_value('core.name', 'Messenger')
+					.' <messenger@'.preg_replace('/^www\./', '',
 						Swisdk::config_value('runtime.request.host')).'>';
 			$reply_to = $this->dbobj->reply_to;
 			if(!$reply_to)
