@@ -45,6 +45,11 @@
 		protected $behaviors = array();
 
 		/**
+		* css class
+		*/
+		protected $css_class;
+
+		/**
 		 * additional html attributes
 		 */
 		protected $attributes = array();
@@ -187,6 +192,23 @@
 		public function set_form_box(&$box)
 		{
 			$this->box_name = $box->id().'_';
+		}
+
+		public function add_css_class($class)
+		{
+			$this->css_class .= ' '.$class;
+			return $this;
+		}
+
+		public function set_css_class($class)
+		{
+			$this->css_class = $class;
+			return $this;
+		}
+
+		public function css_class()
+		{
+			return $this->css_class;
 		}
 
 		/**
@@ -343,12 +365,12 @@ EOD;
 
 	class TextInput extends SimpleInput {
 		protected $type = 'text';
-		protected $attributes = array('class' => 'sf-textinput');
+		protected $css_class = 'sf-textinput';
 	}
 
 	class SpinButton extends SimpleInput {
 		protected $type = 'text';
-		protected $attributes = array('class' => 'sf-spinbutton');
+		protected $css_class = 'sf-spinbutton';
 
 		public function __construct($name=null)
 		{
@@ -369,7 +391,7 @@ EOD;
 
 	class PasswordInput extends SimpleInput {
 		protected $type = 'password';
-		protected $attributes = array('class' => 'sf-textinput');
+		protected $css_class = 'sf-spinbutton';
 	}
 
 	/**
@@ -379,7 +401,7 @@ EOD;
 	 */
 	class FileUpload extends SimpleInput {
 		protected $type = 'file';
-		protected $attributes = array('class' => 'sf-textinput');
+		protected $css_class = 'sf-spinbutton';
 
 		protected $files_data;
 		protected $no_upload = true;
@@ -568,7 +590,7 @@ EOD;
 	}
 
 	class Textarea extends FormItem {
-		protected $attributes = array('class' => 'sf-textarea');
+		protected $css_class = 'sf-textarea';
 		protected $auto_xss_protection = true;
 
 		public function auto_xss_protection()
@@ -607,7 +629,7 @@ EOD;
 	 * Textarea with all the Wysiwyg-Bling!
 	 */
 	class RichTextarea extends Textarea {
-		protected $attributes = array('class' => 'sf-richtextarea');
+		protected $css_class = 'sf-richtextarea';
 		protected $type = 'Standard';
 
 		public function __construct($name=null)
@@ -646,7 +668,7 @@ EOD;
 	 * base class for all FormItems which offer a choice between several items
 	 */
 	class SelectionFormItem extends FormItem {
-		protected $attributes = array('class' => 'sf-selection');
+		protected $css_class = 'sf-selection';
 
 		public function set_items($items)
 		{
@@ -726,7 +748,7 @@ EOD;
 	}
 
 	class RadioButtons extends DropdownInput {
-		protected $attributes = array('class' => 'sf-radiobuttons');
+		protected $css_class = 'sf-radiobuttons';
 	}
 
 	class ComboBox extends SelectionFormItem {
@@ -886,7 +908,7 @@ EOD;
 	}
 
 	class TagInput extends TextInput {
-		protected $attributes = array('class' => 'sf-textinput');
+		protected $css_class = 'sf-textinput';
 		protected $tag_formitems = array();
 
 		public function init_value()

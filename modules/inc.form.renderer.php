@@ -236,7 +236,7 @@ function validate_'.$id.'()
 			return sprintf(
 				'<input type="hidden" name="%s" id="%s" value="%s" %s />',
 				$name, $name, htmlspecialchars(implode(',', $obj->value())),
-				$this->_attribute_html($obj->attributes()));
+				$this->_attribute_html($obj));
 		}
 
 		protected function visit_SimpleInput($obj)
@@ -277,7 +277,7 @@ EOD;
 			$this->_render($obj, sprintf(
 				'<input type="%s" name="%s" id="%s" value="%s" %s />',
 				$obj->type(), $name, $name, htmlspecialchars($obj->tag_string()),
-				$this->_attribute_html($obj->attributes())));
+				$this->_attribute_html($obj)));
 		}
 
 		protected function visit_FileUpload($obj)
@@ -303,7 +303,7 @@ EOD;
 						$current, $current, $name, $name)
 					:''),
 				$obj->type(), $name, $name, htmlspecialchars($obj->value()),
-				$this->_attribute_html($obj->attributes())));
+				$this->_attribute_html($obj)));
 		}
 
 		protected function visit_CheckboxInput($obj)
@@ -316,7 +316,7 @@ EOD;
 				.'__check" value="1" />',
 				$name, $name,
 				($obj->value()?'checked="checked" ':' ')
-				.$this->_attribute_html($obj->attributes())));
+				.$this->_attribute_html($obj)));
 		}
 
 		protected function visit_TristateInput($obj)
@@ -398,7 +398,7 @@ EOD
 			$this->_render($obj, sprintf(
 				'<textarea name="%s" id="%s" %s>%s</textarea>%s',
 				$name, $name,
-				$this->_attribute_html($obj->attributes()),
+				$this->_attribute_html($obj),
 				$obj->value(),
 				$this->_auto_xss_helper($obj)));
 		}
@@ -409,7 +409,7 @@ EOD
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
 			$value = htmlspecialchars($obj->value());
-			$attributes = $this->_attribute_html($obj->attributes());
+			$attributes = $this->_attribute_html($obj);
 			$type = $obj->type();
 			$auto_xss_protection = $this->_auto_xss_helper($obj);
 			$html = <<<EOD
@@ -447,7 +447,7 @@ EOD;
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
 			$html = '<select name="'.$name.'" id="'.$name.'"'
-				.$this->_attribute_html($obj->attributes()).">\n";
+				.$this->_attribute_html($obj).">\n";
 			$items = $obj->items();
 			foreach($items as $id => $title) {
 				$html .= '<option ';
@@ -465,9 +465,9 @@ EOD;
 		{
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
-			$attributes = $this->_attribute_html($obj->attributes());
+			$attributes = $this->_attribute_html($obj);
 			$html = '<span '
-				.$this->_attribute_html($obj->attributes())
+				.$this->_attribute_html($obj)
 				.'>';
 			$value = $obj->value();
 			$items = $obj->items();
@@ -491,7 +491,7 @@ EOD;
 			$this->_collect_javascript($obj);
 			$name = $obj->id();
 			$html = '<select name="'.$name.'" id="'.$name.'"'
-				.$this->_attribute_html($obj->attributes()).">\n";
+				.$this->_attribute_html($obj).">\n";
 			$value = $obj->value();
 			$items = $obj->items();
 			foreach($items as $id => $title) {
@@ -528,7 +528,7 @@ EOD;
 			$name = $obj->id();
 			$html = '<select name="'.$name.'[]" id="'.$name
 				.'" multiple="multiple"'
-				.$this->_attribute_html($obj->attributes()).">\n";
+				.$this->_attribute_html($obj).">\n";
 			$value = $obj->value();
 			if(!$value)
 				$value = array();
@@ -1004,7 +1004,7 @@ EOD;
 			if(!$caption)
 				$caption = 'Submit';
 			$this->_render_bar($obj,
-				'<input type="submit" '.$this->_attribute_html($obj->attributes())
+				'<input type="submit" '.$this->_attribute_html($obj)
 				.($name?' name="'.$name.'"':'')
 				.' value="'.$caption.'" />',
 				'sf-button');
@@ -1041,15 +1041,18 @@ EOD;
 			return sprintf(
 				'<input type="%s" name="%s" id="%s" value="%s" %s />',
 				$obj->type(), $name, $name, htmlspecialchars($obj->value()),
-				$this->_attribute_html($obj->attributes()));
+				$this->_attribute_html($obj));
 		}
 
 		/**
 		 * helper function which composes a html-compatible attribute
 		 * string
 		 */
-		protected function _attribute_html($attributes)
+		protected function _attribute_html($obj)
 		{
+			$attributes = $obj->attributes();
+			$css_class = $obj->css_class();
+			$attributes['class'] = s_get($attributes, 'class').$css_class;
 			$html = ' ';
 			foreach($attributes as $k => $v)
 				if($v)
