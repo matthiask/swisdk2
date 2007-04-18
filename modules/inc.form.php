@@ -622,18 +622,23 @@ EOD;
 			case GUARD_VALID:
 				$valid = parent::is_valid();
 				if(!$valid)
-					Swisdk::guard_token_refresh($this->guard_input->value());
+					$this->refresh_guard();
 				return $valid;
 			case GUARD_EXPIRED:
 				$this->add_message(
 					dgettext('swisdk', 'Request has expired. Please submit again'));
-				Swisdk::guard_token_refresh($this->guard_input->value());
+				$this->refresh_guard();
 				return false;
 			case GUARD_USED:
 				$this->add_message(
 					dgettext('swisdk', 'Form has already been submitted once'));
 				return false;
 			}
+		}
+
+		public function refresh_guard()
+		{
+			Swisdk::guard_token_refresh($this->guard_input->value());
 		}
 
 		public function submitted()
