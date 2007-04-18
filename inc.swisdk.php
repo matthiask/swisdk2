@@ -312,6 +312,29 @@ EOD;
 		}
 
 		/**
+		 * Remove all files from the given directory whose filenames
+		 * do not exist in the $files array
+		 *
+		 * Example:
+		 * Swisdk::clean_data_directory_list(DATA_ROOT.'xy',
+		 * 	DBOContainer::find('Xy')->collect('id', 'filename'));
+		 */
+		public static function clean_data_directory_list($dir, $files)
+		{
+			$dir = str_replace('//', '/', $dir.'/');
+
+			if($dh = opendir($dir)) {
+				$files = array_flip($files);
+				while(($file = readdir($dh))!==false) {
+					$s = stat($dir.$file);
+					if(($s['mode'] & 0170000)==0100000
+							&& !isset($files[$file]))
+						@unlink($dir.$file);
+				}
+			}
+		}
+
+		/**
 		 * debugging functions
 		 */
 
