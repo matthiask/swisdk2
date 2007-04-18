@@ -5,6 +5,38 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
+	abstract class FormBehavior {
+		protected $form;
+		protected $args;
+
+		public function __construct()
+		{
+			$this->args = func_get_args();
+		}
+
+		public function set_form($form)
+		{
+			$this->form = $form;
+		}
+
+		abstract public function javascript();
+	}
+
+	class NoEnterSubmitFormBehavior extends FormBehavior {
+		public function javascript()
+		{
+			$id = $this->form->id();
+			$init = <<<EOD
+$('#$id input').keydown(function(event){
+	if(event.keyCode==13)
+		return false;
+});
+
+EOD;
+			return array($init, '');
+		}
+	}
+
 	/**
 	 * Behaviors are bound to FormItems and enhance them or allow for
 	 * side interactions between FormItems. They can also add the AJAX

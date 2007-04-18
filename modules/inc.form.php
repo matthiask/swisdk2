@@ -126,6 +126,18 @@
 		}
 
 		/**
+		 * form behaviors
+		 */
+		protected $behaviors;
+
+		public function add_behavior($behavior)
+		{
+			$behavior->set_form($this);
+			$this->behaviors[] = $behavior;
+			return $this;
+		}
+
+		/**
 		 * javascript fragments
 		 */
 		protected $javascript;
@@ -138,7 +150,26 @@
 
 		public function javascript()
 		{
-			return $this->javascript;
+			if(!count($this->behaviors))
+				return $this->javascript;
+
+			$behavior_js = '';
+			$behavior_init_js = '';
+
+			foreach($this->behaviors as &$behavior) {
+				list($init, $js) = $behavior->javascript();
+
+				$behavior_js .= $js;
+				$behavior_init_js .= $init."\n\t";
+			}
+			return $this->javascript.<<<EOD
+$behavior_js
+
+$(function(){
+	$behavior_init_js
+});
+
+EOD;
 		}
 
 		/**
