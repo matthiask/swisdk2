@@ -76,7 +76,7 @@
 				case 'edit':
 				case 'copy':
 					$dbo = $this->find_dbobject($this->dbo_class, $id);
-					if($dbo && $cmd=='_copy')
+					if($dbo && $cmd=='copy')
 						$dbo->unset_primary();
 				case 'create':
 					if(!isset($dbo) || !$dbo) {
@@ -88,8 +88,11 @@
 
 					if($cmp->has_state(STATE_FINISHED))
 						$this->goto();
-					if($cmp->has_state(STATE_CONTINUE) && $cmd!='_edit')
-						$this->goto('_edit/'.$dbo->id());
+					if($cmp->has_state(STATE_CONTINUE)) {
+						if($cmd!='edit')
+							$this->goto('edit/'.$dbo->id());
+						$cmp->form()->refresh_guard();
+					}
 
 					return $cmp;
 				case 'delete':

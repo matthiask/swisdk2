@@ -489,6 +489,7 @@
 					$this->obj->store();
 					if(!$this->editmode)
 						$this->goto('_edit/'.$this->obj->id());
+					$this->form->refresh_guard();
 				} else {
 					$this->obj->store();
 					$this->goto('_index');
@@ -776,6 +777,8 @@
 			$cancel = dgettext('swisdk', 'Cancel');
 
 			$form = new Form($dbo);
+			$form->add(new HiddenInput('guard'))
+				->set_value($token);
 			$form->set_title($question_title);
 			$form->add(new InfoItem($question_text));
 			if($message)
