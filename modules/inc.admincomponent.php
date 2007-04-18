@@ -89,6 +89,11 @@
 			return $this->dbobj->id()>0;
 		}
 
+		public function copymode()
+		{
+			return $this->dbobj->id()<=0 && $this->dbobj->__old_id>0;
+		}
+
 		public function init_form()
 		{
 			if(!$this->form)
