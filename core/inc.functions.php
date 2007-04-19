@@ -135,6 +135,11 @@
 		return $key;
 	}
 
+	function generatePassword($length=6)
+	{
+		return randomKeys($length);
+	}
+
 	/**
 	 * return the backtrace as a string
 	 */
