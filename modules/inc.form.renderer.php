@@ -245,6 +245,16 @@ function validate_'.$id.'()
 			$this->_render($obj, $this->_simpleinput_html($obj));
 		}
 
+		protected function visit_TextInput($obj)
+		{
+			$this->_collect_javascript($obj);
+			$value = $obj->value();
+			if($format = $obj->format())
+				$value = sprintf($format, $value);
+
+			$this->_render($obj, $this->_simpleinput_html($obj, $value));
+		}
+
 		protected function visit_SpinButton($obj)
 		{
 			$this->_collect_javascript($obj);
@@ -1035,12 +1045,14 @@ EOD;
 				.$msg."</div>\n":'';
 		}
 
-		protected function _simpleinput_html($obj)
+		protected function _simpleinput_html($obj, $value=null)
 		{
+			if($value===null)
+				$value = $obj->value();
 			$name = $obj->id();
 			return sprintf(
 				'<input type="%s" name="%s" id="%s" value="%s" %s />',
-				$obj->type(), $name, $name, htmlspecialchars($obj->value()),
+				$obj->type(), $name, $name, htmlspecialchars($value),
 				$this->_attribute_html($obj));
 		}
 

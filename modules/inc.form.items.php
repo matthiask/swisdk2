@@ -366,6 +366,18 @@ EOD;
 	class TextInput extends SimpleInput {
 		protected $type = 'text';
 		protected $css_class = 'sf-textinput';
+		protected $format;
+
+		public function set_format($format)
+		{
+			$this->format = $format;
+			return $this;
+		}
+
+		public function format()
+		{
+			return $this->format;
+		}
 	}
 
 	class SpinButton extends SimpleInput {
