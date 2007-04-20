@@ -301,6 +301,9 @@ EOD;
 		{
 			$dir = str_replace('//', '/', $dir.'/');
 
+			if(!is_dir($dir))
+				return;
+
 			if($dh = opendir($dir)) {
 				while(($file = readdir($dh))!==false) {
 					$s = stat($dir.$file);
@@ -322,6 +325,9 @@ EOD;
 		public static function clean_data_directory_list($dir, $files)
 		{
 			$dir = str_replace('//', '/', $dir.'/');
+
+			if(!is_dir($dir))
+				return;
 
 			if($dh = opendir($dir)) {
 				$files = array_flip($files);
