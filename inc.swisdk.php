@@ -295,6 +295,9 @@ EOD;
 		{
 			$dir = str_replace('//', '/', $dir.'/');
 
+			if(!is_dir($dir))
+				return;
+
 			if($dh = opendir($dir)) {
 				while(($file = readdir($dh))!==false) {
 					$s = stat($dir.$file);
