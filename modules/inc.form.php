@@ -492,7 +492,7 @@ EOD;
 			if(isset($this->items[$name]))
 				return $this->items[$name];
 			foreach($this->boxrefs as &$box)
-				if($item =& $box->item($name))
+				if($item = $box->item($name))
 					return $item;
 			return null;
 		}
