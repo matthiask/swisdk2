@@ -533,7 +533,7 @@ EOD;
 				foreach(array('_file', '_name', '_mimetype', '_size') as $t)
 					$dbobj->set($name.$t, '');
 			}
-			
+
 			if($this->valid && !$this->no_upload) {
 				Swisdk::require_data_directory('upload');
 				copy($this->files_data['path'],
@@ -730,14 +730,11 @@ EOD;
 	}
 
 	class TimeInput extends DropdownInput {
+		protected $ranges = array();
+
 		public function __construct($name=null)
 		{
 			parent::__construct($name);
-			$items = array();
-			for($i=86400+82800; $i<82800+2*86400; $i+=15*60)
-				$items[$i] = strftime('%H:%M', $i);
-
-			$this->set_items($items);
 		}
 
 		public function init_value()
@@ -756,6 +753,42 @@ EOD;
 
 			if(($value = $this->dbobj->get($name))>100000)
 				$this->dbobj->set($name, $value-86400-82800);
+		}
+
+		public function items()
+		{
+			$base = 86400+82800;
+			$items = array();
+
+			if(count($this->ranges)) {
+				foreach($this->ranges as $range) {
+					list($a,$b,$c) = $range;
+					for($i=$a; $i<=$b; $i+=$c)
+						$items[$i] = strftime('%H:%M', $i);
+				}
+			} else {
+				for($i=$base; $i<$base+86400; $i+=900)
+					$items[$i] = strftime('%H:%M', $i);
+			}
+
+			return $items;
+		}
+
+		public function add_range($start, $end, $step=900)
+		{
+			$this->ranges[] = array($start, $end, $step);
+			return $this;
+		}
+
+		public function set_ranges($ranges)
+		{
+			$this->ranges = $ranges;
+			return $this;
+		}
+
+		public function ranges()
+		{
+			return $this->ranges;
 		}
 	}
 
