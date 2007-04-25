@@ -15,6 +15,7 @@
 		protected $form;
 
 		protected $form_id;
+		protected $submitted = false;
 
 		public function __construct()
 		{
@@ -28,6 +29,8 @@
 			parent::visit_Form_start($obj);
 
 			$this->form_id = $obj->id();
+
+			$this->submitted = $obj->submitted();
 		}
 
 		protected function visit_FormBox_start($obj)
@@ -49,15 +52,13 @@
 		protected function _render($obj, $field_html, $row_class = null)
 		{
 			$valid = true;
-			if(isset($this->form) && ($this->form instanceof Form)
-					&& $this->form->submitted()) {
+			if($this->submitted)
 				$valid = $obj->is_valid();
-			}
 
 			$name = $obj->name();
 			if(!$name)
 				$name = uniqid();
-		
+
 			$this->stack[$this->ref][$name] = array(
 				'type' => get_class($obj),
 				'name' => $obj->name(),
