@@ -303,6 +303,11 @@
 			return $this->valid;
 		}
 
+		public function set_valid($valid=null)
+		{
+			$this->valid = $valid;
+		}
+
 		public function accept($renderer)
 		{
 			$renderer->visit($this);
