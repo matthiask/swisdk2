@@ -52,6 +52,15 @@
 EOD;
 		}
 
+		public function provide_jquery_datepicker()
+		{
+			return $this->provide('jquery').<<<EOD
+<link type="text/css" rel="stylesheet" href="{$this->js_prefix}/jquery/datepicker/styles.css" />
+<script type="text/javascript" src="{$this->js_prefix}/jquery/datepicker/datePicker.js"></script>
+
+EOD;
+		}
+
 		public function provide_jquery_spinbutton()
 		{
 			return $this->provide('jquery').<<<EOD

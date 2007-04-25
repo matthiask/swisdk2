@@ -636,7 +636,6 @@ $set_value
 
 EOD;
 
-
 			foreach($value as $v => $third) {
 				$c = str_replace('__ID__', $name.'['.$v.']',
 					$choices);
@@ -728,7 +727,6 @@ function add_$name(val, str)
 EOD;
 			$html .= "<div id=\"$name\">";
 
-
 			$current = DBOContainer::find_by_id($class, $obj->value());
 
 			foreach($current as $dbo) {
@@ -793,38 +791,13 @@ EOD;
 				$select_actions = $actions['select'];
 
 			$html.=<<<EOD
-<input type="text" name="$name" id="$name" value="$display_value" />
-<img src="$prefix/calendar/img.gif"
-	id="$trigger_name"
-	style="cursor: pointer; border: 1px solid red; margin-bottom: -4px;" title="Date selector"
-	onmouseover="this.style.background='red';" onmouseout="this.style.background=''"
-	onclick="show_datesel_$name()" />
+<input class="date-picker" type="text" name="$name" id="$name" value="$display_value" />
 <script type="text/javascript">
 //<![CDATA[
-function show_datesel_$name()
-{
-	var el = document.getElementById('$name');
-	var cal = new Calendar(1, null, onSelectHandler_$name, onCloseHandler_$name);
-	cal.showsOtherMonths = true;
-	cal.create();
-	cal.setDateFormat('$format');
-	cal.parseDate(document.getElementById('$name').value);
-	cal.showAtElement(document.getElementById('$trigger_name', 'tl'));
-}
-
-function onSelectHandler_$name(cal, date)
-{
-	document.getElementById('$name').value = date;
-	if(cal.dateClicked)
-		cal.callCloseHandler();
-	$select_actions
-}
-
-function onCloseHandler_$name(cal)
-{
-	cal.hide();
-	$close_actions
-}
+$(function(){
+	$.datePicker.setDateFormat('dmy', '.');
+	$('#$name').datePicker({firstDayOfWeek:1, startDate:'01.01.2001'});
+});
 //]]>
 </script>
 

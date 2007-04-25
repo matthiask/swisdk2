@@ -1068,7 +1068,7 @@ EOD;
 		public function __construct($name=null)
 		{
 			parent::__construct($name);
-			Swisdk::needs_library('calendar');
+			Swisdk::needs_library('jquery_datepicker');
 		}
 
 		public function init_value()
