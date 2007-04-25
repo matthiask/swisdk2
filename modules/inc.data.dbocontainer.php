@@ -349,17 +349,19 @@
 								.' ON '.$rel['foreign_condition'];
 							break;
 						case DB_REL_N_TO_M:
+						case DB_REL_TAGS:
 							$this->joins .= ' '.$type.' JOIN '.$rel['link_table']
 								.' ON '.$rel['link_condition']
 								.' LEFT JOIN '.$rel['foreign_table']
 								.' ON '.$rel['foreign_condition'];
 							break;
 						case DB_REL_3WAY:
-						case DB_REL_TAGS:
 							$this->joins .= ' '.$type.' JOIN '.$rel['link_table']
 								.' ON '.$rel['link_condition']
 								.' LEFT JOIN '.$rel['foreign_table']
-								.' ON '.$rel['foreign_condition'];
+								.' ON '.$rel['foreign_condition']
+								.' LEFT JOIN '.$rel['choices_table']
+								.' ON '.$rel['choices_condition'];
 							break;
 					}
 				} else {

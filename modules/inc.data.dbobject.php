@@ -740,6 +740,25 @@
 				'foreign_class' => $c2,
 				'foreign_primary' => $o2->primary(),
 				'choices_table' => $o3->table(),
+				'choices_condition' => $tp.$o3->primary().'='.$o3->primary(),
+				'choices_class' => $c3,
+				'choices_primary' => $o3->primary(),
+				'field' => $rel,
+				);
+
+			DBObject::$relations[$rel][$c1] = array(
+				'type' => DB_REL_3WAY,
+				'link_table' => $table,
+				'link_condition' => $o2->primary().'='.$tp.$o2->primary(),
+				'link_here' => $tp.$o2->primary(),
+				'link_there' => $tp.$o1->primary(),
+				'link_choices' => $tp.$o3->primary(),
+				'foreign_table' => $o1->table(),
+				'foreign_condition' => $tp.$o1->primary().'='.$o1->primary(),
+				'foreign_class' => $c1,
+				'foreign_primary' => $o1->primary(),
+				'choices_table' => $o3->table(),
+				'choices_condition' => $tp.$o3->primary().'='.$o3->primary(),
 				'choices_class' => $c3,
 				'choices_primary' => $o3->primary(),
 				'field' => $rel,
@@ -886,7 +905,6 @@
 		{
 			$obj->{$this->primary()} = $this->id();
 		}
-
 
 		private static $traits = array();
 
