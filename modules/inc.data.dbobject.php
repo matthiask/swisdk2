@@ -1390,6 +1390,15 @@
 		{
 			return Swisdk::load_instance('UrlGenerator')->generate_url($this);
 		}
+
+		public function strip_html($fields=null)
+		{
+			if(!$fields)
+				$fields = $this->_fulltext_fields();
+
+			foreach($fields as $f)
+				$this->$f = strip_tags($this->$f);
+		}
 	}
 
 ?>
