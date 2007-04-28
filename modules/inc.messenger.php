@@ -87,6 +87,8 @@
 		protected function sanity_check()
 		{
 			if(strpos($this->dbobj->recipient, "\n")
+					|| strpos($this->dbobj->from, "\n")
+					|| strpos($this->dbobj->reply_to, "\n")
 					|| strpos($this->dbobj->subject, "\n"))
 				return false;
 			return true;
