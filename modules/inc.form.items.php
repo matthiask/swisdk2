@@ -703,9 +703,12 @@ EOD;
 			return $this->items;
 		}
 
-		public function add_null_item()
+		public function add_null_item($title=null)
 		{
-			$items = array(0 => '-- '.dgettext('swisdk', 'select').' --');
+			if(!$title)
+				$title = dgettext('swisdk', 'select');
+
+			$items = array(0 => '-- '.$title.' --');
 			foreach($this->items as $k => $v)
 				$items[$k] = $v;
 			$this->items = $items;
