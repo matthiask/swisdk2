@@ -59,6 +59,7 @@
 			$form->add_fulltext_field();
 			$tableview->set_form($form);
 			$tableview->init();
+			$tableview->run();
 
 			$html = $tableview->html().<<<EOD
 <style type="text/css">
