@@ -91,6 +91,20 @@ EOD;
 		protected $field2;
 	}
 
+	class CallbackFormRule extends FormRule {
+		public function __construct($callback, $message = null)
+		{
+			$this->callback = $callback;
+			parent::__construct($message);
+		}
+
+		protected function is_valid_impl()
+		{
+			return call_user_func($this->callback, $this);
+		}
+
+		protected $callback;
+	}
 
 	abstract class FormItemRule {
 		public function __construct($message=null)
