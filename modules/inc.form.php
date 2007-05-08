@@ -208,7 +208,7 @@ EOD;
 
 		public function id()
 		{
-			return $this->id;
+			return str_replace('-', '_m', $this->id);
 		}
 
 		/**
