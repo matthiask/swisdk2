@@ -114,7 +114,15 @@
 					$cmp->run();
 
 					return $cmp;
+				default:
+					return $this->dispatch_other($cmd, $id);
 			}
+		}
+
+		protected function dispatch_other($cmd, $id)
+		{
+			if(method_exists($this, $m = 'handle_'.$cmd))
+				return $this->$m($id);
 		}
 
 		protected function create_dbobject($class)
