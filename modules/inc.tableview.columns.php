@@ -337,15 +337,13 @@ EOD;
 
 				$doc = DBOContainer::find($this->db_class, $clause);
 				foreach($doc as $id => $obj)
-					$this->db_data[$obj->get($rel['field'])][] =
-						$obj->data();
+					$this->db_data[$obj->get($rel['field'])][] = $obj;
 			} else {
 				$doc = DBOContainer::find($this->db_class, $clause);
 				foreach($doc as $id => $obj)
 					$this->db_data[$obj->get($rel['field'])][] =
 						$obj->title();
 			}
-
 		}
 
 		public function html(&$data)
@@ -365,7 +363,7 @@ EOD;
 				foreach($data as &$record) {
 					$vals = array();
 					foreach($this->vars as $v)
-						$vals[] = $record[$v];
+						$vals[] = $record->pretty_value($v);
 
 					$tokens[] = preg_replace($this->patterns, $vals, $this->args[2]);
 				}
