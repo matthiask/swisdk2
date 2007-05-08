@@ -1124,7 +1124,7 @@ EOD;
 		{
 			return '<img src="'
 				.Swisdk::config_value('runtime.webroot.data', '/data').'/captcha/'
-				.$this->captcha_id.$this->token.'.png" /><br />';
+				.$this->captcha_id.$this->token.'.png" />';
 		}
 
 		public function validation_cb($item)

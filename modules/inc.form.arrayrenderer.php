@@ -49,6 +49,19 @@
 			$this->ref--;
 		}
 
+		protected function visit_CaptchaInput($obj)
+		{
+			$this->_collect_javascript($obj);
+			$c = $obj->captcha_html();
+			$s = $this->_simpleinput_html($obj);
+
+			$this->_render($obj, $c.'<br />'.$s);
+			$name = $obj->name();
+
+			$this->stack[$this->ref][$name]['html_captcha'] = $c;
+			$this->stack[$this->ref][$name]['html_input'] = $s;
+		}
+
 		protected function _render($obj, $field_html, $row_class = null)
 		{
 			$valid = true;
