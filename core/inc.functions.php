@@ -288,8 +288,8 @@
 	 */
 	function ellipsize($string, $len=100, $ellipsis=' &hellip;')
 	{
-		if(strlen($string)>$len)
-			return substr($string, 0, $len).$ellipsis;
+		if(utf8_strlen($string)>$len)
+			return utf8_substr($string, 0, $len).$ellipsis;
 		return $string;
 	}
 
