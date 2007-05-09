@@ -98,16 +98,16 @@
 	 *
 	 * Don't rely on the implementation staying the same
 	 */
-	function slugify($string)
+	function slugify($string, $length=64)
 	{
 		$fr = array('ä', 'ö', 'ü', 'ß', 'à','á','è','é','î','ô','ç');
 		$to = array('ae','oe','ue','ss','a','a','e','e','i','o','c');
 
-		return preg_replace('/[-\s]+/', '-',
+		return utf8_substr(preg_replace('/[-\s]+/', '-',
 			trim(
 				preg_replace('/[^a-z0-9\s-]/', '',
 					str_replace($fr, $to,
-						utf8_strtolower($string)))));
+						utf8_strtolower($string))))), 0, $length);
 	}
 
 	/**

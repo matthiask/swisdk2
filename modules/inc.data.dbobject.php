@@ -71,6 +71,37 @@
 			)));
 		}
 
+		public function pretty_value($field)
+		{
+			if(!($field = $this->find_field($field)))
+				return null;
+
+			$value = s_get($this->data, $field);
+
+			if(strpos($field, '_dttm')!==false)
+				return strftime('%d.%m.%Y : %H:%M', $value);
+
+			if(strpos($field, '_date')!==false)
+				return strftime('%d.%m.%Y', $value);
+
+			return $value;
+		}
+
+		public function find_field($field)
+		{
+			if(isset($this->data[$field]))
+				return $field;
+
+			$fl = $this->field_list();
+			if(isset($fl[$field]))
+				return $field;
+
+			if(isset($fl[$tmp = $this->name($field)]))
+				return $tmp;
+
+			return false;
+		}
+
 		// reverse of DBObject::name()
 		public function shortname($tok)	{ return str_replace($this->prefix,'',$tok); }
 		public function _class()	{ return $this->class; }
