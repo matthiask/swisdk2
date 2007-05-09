@@ -29,12 +29,12 @@
 			$this->controller_url = rtrim(Swisdk::config_value('runtime.controller.url'), '/');
 		}
 
-		public function generate_url($obj)
+		public function generate_url($obj, $params=array())
 		{
 			$class = $obj->_class();
 			$method = 'generate_'.$class.'_url';
 			if(method_exists($this, $method))
-				return call_user_func(array($this, $method), $obj);
+				return call_user_func(array($this, $method), $obj, $params);
 			else
 				return $this->generate_dbobject_url($obj);
 		}
