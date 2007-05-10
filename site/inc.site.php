@@ -40,6 +40,11 @@
 					$cmp->set_smarty($smarty);
 			}
 		}
+
+		public function basedir()
+		{
+			return dirname(Swisdk::config_value('runtime.includefile')).'/';
+		}
 	}
 
 ?>
