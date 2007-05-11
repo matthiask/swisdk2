@@ -42,4 +42,10 @@ EOD;
 		}
 	}
 
+	function file_upload_pre_store($dbo, $fu, $dir, $field='image')
+	{
+		if($f = FormUtil::post_process_file_upload($fu, $dir))
+			$dbo->$field = $f;
+	}
+
 ?>
