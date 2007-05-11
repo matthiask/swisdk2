@@ -557,36 +557,58 @@ EOD;
 
 		protected function visit_ThreewayInput($obj)
 		{
-			$_choices = $obj->choices();
-			$choices = '<select style="float:none" id="__ID__", name="__ID__">';
-			foreach($_choices as $k => $v)
-				$choices .= '<option value="'.htmlspecialchars($k).'"'
-					.'>'.htmlspecialchars($v)."</option>";
-			$choices .= '</select>';
-
 			$name = $obj->id();
 
-			$class = $obj->_class();
+			require_once SWISDK_ROOT.'lib/contrib/json.php';
+			$json = new HTML_AJAX_JSON();
+			$v = $json->encode($obj->value());
+			$s = $json->encode($obj->second());
+			$c = $json->encode($obj->choices());
 			$prefix = Swisdk::config_value('runtime.webroot.img', '/img');
-
-			$value = $obj->value();
-			$items = $obj->second();
-
-			$set_value = '';
-			foreach($value as $k => $v) {
-				$set_value .= <<<EOD
-	document.getElementById('{$name}[$k]').value = $v;
-
-EOD;
-			}
+			$class = $obj->_class();
 
 			$html = <<<EOD
+<input type="hidden" name="{$name}__check" value="1" />
+<span id="{$name}">
+</span>
+<img src="$prefix/icons/add.png" onclick="javascript:open_$name()" style="cursor:pointer" />
+
 <script type="text/javascript">
 //<![CDATA[
-function remove_$name(id)
+var {$name}_choices = eval('($c)');
+var {$name}_second = eval('($s)');
+
+function threeway_populate_select_$name(elem)
 {
-	elem = document.getElementById('{$name}_'+id);
-	elem.parentNode.removeChild(elem);
+	while(elem.options.length)
+		elem.options[0] = null;
+	for(val in {$name}_choices)
+		elem.options[elem.options.length] = new Option({$name}_choices[val], val);
+}
+
+function threeway_create_input_$name(second, third)
+{
+	var myself = document.getElementById('$name');
+
+	var span = document.createElement('span');
+	var input = document.createElement('select');
+	threeway_populate_select_$name(input);
+	input.name = '{$name}['+second+'][]';
+	input.value = third;
+	myself.appendChild(span);
+	span.appendChild(document.createTextNode({$name}_second[second]));
+	span.appendChild(input);
+
+	var img = document.createElement('img');
+	img.src = '$prefix/icons/delete.png';
+	img.style.cursor = 'pointer';
+	$(img).click(function(){
+		var n = this.parentNode;
+		n.parentNode.removeChild(n);
+	});
+	span.appendChild(img);
+
+	span.appendChild(document.createElement('br'));
 }
 
 function open_$name()
@@ -596,79 +618,34 @@ function open_$name()
 	for(i=0; i<inputs.length; i++)
 		str += inputs[i].id.replace(/^.*\[([0-9]+)\]$/, '$1')+',';
 
+	str = '';
+
 	window.open('/__swisdk__/picker?element=$name&class=$class&params[:exclude_ids]='+str, '$name',
 		'width=400,height=600,toolbar=no,location=no,resizable=yes,scrollbars=yes');
 	return false;
 }
 
 function select_$name(val, str)
-{
-	elem = document.getElementById('$name');
-
-	// save the values ...
-	var inputs = elem.getElementsByTagName('select');
-	var values = new Array();
-	for(i=0; i<inputs.length; i++)
-		values[inputs[i].id] = inputs[i].value;
-
-	html = '<div id="{$name}_'+val+'">';
-	html += '<span style="width:150px;display:block;float:left">'+str+'</span>: ';
-	html += '$choices'.replace(/__ID__/g, '{$name}['+val+']');
-	html += ' <img src="$prefix/icons/delete.png" onclick="remove_$name(';
-	html += val+')" style="cursor:pointer" /></div>';
-
-	elem.innerHTML += html;
-
-	// ... and restore them (they get clobbered when appending to innerHTML)
-	for(i in values)
-		document.getElementById(i).value = values[i];
+{	
+	threeway_create_input_$name(val);
 }
 
-$(function(){
-$set_value
-});
 
+$(function(){
+	var values = eval('({$v})');
+
+	for(second in values) {
+		for(third in values[second]) {
+			threeway_create_input_$name(second, values[second][third]);
+		}
+	}
+});
 //]]>
 </script>
 
-<div id="$name">
-	<input type="hidden" name="{$name}__check" value="1" />
-
 EOD;
-
-			foreach($value as $v => $third) {
-				$c = str_replace('__ID__', $name.'['.$v.']',
-					$choices);
-				$html .= <<<EOD
-<div id="{$name}_$v">
-	<span style="width:150px;display:block;float:left">{$items[$v]}</span>:
-	$c
-	<img src="$prefix/icons/delete.png" onclick="remove_$name($v)" style="cursor:pointer" />
-</div>
-
-EOD;
-			}
-
-			$html .= <<<EOD
-</div>
-<img src="$prefix/icons/add.png" onclick="javascript:open_$name()" style="cursor:pointer" />
-
-EOD;
-
 			$this->_render($obj, $html);
-		}
-
-		protected function threeway_helper_choice($obj, $value=null)
-		{
-			$choices = $obj->choices();
-			$html = "<select name=\"%s\" id=\"%s\">\n"
-				."<option value=\"0\"> -- </option>";
-			foreach($choices as $k => $v)
-				$html .= '<option value="'.htmlspecialchars($k).'"'
-					.($k==$value?' selected="selected"':'')
-					.'>'.htmlspecialchars($v)."</option>\n";
-			$html .= "</select>\n";
-			return $html;
+			return;
 		}
 
 		protected function visit_InlineEditor($obj)

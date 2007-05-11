@@ -864,6 +864,12 @@ EOD;
 	class ThreewayInput extends FormItem {
 		protected $relation;
 
+		public function __construct($name=null)
+		{
+			parent::__construct($name);
+			Swisdk::needs_library('jquery');
+		}
+
 		public function init_value()
 		{
 			parent::init_value();

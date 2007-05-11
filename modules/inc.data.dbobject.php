@@ -443,23 +443,33 @@
 					$field = $rel['field'];
 					if(!$field||!isset($this->data[$field]))
 						$field = $rel['foreign_class'];
+
 					if(!isset($this->data[$field]))
 						continue;
+
 					$res = DBObject::db_query('DELETE FROM '.$rel['link_table']
 						.' WHERE '.$rel['link_here'].'='.$this->id(),
 						$this->db_connection_id);
+
 					if($res===false)
 						return false;
+
 					if(is_array($this->data[$field])
 							&& count($this->data[$field])) {
+
 						$frags = array();
-						foreach($this->data[$field] as $v1 => $v2)
-							if(($id1 = intval($v1))
-									&& ($id2 = intval($v2)))
-								$frags[] = $id1.','.$id2;
+						foreach($this->data[$field] as $v1 => $values) {
+							if(!($id1 = intval($v1)))
+								continue;
+
+							foreach($values as $v2)
+								if($id2 = intval($v2))
+									$frags[] = $id1.','.$id2;
+						}
+
 						if(!count($frags))
 							return true;
-						$o3 = DBObject::create($rel['choices_class']);
+
 						$sql = 'INSERT INTO '.$rel['link_table']
 							.' ('.$rel['link_here'].','
 							.$rel['link_there'].','
@@ -467,6 +477,7 @@
 							.$this->id().','
 							.implode('),('.$this->id().',',
 							$frags).')';
+
 						if(DBObject::db_query($sql,
 								$this->db_connection_id)===false)
 							return false;
@@ -898,7 +909,18 @@
 
 		protected function related_3way(&$rel, $params=null)
 		{
-			return $this->related_many_to_many($rel, $params);
+			$key = 'CONCAT('.$rel['foreign_primary'].',\'_\','.$rel['choices_primary'].')';
+			$sql = <<<EOD
+SELECT *, $key AS __code FROM {$rel['foreign_table']}
+LEFT JOIN {$rel['link_table']} ON {$rel['foreign_condition']}
+LEFT JOIN {$rel['choices_table']} ON {$rel['choices_condition']}
+WHERE {$rel['link_here']}={$this->id}
+
+EOD;
+			$dboc = DBOContainer::create($rel['foreign_class']);
+			$dboc->set_index('__code');
+			$dboc->init_by_sql($sql);
+			return $dboc;
 		}
 
 		/**
@@ -1258,9 +1280,13 @@
 						$this->data[$var] = $obj->ids();
 						break;
 					case DB_REL_3WAY:
-						$this->data[$var] = $obj->collect_full(
-							$relations[$var]['link_there'],
-							$relations[$var]['link_choices']);
+						$rel =& $relations[$var];
+						$this->data[$var] = array();
+						foreach($obj as $dbo)
+							$this->data[$var][
+								$dbo[$rel['foreign_primary']]
+								][] = $dbo[$rel['choices_primary']];
+
 						break;
 					case DB_REL_TAGS:
 						$this->data[$var] = $obj->collect_full(
