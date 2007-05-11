@@ -78,6 +78,7 @@
 					$dbo = $this->find_dbobject($this->dbo_class, $id);
 					if($dbo && $cmd=='copy')
 						$dbo->unset_primary();
+				case 'new':
 				case 'create':
 					if(!isset($dbo) || !$dbo) {
 						$dbo = $this->create_dbobject($this->dbo_class);
