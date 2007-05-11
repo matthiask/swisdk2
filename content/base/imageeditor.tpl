@@ -118,7 +118,7 @@
 		</a>
 		<a href="{$this_url_type}cmd=grayscale"
 				title="Convert to grayscale">
-			grayscale
+			<img src="{webroot key=img}/icons/contrast.png" />
 		</a>
 		<a href="{$this_url_type}cmd=colorize-red"
 				title="Colorize image with red color">
@@ -134,11 +134,11 @@
 		</a>
 		<a href="{$this_url_type}cmd=darken"
 				title="Darken image">
-			darken
+			<img src="{webroot key=img}/icons/contrast_decrease.png" />
 		</a>
 		<a href="{$this_url_type}cmd=lighten"
 				title="Lighten image">
-			lighten
+			<img src="{webroot key=img}/icons/contrast_increase.png" />
 		</a>
 		<a href="{$this_url_type}cmd=crop"
 				title="Crop image">
