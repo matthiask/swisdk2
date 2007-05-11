@@ -71,6 +71,7 @@
 			$id = $this->form->id();
 			$in1 = $this->field1->id();
 			$in2 = $this->field2->id();
+			$js = '';
 			static $sent = false;
 			if(!$sent) {
 				$sent = true;
