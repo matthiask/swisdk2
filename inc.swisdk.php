@@ -344,6 +344,8 @@ EOD;
 		 * debugging functions
 		 */
 
+		protected static $log_exclude = null;
+
 		/**
 		 * add log message
 		 *
@@ -354,6 +356,14 @@ EOD;
 		 */
 		public static function log($message, $log='error')
 		{
+			if(Swisdk::$log_exclude===null)
+				Swisdk::$log_exclude = array_fill_keys(
+					explode(',', Swisdk::config_value('error.log_exclude')),
+					true);
+
+			if(s_test(Swisdk::$log_exclude, $log))
+				return;
+
 			Swisdk::require_data_directory('log');
 			$fname = Swisdk::config_value('error.logfile');
 			if(!$fname)
