@@ -6,15 +6,17 @@
 	*/
 
 	class FormUtil {
-		public static function add_captcha($form)
+		public static function add_captcha($form, $message = null)
 		{
 			$box = $form->box('zzz_captcha');
-
+			if($message == null) {
+				$message = 'Captcha input does not match';
+			}
 			$c = $box->add('captcha', new CaptchaInput());
 			$c->generate_captcha();
 			$c->add_rule(new CallbackRule(
 				array($c, 'validation_cb'),
-				'Captcha input does not match'));
+				$message));
 		}
 
 		public static function submit_bar($form)
