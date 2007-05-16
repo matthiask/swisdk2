@@ -584,7 +584,7 @@ EOD;
 		protected $guard_state;
 		protected $guard_input;
 
-		public function init($reinitialize=false)
+		public function init_guard()
 		{
 			if(!$this->guard_input) {
 				//
@@ -598,7 +598,17 @@ EOD;
 				$this->guard_input->set_value(
 					Swisdk::guard_token_f($this->guard_input->id()));
 			}
+		}
 
+		public function guard_token()
+		{
+			$this->init_guard();
+			return $this->guard_input->value();
+		}
+
+		public function init($reinitialize=false)
+		{
+			$this->init_guard();
 			parent::init($reinitialize);
 		}
 

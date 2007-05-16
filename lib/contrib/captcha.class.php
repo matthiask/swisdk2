@@ -59,22 +59,11 @@ class Captcha
     function GenStr()
     {
         $this->strCheck = "";
-
+	$chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz2345689';
         for($i=0 ; $i < $this->strLength ; $i++)
         {
-            $textornumber = rand(1,3);
-            if($textornumber == 1)
-            {
-                $this->strCheck .= chr(rand(49,57));
-            }
-            else if($textornumber == 2)
-            {
-                $this->strCheck .= chr(rand(65,78));
-            }
-            else if($textornumber == 3)
-            {
-                $this->strCheck .= chr(rand(80,90));
-            }
+		$num = mt_rand(0, strlen($chars) - 1);
+		$this->strCheck .= $chars{$num};
         }
     }
 
