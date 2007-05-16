@@ -954,7 +954,6 @@ EOD;
 		{
 			if(($v=$this->value())
 					&& !strcasecmp($v, $this->captcha_code)) {
-				unset($_SESSION['swisdk2']['captcha'][$this->captcha_id]);
 				return true;
 			}
 
@@ -963,7 +962,7 @@ EOD;
 
 		public function generate_captcha()
 		{
-			$this->captcha_id = $this->id();
+			$this->captcha_id = guardToken();
 
 			if(isset($_SESSION['swisdk2']['captcha'][$this->captcha_id]['code'])) {
 				$this->captcha_code =
