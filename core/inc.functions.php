@@ -170,10 +170,13 @@
 	/**
 	 * pipe a file to the browser
 	 */
-	function sendFile($path, $name, $mime='application/binary')
+	function sendFile($path, $name, $mime='application/binary', $size=null)
 	{
 		if(!file_exists($path))
 			die('Invalid path given');
+
+		if($size===null)
+			$size = filesize($path);
 
 		if( preg_match( '/^(text|image)/i', $mime )  ) {
 			$disposition = "inline";
@@ -201,7 +204,7 @@
 		header("Content-Type: $mime");
 		header("Content-Disposition:$disposition; filename=\"".trim($name)."\"");
 		header("Content-Description: ".trim($name));
-		header("Content-Length: ".(string)(filesize($path)));
+		header("Content-Length: ".(string)($size));
 		header("Connection: close");
 	
 		$fp = fopen( $path, 'rb' );
