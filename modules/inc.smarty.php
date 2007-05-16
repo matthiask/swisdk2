@@ -39,6 +39,7 @@
 				'_smarty_swisdk_generate_image_url');
 			$this->register_function('dttm_range', '_smarty_swisdk_dttm_range');
 			$this->register_modifier('pluralize', 'pluralize');
+			$this->register_function('formitem_error', '_smarty_swisdk_formitem_error');
 
 			if($assign) {
 				$this->assign('swisdk_user', SessionHandler::user()->data());
@@ -334,6 +335,13 @@
 		if($tmpl = $ss->resolve_template($params['key']))
 			return $ss->fetch($tmpl);
 		return null;
+	}
+
+	function _smarty_swisdk_formitem_error($params, &$smarty)
+	{
+		$item = $params['item'];
+		if(!$item['valid'])
+			return '<span class="error">'.$item['message_raw'].'</span>';
 	}
 
 ?>
