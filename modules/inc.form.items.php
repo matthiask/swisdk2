@@ -1137,16 +1137,15 @@ EOD;
 		{
 			if(($v=$this->value())
 					&& !strcasecmp($v, $this->captcha_code)) {
-				unset($_SESSION['swisdk2']['captcha'][$this->captcha_id]);
 				return true;
 			}
 
 			return false;
 		}
 
-		public function generate_captcha()
+		public function generate_captcha($guard_token)
 		{
-			$this->captcha_id = $this->id();
+			$this->captcha_id = $guard_token;
 
 			if(isset($_SESSION['swisdk2']['captcha'][$this->captcha_id]['code'])) {
 				$this->captcha_code =
