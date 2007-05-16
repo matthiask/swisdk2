@@ -213,6 +213,12 @@
 		Swisdk::shutdown();
 	}
 
+	function sendFileDBO($dbo, $prefix='file', $base=UPLOAD_ROOT)
+	{
+		sendFile($base.$dbo->{$prefix.'_file'}, $dbo->{$prefix.'_name'},
+			$dbo->{$prefix.'_mimetype'}, $dbo->{$prefix.'_size'});
+	}
+
 	/**
 	 * convert a timespan in seconds to a textual representation
 	 */
