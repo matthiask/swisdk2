@@ -259,11 +259,23 @@ function validate_'.$id.'()
 		{
 			$this->_collect_javascript($obj);
 			$id = $obj->id();
+			$range = $obj->range();
+			$cfg = array();
+
+			if(($min = s_get($range, 0))!==null)
+				$cfg[] = 'min:'.$min;
+			if(($max = s_get($range, 1))!==null)
+				$cfg[] = 'max:'.$max;
+			if(($step = s_get($range, 2))!==null)
+				$cfg[] = 'step:'.$step;
+
+			$cfg = '{'.implode(',', $cfg).'}';
+
 			$js = <<<EOD
 <script type="text/javascript">
 //<![CDATA[
 $(function(){
-	$("#$id").SpinButton({min:0});
+	$("#$id").SpinButton($cfg);
 });
 //]]>
 </script>

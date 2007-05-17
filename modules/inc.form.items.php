@@ -388,11 +388,23 @@ EOD;
 	class SpinButton extends SimpleInput {
 		protected $type = 'text';
 		protected $css_class = 'sf-spinbutton';
+		protected $range = array();
 
 		public function __construct($name=null)
 		{
 			parent::__construct($name);
 			Swisdk::needs_library('jquery_spinbutton');
+		}
+
+		public function set_range($min, $max, $step=1)
+		{
+			$this->range = func_get_args();
+			return $this;
+		}
+
+		public function range()
+		{
+			return $this->range;
 		}
 	}
 
