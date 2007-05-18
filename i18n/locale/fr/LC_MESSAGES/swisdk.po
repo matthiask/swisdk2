@@ -174,7 +174,7 @@ msgstr "Effacer"
 
 #: modules/inc.form.items.php:828
 msgid "Submit"
-msgstr "Envoier"
+msgstr "Envoyer"
 
 #: modules/inc.form.items.php:850
 msgid "Reset"
