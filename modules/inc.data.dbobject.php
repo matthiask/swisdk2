@@ -686,6 +686,14 @@
 			DBObject::belongs_to($c1, $c2, $options);
 		}
 
+		public static function has_parent($c)
+		{
+			if(!($c instanceof DBObject))
+				$c = DBObject::create($c);
+
+			DBObject::belongs_to($c, $c, $c->name('parent_id'));
+		}
+
 		public static function n_to_m($c1, $c2, $options = null)
 		{
 			if($c1 instanceof DBObject) {
