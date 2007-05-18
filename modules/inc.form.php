@@ -551,6 +551,33 @@ EOD;
 	}
 
 	class Form extends FormBox {
+		protected $method = 'post';
+		protected $action = null;
+
+		public function method()
+		{
+			return $this->method;
+		}
+
+		public function action()
+		{
+			if(!$this->action)
+				return $_SERVER['REQUEST_URI'];
+			return $this->action;
+		}
+
+		public function set_method($metdod)
+		{
+			$this->method = $method;
+			return $this;
+		}
+
+		public function set_action($action)
+		{
+			$this->action = $action;
+			return $this;
+		}
+
 		public function id()
 		{
 			if(!$this->id)

@@ -147,7 +147,8 @@
 					.'"';
 			list($html, $js) = $this->_validation_html($obj);
 			$this->add_html_start(
-				'<form method="post" action="'.htmlspecialchars($_SERVER['REQUEST_URI'])
+				'<form method="'.$obj->method()
+				.'" action="'.htmlspecialchars($obj->action())
 				.'" id="'.$obj->id()."\" $html class=\"sf-form\" "
 				."accept-charset=\"utf-8\" $upload>\n<div>\n".$js);
 			$this->add_html_end($this->_message_html($obj));
