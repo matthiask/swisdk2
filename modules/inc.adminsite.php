@@ -46,6 +46,8 @@
 
 		protected function run_combined()
 		{
+			Swisdk::needs_library('jquery_interface');
+
 			$this->init();
 			$args = Swisdk::config_value('runtime.arguments');
 
@@ -59,9 +61,23 @@
 
 			$this->smarty = new SwisdkSmarty();
 			$this->run_website_components($this->smarty);
+
+			$scroll = '';
+			if(s_test($args, 0))
+				$scroll = <<<EOD
+<div id="adminsite-component"></a>
+<script type="text/javascript">
+//<![CDATA[
+$(function(){
+	$('#adminsite-component').ScrollTo(1000);
+});
+//]]>
+</script>
+
+EOD;
+
 			$this->smarty->assign('content',
-				$list->html()
-				.($cmp?$cmp->html():''));
+				$list->html().$scroll.($cmp?$cmp->html():''));
 			$this->display();
 		}
 
