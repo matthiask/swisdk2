@@ -784,9 +784,12 @@ EOD;
 <input class="date-picker" type="text" name="$name" id="$name" value="$display_value" />
 <script type="text/javascript">
 //<![CDATA[
+Date.firstDayOfWeek = 1;
+Date.format = 'dd.mm.yyyy';
 $(function(){
-	$.datePicker.setDateFormat('dmy', '.');
-	$('#$name').datePicker({firstDayOfWeek:1, startDate:'01.01.2001'});
+	$('#$name').datePicker({
+		startDate: '01/01/1970'
+	});
 });
 //]]>
 </script>

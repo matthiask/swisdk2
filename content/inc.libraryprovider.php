@@ -55,8 +55,32 @@ EOD;
 		public function provide_jquery_datepicker()
 		{
 			return $this->provide('jquery').<<<EOD
-<link type="text/css" rel="stylesheet" href="{$this->js_prefix}/jquery/datepicker/styles.css" />
-<script type="text/javascript" src="{$this->js_prefix}/jquery/datepicker/datePicker.js"></script>
+<script type="text/javascript" src="{$this->js_prefix}/jquery/date.js"></script>
+<script type="text/javascript" src="{$this->js_prefix}/jquery/jquery.dimensions.js"></script>
+<!--[if IE]><script type="text/javascript" src="{$this->js_prefix}/jquery/jquery.bgiframe.js"></script><![endif]-->
+<script type="text/javascript" src="{$this->js_prefix}/jquery/datepicker_v2/jquery.datePicker.js"></script>
+<link rel="stylesheet" type="text/css" media="screen" href="{$this->js_prefix}/jquery/datepicker_v2/datePicker.css" />
+<style type="text/css">
+a.date-picker {
+	width: 16px;
+	height: 16px;
+	border: none;
+	color: #fff;
+	padding: 0;
+	margin: 0;
+	float: left;
+	overflow: hidden;
+	cursor: pointer;
+	background: url({$this->js_prefix}/jquery/datepicker_v2/calendar.png) no-repeat; 
+}
+/* makes the input field shorter once the date picker code
+ * has run (to allow space for the calendar icon
+ */
+input.dp-applied {
+	width: 140px;
+	float: left;
+}
+</style>
 
 EOD;
 		}
