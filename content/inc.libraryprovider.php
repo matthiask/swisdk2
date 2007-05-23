@@ -61,7 +61,7 @@ EOD;
 <script type="text/javascript" src="{$this->js_prefix}/jquery/datepicker_v2/jquery.datePicker.js"></script>
 <link rel="stylesheet" type="text/css" media="screen" href="{$this->js_prefix}/jquery/datepicker_v2/datePicker.css" />
 <style type="text/css">
-a.date-picker {
+a.dp-choose-date {
 	width: 16px;
 	height: 16px;
 	border: none;
