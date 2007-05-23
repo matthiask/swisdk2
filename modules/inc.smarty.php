@@ -37,6 +37,8 @@
 			$this->register_function('generate_url', '_smarty_swisdk_generate_url');
 			$this->register_function('generate_image_url',
 				'_smarty_swisdk_generate_image_url');
+			$this->register_function('generate_thumb',
+				'_smarty_swisdk_generate_thumb');
 			$this->register_function('dttm_range', '_smarty_swisdk_dttm_range');
 			$this->register_modifier('pluralize', 'pluralize');
 			$this->register_function('formitem_error', '_smarty_swisdk_formitem_error');
@@ -214,6 +216,18 @@
 
 		return Swisdk::config_value('runtime.webroot.data', '/data')
 			.'/gallery/'.$a.'/'.$i->{'filename_'.$t};
+	}
+
+	function _smarty_swisdk_generate_thumb($params, &$smarty)
+	{
+		$item = $params['item'];
+		$type = $params['type'];
+		$dir = $params['dir'];
+		$field = $params['image_field'];
+
+		return Swisdk::webroot('data').'/'.$dir.'/'
+			.ImageManager::generate_type(DATA_ROOT.$dir.'/'
+				.$item->$field, $type, $dir);
 	}
 
 	function _smarty_swisdk_dttm_range($params, &$smarty)
