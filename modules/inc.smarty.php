@@ -286,7 +286,7 @@
 	{
 		$name = $params['name'];
 		$ss = $smarty->get_template_vars('_swisdk_smarty_instance');
-		if(isset($ss->_blocks[$name]) && $ss->_blocks[$name])
+		if(isset($ss->_blocks[$name]) && trim($ss->_blocks[$name]))
 			return $content;
 		return null;
 	}
@@ -295,7 +295,7 @@
 	{
 		$name = $params['name'];
 		$ss = $smarty->get_template_vars('_swisdk_smarty_instance');
-		if(isset($ss->_blocks[$name]) && $ss->_blocks[$name])
+		if(isset($ss->_blocks[$name]) && trim($ss->_blocks[$name]))
 			return null;
 		return $content;
 	}
