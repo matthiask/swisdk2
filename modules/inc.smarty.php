@@ -149,7 +149,7 @@
 
 		public function block_content($block)
 		{
-			return $this->_blocks[$block];
+			return s_get($this->_blocks, $block);
 		}
 
 		public function set_block_content($block, $content)
