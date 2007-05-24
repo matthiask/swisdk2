@@ -1,6 +1,8 @@
 #!/bin/sh
 
-SKELETON_DIR="`dirname $0`/../skeletons/"
+SCRIPT=`readlink $0`
+
+SKELETON_DIR="`dirname $SCRIPT`/../skeletons/"
 
 to_lower() {
 	echo $1|tr "[:upper:]" "[:lower:]"
