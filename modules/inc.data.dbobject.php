@@ -917,6 +917,10 @@
 
 		protected function related_3way(&$rel, $params=null)
 		{
+			$dboc = DBOContainer::create($rel['foreign_class']);
+			if(!$this->id())
+				return $container;
+
 			$key = 'CONCAT('.$rel['foreign_primary'].',\'_\','.$rel['choices_primary'].')';
 			$sql = <<<EOD
 SELECT *, $key AS __code FROM {$rel['foreign_table']}
@@ -925,7 +929,6 @@ LEFT JOIN {$rel['choices_table']} ON {$rel['choices_condition']}
 WHERE {$rel['link_here']}={$this->id}
 
 EOD;
-			$dboc = DBOContainer::create($rel['foreign_class']);
 			$dboc->set_index('__code');
 			$dboc->init_by_sql($sql);
 			return $dboc;
