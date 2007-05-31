@@ -134,6 +134,14 @@ EOD;
 EOD;
 		}
 
+		public function provide_jquery_preload()
+		{
+			return $this->provide('jquery').<<<EOD
+<script type="text/javascript" src="{$this->js_prefix}/jquery/jquery.preload.js"></script>
+
+EOD;
+		}
+
 		public function provide_fckeditor()
 		{
 			return <<<EOD
