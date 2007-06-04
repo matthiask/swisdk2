@@ -56,10 +56,11 @@
 				return;
 
 			$this->send_mail($this->dbobj->recipient, $this->dbobj->subject,
-				$this->dbobj->message);
+				$this->dbobj->message, $this->dbobj->recipient_cc,
+				$this->dbobj->recipient_bcc);
 		}
 
-		protected function send_mail($to, $sub, $msg)
+		protected function send_mail($to, $sub, $msg, $cc, $bcc)
 		{
 			$from = $this->dbobj->from;
 			if(!$from)
@@ -72,8 +73,8 @@
 
 			$headers = implode("\r\n", array(
 					'From: '.$from,
-					'Cc: ',
-					'Bcc: '.Swisdk::config_value('core.admin_email'),
+					'Cc: '.$cc,
+					'Bcc: '.$bcc.Swisdk::config_value('core.admin_email'),
 					'Reply-To: '.$reply_to,
 					'X-Mailer: SWISDK 2.0 http://spinlock.ch/projects/swisdk/'
 				));
@@ -88,6 +89,8 @@
 		protected function sanity_check()
 		{
 			if(strpos($this->dbobj->recipient, "\n")
+					|| strpos($this->dbobj->recipient_cc, "\n")
+					|| strpos($this->dbobj->recipient_bcc, "\n")
 					|| strpos($this->dbobj->from, "\n")
 					|| strpos($this->dbobj->reply_to, "\n")
 					|| strpos($this->dbobj->subject, "\n"))
