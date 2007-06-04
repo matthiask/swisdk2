@@ -103,14 +103,14 @@
 			// append current website to realm (realm is used as cache key only)
 			$realm .= '_'.Swisdk::config_value('runtime.website');
 
-			if(isset(Swisdk::$cache['smarty'][$realm][$key])
-					&& ($t = Swisdk::$cache['smarty'][$realm][$key])!==null)
-				return $t;
-
-
 			Swisdk::log('Searching for '.$key, 'smarty');
 
 			$tmpl = $this->_template($key);
+
+			if(isset(Swisdk::$cache['smarty'][$realm][$tmpl])
+					&& ($t = Swisdk::$cache['smarty'][$realm][$tmpl])!==null)
+				return $t;
+
 			$bases = Swisdk::loader_bases();
 
 			foreach($bases as $b) {
@@ -123,7 +123,7 @@
 				}
 			}
 
-			Swisdk::$cache['smarty'][$realm][$key] = false;
+			Swisdk::$cache['smarty'][$realm][$tmpl] = false;
 			Swisdk::$cache_modified = true;
 			Swisdk::log('No match for '.$key, 'smarty');
 
