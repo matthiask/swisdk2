@@ -903,8 +903,12 @@
 		{
 			if(isset($this->request['id'])) {
 				$this->init(false);
-				return DBObject::find($this->dbo_class,
-					$this->request['id']);
+				if($this->multilanguage)
+					return DBObjectML::find($this->dbo_class,
+						$this->request['id']);
+				else
+					return DBObject::find($this->dbo_class,
+						$this->request['id']);
 			} else {
 				$this->init();
 				if($this->find_config_value('cut_off_archive', true)===true)
