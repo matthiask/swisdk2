@@ -77,6 +77,7 @@
 				'name' => $obj->name(),
 				'html' => $field_html,
 				'id' => $obj->id(),
+				'value' => $obj->value(),
 				'title' => $this->_title_html($obj),
 				'message' => $this->_message_html($obj),
 				'info' => $this->_info_html($obj),
