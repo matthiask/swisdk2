@@ -45,6 +45,17 @@
 		{
 			return dirname(Swisdk::config_value('runtime.includefile')).'/';
 		}
+
+		public function smarty()
+		{
+			require_once MODULE_ROOT.'inc.smarty.php';
+			static $smarty = null;
+
+			if(!$smarty)
+				$smarty = new SwisdkSmarty();
+
+			return $smarty;
+		}
 	}
 
 ?>
