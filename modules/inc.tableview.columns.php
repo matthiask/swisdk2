@@ -373,8 +373,8 @@ EOD;
 			} else
 				$tokens =& $data;
 			if($this->ellipsize)
-				return ellipsize(implode(', ', $tokens), $this->ellipsize);
-			return implode(', ', $tokens);
+				return ellipsize(implode('; ', $tokens), $this->ellipsize);
+			return implode('; ', $tokens);
 		}
 
 		public function set_ellipsize($e)
@@ -440,8 +440,8 @@ EOD;
 				}
 			}
 			if($this->ellipsize)
-				return ellipsize(implode(', ', $tokens), $this->ellipsize);
-			return implode(', ', $tokens);
+				return ellipsize(implode('; ', $tokens), $this->ellipsize);
+			return implode('; ', $tokens);
 		}
 
 		public function set_ellipsize($e)
