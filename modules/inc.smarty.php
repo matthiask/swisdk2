@@ -40,6 +40,7 @@
 			$this->register_function('generate_thumb',
 				'_smarty_swisdk_generate_thumb');
 			$this->register_function('dttm_range', '_smarty_swisdk_dttm_range');
+			$this->register_function('assign_args', '_smarty_swisdk_assign_args');
 			$this->register_modifier('pluralize', 'pluralize');
 			$this->register_function('formitem_error', '_smarty_swisdk_formitem_error');
 
@@ -223,7 +224,7 @@
 		$item = $params['item'];
 		$type = $params['type'];
 		$dir = $params['dir'];
-		$field = $params['image_field'];
+		$field = s_get($params, 'image_field', 'image');
 
 		return Swisdk::webroot('data').'/'.$dir.'/'
 			.ImageManager::generate_type(DATA_ROOT.$dir.'/'
@@ -235,27 +236,32 @@
 		return dttmRange($params['item']);
 	}
 
+	function _smarty_swisdk_assign_args($params, &$smarty)
+	{
+		$smarty->assign(s_get($params, 'name', 'arguments'), Swisdk::arguments());
+	}
+
 	/**
 	 * Template inheritance
 	 *
 	 * Base template example:
 	 * --8<--
 	 * Content here is used verbatim
-	 * 
+	 *
 	 * {block name="test-block"}
 	 * Here, you may insert default content for the block
 	 * {/block}
 	 * --8<--
-	 * 
-	 * 
+	 *
+	 *
 	 * Derived template example:
 	 * --8<--
 	 * {extends file="base.tpl"}
 	 * OR
 	 * {extends template="article.list"}
-	 * 
+	 *
 	 * Content here is ignored
-	 * 
+	 *
 	 * {block name="test-block"}
 	 * The content here replaces everything in the test-block of the base template
 	 * {/block}
