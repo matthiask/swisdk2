@@ -6,6 +6,7 @@
 		protected $multilanguage = false;
 
 		protected $mode = 'combined';
+		protected $creation_button = false;
 
 		public function info_actions()
 		{

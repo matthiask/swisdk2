@@ -13,6 +13,7 @@
 		protected $multilanguage = false;
 
 		protected $mode = 'combined';
+		protected $creation_button = false;
 
 		protected $role = ROLE_MANAGER;
 
@@ -83,6 +84,17 @@ EOD;
 
 		protected function display()
 		{
+			if($this->creation_button) {
+				$url = $this->url();
+
+				$button = <<<EOD
+<button type="button" onclick="window.location.href='{$url}new'">Create {$this->dbo_class}</button>
+
+EOD;
+				$this->smarty->assign('content', $button
+					.$this->smarty->get_template_vars('content'));
+			}
+
 			$this->smarty->display_template('base.admin');
 		}
 
