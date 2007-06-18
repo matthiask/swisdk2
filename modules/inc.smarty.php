@@ -169,7 +169,7 @@
 	function _smarty_swisdk_runtime_value($params, &$smarty)
 	{
 		$val = Swisdk::config_value('runtime.'.$params['key']);
-		if(!$val && isset($params['default']))
+		if(($val===null) && isset($params['default']))
 			return $params['default'];
 		if(isset($params['format']) && $val)
 			return sprintf($params['format'], $val);
