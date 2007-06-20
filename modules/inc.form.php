@@ -217,7 +217,7 @@ EOD;
 		 *
 		 * This function should also be used to create FormBoxes
 		 */
-		public function box($id=0)
+		public function box($id=0, $dbobj=null)
 		{
 			if(!$id && count($this->boxrefs))
 				return reset($this->boxrefs);
@@ -225,7 +225,9 @@ EOD;
 			if(!isset($this->boxrefs[$id])) {
 				$this->boxrefs[$id] = new FormBox();
 				$this->boxrefs[$id]->set_name($id);
-				if($obj = $this->dbobj())
+				if($dbobj)
+					$this->boxrefs[$id]->bind($dbobj);
+				else if($obj = $this->dbobj())
 					$this->boxrefs[$id]->bind($obj);
 			}
 			return $this->boxrefs[$id];
