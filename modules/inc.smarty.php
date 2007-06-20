@@ -311,10 +311,16 @@
 	 */
 	function _smarty_swisdk_db_assign($params, &$smarty)
 	{
-		if(isset($params['id']) && $id = $params['id']) {
-			$smarty->assign($params['name'], DBObject::find($params['class'], $id));
+		if(in_array('id', array_keys($params))) {
+			if($id = $params['id'])
+				$smarty->assign($params['name'],
+					DBObject::find($params['class'], $id));
+			else
+				$smarty->assign($params['name'], null);
+
 			return;
 		}
+
 		$clauses = array();
 		foreach($params as $k => $v) {
 			switch($k) {
