@@ -33,4 +33,9 @@
 	require_once MODULE_ROOT.'inc.data.dbocontainer.php';
 	require_once MODULE_ROOT.'inc.data.dbobjectml.php';
 
+	function dbo_slugify_title($dbo, $title='title', $name='name')
+	{
+		$dbo->$name = slugify($dbo->$title);
+	}
+
 ?>
