@@ -798,8 +798,9 @@
 					.$ug->generate_url($dbo);
 				$item->description = Markdown($dbo->teaser);
 				$item->date = date(DATE_W3C, $dbo->start_dttm);
-				$item->author = $authors[$dbo->author_id]->forename.' '
-					.$authors[$dbo->author_id]->name;
+				if($dbo->author_id)
+					$item->author = $authors[$dbo->author_id]->forename.' '
+						.$authors[$dbo->author_id]->name;
 
 				$feed->addItem($item);
 			}
