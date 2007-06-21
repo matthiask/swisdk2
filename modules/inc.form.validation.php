@@ -181,7 +181,8 @@ EOD;
 		protected function is_valid_impl()
 		{
 			$v = trim($this->item->value());
-			if($this->item instanceof SelectionFormItem) {
+			if($this->item instanceof SelectionFormItem
+					|| $this->item instanceof CheckboxInput) {
 				return $v!=='' && $v!==0 && $v!=='0' && $v!==array();
 			} else
 				return $v!='';
