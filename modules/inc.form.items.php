@@ -727,6 +727,18 @@ EOD;
 			return $this;
 		}
 
+		public function sort_items_by_key()
+		{
+			ksort($this->items);
+			return $this;
+		}
+
+		public function sort_items_by_title()
+		{
+			natcasesort($this->items);
+			return $this;
+		}
+
 		public function remove_visitor()
 		{
 			if(isset($this->items[SWISDK2_VISITOR]))
