@@ -822,7 +822,7 @@
 		{
 			if($class instanceof DBObject) {
 				$obj = $class;
-				$class = $obj->_class;
+				$class = $obj->_class();
 			} else
 				$obj = DBObject::create($class);
 
