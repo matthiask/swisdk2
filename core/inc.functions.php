@@ -130,7 +130,7 @@
 		$res = str_replace(' ', '-', trim(preg_replace(
 			'/[^A-Za-z]+/', ' ', $string)));
 		if($res)
-			return $res;
+			return strtolower($res);
 		return 'root';
 	}
 
@@ -217,7 +217,7 @@
 		header("Content-Description: ".trim($name));
 		header("Content-Length: ".(string)($size));
 		header("Connection: close");
-	
+
 		$fp = fopen( $path, 'rb' );
 		fpassthru( $fp );
 		fclose( $fp );
