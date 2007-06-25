@@ -157,6 +157,20 @@
 		{
 			$this->add_state(STATE_DISPLAYED);
 		}
+
+		public function handle_required_file_upload($upload, $dir)
+		{
+			if(!$this->editmode()) {
+				$field = $this->dbobj->shortname($upload->name());
+				if($this->copymode() && $this->dbobj->$field) {
+					$new = uniquifyFilename($this->dbobj->$field);
+					$base = DATA_ROOT.$dir.'/';
+					copy($base.$this->dbobj->$field, $base.$new);
+					$this->dbobj->$field = $new;
+				} else
+					$upload->add_rule(new UploadedFileRule());
+			}
+		}
 	}
 
 	class DeleteComponent extends AdminComponent2 implements IHtmlComponent, ISmartyComponent {
