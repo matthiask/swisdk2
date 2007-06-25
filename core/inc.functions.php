@@ -6,6 +6,17 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
+	function dumpAndDie()
+	{
+		$args = func_get_args();
+		header('Content-type: text/plain');
+		if(count($args)==1)
+			print_r(array_shift($args));
+		else
+			print_r($args);
+		exit();
+	}
+
 	/**
 	 * shortcut accessor functions
 	 */
