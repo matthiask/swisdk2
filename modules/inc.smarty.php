@@ -325,7 +325,7 @@
 		foreach($params as $k => $v) {
 			switch($k) {
 				case 'order':
-					$clauses[':order'] = explode(':', $v);
+					$clauses[':order'] = $v;
 					break;
 				case 'limit':
 					$clauses[':limit'] = $v;
