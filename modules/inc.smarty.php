@@ -333,6 +333,9 @@
 				case 'join':
 					$clauses[':join'] = $v;
 					break;
+				case 'index':
+					$clauses[':index'] = $v;
+					break;
 				case 'cut_off_future':
 					$clauses[$v.'<'] = time();
 					break;
