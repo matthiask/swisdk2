@@ -1302,6 +1302,7 @@ EOD;
 
 		public function init_value()
 		{
+			$this->box()->init_value();
 		}
 
 		public function set_separator($separator)
