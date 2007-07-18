@@ -252,34 +252,24 @@
 		 */
 		protected function register_functions()
 		{
-			$this->smarty->register_function('generate_paging',
-				array(&$this, '_generate_paging'));
-			$this->smarty->register_function('generate_pagelinks',
-				array(&$this, '_generate_pagelinks'));
-			$this->smarty->register_function('generate_page_list',
-				array(&$this, '_generate_page_list'));
-			$this->smarty->register_function('generate_page_first',
-				array(&$this, '_generate_page_first'));
-			$this->smarty->register_function('generate_page_last',
-				array(&$this, '_generate_page_last'));
-			$this->smarty->register_function('generate_page_next',
-				array(&$this, '_generate_page_next'));
-			$this->smarty->register_function('generate_page_previous',
-				array(&$this, '_generate_page_previous'));
-			$this->smarty->register_function('generate_page_fpnl',
-				array(&$this, '_generate_page_fpnl'));
-			$this->smarty->register_function('generate_page_pcn',
-				array(&$this, '_generate_page_pcn'));
+			$functions = array(
+				'generate_paging',
+				'generate_pagelinks',
+				'generate_page_list',
+				'generate_page_first',
+				'generate_page_last',
+				'generate_page_next',
+				'generate_page_previous',
+				'generate_page_fpnl',
+				'generate_page_pcn',
+				'generate_item_previous_url',
+				'generate_item_next_url',
+				'generate_page_list_from_item',
+				'generate_date',
+				);
 
-			$this->smarty->register_function('generate_item_previous_url',
-				array(&$this, '_generate_item_previous_url'));
-			$this->smarty->register_function('generate_item_next_url',
-				array(&$this, '_generate_item_next_url'));
-			$this->smarty->register_function('generate_page_list_from_item',
-				array(&$this, '_generate_page_list_from_item'));
-
-			$this->smarty->register_function('generate_date',
-				array(&$this, '_generate_date'));
+			foreach($functions as $f)
+				$this->smarty->register_function($f, array(&$this, '_'.$f));
 		}
 
 		protected $_paging_limit = null;
