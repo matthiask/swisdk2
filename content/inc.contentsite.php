@@ -117,13 +117,6 @@
 			$args = Swisdk::config_value('runtime.arguments');
 			$this->request = array();
 
-			// handle /controller?p=<numeric> specially
-			if($id = s_get($_GET, 'p')) {
-				$this->request['id'] = $id;
-				$this->mode = 'single';
-				return;
-			}
-
 			if(!count($args))
 				$this->mode = 'home';
 
@@ -148,6 +141,13 @@
 						$this->mode = 'single';
 					}
 				}
+			}
+
+			// handle /controller?p=<numeric> specially
+			if($id = s_get($_GET, 'p')) {
+				$this->request['id'] = $id;
+				$this->mode = 'single';
+				return;
 			}
 		}
 
