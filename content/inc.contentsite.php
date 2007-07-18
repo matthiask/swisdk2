@@ -652,8 +652,7 @@
 				if($reverse)
 					$dir = !$dir;
 
-				$this->dbobj->add_order_column($tokens[0],
-					(isset($tokens[1]) && $dir?'ASC':'DESC'));
+				$this->dbobj->add_order_column($tokens[0], $dir?'ASC':'DESC');
 
 				$this->dbobj->add_clause($tokens[0]
 					.($dir?'>':'<'), $dbo->get($tokens[0]));
