@@ -202,7 +202,11 @@
 		static $generator = null;
 		if($generator===null)
 			$generator = Swisdk::load_instance('UrlGenerator');
-		return $generator->generate_url($params['item'], $params);
+		$url = $generator->generate_url($params['item'], $params);
+		if($a = s_get($params, 'assign'))
+			$smarty->assign($a, $url);
+		else
+			return $url;
 	}
 
 	function _smarty_swisdk_generate_image_url($params, &$smarty)

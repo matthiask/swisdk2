@@ -630,12 +630,20 @@
 
 		public function _generate_item_previous_url($params, &$smarty)
 		{
-			return $this->_item_previous_next_url_helper($params, true);
+			$url = $this->_item_previous_next_url_helper($params, true);
+			if($a = s_get($params, 'assign'))
+				$smarty->assign($a, $url);
+			else
+				return $url;
 		}
 
 		public function _generate_item_next_url($params, &$smarty)
 		{
-			return $this->_item_previous_next_url_helper($params, false);
+			$url = $this->_item_previous_next_url_helper($params, false);
+			if($a = s_get($params, 'assign'))
+				$smarty->assign($a, $url);
+			else
+				return $url;
 		}
 
 		protected function _item_previous_next_url_helper($params, $reverse)
@@ -1172,7 +1180,7 @@
 				$this->dbobj->add_clause($pubdate_field.'<', $end);
 			}
 		}
-			
+
 		/**
 		 * Filter by slug (entry name)
 		 */
