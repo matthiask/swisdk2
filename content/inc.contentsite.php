@@ -649,7 +649,7 @@
 				$tokens = explode(':', $order);
 
 				$dir = $tokens[1]=='DESC';
-				if($reverse)
+				if(!$reverse)
 					$dir = !$dir;
 
 				$this->dbobj->add_order_column($tokens[0], $dir?'ASC':'DESC');
