@@ -38,4 +38,13 @@
 		$dbo->$name = slugify($dbo->$title);
 	}
 
+	function dbo_remove_file($dbo, $field='file_file', $dir='upload')
+	{
+		if($fname = $dbo->$field) {
+			$fname = DATA_ROOT.$dir.'/'.$fname;
+			if(file_exists($fname))
+				unlink($fname);
+		}
+	}
+
 ?>
