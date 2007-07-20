@@ -117,13 +117,6 @@
 			$args = Swisdk::config_value('runtime.arguments');
 			$this->request = array();
 
-			// handle /controller?p=<numeric> specially
-			if($id = s_get($_GET, 'p')) {
-				$this->request['id'] = $id;
-				$this->mode = 'single';
-				return;
-			}
-
 			if(!count($args))
 				$this->mode = 'home';
 
@@ -148,6 +141,13 @@
 						$this->mode = 'single';
 					}
 				}
+			}
+
+			// handle /controller?p=<numeric> specially
+			if($id = s_get($_GET, 'p')) {
+				$this->request['id'] = $id;
+				$this->mode = 'single';
+				return;
 			}
 		}
 
@@ -252,34 +252,24 @@
 		 */
 		protected function register_functions()
 		{
-			$this->smarty->register_function('generate_paging',
-				array(&$this, '_generate_paging'));
-			$this->smarty->register_function('generate_pagelinks',
-				array(&$this, '_generate_pagelinks'));
-			$this->smarty->register_function('generate_page_list',
-				array(&$this, '_generate_page_list'));
-			$this->smarty->register_function('generate_page_first',
-				array(&$this, '_generate_page_first'));
-			$this->smarty->register_function('generate_page_last',
-				array(&$this, '_generate_page_last'));
-			$this->smarty->register_function('generate_page_next',
-				array(&$this, '_generate_page_next'));
-			$this->smarty->register_function('generate_page_previous',
-				array(&$this, '_generate_page_previous'));
-			$this->smarty->register_function('generate_page_fpnl',
-				array(&$this, '_generate_page_fpnl'));
-			$this->smarty->register_function('generate_page_pcn',
-				array(&$this, '_generate_page_pcn'));
+			$functions = array(
+				'generate_paging',
+				'generate_pagelinks',
+				'generate_page_list',
+				'generate_page_first',
+				'generate_page_last',
+				'generate_page_next',
+				'generate_page_previous',
+				'generate_page_fpnl',
+				'generate_page_pcn',
+				'generate_item_previous_url',
+				'generate_item_next_url',
+				'generate_page_list_from_item',
+				'generate_date',
+				);
 
-			$this->smarty->register_function('generate_item_previous_url',
-				array(&$this, '_generate_item_previous_url'));
-			$this->smarty->register_function('generate_item_next_url',
-				array(&$this, '_generate_item_next_url'));
-			$this->smarty->register_function('generate_page_list_from_item',
-				array(&$this, '_generate_page_list_from_item'));
-
-			$this->smarty->register_function('generate_date',
-				array(&$this, '_generate_date'));
+			foreach($functions as $f)
+				$this->smarty->register_function($f, array(&$this, '_'.$f));
 		}
 
 		protected $_paging_limit = null;
@@ -630,12 +620,20 @@
 
 		public function _generate_item_previous_url($params, &$smarty)
 		{
-			return $this->_item_previous_next_url_helper($params, true);
+			$url = $this->_item_previous_next_url_helper($params, true);
+			if($a = s_get($params, 'assign'))
+				$smarty->assign($a, $url);
+			else
+				return $url;
 		}
 
 		public function _generate_item_next_url($params, &$smarty)
 		{
-			return $this->_item_previous_next_url_helper($params, false);
+			$url = $this->_item_previous_next_url_helper($params, false);
+			if($a = s_get($params, 'assign'))
+				$smarty->assign($a, $url);
+			else
+				return $url;
 		}
 
 		protected function _item_previous_next_url_helper($params, $reverse)
@@ -651,11 +649,10 @@
 				$tokens = explode(':', $order);
 
 				$dir = $tokens[1]=='DESC';
-				if($reverse)
+				if(!$reverse)
 					$dir = !$dir;
 
-				$this->dbobj->add_order_column($tokens[0],
-					(isset($tokens[1]) && $dir?'ASC':'DESC'));
+				$this->dbobj->add_order_column($tokens[0], $dir?'ASC':'DESC');
 
 				$this->dbobj->add_clause($tokens[0]
 					.($dir?'>':'<'), $dbo->get($tokens[0]));
@@ -1172,7 +1169,7 @@
 				$this->dbobj->add_clause($pubdate_field.'<', $end);
 			}
 		}
-			
+
 		/**
 		 * Filter by slug (entry name)
 		 */
