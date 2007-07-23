@@ -38,7 +38,7 @@
 	 *
 	 * The following properties are respected too:
 	 *
-	 * email_from (defaults to messenger@HTTP_HOST)
+	 * email_from (defaults to info@HTTP_HOST)
 	 * email_reply_to (defauls to email_from)
 	 */
 	class EmailMessage extends Message {
@@ -65,7 +65,7 @@
 			$from = $this->dbobj->from;
 			if(!$from)
 				$from = Swisdk::config_value('core.name', 'Messenger')
-					.' <messenger@'.preg_replace('/^www\./', '',
+					.' <info@'.preg_replace('/^www\./', '',
 						Swisdk::config_value('runtime.request.host')).'>';
 			$reply_to = $this->dbobj->reply_to;
 			if(!$reply_to)
