@@ -383,6 +383,18 @@ EOD;
 		}
 	}
 
+	class DNSEmailRule extends EmailRule {
+		protected function is_valid_impl()
+		{
+			if(!parent::is_valid_impl())
+				return false;
+
+			list($username, $domain) = split('@', $this->item->value());
+
+			return checkdnsrr($domain, 'MX');
+		}
+	}
+
 	class UrlRule extends RegexRule {
 		public function __construct($message = null)
 		{

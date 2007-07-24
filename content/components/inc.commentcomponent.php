@@ -76,7 +76,7 @@
 
 				$author->add_rule(new RequiredRule());
 
-				$email->add_rule(new EmailRule());
+				$email->add_rule(new DNSEmailRule());
 				$email->add_rule(new RequiredRule());
 
 				$url->add_rule(new UrlRule());
