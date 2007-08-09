@@ -155,6 +155,12 @@
 			return strftime($this->fmt, $data[$this->column]);
 		}
 
+		public function set_format($fmt)
+		{
+			$this->fmt = $fmt;
+			return $this;
+		}
+
 		protected $fmt = null;
 		protected $never = '(never)';
 	}
@@ -162,8 +168,16 @@
 	class TimeTableViewColumn extends TableViewColumn {
 		public function html(&$data)
 		{
-			return strftime('%H:%M', $data[$this->column]+82800);
+			return strftime($this->fmt, $data[$this->column]+82800);
 		}
+
+		public function set_format($fmt)
+		{
+			$this->fmt = $fmt;
+			return $this;
+		}
+
+		protected $fmt = '%H:%M';
 	}
 
 	/**
