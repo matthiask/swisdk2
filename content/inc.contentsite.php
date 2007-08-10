@@ -793,6 +793,8 @@
 				$item->title = $dbo->title;
 				$item->link = $feed->link
 					.$ug->generate_url($dbo);
+				$item->guid = $feed->link
+					.$ug->generate_url($dbo);
 				$item->description = Markdown($dbo->teaser);
 				$item->date = date(DATE_W3C, $dbo->start_dttm);
 				if($dbo->author_id)
