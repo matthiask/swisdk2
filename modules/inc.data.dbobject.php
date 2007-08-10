@@ -929,7 +929,7 @@ LEFT JOIN {$rel['choices_table']} ON {$rel['choices_condition']}
 WHERE {$rel['link_here']}={$this->id}
 
 EOD;
-			$dboc->set_index('__code');
+			$dboc->set_index(s_get($params, ':index', '__code'));
 			$dboc->init_by_sql($sql);
 			return $dboc;
 		}
