@@ -92,6 +92,34 @@ EOD;
 		protected $field2;
 	}
 
+	class ValuesExistRule extends FormRule {
+		protected $var;
+
+		protected function is_valid_impl()
+		{
+			$dbobj = $this->form->dbobj();
+			$clauses = array();
+			$fl = $dbobj->field_list();
+			foreach($dbobj as $k => $v) {
+				if(isset($fl[$k])) {
+					$clauses[$k.'='] = $v;
+				}
+			}
+
+			if($obj = DBObject::find($dbobj->_class(), $clauses)) {
+				$this->var = $obj;
+				return true;
+			}
+
+			return false;
+		}
+
+		public function match()
+		{
+			return $this->var;
+		}
+	}
+
 	class CallbackFormRule extends FormRule {
 		public function __construct($callback, $message = null)
 		{
