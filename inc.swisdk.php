@@ -103,7 +103,9 @@ EOD;
 
 			date_default_timezone_set('Europe/Zurich');
 
-			define('HTDOCS_ROOT', APP_ROOT . 'webapp/htdocs/');
+			if(!defined('HTDOCS_ROOT'))
+				define('HTDOCS_ROOT', APP_ROOT . 'webapp/htdocs/');
+
 			define('SWISDK_ROOT', APP_ROOT . 'swisdk/');
 			define('SMARTY_ROOT', SWISDK_ROOT . 'lib/smarty/');
 			define('MODULE_ROOT', SWISDK_ROOT . 'modules/');
