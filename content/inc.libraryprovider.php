@@ -74,7 +74,7 @@ a.dp-choose-date {
 	border: none;
 	color: #fff;
 	padding: 0;
-	margin: 0;
+	margin: 1px;
 	float: left;
 	overflow: hidden;
 	cursor: pointer;
