@@ -114,6 +114,11 @@
 		}
 
 		public function dirty()		{ return $this->dirty; }
+		public function set_dirty($dirty = true)
+		{
+			$this->dirty = $dirty;
+			return $this;
+		}
 
 		/**
 		 * main DB handle (holds the mysqli instance in the current version
