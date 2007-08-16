@@ -20,6 +20,10 @@
 				session_start();
 			}
 
+			if(!isset($_SESSION['original_referer'])){
+				 $_SESSION['original_referer'] = $_SERVER['HTTP_REFERER'];
+			}
+
 			if(isset($_REQUEST['login_username'])
 					&& isset($_REQUEST['login_password'])
 					&& !isset($_SESSION['swisdk2']['user_id'])) {
