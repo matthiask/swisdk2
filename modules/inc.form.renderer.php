@@ -639,7 +639,7 @@ function open_$name()
 }
 
 function select_$name(val, str)
-{	
+{
 	threeway_create_input_$name(val);
 }
 
@@ -793,6 +793,7 @@ $(function(){
 });
 //]]>
 </script>
+<br style="clear:left;line-height:1px;visibility:hidden;" />
 
 EOD;
 

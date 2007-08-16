@@ -587,6 +587,12 @@ EOD;
 			return $this->id;
 		}
 
+		public function set_id($id)
+		{
+			$this->id = $id;
+			return $this;
+		}
+
 		/**
 		 * generate an id for this form
 		 *

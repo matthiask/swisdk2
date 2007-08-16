@@ -114,6 +114,11 @@
 		}
 
 		public function dirty()		{ return $this->dirty; }
+		public function set_dirty($dirty = true)
+		{
+			$this->dirty = $dirty;
+			return $this;
+		}
 
 		/**
 		 * main DB handle (holds the mysqli instance in the current version
@@ -929,7 +934,7 @@ LEFT JOIN {$rel['choices_table']} ON {$rel['choices_condition']}
 WHERE {$rel['link_here']}={$this->id}
 
 EOD;
-			$dboc->set_index('__code');
+			$dboc->set_index(s_get($params, ':index', '__code'));
 			$dboc->init_by_sql($sql);
 			return $dboc;
 		}

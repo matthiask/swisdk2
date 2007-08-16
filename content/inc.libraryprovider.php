@@ -52,11 +52,18 @@
 EOD;
 		}
 
-		public function provide_jquery_datepicker()
+		public function provide_jquery_dimensions()
 		{
 			return $this->provide('jquery').<<<EOD
-<script type="text/javascript" src="{$this->js_prefix}/jquery/date.js"></script>
 <script type="text/javascript" src="{$this->js_prefix}/jquery/jquery.dimensions.js"></script>
+
+EOD;
+		}
+
+		public function provide_jquery_datepicker()
+		{
+			return $this->provide('jquery').$this->provide('jquery_dimensions').<<<EOD
+<script type="text/javascript" src="{$this->js_prefix}/jquery/date.js"></script>
 <!--[if IE]><script type="text/javascript" src="{$this->js_prefix}/jquery/jquery.bgiframe.js"></script><![endif]-->
 <script type="text/javascript" src="{$this->js_prefix}/jquery/datepicker_v2/jquery.datePicker.js"></script>
 <link rel="stylesheet" type="text/css" media="screen" href="{$this->js_prefix}/jquery/datepicker_v2/datePicker.css" />
@@ -67,11 +74,11 @@ a.dp-choose-date {
 	border: none;
 	color: #fff;
 	padding: 0;
-	margin: 0;
+	margin: 1px;
 	float: left;
 	overflow: hidden;
 	cursor: pointer;
-	background: url({$this->js_prefix}/jquery/datepicker_v2/calendar.png) no-repeat; 
+	background: url({$this->js_prefix}/jquery/datepicker_v2/calendar.png) no-repeat;
 }
 /* makes the input field shorter once the date picker code
  * has run (to allow space for the calendar icon
