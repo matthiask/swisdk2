@@ -20,7 +20,7 @@
 				session_start();
 			}
 
-			if(!isset($_SESSION['original_referer'])){
+			if(!isset($_SESSION['original_referer']) && isset($_SERVER['HTTP_REFERER'])) {
 				 $_SESSION['original_referer'] = $_SERVER['HTTP_REFERER'];
 			}
 
