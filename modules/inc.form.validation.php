@@ -46,6 +46,11 @@
 		{
 		}
 
+		public function form()
+		{
+			return $this->form;
+		}
+
 		protected $message;
 		protected $form;
 	}
