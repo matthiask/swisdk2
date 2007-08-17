@@ -74,7 +74,7 @@
 			$headers = implode("\r\n", array(
 					'From: '.$from,
 					'Cc: '.$cc,
-					'Bcc: '.$bcc.','.Swisdk::config_value('core.admin_email'),
+					'Bcc: '.$bcc,
 					'Reply-To: '.$reply_to,
 					'X-Mailer: SWISDK 2.0 http://spinlock.ch/projects/swisdk/'
 				));
