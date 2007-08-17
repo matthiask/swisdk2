@@ -638,7 +638,7 @@ EOD;
 			$name = $this->name();
 			$id = $this->id();
 
-			if($v = getInputRaw($id)) {
+			if(($v = getInputRaw($id))!==null) {
 				if($this->auto_xss_protection
 						|| getInput($id.'__xss'))
 					$this->dbobj->set($name, cleanInput($v));
