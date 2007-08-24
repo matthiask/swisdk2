@@ -1203,6 +1203,9 @@
 			if($this->find_config_value('active_filter'))
 				$this->dbobj->add_clause($this->dbobj->dbobj()->name('active')
 					.'!=0');
+			if($this->multilanguage
+					&& $this->find_config_value('translation_active_filter'))
+				$this->dbobj->add_clause($this->dbobj->dbobj()->name('content_active'));
 		}
 
 		protected function filter_language()
