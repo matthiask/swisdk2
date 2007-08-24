@@ -16,7 +16,11 @@
 
 		public function set_smarty(&$smarty)
 		{
-			$smarty->assign('modules', SwisdkSitemap::page('/admin'));
+			$page = '/admin';
+			if($d = Swisdk::config_value('runtime.domain'))
+				$page = '/'.$d.$page;
+
+			$smarty->assign('modules', SwisdkSitemap::page($page));
 			$smarty->assign('currentmodule', SwisdkSitemap::page(
 				Swisdk::config_value('runtime.controller.url')));
 		}
