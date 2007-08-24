@@ -43,6 +43,7 @@
 			$this->register_function('assign_args', '_smarty_swisdk_assign_args');
 			$this->register_modifier('pluralize', 'pluralize');
 			$this->register_function('formitem_error', '_smarty_swisdk_formitem_error');
+			$this->register_function('formitem_render', '_smarty_swisdk_formitem_render');
 
 			if($assign) {
 				$this->assign('swisdk_user', SessionHandler::user()->data());
@@ -375,6 +376,43 @@
 		$item = $params['item'];
 		if(!$item['valid'])
 			return '<span class="error">'.$item['message_raw'].'</span>';
+	}
+
+	function _smarty_swisdk_formitem_render($params, &$smarty)
+	{
+		$item = $params['item'];
+		$msg = _smarty_swisdk_formitem_error($params, $smarty);
+
+		$type = s_get($params, 'type', 'dl');
+
+		switch($type) {
+			case 'dl':
+				return <<<EOD
+<dt>{$item['title']}</dt>
+<dd>{$item['html']} $msg</dd>
+
+EOD;
+
+			case 'table':
+				return <<<EOD
+<tr>
+	<td>{$item['title']}</td>
+	<td>{$item['html']} $msg</td>
+</tr>
+
+EOD;
+
+			case 'plain':
+				return <<<EOD
+{$item['title']}
+{$item['html']}
+$msg
+<br />
+
+EOD;
+			default:
+				return 'Unknown formitem_render type';
+		}
 	}
 
 ?>
