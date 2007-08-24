@@ -27,7 +27,7 @@ $(function(){
 
 	<div id="head">
 
-		<h1><a href="/admin/">{swisdk_runtime_value key="website.title"}</a></h1>
+		<h1><a href="{swisdk_runtime_value key=navigation.prepend}/admin/">{swisdk_runtime_value key="website.title"}</a></h1>
 
 		<a id="logout" href="?logout=1"><img src="/media/admin/gnome-logout.png" alt="log out" /></a>
 
@@ -36,7 +36,7 @@ $(function(){
 			<select id="fast-switch">
 				<option value="">-- go to --</option>
 				{foreach from=$modules.pages item=module}
-					<option value="{$module.url}">{$module.title}</option>
+					<option value="{swisdk_runtime_value key=navigation.prepend}{$module.url}">{$module.title}</option>
 				{/foreach}
 			</select>
 		</div>
@@ -46,9 +46,9 @@ $(function(){
 	{if !$adminindex}
 	<div id="subnavigation">
 		<ul>
-			<li><a href="{$currentmodule.url}"><strong>{$currentmodule.title}</strong></a></li>
+			<li><a href="{swisdk_runtime_value key=navigation.prepend}{$currentmodule.url}"><strong>{$currentmodule.title}</strong></a></li>
 		{foreach from=$currentmodule.pages item=module}
-			<li><a href="{$module.url}">{$module.title}</a></li>
+			<li><a href="{swisdk_runtime_value key=navigation.prepend}{$module.url}">{$module.title}</a></li>
 		{/foreach}
 		</ul>
 	</div>
