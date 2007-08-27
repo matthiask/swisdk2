@@ -61,6 +61,8 @@
 			$this->form->bind($this->cdbo);
 
 			$this->form->set_title('Post a comment!');
+			$this->form->add('comment_pageview_dttm', new HiddenInput())
+				->set_default_value(time());
 
 			$user = SessionHandler::user();
 
@@ -105,6 +107,9 @@
 
 			$text->set_title('Comment');
 			$text->add_rule(new RequiredRule());
+
+			$this->form->add_rule(new CallbackFormRule('swisdk_comment_form_validation',
+				'Slow down please.'));
 
 			return $this->form;
 		}
@@ -153,6 +158,16 @@
 
 			$this->init_container();
 		}
+	}
+
+	function swisdk_comment_form_validation($rule)
+	{
+		$dbo = $rule->form()->dbobj();
+
+		if($dbo->pageview_dttm>time()-30)
+			return false;
+
+		return true;
 	}
 
 ?>
