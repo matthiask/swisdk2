@@ -61,7 +61,15 @@
 	*/
 	function getInputRaw($var, $default = null)
 	{
-		return s_get($_REQUEST, $var, $default);
+		if(!isset($_REQUEST[$var]))
+			return $default;
+
+		$value = $_REQUEST[$var];
+
+		if(get_magic_quotes_gpc())
+			$value = stripslashes($value);
+
+		return $value;
 	}
 
 	/**
