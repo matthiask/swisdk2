@@ -297,9 +297,12 @@
 				return $this->valid;
 
 			$this->valid = true;
-			foreach($this->rules as &$rule)
-				if(!$rule->is_valid($this))
+			foreach($this->rules as &$rule) {
+				if(!$rule->is_valid($this)) {
 					$this->valid = false;
+					break;
+				}
+			}
 			return $this->valid;
 		}
 
