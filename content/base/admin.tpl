@@ -34,10 +34,7 @@ $(function(){
 		<div id="head-actions">
 			<span>Fast switch</span>
 			<select id="fast-switch">
-				<option value="">-- go to --</option>
-				{foreach from=$modules.pages item=module}
-					<option value="{swisdk_runtime_value key=navigation.prepend}{$module.url}">{$module.title}</option>
-				{/foreach}
+				{generate_module_switch}
 			</select>
 		</div>
 
