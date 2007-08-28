@@ -624,15 +624,22 @@ EOD;
 	class Textarea extends FormItem {
 		protected $css_class = 'sf-textarea';
 		protected $auto_xss_protection = true;
+		protected $xss_protection = true;
 
 		public function auto_xss_protection()
 		{
 			return $this->auto_xss_protection;
 		}
 
-		public function set_auto_xss_protection($enabled=true)
+		public function xss_protection()
+		{
+			return $this->xss_protection;
+		}
+
+		public function set_auto_xss_protection($enabled=true, $default_enabled=true)
 		{
 			$this->auto_xss_protection = $enabled;
+			$this->xss_protection = $default_enabled;
 			return $this;
 		}
 

@@ -404,9 +404,13 @@ EOD;
 				return;
 
 			$id = $obj->id().'__xss';
+			$checked = 'checked="checked"';
+			if($obj->xss_protection()==false)
+				$checked = '';
+
 			return sprintf(<<<EOD
 <div class="sf-element-ext">
-	<input type="checkbox" id="%s" name="%s" checked="checked" />
+	<input type="checkbox" id="%s" name="%s" $checked />
 	<label for="%s">%s</label>
 </div>
 EOD
