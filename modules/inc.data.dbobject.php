@@ -924,7 +924,7 @@
 		{
 			$dboc = DBOContainer::create($rel['foreign_class']);
 			if(!$this->id())
-				return $container;
+				return $dboc;
 
 			$key = 'CONCAT('.$rel['foreign_primary'].',\'_\','.$rel['choices_primary'].')';
 			$sql = <<<EOD
