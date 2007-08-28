@@ -265,6 +265,7 @@
 				'generate_item_previous_url',
 				'generate_item_next_url',
 				'generate_page_list_from_item',
+				'generate_months_with_items',
 				'generate_date',
 				);
 
@@ -730,6 +731,36 @@
 			$count = $this->dbobj->total_count();
 			$this->dbobj = $dbo;
 			return $count;
+		}
+
+		public function _generate_months_with_items($params, &$smarty)
+		{
+			$tmp = $this->dbobj;
+
+			if($tmp instanceof DBOContainer)
+				$tmp = $tmp->dbobj();
+
+			if(!$tmp)
+				$tmp = DBObject::create($this->dbo_class);
+
+			$pubdate_field = $this->find_config_value('pubdate_field', '#');
+			if($pubdate_field=='#')
+				$pubdate_field = $tmp->name('start_dttm');
+
+			$rows = DBObject::db_get_array(sprintf('SELECT %s,%s FROM %s',
+				$p = $tmp->primary(), $pubdate_field, $tmp->table()),
+				array($p, $pubdate_field));
+
+			$months = array();
+			foreach($rows as $dttm) {
+				$date = getdate($dttm);
+
+				$months[sprintf('%04d/%02d', $date['year'], $date['mon'])] = $dttm;
+			}
+
+			krsort($months);
+
+			$smarty->assign($params['assign'], $months);
 		}
 
 		protected $_generate_date_data = array();
