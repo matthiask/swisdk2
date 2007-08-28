@@ -133,6 +133,7 @@
 				if(getInput('sf_button_publish')) {
 					$dbo->active = 1;
 					$dbo->store();
+					$dbo->listener_call('publish');
 					$this->add_state(STATE_FINISHED);
 				} else if(getInput('sf_button_save_and_continue')) {
 					$dbo->store();
