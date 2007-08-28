@@ -108,8 +108,9 @@
 			$text->set_title('Comment');
 			$text->add_rule(new RequiredRule());
 
-			$this->form->add_rule(new CallbackFormRule('swisdk_comment_form_validation',
-				'Slow down please.'));
+			if(Swisdk::website_config_value('comment_pageview_timer'))
+				$this->form->add_rule(new CallbackFormRule('swisdk_comment_form_validation',
+					'Slow down please.'));
 
 			return $this->form;
 		}
