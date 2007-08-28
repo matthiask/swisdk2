@@ -422,6 +422,9 @@ EOD;
 			if(!parent::is_valid_impl())
 				return false;
 
+			if(!$this->item->value())
+				return false;
+
 			list($username, $domain) = split('@', $this->item->value());
 
 			return checkdnsrr($domain, 'MX');
