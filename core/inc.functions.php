@@ -256,6 +256,11 @@
 		return dgettext('swisdk', 'right now');
 	}
 
+	function stringifyAbsoluteTime($seconds)
+	{
+		return stringifyTimespan($seconds-time());
+	}
+
 	/**
 	 * return a unique filenames for related files
 	 *
