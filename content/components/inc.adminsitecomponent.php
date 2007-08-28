@@ -54,6 +54,8 @@
 
 				if($type=='section')
 					$html .= $this->generate_module_switch_section($p);
+				else if($type=='hidden')
+					;
 				else
 					$html .= $this->generate_module_switch_module($p);
 			}
@@ -94,6 +96,8 @@ EOD;
 
 				if($type=='section')
 					$html .= $this->generate_module_html_section($p);
+				else if($type=='hidden')
+					;
 				else
 					$html .= $this->generate_module_html_module($p);
 			}
