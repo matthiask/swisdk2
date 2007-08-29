@@ -91,15 +91,31 @@ EOD;
 			$page = $this->admin_page();
 			$html = '<div id="admin-modules">';
 
+			$in_list = false;
+
 			foreach($page['pages'] as $p) {
 				$type = s_get($p, 'adminsite:type');
 
-				if($type=='section')
+				if($type=='section')  {
+					if($in_list) {
+						$in_list = false;
+						$html .= '</ul>';
+					}
 					$html .= $this->generate_module_html_section($p);
-				else if($type=='hidden')
+				} else if($type=='hidden')
 					;
-				else
+				else {
+					if(!$in_list) {
+						$in_list = true;
+						$html .= '<ul>';
+					}
 					$html .= $this->generate_module_html_module($p);
+				}
+			}
+
+			if($in_list) {
+				$in_list = false;
+				$html .= '</ul>';
 			}
 
 			$html .= '</div>';
