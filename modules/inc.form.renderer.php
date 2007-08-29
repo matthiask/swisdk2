@@ -797,7 +797,6 @@ $(function(){
 });
 //]]>
 </script>
-<br style="clear:left;line-height:1px;visibility:hidden;" />
 
 EOD;
 
@@ -826,7 +825,11 @@ EOD;
 						.str_pad($m, 2, '0', STR_PAD_LEFT).'</option>';
 				}
 				$html .= '</select>';
+
 			}
+
+			$html .= '<br style="clear:left;line-height:1px;visibility:hidden;" />';
+
 			$this->_render($obj, $html);
 		}
 
