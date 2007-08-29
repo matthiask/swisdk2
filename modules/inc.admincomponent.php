@@ -64,7 +64,7 @@
 		 */
 		public function form_renderer()
 		{
-			return new NoTableFormRenderer();
+			return new DListFormRenderer();
 		}
 	}
 

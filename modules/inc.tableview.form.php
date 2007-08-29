@@ -124,7 +124,7 @@
 		}
 	}
 
-	class TableViewFormRenderer extends NoTableFormRenderer {
+	class TableViewFormRenderer extends DListFormRenderer {
 		protected $current = 'search';
 		protected $html_fragments = array();
 
@@ -136,12 +136,14 @@
 		public function html_start()
 		{
 			return $this->html_start
-				.s_get($this->html_fragments, 'search').'<br />';
+				.'<dl>'
+				.s_get($this->html_fragments, 'search').'</dl>';
 		}
 
 		public function html_end()
 		{
-			return s_get($this->html_fragments, 'action')
+			return '<dl>'.s_get($this->html_fragments, 'action')
+				.'</dl>'
 				.'<script type="text/javascript">'."\n"
 				."//<![CDATA[\n"
 				.$this->javascript

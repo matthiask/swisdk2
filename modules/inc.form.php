@@ -433,7 +433,7 @@ EOD;
 		/**
 		 * @return the FormBox html
 		 */
-		public function html($arg = 'NoTableFormRenderer')
+		public function html($arg = 'DListFormRenderer')
 		{
 			$renderer = null;
 			if($arg instanceof FormRenderer)
@@ -742,6 +742,6 @@ EOD;
 	require_once MODULE_ROOT.'inc.form.renderer.php';
 	require_once MODULE_ROOT.'inc.form.behavior.php';
 	require_once MODULE_ROOT.'inc.form.util.php';
-	require_once MODULE_ROOT.'inc.form.notablerenderer.php';
+	require_once MODULE_ROOT.'inc.form.dlistrenderer.php';
 
 ?>
