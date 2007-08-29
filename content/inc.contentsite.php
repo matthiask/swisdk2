@@ -826,7 +826,10 @@
 					.$ug->generate_url($dbo);
 				$item->guid = $feed->link
 					.$ug->generate_url($dbo);
-				$item->description = Markdown($dbo->teaser);
+				if($dbo->teaser)
+					$item->description = Markdown($dbo->teaser);
+				else
+					$item->description = Markdown($dbo->text);
 				$item->date = date(DATE_W3C, $dbo->start_dttm);
 				if($dbo->author_id)
 					$item->author = $authors[$dbo->author_id]->forename.' '
