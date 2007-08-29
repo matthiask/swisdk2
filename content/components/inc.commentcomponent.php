@@ -66,40 +66,36 @@
 
 			$user = SessionHandler::user();
 
+			$author = $this->form->add_auto('author');
+			$email = $this->form->add_auto('author_email');
+			$url = $this->form->add_auto('author_url');
+
+			$author->set_title('Your Name');
+			$email->set_title('Your Email');
+			$email->set_info('Will not be shown');
+			$url->set_title('Your Website');
+
+			$author->add_rule(new RequiredRule());
+
+			$email->add_rule(new DNSEmailRule());
+			$email->add_rule(new RequiredRule());
+
+			$url->add_rule(new UrlRule());
+
 			if($user->id==SWISDK2_VISITOR) {
-				$author = $this->form->add_auto('author');
-				$email = $this->form->add_auto('author_email');
-				$url = $this->form->add_auto('author_url');
-
-				$author->set_title('Your Name');
-				$email->set_title('Your Email');
-				$email->set_info('Will not be shown');
-				$url->set_title('Your Website');
-
-				$author->add_rule(new RequiredRule());
-
-				$email->add_rule(new DNSEmailRule());
-				$email->add_rule(new RequiredRule());
-
-				$url->add_rule(new UrlRule());
-
 				if(isset($_COOKIE['swisdk2_comment_author'])) {
 					$comment_author = explode("\n",
 						$_COOKIE['swisdk2_comment_author']);
 					if(count($comment_author)==3) {
-						$author->set_value($comment_author[0]);
-						$email->set_value($comment_author[1]);
-						$url->set_value($comment_author[2]);
+						$author->set_default_value($comment_author[0]);
+						$email->set_default_value($comment_author[1]);
+						$url->set_default_value($comment_author[2]);
 					}
 				}
 			} else {
-				$author = $this->form->add('comment_author', new HiddenInput());
-				$email = $this->form->add('comment_author_email', new HiddenInput());
-				$url = $this->form->add('comment_author_url', new HiddenInput());
-
-				$email->set_value($user->email);
-				$author->set_value($user->forename.' '.$user->name);
-				$url->set_value($user->url);
+				$email->set_default_value($user->email);
+				$author->set_default_value($user->forename.' '.$user->name);
+				$url->set_default_value($user->url);
 			}
 
 			$text = $this->form->add_auto('text');
