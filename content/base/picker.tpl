@@ -1,11 +1,21 @@
-{extends file="base.admin"}
-
-{block name="head"}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>{$smarty.get.class} Picker</title>
+<link rel="stylesheet" type="text/css" href="/media/admin/admin.css" />
 {literal}
 <style type="text/css">
-.s-table tbody tr:hover {
-	background: #cfc7b7;
+#body .s-table tbody tr:hover {
+	background: #657ba8;
 	cursor: pointer;
+}
+
+#body label.sf-label {
+	text-align: left;
+}
+
+#body input, #body button, #body select, #body textarea {
+	width: 340px;
 }
 </style>
 <script type="text/javascript">
@@ -18,8 +28,9 @@ function do_select(elem, val, str)
 //]]>
 </script>
 {/literal}
-{/block}
+</head>
 
-{block name="body"}
+<body id="body">
 {$content}
-{/block}
+</body>
+</html>
