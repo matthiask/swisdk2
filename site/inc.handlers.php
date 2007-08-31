@@ -20,7 +20,11 @@
 				SwisdkError::handle( new SiteNotFoundError() );
 
 			// get the type of the controller and instance it
-			$type = substr( $includefile, strrpos( $includefile, '_' )+1 );
+			$rpos = strrpos($includefile, '%');
+			if($rpos===false)
+				$rpos = strrpos($includefile, '_');
+
+			$type = substr($includefile, $rpos+1);
 
 			$handler = SwisdkSiteHandler::get_type_handler_instance( $type );
 			return $handler->handle();

@@ -15,7 +15,7 @@
 	 * Incoming: /request/path/
 	 *
 	 * Checks for (always prepend CONTENT_ROOT):
-	 * 
+	 *
 	 * 1. request/path/Index_*
 	 * 2. request/path/All_*
 	 * 3. request/path_*
@@ -53,15 +53,15 @@
 			// try to find an Index_* controller/template only
 			// for the full REQUEST_URI path
 			foreach($paths as $p) {
-				if($matches = glob($p.'/Index_*'))
+				if($matches = glob($p.'/Index{_,%}*', GLOB_NOSORT|GLOB_BRACE))
 					break;
 			}
 
 			if(!$matches) {
 				while(true) {
 					foreach($paths as $p) {
-						if(($matches = glob($p.'/All_*'))
-								||($matches = glob($p.'_*'))) {
+						if(($matches = glob($p.'/All{_,%}*', GLOB_NOSORT|GLOB_BRACE))
+								||($matches = glob($p.'{_,%}*', GLOB_NOSORT|GLOB_BRACE))) {
 							if(count($matches) && is_file($matches[0]))
 								break 2;
 						}
