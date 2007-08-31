@@ -15,6 +15,8 @@
 	{
 		static public function dispatch( $url )
 		{
+			Swisdk::log($url, 'DISPATCHER');
+
 			$modules = explode( "," , Swisdk::config_value( "dispatcher.modules" ) );
 
 			if( count( $modules ) )

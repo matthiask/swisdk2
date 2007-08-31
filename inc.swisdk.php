@@ -273,6 +273,8 @@ EOD;
 					SwisdkError::handle(new ExtremelyFatalError(sprintf(
 						dgettext('swisdk', 'Could not create data directory %s'),
 						$dir)));
+
+			return $dir.'/';
 		}
 
 		/**
@@ -293,6 +295,8 @@ EOD;
 					SwisdkError::handle(new FatalError(sprintf(
 						dgettext('swisdk', 'Could not create data directory %s'),
 						$dir)));
+
+			return $dir.'/';
 		}
 
 		/**
@@ -350,14 +354,13 @@ EOD;
 
 		/**
 		 * add log message
-		 *
-		 * uses the configuration variable $log.logfile as logfile
-		 *
-		 * Example: If you want Swisdk::log($sql, 'db') to work, you need
-		 * to define the configuration variable db.logfile
 		 */
 		public static function log($message, $log='error')
 		{
+			$fname = Swisdk::config_value('error.logfile');
+			if(!$fname)
+				return;
+
 			if(Swisdk::$log_exclude===null)
 				Swisdk::$log_exclude = array_fill_keys(
 					explode(',', Swisdk::config_value('error.log_exclude')),
@@ -366,11 +369,8 @@ EOD;
 			if(s_test(Swisdk::$log_exclude, $log))
 				return;
 
-			Swisdk::require_data_directory('log');
-			$fname = Swisdk::config_value('error.logfile');
-			if(!$fname)
-				return;
-			$fp = @fopen(DATA_ROOT.'log/'.$fname, 'a');
+			$dir = Swisdk::require_data_directory('log');
+			$fp = @fopen($dir.$fname, 'a');
 			@fwrite($fp, date(DATE_W3C).' |'.strtoupper(str_pad($log, 10)).'| '.$message."\n");
 			@fclose($fp);
 		}
@@ -538,7 +538,7 @@ EOD;
 				Swisdk::$_all_languages = DBObject::db_get_array(
 					'SELECT * FROM tbl_language', 'language_id');
 			}
-			
+
 			if($key || $key=Swisdk::config_value('runtime.language')) {
 				foreach(Swisdk::$_all_languages as $id => &$l)
 					if($l['language_key']==$key)
@@ -571,14 +571,14 @@ EOD;
 			if(!Swisdk::$_languages) {
 				Swisdk::$_languages = array();
 				$_langs = Swisdk::website_config_value('languages');
-					
+
 				if($_langs) {
 					$langs = array_flip(explode(',', $_langs));
 					$languages = Swisdk::all_languages();
 					foreach($languages as $lid => &$l)
 						if(isset($langs[$l['language_key']]))
 							Swisdk::$_languages[$lid] = $l;
-					
+
 				} else
 					Swisdk::$_languages = Swisdk::all_languages();
 			}

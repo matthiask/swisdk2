@@ -74,8 +74,7 @@
 			$dbgmsg = $this->debug_message();
 			if($this->send_email)
 				$this->send_notification($dbgmsg);
-			if(Swisdk::config_value('error.logging'))
-				Swisdk::log($dbgmsg);
+			Swisdk::log($dbgmsg);
 			$this->display();
 			die();
 		}
