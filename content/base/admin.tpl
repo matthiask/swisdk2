@@ -17,8 +17,6 @@ $(function(){
 {/literal}</script>
 {block name="head"}
 {/block}
-{swisdk_needs_library name=jquery}
-{swisdk_libraries_html}
 </head>
 
 <body>
