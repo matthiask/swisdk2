@@ -45,6 +45,7 @@
 			$this->register_function('formitem_error', '_smarty_swisdk_formitem_error');
 			$this->register_function('formitem_title', '_smarty_swisdk_formitem_title');
 			$this->register_function('formitem_render', '_smarty_swisdk_formitem_render');
+			$this->register_function('formitem_label', '_smarty_swisdk_formitem_label');
 
 			if($assign) {
 				$this->assign('swisdk_user', SessionHandler::user()->data());
@@ -423,6 +424,11 @@ EOD;
 			default:
 				return 'Unknown formitem_render type';
 		}
+	}
+
+	function _smarty_swisdk_formitem_label($params, &$smarty)
+	{
+		return '<label for="'.$params['item']['id'].'">'.$params['text'].'</label>';
 	}
 
 ?>
