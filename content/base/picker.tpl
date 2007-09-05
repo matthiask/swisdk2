@@ -14,8 +14,19 @@
 	text-align: left;
 }
 
-#body input, #body button, #body select, #body textarea {
-	width: 340px;
+#body form dt {
+	width: 80px;
+}
+
+#body form dd {
+	margin-left: 90px;
+}
+
+#body form input,
+#body form button,
+#body form select,
+#body form textarea {
+	width: 230px;
 }
 </style>
 <script type="text/javascript">
