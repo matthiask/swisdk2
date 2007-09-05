@@ -64,7 +64,7 @@
 
 			if($e===null) {
 				if($title)
-					$this->html .= '<legend>'.$title."</legend>\n<div>\n";
+					$this->html .= '<legend>'.$title."</legend>\n<div>\n<dl>\n";
 			} else if($title) {
 				$id = $obj->id().'__expander';
 
