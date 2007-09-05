@@ -195,20 +195,25 @@ EOD;
 	}
 
 	class RequiredRule extends FormItemRule {
-		public function __construct($message=null)
+		protected $template = '%s<span style="color:red">*</span>';
+
+		public function __construct($message=null, $template=null)
 		{
 			if($message)
 				$this->message = $message;
 			else
 				$this->message = dgettext('swisdk', 'Value required');
+
+			if($template!==null)
+				$this->template = $template;
 		}
 
 		public function set_form_item(&$item)
 		{
 			parent::set_form_item($item);
 			$item->add_css_class('required');
-			$item->set_title($item->title()
-				.'<span style="color:red">*</span>');
+			$item->set_title(sprintf(
+				$this->template, $item->title()));
 		}
 
 		protected function is_valid_impl()
