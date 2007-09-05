@@ -46,6 +46,9 @@
 			$page = $this->admin_page();
 			$html = '';
 
+			if(!s_test($page, 'pages'))
+				return '';
+
 			if($page['url']==$this->current_page['url'])
 				$html .= '<option value="">-- go to --</option>';
 
@@ -89,6 +92,10 @@ EOD;
 		public function generate_module_html()
 		{
 			$page = $this->admin_page();
+
+			if(!s_test($page, 'pages'))
+				return '';
+
 			$html = '<div id="admin-modules">';
 
 			$in_list = false;
