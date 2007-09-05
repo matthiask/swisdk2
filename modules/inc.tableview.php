@@ -310,9 +310,11 @@ EOD;
 				$formobj = $this->form->dbobj();
 				$p = $formobj->_prefix();
 				$data = $formobj->data();
+				$count = $this->obj->total_count();
 
-				$position = array($first = $data[$p.'start']+1,
-					$count = $this->obj->total_count(),
+				$position = array(
+					min($first = $data[$p.'start']+1, $count),
+					$count,
 					min($count, $first+$data[$p.'limit']-1),
 					$data[$p.'limit']);
 			}
@@ -470,7 +472,7 @@ EOD;
 				$html = "<tfoot>\n<tr>\n<td colspan=\"".$colcount.'">'.$html
 					."</td>\n</tr>\n</tfoot>\n";
 			}
-			
+
 			$html .= "</table>\n";
 
 			if(!$this->enabled('multi'))
