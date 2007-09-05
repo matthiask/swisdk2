@@ -194,7 +194,7 @@ EOD;
 		 */
 		public function bind($dbobj)
 		{
-			$this->id = Form::to_form_id($dbobj).'_box_'.$this->name;
+			$this->id = Form::to_form_id($dbobj).'_'.$this->name.'_';
 			$this->dbobj = $dbobj;
 		}
 
@@ -610,7 +610,8 @@ EOD;
 		public static function to_form_id($dbo, $id=0)
 		{
 			$id = $dbo->id();
-			return 'sf_'.$dbo->table().'_'.($id?$id:0);
+
+			return str_replace('-', '_m', substr($dbo->table(), 4).'_'.($id?$id:0));
 		}
 
 		/**

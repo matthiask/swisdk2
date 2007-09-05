@@ -178,7 +178,7 @@
 		{
 			if($this->preinitialized)
 				return $this->name;
-			$id = $this->box_name.$this->name;
+			$id = $this->box_name.$this->dbobj->shortname($this->name);
 			if(strlen($id)>64)
 				$id = 'elem_'.dechex(crc32($id)).'_'.substr($id, -40);
 			$id = str_replace('-', '_m', $id);

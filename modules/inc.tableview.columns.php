@@ -25,11 +25,9 @@
 			else
 				$this->title = '';
 		}
-		
+
 		public function css_class()
 		{
-			if(!$this->css_class)
-				$this->css_class = 's-'.str_replace('_', '-', $this->name());
 			return $this->css_class;
 		}
 

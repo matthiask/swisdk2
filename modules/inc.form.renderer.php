@@ -969,9 +969,13 @@ EOD;
 				$this->file_upload = $renderer->file_upload;
 
 			foreach($elems[$name] as $elem) {
-				$html[] = <<<EOD
-<label for="{$elem['id']}">{$elem['title']}</label> {$elem['html']}
+				$h = '';
+				if($elem['id'] && $elem['title'])
+					$h = <<<EOD
+<label for="{$elem['id']}">{$elem['title']}</label>
+
 EOD;
+				$html[] = $h.$elem['html']."\n";
 				$msg[] = $elem['info'].$elem['message'];
 			}
 
@@ -996,7 +1000,9 @@ EOD;
 
 		protected function _title_html($obj)
 		{
-			return '<label class="sf-label" for="'.$obj->id().'">'.$obj->title().'</label>';
+			if(($i = $obj->id()) && ($t = $obj->title()))
+				return '<label class="sf-label" for="'.$i.'">'.$t.'</label>';
+			return '';
 		}
 
 		protected function _message_html($obj)
