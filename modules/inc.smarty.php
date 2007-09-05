@@ -43,6 +43,7 @@
 			$this->register_function('assign_args', '_smarty_swisdk_assign_args');
 			$this->register_modifier('pluralize', 'pluralize');
 			$this->register_function('formitem_error', '_smarty_swisdk_formitem_error');
+			$this->register_function('formitem_title', '_smarty_swisdk_formitem_title');
 			$this->register_function('formitem_render', '_smarty_swisdk_formitem_render');
 
 			if($assign) {
@@ -376,6 +377,15 @@
 		$item = $params['item'];
 		if(!$item['valid'])
 			return '<span class="error">'.$item['message_raw'].'</span>';
+	}
+
+	function _smarty_swisdk_formitem_title($params, &$smarty)
+	{
+		$item = $params['item'];
+		$template = s_get($params, 'template', '%s');
+
+		return '<label class="sf-label" for="'.$item['id'].'">'
+			.sprintf($template, $item['title_raw']).'</label>';
 	}
 
 	function _smarty_swisdk_formitem_render($params, &$smarty)

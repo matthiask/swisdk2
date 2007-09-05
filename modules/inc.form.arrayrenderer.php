@@ -79,6 +79,7 @@
 				'id' => $obj->id(),
 				'value' => $obj->value(),
 				'title' => $this->_title_html($obj),
+				'title_raw' => $obj->title(),
 				'message' => $this->_message_html($obj),
 				'info' => $this->_info_html($obj),
 				'valid' => $valid,
