@@ -42,6 +42,11 @@
 			return $this->form;
 		}
 
+		public function comment()
+		{
+			return $this->cdbo;
+		}
+
 		public function set_smarty(&$smarty)
 		{
 			$csmarty = new SwisdkSmarty();
@@ -57,6 +62,9 @@
 
 		public function init_form()
 		{
+			if($this->form)
+				return;
+
 			$this->form = new Form();
 			$this->form->bind($this->cdbo);
 
@@ -99,6 +107,7 @@
 			}
 
 			$text = $this->form->add_auto('text');
+			$this->form->add_auto('notify');
 			$this->form->add('submit', new SubmitButton());
 
 			$text->set_title('Comment');
@@ -123,14 +132,22 @@
 
 		public function init_dbobj()
 		{
+			if($this->cdbo)
+				return;
+
 			$this->cdbo = DBObject::create('Comment');
 			$this->cdbo->realm = $this->realm;
 		}
 
-		public function run()
+		public function init()
 		{
 			$this->init_dbobj();
 			$this->init_form();
+		}
+
+		public function run()
+		{
+			$this->init();
 
 			if($this->form->is_valid() && !empty($_SERVER['HTTP_USER_AGENT'])) {
 				$this->cdbo->realm = $this->realm;
