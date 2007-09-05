@@ -430,6 +430,18 @@ EOD
 				$this->_auto_xss_helper($obj)));
 		}
 
+		protected function visit_WymEditor($obj)
+		{
+			$this->_collect_javascript($obj);
+			$name = $obj->id();
+			$this->_render($obj, sprintf(
+				'<textarea name="%s" id="%s" %s>%s</textarea>%s',
+				$name, $name,
+				$this->_attribute_html($obj),
+				$obj->value(),
+				$this->_auto_xss_helper($obj)));
+		}
+
 		protected function visit_RichTextarea($obj)
 		{
 			$prefix = Swisdk::config_value('runtime.webroot.js', '/js');

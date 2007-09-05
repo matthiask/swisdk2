@@ -664,6 +664,16 @@ EOD;
 		}
 	}
 
+	class WymEditor extends Textarea {
+		protected $css_class = 'sf-wymeditor';
+
+		public function __construct($name=null)
+		{
+			parent::__construct($name);
+			Swisdk::needs_library('jquery_wymeditor');
+		}
+	}
+
 	/**
 	 * Textarea with all the Wysiwyg-Bling!
 	 */
