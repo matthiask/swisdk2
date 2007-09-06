@@ -41,7 +41,7 @@
 
 			$this->smarty = new SwisdkSmarty();
 			$this->run_website_components($this->smarty);
-			$this->smarty->assign('content', $cmp->html());
+			$this->smarty->assign('content', $cmp?$cmp->html():'');
 			$this->display();
 		}
 
@@ -143,6 +143,40 @@ EOD;
 					$cmp->run();
 
 					return $cmp;
+				case 'edit_multiple':
+				case 'copy_multiple':
+					$container = $this->find_dbocontainer($this->dbo_class);
+					if(!$container)
+						$this->goto();
+				case 'new_multiple':
+					if(!isset($container) || !$container) {
+						$container = $this->create_dbocontainer(
+							$this->dbo_class, 3);
+					}
+
+					if($cmd=='copy_multiple' || $cmd=='new_multiple') {
+						$this->renumber_dbocontainer($container);
+					}
+
+					$cmp = $this->create_multi_edit_component($container);
+					$cmp->run();
+
+					if($cmp->has_state(STATE_FINISHED))
+						$this->goto();
+
+					return $cmp;
+				case 'delete_multiple':
+					$container = $this->find_dbocontainer($this->dbo_class);
+					if(!$container)
+						$this->goto();
+
+					$cmp = $this->create_multi_delete_component($container);
+					$cmp->run();
+
+					if($cmp->has_state(STATE_FINISHED))
+						$this->goto();
+
+					return $cmp;
 				default:
 					return $this->dispatch_other($cmd, $id);
 			}
@@ -170,12 +204,59 @@ EOD;
 				return DBObject::find($class, $args);
 		}
 
+		protected function create_dbocontainer($class, $count=0)
+		{
+			$container = DBOContainer::create($this->create_dbobject($class));
+			while($count) {
+				$dbo = $container->dbobj_clone();
+				$dbo->id = -$count--;
+				$container->add($dbo);
+			}
+
+			return $container;
+		}
+
+		protected function find_dbocontainer($class)
+		{
+			$dbo = $this->create_dbobject($class);
+			$primary = $dbo->primary();
+
+			$ids = getInput($primary);
+			if(!is_array($ids) || !count($ids))
+				return null;
+
+			$container = DBOContainer::find_by_id($dbo, $ids);
+			if($container->count()==0)
+				return null;
+
+			return $container;
+		}
+
+		protected function renumber_dbocontainer(&$container)
+		{
+			$idx = 0;
+			foreach($container as $dbo) {
+				$dbo->unset_primary();
+				$dbo->id = --$idx;
+			}
+		}
+
 		protected function create_edit_component($dbo)
 		{
 			return new EditComponent($dbo);
 		}
 
+		protected function create_multi_edit_component($dbo)
+		{
+			return new EditComponent($dbo);
+		}
+
 		protected function create_delete_component($dbo)
+		{
+			return new DeleteComponent($dbo);
+		}
+
+		protected function create_multi_delete_component($dbo)
 		{
 			return new DeleteComponent($dbo);
 		}

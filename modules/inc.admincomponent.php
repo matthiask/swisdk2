@@ -12,6 +12,8 @@
 		protected $dbobj;
 		protected $module_url;
 
+		protected $multiple = false;
+
 		public function __construct($dbo=null)
 		{
 			$this->bind($dbo);
@@ -22,13 +24,30 @@
 
 		public function bind($dbo)
 		{
+			if($dbo instanceof DBOContainer)
+				$this->multiple = true;
+
 			$this->dbobj = $dbo;
 			$this->dbo_class = $dbo->_class();
+
 			return $this;
 		}
 
 		public function dbobj()
 		{
+			return $this->dbobj;
+		}
+
+		public function multiple()
+		{
+			return $this->multiple;
+		}
+
+		public function dbobj_single()
+		{
+			if($this->multiple)
+				return $this->dbobj->rewind();
+
 			return $this->dbobj;
 		}
 
@@ -80,24 +99,26 @@
 		public function set_form($form)
 		{
 			$this->form = $form;
-			$this->form->bind($this->dbobj);
+			$this->form->bind($this->dbobj_single());
 			return $this;
 		}
 
 		public function editmode()
 		{
-			return $this->dbobj->id()>0;
+			return $this->dbobj_single()->id()>0;
 		}
 
 		public function copymode()
 		{
-			return $this->dbobj->id()<=0 && $this->dbobj->__old_id>0;
+			$dbo = $this->dbobj_single();
+
+			return $dbo->id()<=0 && $dbo->__old_id>0;
 		}
 
 		public function init_form()
 		{
 			if(!$this->form)
-				$this->form = new Form($this->dbobj);
+				$this->form = new Form($this->dbobj_single());
 		}
 
 		public function init($autobuild=false)
@@ -107,14 +128,30 @@
 
 			$this->init_form();
 
-			if($this->editmode())
-				$this->form->set_title('Edit '.$this->dbo_class.' '
-					.$this->dbobj->id());
-			else
+			if($this->editmode()) {
+				if($this->multiple)
+					$this->form->set_title('Edit '.$this->dbo_class);
+				else
+					$this->form->set_title('Edit '.$this->dbo_class.' '
+						.$this->dbobj->id());
+			} else {
 				$this->form->set_title('Create '.$this->dbo_class);
+			}
 
 			if($autobuild) {
-				$this->form_builder()->build($this->form);
+				$builder = $this->form_builder();
+				if($this->multiple) {
+					foreach($this->dbobj as $dbo) {
+						$box = $this->form->box('dbo'.$dbo->id(), $dbo);
+						$box->set_title($this->dbo_class.' '.$dbo->id());
+						$builder->build($box);
+						$box->add(new HiddenInput($dbo->primary().'[]'))
+							->set_value($dbo->__old_id?$dbo->__old_id:$dbo->id());
+					}
+				} else {
+					$builder->build($form);
+				}
+
 				FormUtil::submit_bar($this->form);
 			}
 
@@ -128,18 +165,18 @@
 			if($this->form->canceled())
 				$this->add_state(STATE_FINISHED);
 			else if($this->form->is_valid()) {
-				$dbo = $this->form->dbobj();
+				$dbo = $this->dbobj;
 				$this->remove_state(STATE_INVALID);
 				if(getInput('sf_button_publish')) {
-					$dbo->active = 1;
-					$dbo->store();
-					$dbo->listener_call('publish');
+					$this->dbobj->active = 1;
+					$this->dbobj->store();
+					$this->dbobj->listener_call('publish');
 					$this->add_state(STATE_FINISHED);
 				} else if(getInput('sf_button_save_and_continue')) {
-					$dbo->store();
+					$this->dbobj->store();
 					$this->add_state(STATE_CONTINUE);
 				} else {
-					$dbo->store();
+					$this->dbobj->store();
 					$this->add_state(STATE_FINISHED);
 				}
 			} else
@@ -180,13 +217,23 @@
 		public function init_form()
 		{
 			$question_title = dgettext('swisdk', 'Confirmation required');
-			$question_text = sprintf(dgettext('swisdk', 'Do you really want to delete %s (%s)?'),
-				$this->dbobj->_class().' '.$this->dbobj->id(),
-				$this->dbobj->title());
+
+			if($this->multiple) {
+				$class = $this->dbobj->_class();
+				$question_text = sprintf(
+					dgettext('swisdk', 'Do you really want to delete %s?'),
+					$class.' '.implode(', ', $this->dbobj->ids()));
+			} else {
+				$question_text = sprintf(
+					dgettext('swisdk', 'Do you really want to delete %s (%s)?'),
+					$this->dbobj->_class().' '.$this->dbobj->id(),
+					$this->dbobj->title());
+			}
+
 			$delete = dgettext('swisdk', 'Delete');
 			$cancel = dgettext('swisdk', 'Cancel');
 
-			$this->form = new Form($this->dbobj);
+			$this->form = new Form($this->dbobj_single());
 			$this->form->set_title($question_title);
 			$this->form->add(new InfoItem($question_text));
 			$group = $this->form->add(new GroupItem());

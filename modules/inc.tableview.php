@@ -333,9 +333,14 @@ EOD;
 			$id = $this->form->id();
 			$gid = Swisdk::guard_token_f('guard');
 			$delete = dgettext('swisdk', 'Really delete?');
+
+			$controller = Swisdk::config_value('runtime.controller.url');
+
 			return '<div style="float:left">'
-				.sprintf(dgettext('swisdk', '%sedit%s or %sdelete%s checked'),
+				.sprintf(dgettext('swisdk', '%sedit%s, %scopy%s or %sdelete%s checked'),
 					'<a href="javascript:tv_edit()">',
+					'</a>',
+					'<a href="javascript:tv_copy()">',
 					'</a>',
 					'<a href="javascript:tv_delete()">',
 					'</a>')
@@ -343,10 +348,16 @@ EOD;
 				.<<<EOD
 <script type="text/javascript">
 //<![CDATA[
-function tv_edit()
+function tv_edit(copy)
 {
 	var form = document.getElementById('$id');
-	form.action = form.action.replace(/\/_list/, '/_edit/multiple');
+	form.action = '{$controller}edit_multiple/';
+	form.submit();
+}
+function tv_copy()
+{
+	var form = document.getElementById('$id');
+	form.action = '{$controller}copy_multiple/';
 	form.submit();
 }
 function tv_delete()
@@ -354,7 +365,7 @@ function tv_delete()
 	if(!confirm('$delete'))
 		return;
 	var form = document.getElementById('$id');
-	form.action = form.action.replace(/\/_list/, '/_delete/multiple?guard=$gid');
+	form.action = '{$controller}delete_multiple/?guard=$gid';
 	form.submit();
 }
 function tv_toggle(elem)
