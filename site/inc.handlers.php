@@ -121,4 +121,24 @@
 		}
 	}
 
+	/**
+	*	Extremly simple DB-based content
+	*/
+	class DbTplHandler extends SwisdkSiteHandler {
+		public function handle()
+		{
+			$includefile = Swisdk::config_value('runtime.includefile');
+			$tmp = explode('_', str_replace(CONTENT_ROOT, '', $includefile));
+			$key = $tmp[0];
+
+			$dbo = DBObject::find('Template', array(
+				'template_key=' => $key));
+
+			$smarty = new SwisdkSmarty();
+			if($dbo)
+				$smarty->assign('dbtpl_content', $dbo->content);
+
+			$smarty->display($includefile);
+		}
+	}
 ?>
