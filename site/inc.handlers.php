@@ -127,6 +127,7 @@
 	class DbTplHandler extends SwisdkSiteHandler {
 		public function handle()
 		{
+			require_once MODULE_ROOT.'inc.smarty.php';
 			$includefile = Swisdk::config_value('runtime.includefile');
 			$tmp = explode('_', str_replace(CONTENT_ROOT, '', $includefile));
 			$key = $tmp[0];
