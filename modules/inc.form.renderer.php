@@ -625,7 +625,7 @@ function threeway_create_input_$name(second, third)
 	input.name = '{$name}['+second+'][]';
 	input.value = third;
 	myself.appendChild(span);
-	span.appendChild(document.createTextNode({$name}_second[second]));
+	span.appendChild(document.createTextNode({$name}_second[second]+' '));
 	span.appendChild(input);
 
 	var img = document.createElement('img');
