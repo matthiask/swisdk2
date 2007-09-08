@@ -57,7 +57,7 @@ msgstr "In %s"
 
 #: core/inc.functions.php:208
 msgid "years,months,weeks,days,hours,min,sec"
-msgstr "Jahre,Monate,Wochen,Tage,Stunden,Minuten,Sekunden"
+msgstr "Jahren,Monaten,Wochen,Tagen,Stunden,Minuten,Sekunden"
 
 #: core/inc.functions.php:216
 msgid "right now"
