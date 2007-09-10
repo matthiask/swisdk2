@@ -364,10 +364,15 @@ EOD;
 			if(!$fname)
 				return;
 
-			if(Swisdk::$log_exclude===null)
-				Swisdk::$log_exclude = array_fill_keys(
-					Swisdk::config_value('error.log_exclude'),
-					true);
+			if(Swisdk::$log_exclude===null) {
+				$le = Swisdk::config_value('error.log_exclude');
+				if($le)
+					$le = array_fill_keys($le, true);
+				else
+					$le = array();
+
+				Swisdk::$log_exclude = $le;
+			}
 
 			if(s_test(Swisdk::$log_exclude, $log))
 				return;
