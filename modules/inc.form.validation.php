@@ -328,6 +328,41 @@ EOD;
 		}
 	}
 
+	class IntegerRule extends FormItemRule {
+		public function __construct($message=null)
+		{
+			if($message)
+				$this->message = $message;
+			else
+				$this->message = dgettext('swisdk', 'Value must be an integer');
+		}
+
+		protected function is_valid_impl()
+		{
+			$v = $this->item->value();
+			return !$v || (is_numeric($v) && floatval($v)==intval($v));
+		}
+
+		protected function validation_js_impl($set_sent=true)
+		{
+			static $sent = false;
+			$js = '';
+			if(!$sent) {
+				if($set_sent)
+					$sent = true;
+				$js = <<<EOD
+function formitem_integer_rule(id)
+{
+	var value = document.getElementById(id).value;
+	return !value || value.match(/^[0-9]*$/);
+}
+
+EOD;
+			}
+			return array('formitem_integer_rule', $js);
+		}
+	}
+
 	class RangeRule extends FormItemRule {
 		protected $min;
 		protected $max;
