@@ -219,7 +219,12 @@ EOD;
 
 		public static function init_config()
 		{
-			Swisdk::read_configfile(WEBAPP_ROOT.'config.ini');
+			if(file_exists(WEBAPP_ROOT.'config.yaml')) {
+				Swisdk::read_configfile(WEBAPP_ROOT.'config.yaml');
+			} else {
+				Swisdk::read_configfile(WEBAPP_ROOT.'config.ini');
+			}
+
 			if($core_cfg = Swisdk::config_value('core.include'))
 				Swisdk::read_configfile(WEBAPP_ROOT.$core_cfg);
 		}
@@ -232,7 +237,13 @@ EOD;
 				$prefix .= '.';
 
 			if(file_exists($file)) {
-				$cfg = parse_ini_file($file, true);
+				$cfg = array();
+				if(strpos($file, '.yaml')!==false) {
+					require_once SWISDK_ROOT.'lib/contrib/spyc.php';
+					$cfg = Spyc::YAMLLoad($file);
+				} else
+					$cfg = parse_ini_file($file, true);
+
 				foreach($cfg as $section => $array) {
 					$section = preg_replace('/^([\w]+)\ "(.*)"$/', '\1.\2', $section);
 					// special handling for sections which have a dot
