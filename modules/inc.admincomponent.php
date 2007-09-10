@@ -7,7 +7,7 @@
 
 	require_once MODULE_ROOT.'inc.builder.php';
 
-	class AdminComponent2 extends StateComponent {
+	abstract class AdminComponent2 extends StateComponent implements IComponent {
 		protected $dbo_class;
 		protected $dbobj;
 		protected $module_url;

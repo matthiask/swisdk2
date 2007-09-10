@@ -23,6 +23,27 @@
 			redirect($this->url().$frag);
 		}
 
+		public function handle_component_call($args=null)
+		{
+			$cmp_class = Swisdk::config_value('runtime.dispatcher.component');
+
+			if(!$cmp_class)
+				return;
+
+			$cmp = Swisdk::load_instance($cmp_class.'Component', 'components');
+			if($cmp instanceof IComponent)
+				$cmp->run();
+			if($cmp instanceof IHtmlComponent)
+				echo $cmp->html();
+			if($cmp instanceof ISmartyComponent) {
+				$smarty = $this->smarty();
+				$cmp->set_smarty($smarty);
+				$smarty->display_template('base.full');
+			}
+
+			Swisdk::shutdown();
+		}
+
 		public function run_website_components($smarty)
 		{
 			$components = Swisdk::website_config_value('components');
