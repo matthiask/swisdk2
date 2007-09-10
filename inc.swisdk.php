@@ -122,6 +122,7 @@ EOD;
 			require_once UTF8 . '/utils/ascii.php';
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
+			require_once SWISDK_ROOT.'lib/contrib/spyc.php';
 
 			SwisdkError::setup();
 			Swisdk::init_config();
@@ -219,11 +220,7 @@ EOD;
 
 		public static function init_config()
 		{
-			if(file_exists(WEBAPP_ROOT.'config.yaml')) {
-				Swisdk::read_configfile(WEBAPP_ROOT.'config.yaml');
-			} else {
-				Swisdk::read_configfile(WEBAPP_ROOT.'config.ini');
-			}
+			Swisdk::read_configfile(WEBAPP_ROOT.'config.yaml');
 
 			if($core_cfg = Swisdk::config_value('core.include'))
 				Swisdk::read_configfile(WEBAPP_ROOT.$core_cfg);
@@ -237,12 +234,7 @@ EOD;
 				$prefix .= '.';
 
 			if(file_exists($file)) {
-				$cfg = array();
-				if(strpos($file, '.yaml')!==false) {
-					require_once SWISDK_ROOT.'lib/contrib/spyc.php';
-					$cfg = Spyc::YAMLLoad($file);
-				} else
-					$cfg = parse_ini_file($file, true);
+				$cfg = Spyc::YAMLLoad($file);
 
 				foreach($cfg as $section => $array) {
 					$section = preg_replace('/^([\w]+)\ "(.*)"$/', '\1.\2', $section);
@@ -374,7 +366,7 @@ EOD;
 
 			if(Swisdk::$log_exclude===null)
 				Swisdk::$log_exclude = array_fill_keys(
-					explode(',', Swisdk::config_value('error.log_exclude')),
+					Swisdk::config_value('error.log_exclude'),
 					true);
 
 			if(s_test(Swisdk::$log_exclude, $log))

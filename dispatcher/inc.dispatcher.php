@@ -17,7 +17,7 @@
 		{
 			Swisdk::log($url, 'DISPATCHER');
 
-			$modules = explode( "," , Swisdk::config_value( "dispatcher.modules" ) );
+			$modules = Swisdk::config_value('dispatcher.modules');
 
 			if( count( $modules ) )
 			{

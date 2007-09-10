@@ -102,7 +102,7 @@
 			require_once MODULE_ROOT.'inc.smarty.php';
 			$smarty = new SwisdkSmarty();
 
-			$components = explode(',', Swisdk::website_config_value('components'));
+			$components = Swisdk::website_config_value('components');
 
 			foreach($components as &$c) {
 				$c = trim($c);
