@@ -53,7 +53,7 @@
 				$html .= '<option value="">-- go to --</option>';
 
 			foreach($page['pages'] as $p) {
-				$type = s_get($p, 'adminsite:type');
+				$type = s_get($p, 'adminsite.type');
 
 				if($type=='section')
 					$html .= $this->generate_module_switch_section($p);
@@ -101,7 +101,7 @@ EOD;
 			$in_list = false;
 
 			foreach($page['pages'] as $p) {
-				$type = s_get($p, 'adminsite:type');
+				$type = s_get($p, 'adminsite.type');
 
 				if($type=='section')  {
 					if($in_list) {

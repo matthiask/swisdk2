@@ -27,12 +27,12 @@
 			if(isset($sitemap['pages'])) {
 				$html = '<ul>';
 				foreach($sitemap['pages'] as &$page) {
-					if(isset($page['navigation:hidden'])
-							&& $page['navigation:hidden']=='true')
+					if(isset($page['navigation.hidden'])
+							&& $page['navigation.hidden']=='true')
 						continue;
 					$class = '';
-					if((!isset($page['navigation:current'])
-							|| !$page['navigation:current'])
+					if((!isset($page['navigation.current'])
+							|| !$page['navigation.current'])
 							&& strpos($current.'/', $page['url'].'/')===0)
 						$class = ' class="current"';
 					$html .= '<li'.$class.'><a href="'.$this->prepend

@@ -6,6 +6,9 @@
 <xsl:template match="sitemap">&lt;?php
 global $_swisdk2_sitemap;
 $_swisdk2_sitemap = array(
+	<xsl:for-each select="@*">
+		'<xsl:value-of select="translate(name(),':','.')" />' => '<xsl:value-of select="." />',
+	</xsl:for-each>
 	'pages' => array(
 	<xsl:apply-templates/>
 	)
@@ -16,7 +19,7 @@ $_swisdk2_sitemap = array(
 '<xsl:value-of select="@id"/>' => array(
 	'domain' => 1,
 	<xsl:for-each select="@*">
-		'<xsl:value-of select="name()" />' => '<xsl:value-of select="." />',
+		'<xsl:value-of select="translate(name(),':','.')" />' => '<xsl:value-of select="." />',
 	</xsl:for-each>
 	<xsl:if test="count(*) &gt; 0">
 	'pages' => array(
@@ -29,7 +32,7 @@ $_swisdk2_sitemap = array(
 <xsl:template match="page">
 '<xsl:value-of select="@id"/>' => array(
 	<xsl:for-each select="@*">
-		'<xsl:value-of select="name()" />' => '<xsl:value-of select="." />',
+		'<xsl:value-of select="translate(name(),':','.')" />' => '<xsl:value-of select="." />',
 	</xsl:for-each>
 	<xsl:if test="count(*) &gt; 0">
 	'pages' => array(
