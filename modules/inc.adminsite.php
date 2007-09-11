@@ -18,6 +18,7 @@
 		protected $role = ROLE_MANAGER;
 
 		protected $smarty;
+		protected $component;
 
 		public function init()
 		{
@@ -35,13 +36,13 @@
 			$this->init();
 			$args = Swisdk::config_value('runtime.arguments');
 
-			$cmp = $this->dispatch(
+			$this->component = $this->dispatch(
 				s_get($args, 0, 'list'),
 				s_get($args, 1));
 
 			$this->smarty = new SwisdkSmarty();
 			$this->run_website_components($this->smarty);
-			$this->smarty->assign('content', $cmp?$cmp->html():'');
+			$this->smarty->assign('content', $this->component?$this->component->html():'');
 			$this->display();
 		}
 
@@ -52,7 +53,7 @@
 			$this->init();
 			$args = Swisdk::config_value('runtime.arguments');
 
-			$cmp = $this->dispatch(
+			$this->component = $this->dispatch(
 				s_get($args, 0, 'create'),
 				s_get($args, 1));
 
@@ -78,7 +79,7 @@ $(function(){
 EOD;
 
 			$this->smarty->assign('content',
-				$list->html().$scroll.($cmp?$cmp->html():''));
+				$list->html().$scroll.($this->component?$this->component->html():''));
 			$this->display();
 		}
 
