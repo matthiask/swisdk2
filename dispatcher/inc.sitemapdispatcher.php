@@ -43,10 +43,12 @@
 			if($input = trim($input, '/'))
 				$this->tokens = explode('/', $input);
 			$this->domain = Swisdk::config_value('runtime.domain', '');
-			// empty string is ok too
-			if(!count($this->tokens) || $this->tokens[0])
+
+			if($this->domain)
 				array_unshift($this->tokens, $this->domain);
 			$this->rewroten = null;
+
+			$this->walk_page($ref);
 
 			while(($t = array_shift($this->tokens))!==null) {
 				if(!isset($ref['pages'][$t]))
