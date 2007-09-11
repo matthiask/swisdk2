@@ -42,6 +42,8 @@
 	 * email_reply_to (defauls to email_from)
 	 */
 	class EmailMessage extends Message {
+		protected $auto_html = false;
+
 		public function __construct($dbo = null)
 		{
 			if($dbo)
@@ -55,35 +57,64 @@
 			if(!$this->sanity_check())
 				return;
 
-			$this->send_mail($this->dbobj->recipient, $this->dbobj->subject,
-				$this->dbobj->message, $this->dbobj->recipient_cc,
-				$this->dbobj->recipient_bcc);
-		}
-
-		protected function send_mail($to, $sub, $msg, $cc, $bcc)
-		{
-			$from = $this->dbobj->from;
-			if(!$from)
-				$from = Swisdk::config_value('core.name', 'Messenger')
+			if(!$this->dbobj->from)
+				$this->dbobj->from = Swisdk::config_value('core.name', 'Messenger')
 					.' <info@'.preg_replace('/^www\./', '',
 						Swisdk::config_value('runtime.request.host')).'>';
-			$reply_to = $this->dbobj->reply_to;
-			if(!$reply_to)
-				$reply_to = $from;
 
+			if(!$this->dbobj->reply_to)
+				$this->dbobj->reply_to = $this->dbobj->from;
+
+			if($this->auto_html)
+				$this->send_mail_html();
+			else
+				$this->send_mail_text();
+		}
+
+		protected function send_mail_html($to, $sub, $msg, $cc, $bcc)
+		{
+			require_once MODULE_ROOT.'inc.smarty.php';
+			require_once SWISDK_ROOT.'lib/contrib/htmlMimeMail5/htmlMimeMail5.php';
+
+			$mail = new htmlMimeMail5();
+
+			$mail->setHeadCharset('UTF-8');
+			$mail->setTextCharset('UTF-8');
+			$mail->setHTMLCharset('UTF-8');
+
+			$mail->setFrom($this->dbobj->from);
+			$mail->setSubject($this->dbobj->subject);
+			$mail->setText($this->dbobj->message);
+
+			$smarty = new SwisdkSmarty();
+			foreach($this->dbobj as $k => $v)
+				$smarty->assign($this->dbobj->shortname($k), $v);
+
+			$mail->setHTML($smarty->fetch_template('base.mail'));
+
+			$mail->setCc($this->dbobj->recipient_cc);
+			$mail->setBcc($this->dbobj->recipient_bcc);
+			$mail->setHeader('Reply-To', $this->dbobj->reply_to);
+
+			$mail->send(array($this->dbobj->recipient));
+		}
+
+		protected function send_mail_text($to, $sub, $msg, $cc, $bcc)
+		{
 			$headers = implode("\r\n", array(
-					'From: '.$from,
-					'Cc: '.$cc,
-					'Bcc: '.$bcc,
-					'Reply-To: '.$reply_to,
+					'From: '.$this->dbobj->from,
+					'Cc: '.$this->dbobj->recipient_cc,
+					'Bcc: '.$this->dbobj->recipient_bcc,
+					'Reply-To: '.$this->dbobj->reply_to,
 					'X-Mailer: SWISDK 2.0 http://spinlock.ch/projects/swisdk/'
 				));
 			if(function_exists('mb_language') && function_exists('mb_send_mail')) {
 				mb_language('uni');
-				mb_send_mail($to, $sub, $msg, $headers);
+				mb_send_mail($this->dbobj->recipient, $this->dbobj->subject,
+					$this->dbobj->message, $headers);
 			} else
-				mail($to, $sub, $msg, $headers);
-
+				mail($this->dbobj->recipient, $this->dbobj->subject,
+					$this->dbobj->message, $headers);
 		}
 
 		protected function sanity_check()
