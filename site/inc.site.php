@@ -79,6 +79,13 @@
 
 			return $smarty;
 		}
+
+		public function catalog_load($file)
+		{
+			require_once MODULE_ROOT.'inc.catalog.php';
+
+			Catalog::load($this->basedir().$file);
+		}
 	}
 
 ?>
