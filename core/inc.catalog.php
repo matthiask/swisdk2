@@ -10,23 +10,21 @@
 	class Catalog {
 		protected static $catalog = array();
 
-		protected static $language_key;
-
 		public static function load($data)
 		{
 			Catalog::add(Spyc::YAMLLoad($data));
-			Catalog::$language_key = Swisdk::language_key();
 		}
 
 		public static function add($c)
 		{
-			Catalog::$catalog = array_merge_recursive(Catalog::$catalog, $c);
+			Catalog::$catalog = array_merge(Catalog::$catalog, $c);
 		}
 
 		public static function translate($str)
 		{
-			if(isset(Catalog::$catalog[$str][Catalog::$language_key]))
-				return Catalog::$catalog[$str][Catalog::$language_key];
+			$lkey = Swisdk::language_key();
+			if(isset(Catalog::$catalog[$str][$lkey]))
+				return Catalog::$catalog[$str][$lkey];
 
 			return $str;
 		}
@@ -41,7 +39,7 @@
 			}
 
 			$c =& Catalog::$catalog[$str];
-			$lkey = Catalog::$language_key;
+			$lkey = Swisdk::language_key();
 
 			if(isset($c[$t = $lkey.'_'.$count]))
 				return $c[$t];

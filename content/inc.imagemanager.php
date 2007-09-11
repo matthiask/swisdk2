@@ -55,8 +55,7 @@
 		{
 			if(!ImageManager::type_exists($type))
 				SwisdkError::handle(new FatalError(sprintf(
-					dgettext('swisdk', 'Type %s does not exist'),
-					$type)));
+					'Type %s does not exist', $type)));
 			return ImageManager::generate($file, $type, $htdocs_data_dir,
 				array(), $regenerate);
 		}

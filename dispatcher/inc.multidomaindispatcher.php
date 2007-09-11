@@ -49,8 +49,8 @@
 				if($cfg = Swisdk::config_value('domain.'.$out.'.include'))
 					Swisdk::read_configfile($cfg);
 			} else {
-				SwisdkError::handle(new FatalError(dgettext('swisdk',
-					'No matching host found')));
+				SwisdkError::handle(new FatalError(
+					'No matching host found'));
 			}
 		}
 	}

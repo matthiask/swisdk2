@@ -174,7 +174,7 @@
 				$this->filter('!cutoff');
 			$this->dbobj->init();
 
-			$title = dgettext('swisdk', 'Archive for ');
+			$title = _T('Archive for ');
 			switch($this->archive_mode) {
 				case 'day':
 					$title .= '%d. %B %Y';
@@ -857,7 +857,7 @@
 			require_once SWISDK_ROOT.'lib/contrib/markdown.php';
 			$feed = new UniversalFeedCreator();
 			$feed->title = Swisdk::config_value('runtime.website.title')
-				.' | '.dgettext('swisdk', 'Comments');
+				.' | '._T('Comments');
 			$feed->description = $feed->title;
 			$feed->link = Swisdk::config_value('runtime.request.protocol')
 				.'//'.Swisdk::config_value('runtime.request.host');
@@ -903,8 +903,8 @@
 			require_once SWISDK_ROOT.'lib/contrib/markdown.php';
 			$feed = new UniversalFeedCreator();
 			$feed->title = $this->dbobj->title
-				.' | '.dgettext('swisdk', 'Comments');
-			$feed->description = sprintf(dgettext('swisdk', 'Comments for \'%s\''),
+				.' | '._T('Comments');
+			$feed->description = sprintf(_T('Comments for \'%s\''),
 				$this->dbobj->title);
 			$feed->link = Swisdk::config_value('runtime.request.protocol')
 				.'//'.Swisdk::config_value('runtime.request.host')

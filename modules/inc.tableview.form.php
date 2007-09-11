@@ -46,8 +46,8 @@
 
 		public function add_default_items()
 		{
-			$this->box('search')->set_title(dgettext('swisdk', 'Search form'));
-			$this->box('action')->set_title(dgettext('swisdk', 'Actions'));
+			$this->box('search')->set_title(_T('Search form'));
+			$this->box('action')->set_title(_T('Actions'));
 			$this->search->add(new SubmitButton());
 		}
 
@@ -87,7 +87,7 @@
 
 			$this->box('search')->set_title($this->box('search')->title
 				.' <small>(<a href="?swisdk2_persistence_reset=1">'
-				.dgettext('swisdk', 'reset listing')
+				._T('reset listing')
 				.'</a>)</small>');
 
 		}
@@ -99,7 +99,7 @@
 		{
 			$this->box('search')->add($this->dbobj()->name('query'),
 				new TextInput(),
-				($title?$title:dgettext('swisdk', 'Search')));
+				($title?$title:_T('Search')));
 		}
 
 		public function name()

@@ -183,8 +183,7 @@
 		public function __construct($exception)
 		{
 			parent::__construct(
-				sprintf(dgettext('swisdk', 'Uncaught exception: %s'),
-					$exception->getMessage()));
+				sprintf('Uncaught exception: %s', $exception->getMessage()));
 		}
 	}
 

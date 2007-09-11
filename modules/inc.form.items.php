@@ -167,7 +167,7 @@
 
 		public function set_title($title=null)
 		{
-			$this->title = $title?dgettext('swisdk', $title):null;
+			$this->title = $title?_T($title):null;
 			return $this;
 		}
 
@@ -468,22 +468,22 @@ EOD;
 				case UPLOAD_ERR_INI_SIZE:  // upload_max_filesize in php.ini
 				case UPLOAD_ERR_FORM_SIZE: // MAX_FILE_SIZE hidden input field
 					$this->add_message(
-						dgettext('swisdk', 'The uploaded file exceeds the allowed filesize'));
+						_T('The uploaded file exceeds the allowed filesize'));
 					break;
 				case UPLOAD_ERR_PARTIAL:
 					$this->add_message(
-						dgettext('swisdk', 'The uploaded file was only partially uploaded'));
+						_T('The uploaded file was only partially uploaded'));
 					break;
 				case UPLOAD_ERR_NO_FILE:
 					$this->add_message(
-						dgettext('swisdk', 'No file was uploaded'));
+						_T('No file was uploaded'));
 				case UPLOAD_ERR_NO_TMP_DIR:
 					SwisdkError::handle(new FatalError(
-						dgettext('swisdk', 'FileUpload: Missing a temporary folder')));
+						_T('FileUpload: Missing a temporary folder')));
 					break;
 				case UPLOAD_ERR_CANT_WRITE:
 					SwisdkError::handle(new FatalError(
-						dgettext('swisdk', 'FileUpload: Failed to write file to disk')));
+						_T('FileUpload: Failed to write file to disk')));
 					break;
 			}
 
@@ -738,7 +738,7 @@ EOD;
 		public function add_null_item($title=null)
 		{
 			if(!$title)
-				$title = dgettext('swisdk', 'select');
+				$title = _T('select');
 
 			$items = array(0 => '-- '.$title.' --');
 			foreach($this->items as $k => $v)
@@ -1077,7 +1077,7 @@ EOD;
 			if($name)
 				$this->name = $name;
 
-			$this->caption = dgettext('swisdk', $this->caption);
+			$this->caption = _T($this->caption);
 		}
 
 		public function caption()

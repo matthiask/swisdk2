@@ -61,7 +61,7 @@
 			$this->field1 = $field1;
 			$this->field2 = $field2;
 			parent::__construct($message);
-			$this->message = dgettext('swisdk', 'The two related fields are not equal');
+			$this->message = _T('The two related fields are not equal');
 		}
 
 		protected function is_valid_impl()
@@ -146,7 +146,7 @@ EOD;
 			if($message)
 				$this->message = $message;
 			else
-				$this->message = dgettext('swisdk', 'Value does not validate');
+				$this->message = _T('Value does not validate');
 		}
 
 		public function set_form_item(&$item)
@@ -202,7 +202,7 @@ EOD;
 			if($message)
 				$this->message = $message;
 			else
-				$this->message = dgettext('swisdk', 'Value required');
+				$this->message = _T('Value required');
 
 			if($template!==null)
 				$this->template = $template;
@@ -262,7 +262,7 @@ EOD;
 			if($message)
 				$this->message = $message;
 			else
-				$this->message = dgettext('swisdk', 'User required');
+				$this->message = _T('User required');
 		}
 
 		protected function is_valid_impl()
@@ -299,7 +299,7 @@ EOD;
 			if($message)
 				$this->message = $message;
 			else
-				$this->message = dgettext('swisdk', 'Value must be numeric');
+				$this->message = _T('Value must be numeric');
 		}
 
 		protected function is_valid_impl()
@@ -334,7 +334,7 @@ EOD;
 			if($message)
 				$this->message = $message;
 			else
-				$this->message = dgettext('swisdk', 'Value must be an integer');
+				$this->message = _T('Value must be an integer');
 		}
 
 		protected function is_valid_impl()
@@ -372,7 +372,7 @@ EOD;
 			if($message)
 				$this->message = $message;
 			else
-				$this->message = sprintf(dgettext('swisdk', 'Number must be between %s and %s'),
+				$this->message = sprintf(_T('Number must be between %s and %s'),
 					$min, $max);
 			$this->min = $min;
 			$this->max = $max;
@@ -452,7 +452,7 @@ EOD;
 			if($message)
 				$this->message = $message;
 			else
-				$this->message = dgettext('swisdk', 'Please enter a valid email address');
+				$this->message = _T('Please enter a valid email address');
 		}
 	}
 
@@ -480,7 +480,7 @@ EOD;
 			if($message)
 				$this->message = $message;
 			else
-				$this->message = dgettext('swisdk', 'Please enter a valid URL');
+				$this->message = _T('Please enter a valid URL');
 		}
 	}
 
@@ -492,7 +492,7 @@ EOD;
 				$this->message = $message;
 			else
 				$this->message =
-					dgettext('swisdk', 'Only alphanumeric characters allowed');
+					_T('Only alphanumeric characters allowed');
 		}
 	}
 
@@ -539,7 +539,7 @@ EOD;
 			if($message)
 				$this->message = $message;
 			else
-				$this->message = dgettext('swisdk', 'Value is not unique');
+				$this->message = _T('Value is not unique');
 		}
 
 		protected function is_valid_impl()
@@ -560,7 +560,7 @@ EOD;
 			if($message)
 				$this->message = $message;
 			else
-				$this->message = dgettext('swisdk', 'Please provide a file');
+				$this->message = _T('Please provide a file');
 		}
 
 		protected function is_valid_impl()
@@ -578,7 +578,7 @@ EOD;
 			if($message)
 				$this->message = $message;
 			else
-				$this->message = dgettext('swisdk', 'Please provide a valid image file');
+				$this->message = _T('Please provide a valid image file');
 
 			if($mimetypes)
 				$this->image_mimetypes = $mimetypes;

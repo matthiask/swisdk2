@@ -209,7 +209,7 @@
 			require_once MODULE_ROOT . 'inc.smarty.php';
 			$form = new Form();
 			$form->bind(DBObject::create('Login'));
-			$form->set_title(dgettext('swisdk', 'Login'));
+			$form->set_title('Login');
 			$form->add(new TextInput('login_username'))
 				->add_behavior(new GrabFocusBehavior())
 				->set_title('Username');

@@ -53,7 +53,7 @@
 			Swisdk::shutdown();
 		} else
 			SwisdkError::handle(new FatalError(sprintf(
-				dgettext('swisdk', 'Invalid location specification: %s'), $url)));
+				'Invalid location specification: %s', $url)));
 	}
 
 	/**
@@ -245,15 +245,14 @@
 	{
 		static $timespans = null;
 
-		$template = dgettext('swisdk', '%s ago');
+		$template = _T('%s ago');
 		if($seconds>0)
-			$template = dgettext('swisdk', 'in %s');
+			$template = _T('in %s');
 		$seconds = abs($seconds);
 
 		if(!$timespans)
 			$timespans = array_combine(
-				explode(',',
-					dgettext('swisdk', 'years,months,weeks,days,hours,min,sec')),
+				explode(',', _T('years,months,weeks,days,hours,min,sec')),
 				array(86400*365, 86400*365/12, 86400*7, 86400, 3600, 60, 1));
 
 		foreach($timespans as $type => $span)
@@ -261,7 +260,7 @@
 				return sprintf($template,
 					intval($seconds/$span).' '.$type);
 
-		return dgettext('swisdk', 'right now');
+		return _T('right now');
 	}
 
 	function stringifyAbsoluteTime($seconds)

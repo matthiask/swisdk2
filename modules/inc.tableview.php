@@ -269,7 +269,7 @@ EOD;
 
 			if(!$this->obj)
 				SwisdkError::handle(new FatalError(
-					dgettext('swisdk', 'Cannot use TableView without DBOContainer')));
+					'Cannot use TableView without DBOContainer'));
 			if(!$this->form)
 				$this->form = new TableViewForm();
 
@@ -332,12 +332,12 @@ EOD;
 
 			$id = $this->form->id();
 			$gid = Swisdk::guard_token_f('guard');
-			$delete = dgettext('swisdk', 'Really delete?');
+			$delete = _T('Really delete?');
 
 			$controller = Swisdk::config_value('runtime.controller.url');
 
 			return '<div style="float:left">'
-				.sprintf(dgettext('swisdk', '%sedit%s, %scopy%s or %sdelete%s checked'),
+				.sprintf(_T('%sedit%s, %scopy%s or %sdelete%s checked'),
 					'<a href="javascript:tv_edit()">',
 					'</a>',
 					'<a href="javascript:tv_copy()">',
@@ -465,8 +465,8 @@ EOD;
 
 			list($first, $count, $last, $step) = $this->list_position();
 
-			$str = sprintf(dgettext('swisdk', 'displaying %s &ndash; %s of %s'), $first, $last, $count);
-			$skim = sprintf(dgettext('swisdk', 'skim %sbackwards%s or %sforwards%s'),
+			$str = sprintf(_T('displaying %s &ndash; %s of %s'), $first, $last, $count);
+			$skim = sprintf(_T('skim %sbackwards%s or %sforwards%s'),
 				'<a href="javascript:skim(-'.$step.')">',
 				'</a>',
 				'<a href="javascript:skim('.$step.')">',

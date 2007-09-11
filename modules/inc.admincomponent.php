@@ -216,22 +216,22 @@
 
 		public function init_form()
 		{
-			$question_title = dgettext('swisdk', 'Confirmation required');
+			$question_title = _T('Confirmation required');
 
 			if($this->multiple) {
 				$class = $this->dbobj->_class();
 				$question_text = sprintf(
-					dgettext('swisdk', 'Do you really want to delete %s?'),
+					_T('Do you really want to delete %s?'),
 					$class.' '.implode(', ', $this->dbobj->ids()));
 			} else {
 				$question_text = sprintf(
-					dgettext('swisdk', 'Do you really want to delete %s (%s)?'),
+					_T('Do you really want to delete %s (%s)?'),
 					$this->dbobj->_class().' '.$this->dbobj->id(),
 					$this->dbobj->title());
 			}
 
-			$delete = dgettext('swisdk', 'Delete');
-			$cancel = dgettext('swisdk', 'Cancel');
+			$delete = _T('Delete');
+			$cancel = _T('Cancel');
 
 			$this->form = new Form($this->dbobj_single());
 			$this->form->set_title($question_title);

@@ -76,11 +76,11 @@
 					$xml = new DOMDocument();
 					if(!$xml->load($xmlfile))
 						SwisdkError::handle(new FatalError(sprintf(
-							dgettext('swisdk', 'Could not load sitemap %s'),
+							'Could not load sitemap %s',
 							$xmlfile)));
 					if(!$xsl->load($xslfile))
 						SwisdkError::handle(new FatalError(sprintf(
-							dgettext('swisdk', 'Could not load sitemap xsl %s'),
+							'Could not load sitemap xsl %s',
 							$xslfile)));
 					$prc->importStyleSheet($xsl);
 					file_put_contents($phpfile, $prc->transformToXML($xml));

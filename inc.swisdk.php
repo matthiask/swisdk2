@@ -122,6 +122,7 @@ EOD;
 			require_once UTF8 . '/utils/ascii.php';
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
+			require_once SWISDK_ROOT.'core/inc.catalog.php';
 			require_once SWISDK_ROOT.'lib/contrib/spyc.php';
 
 			SwisdkError::setup();
@@ -253,8 +254,8 @@ EOD;
 						Swisdk::$config[$prefix.$section.'.'.$key] = $value;
 				}
 			} else if($throw) {
-				SwisdkError::handle(new FatalError(sprintf(
-					dgettext('swisdk', 'Configuration file %s not found'), $file)));
+				SwisdkError::handle(new ExtremelyFatalError(
+					sprintf('Configuration file %s not found', $file)));
 			}
 		}
 
@@ -265,8 +266,8 @@ EOD;
 		{
 			if(preg_match('/[^A-Za-z0-9\.-_\/\-]/', $dir)
 					|| strpos($dir, '..')!==false)
-				SwisdkError::handle(new FatalError(sprintf(
-					dgettext('swisdk', 'Invalid path passed to require_data_directory: %s'),
+				SwisdkError::handle(new ExtremelyFatalError(sprintf(
+					'Invalid path passed to require_data_directory: %s',
 					$dir)));
 			if(!isAbsolutePath($dir))
 				$dir = DATA_ROOT.$dir;
@@ -274,7 +275,7 @@ EOD;
 			if(!file_exists($dir))
 				if(!@mkdir($dir, 0775, true))
 					SwisdkError::handle(new ExtremelyFatalError(sprintf(
-						dgettext('swisdk', 'Could not create data directory %s'),
+						'Could not create data directory %s',
 						$dir)));
 
 			return $dir.'/';
@@ -288,7 +289,7 @@ EOD;
 			if(preg_match('/[^A-Za-z0-9\.-_\/\-]/', $dir)
 					|| strpos($dir, '..')!==false)
 				SwisdkError::handle(new FatalError(sprintf(
-					dgettext('swisdk', 'Invalid path passed to require_htdocs_data_directory: %s'),
+					'Invalid path passed to require_htdocs_data_directory: %s',
 					$dir)));
 			if(!isAbsolutePath($dir))
 				$dir = HTDOCS_DATA_ROOT.$dir;
@@ -296,7 +297,7 @@ EOD;
 			if(!file_exists($dir))
 				if(!@mkdir($dir, 0775, true))
 					SwisdkError::handle(new FatalError(sprintf(
-						dgettext('swisdk', 'Could not create data directory %s'),
+						'Could not create data directory %s',
 						$dir)));
 
 			return $dir.'/';
@@ -506,21 +507,12 @@ EOD;
 		protected static $_all_languages;
 
 		/**
-		 * initialize gettext and set the current locale
+		 * set the current locale
 		 *
 		 * This function might get called more than once;
 		 */
 		protected static function init_language()
 		{
-			static $gettext_initialized = false;
-			if(!$gettext_initialized) {
-				// initialize gettext textdomains
-				bindtextdomain('swisdk', SWISDK_ROOT.'i18n/locale');
-				bindtextdomain('webapp', WEBAPP_ROOT.'i18n/locale');
-				textdomain('webapp');
-				$gettext_initialized = true;
-			}
-
 			// use the current language to find locale strings and apply
 			// them to LC_ALL until the first match
 			//
@@ -533,6 +525,8 @@ EOD;
 						break;
 				}
 			}
+
+			Catalog::load(SWISDK_ROOT.'i18n/swisdk.yaml');
 		}
 
 		/**
@@ -668,8 +662,8 @@ EOD;
 					&& class_exists($class = Swisdk::config_value($key)))
 				return new $class;
 			else
-				SwisdkError::handle(new FatalError(sprintf(
-					dgettext('swisdk', 'Could not load %s, prefix %s'),
+				SwisdkError::handle(new ExtremelyFatalError(sprintf(
+					'Could not load %s, prefix %s',
 					$class, $prefix_path)));
 		}
 

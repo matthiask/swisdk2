@@ -20,10 +20,8 @@
 		public function name()		{ return $this->column; }
 		public function set_title($t)
 		{
-			if($t)
-				$this->title = dgettext('swisdk', $t);
-			else
-				$this->title = '';
+			$this->title = $t;
+			return $this;
 		}
 
 		public function css_class()
@@ -34,6 +32,7 @@
 		public function set_tableview(&$tableview)
 		{
 			$this->tableview = $tableview;
+			return $this;
 		}
 
 		protected $column;
@@ -227,7 +226,7 @@
 			if(!$this->token)
 				$this->token = Swisdk::guard_token_f('guard');
 			$id = $data[$this->column];
-			$delete = dgettext('swisdk', 'Really delete?');
+			$delete = _T('Really delete?');
 			$prefix = Swisdk::config_value('runtime.webroot.img', '/img');
 			$html =<<<EOD
 <a href="{$this->title}edit/$id" title="edit">
@@ -257,6 +256,7 @@ EOD;
 		public function disable_copy($enabled=false)
 		{
 			$this->copy_enabled = $enabled;
+			return $this;
 		}
 	}
 
@@ -308,6 +308,7 @@ EOD;
 		public function set_no_data_text($txt)
 		{
 			$this->no_data = $txt;
+			return $this;
 		}
 
 		protected $initialized = false;
@@ -392,6 +393,7 @@ EOD;
 		public function set_ellipsize($e)
 		{
 			$this->ellipsize = $e;
+			return $this;
 		}
 
 		protected $dbobj = null;
@@ -459,6 +461,7 @@ EOD;
 		public function set_ellipsize($e)
 		{
 			$this->ellipsize = $e;
+			return $this;
 		}
 
 		protected $reldata = null;

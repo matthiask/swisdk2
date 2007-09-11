@@ -183,7 +183,7 @@ EOD;
 
 		public function set_title($title=null)
 		{
-			$this->title = $title?dgettext('swisdk', $title):null;
+			$this->title = $title?_T($title):null;
 			return $this;
 		}
 
@@ -421,11 +421,11 @@ EOD;
 						break;
 					case DB_REL_MANY:
 						SwisdkError::handle(new BasicSwisdkError(sprintf(
-							dgettext('swisdk', 'Cannot edit relation of type DB_REL_MANY! relspec: %s'),
+							_T('Cannot edit relation of type DB_REL_MANY! relspec: %s'),
 							$relspec)));
 					default:
 						SwisdkError::handle(new BasicSwisdkError(sprintf(
-							dgettext('swisdk', 'Oops. Unknown relation type %s'), $relspec)));
+							_T('Oops. Unknown relation type %s'), $relspec)));
 				}
 			}
 		}
@@ -442,7 +442,7 @@ EOD;
 				$renderer = new $arg;
 			else
 				SwisdkError::handle(new FatalError(sprintf(
-					dgettext('swisdk', 'Invalid renderer specification: %s'), $arg)));
+					_T('Invalid renderer specification: %s'), $arg)));
 			$this->accept($renderer);
 
 			return $renderer->html();
@@ -663,7 +663,7 @@ EOD;
 			switch($this->guard_state) {
 			case GUARD_UNKNOWN:
 				$this->add_message(
-					dgettext('swisdk', 'Could not validate form submission'));
+					_T('Could not validate form submission'));
 				return false;
 			case GUARD_VALID:
 				$valid = parent::is_valid();
@@ -672,12 +672,12 @@ EOD;
 				return $valid;
 			case GUARD_EXPIRED:
 				$this->add_message(
-					dgettext('swisdk', 'Request has expired. Please submit again'));
+					_T('Request has expired. Please submit again'));
 				$this->refresh_guard();
 				return false;
 			case GUARD_USED:
 				$this->add_message(
-					dgettext('swisdk', 'Form has already been submitted once'));
+					_T('Form has already been submitted once'));
 				return false;
 			}
 		}

@@ -120,7 +120,7 @@
 			}
 
 			SwisdkError::handle(new FatalError(sprintf(
-				dgettext('swisdk', 'FormRenderer: Cannot visit %s'), $class)));
+				_T('FormRenderer: Cannot visit %s'), $class)));
 		}
 
 		protected function visit_Form_start($obj)
@@ -415,7 +415,7 @@ EOD;
 </div>
 EOD
 ,
-				$id, $id, $id, dgettext('swisdk', 'Automatic XSS protection'));
+				$id, $id, $id, _T('Automatic XSS protection'));
 		}
 
 		protected function visit_Textarea($obj)

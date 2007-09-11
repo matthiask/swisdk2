@@ -1039,7 +1039,7 @@ EOD;
 			$result = $dbh->query($sql);
 			DBObject::$error_obj = null;
 			if($dbh->errno) {
-				$error = new DBError(sprintf(dgettext('swisdk', 'Database error: %s'),
+				$error = new DBError(sprintf('Database error: %s',
 					$dbh->error), $sql);
 				if(DBObject::$handle_error)
 					SwisdkError::handle($error);
@@ -1420,7 +1420,7 @@ EOD;
 				$field_list[$this->class] = $fl;
 			} else {
 				SwisdkError::handle(new FatalError(sprintf(
-					dgettext('swisdk', 'Cannot act on PDO DB type %s'), $driver)));
+					'Cannot act on PDO DB type %s', $driver)));
 			}
 
 			DBObject::$_field_list[$this->db_connection_id][$this->class] = $fl;
