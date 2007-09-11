@@ -20,7 +20,7 @@
 
 			global $_swisdk2_sitemap;
 
-			$regenerate = true;
+			$regenerate = false;
 			if(file_exists($phpfile)) {
 				// regenerate if either sitemap.yaml or the xsl
 				// stylesheet are newer than the cached php
