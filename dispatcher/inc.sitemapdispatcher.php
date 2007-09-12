@@ -74,6 +74,7 @@
 						Swisdk::set_language($v);
 						break;
 					case 'website':
+						$url = s_get($page, 'url');
 						Swisdk::set_config_value(
 							'runtime.website', $v);
 						Swisdk::set_config_value('runtime.website.title',
@@ -81,9 +82,9 @@
 						Swisdk::add_loader_base(
 							CONTENT_ROOT
 							.($this->domain?$this->domain.'/':'')
-							.substr($page['url'], 1).'/');
+							.substr($url, 1).'/');
 						Swisdk::set_config_value('runtime.website.url',
-							$page['url'].'/');
+							$url.'/');
 						if($cfg = Swisdk::config_value('website.'.$v.'.include'))
 							Swisdk::read_configfile($cfg);
 						break;
@@ -115,11 +116,9 @@
 					case 'parent_url':
 					case 'id':
 					case 'url':
-					case 'domain':
 						break;
 					default:
-						Swisdk::set_config_value(
-							'runtime.'.str_replace(':', '.', $k), $v);
+						Swisdk::set_config_value('runtime.'.$k, $v);
 				}
 			}
 		}
