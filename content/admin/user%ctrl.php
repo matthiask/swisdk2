@@ -36,6 +36,8 @@
 
 			FormUtil::submit_bar($form);
 
+			Swisdk::kill_cache('permission');
+
 			return $cmp;
 		}
 

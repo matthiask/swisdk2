@@ -29,6 +29,8 @@
 			$elem->set_items(DBOContainer::find('User'));
 			$form->add('User', $elem);
 
+			Swisdk::kill_cache('permission');
+
 			return $cmp;
 		}
 
