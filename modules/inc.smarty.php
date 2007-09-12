@@ -19,33 +19,41 @@
 			//$this->config_dir
 			$this->caching = false;
 			$this->security = false;
-			$this->register_function('swisdk_runtime_value',
-				'_smarty_swisdk_runtime_value');
-			$this->register_function('webroot', '_smarty_swisdk_webroot');
-			$this->register_function('swisdk_needs_library',
-				'_smarty_swisdk_needs_library');
-			$this->register_function('swisdk_libraries_html',
-				'_smarty_swisdk_libraries_html');
-			$this->register_block('block', '_smarty_swisdk_process_block');
-			$this->register_function('extends', '_smarty_swisdk_extends');
-			$this->register_function('db_assign', '_smarty_swisdk_db_assign');
-			$this->register_function('include_template', '_smarty_swisdk_include_template');
-			$this->register_block('if_block', '_smarty_swisdk_if_block');
-			$this->register_block('if_not_block', '_smarty_swisdk_if_not_block');
+
+			$functions = array(
+				'swisdk_runtime_value',
+				'webroot',
+				'swisdk_needs_library',
+				'swisdk_libraries_html',
+				'extends',
+				'db_assign',
+				'include_template',
+				'css_classify',
+				'generate_url',
+				'generate_image_url',
+				'generate_thumb',
+				'dttm_range',
+				'assign_args',
+				'formitem_error',
+				'formitem_title',
+				'formitem_render',
+				'formitem_label'
+				);
+
+			foreach($functions as $f)
+				$this->register_function($f, '_smarty_swisdk_'.$f);
+
+			$blocks = array(
+				'block',
+				'if_block',
+				'if_not_block'
+				);
+
+			foreach($blocks as $b)
+				$this->register_block($b, '_smarty_swisdk_'.$b);
+
 			$this->assign_by_ref('_swisdk_smarty_instance', $this);
-			$this->register_function('css_classify', '_smarty_swisdk_css_classify');
-			$this->register_function('generate_url', '_smarty_swisdk_generate_url');
-			$this->register_function('generate_image_url',
-				'_smarty_swisdk_generate_image_url');
-			$this->register_function('generate_thumb',
-				'_smarty_swisdk_generate_thumb');
-			$this->register_function('dttm_range', '_smarty_swisdk_dttm_range');
-			$this->register_function('assign_args', '_smarty_swisdk_assign_args');
 			$this->register_modifier('pluralize', 'pluralize');
-			$this->register_function('formitem_error', '_smarty_swisdk_formitem_error');
-			$this->register_function('formitem_title', '_smarty_swisdk_formitem_title');
-			$this->register_function('formitem_render', '_smarty_swisdk_formitem_render');
-			$this->register_function('formitem_label', '_smarty_swisdk_formitem_label');
 
 			if($assign) {
 				$this->assign('swisdk_user', SessionHandler::user()->data());
@@ -170,7 +178,7 @@
 	 * {swisdk_runtime_value key="request.host"}  inserts the value of
 	 * runtime.request.host
 	 */
-	function _smarty_swisdk_runtime_value($params, &$smarty)
+	function _smarty_swisdk_swisdk_runtime_value($params, &$smarty)
 	{
 		$val = Swisdk::config_value('runtime.'.$params['key']);
 		if(($val===null) && isset($params['default']))
@@ -185,12 +193,12 @@
 		return Swisdk::webroot($params['key']);
 	}
 
-	function _smarty_swisdk_needs_library($params, &$smarty)
+	function _smarty_swisdk_swisdk_needs_library($params, &$smarty)
 	{
 		Swisdk::needs_library($params['name']);
 	}
 
-	function _smarty_swisdk_libraries_html($params, &$smarty)
+	function _smarty_swisdk_swisdk_libraries_html($params, &$smarty)
 	{
 		return Swisdk::needed_libraries_html();
 	}
@@ -275,7 +283,7 @@
 	 * --8<--
 	 */
 
-	function _smarty_swisdk_process_block($params, $content, &$smarty, &$repeat)
+	function _smarty_swisdk_block($params, $content, &$smarty, &$repeat)
 	{
 		if($content===null)
 			return;
