@@ -112,7 +112,7 @@
 				return;
 			foreach($pages['pages'] as $id => &$page) {
 				if(!isset($page['url']))
-					$page['url'] = $prefix.$id;
+					$page['url'] = '/'.$prefix.$id;
 				if(!isset($page['title']))
 					$page['title'] = utf8_ucwords(preg_replace('/[ _]+/', ' ', $id));
 				if(isset($page['pages'])) {

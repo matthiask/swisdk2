@@ -5,7 +5,6 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
-	require_once MODULE_ROOT.'inc.component.php';
 	require_once MODULE_ROOT.'inc.sitemap.php';
 
 	class NavigationComponent implements ISmartyComponent {

@@ -123,6 +123,7 @@ EOD;
 			require_once SWISDK_ROOT . 'core/inc.functions.php';
 			require_once SWISDK_ROOT . 'core/inc.error.php';
 			require_once SWISDK_ROOT.'core/inc.catalog.php';
+			require_once SWISDK_ROOT.'core/inc.component.php';
 			require_once SWISDK_ROOT.'lib/contrib/spyc.php';
 
 			SwisdkError::setup();
