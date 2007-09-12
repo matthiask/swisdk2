@@ -21,13 +21,7 @@
 				$ref = reset($ref);
 			$tokens = array();
 
-			// if runtime.domain is set (multi domain support has been activated),
-			// we need to start directly with the domain token. Otherwise, the
-			// empty token is needed too for the first sitemap node
-			if(Swisdk::config_value('runtime.domain'))
-				$tokens = explode('/', trim($url, '/'));
-			else
-				$tokens = explode('/', rtrim($url, '/'));
+			$tokens = explode('/', trim($url, '/'));
 
 			// drill down until there are no more URL tokens
 			while(($t = array_shift($tokens))!==null) {
@@ -95,6 +89,11 @@
 				if(!isset($_swisdk2_sitemap['processed'])) {
 					require_once UTF8.'/ucwords.php';
 					SwisdkSitemap::loop_pages($_swisdk2_sitemap);
+
+					s_set($_swisdk2_sitemap, 'url', '/');
+					s_set($_swisdk2_sitemap, 'title',
+						Swisdk::config_value('core.name'));
+
 					$_swisdk2_sitemap['processed'] = true;
 					file_put_contents($phpfile,
 						'<?php $_swisdk2_sitemap='
@@ -113,7 +112,7 @@
 				return;
 			foreach($pages['pages'] as $id => &$page) {
 				if(!isset($page['url']))
-					$page['url'] = $prefix.$id;
+					$page['url'] = '/'.$prefix.$id;
 				if(!isset($page['title']))
 					$page['title'] = utf8_ucwords(preg_replace('/[ _]+/', ' ', $id));
 				if(isset($page['pages'])) {
