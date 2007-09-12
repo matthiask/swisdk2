@@ -19,6 +19,8 @@
 			//$this->config_dir
 			$this->caching = false;
 			$this->security = false;
+			$this->left_delimiter = '{{';
+			$this->right_delimiter = '}}';
 
 			$functions = array(
 				'swisdk_runtime_value',

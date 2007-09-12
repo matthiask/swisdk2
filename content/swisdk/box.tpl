@@ -1,10 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <body>
 <head>
-<title>{block name="title"}{$title}{/block}</title>
-{swisdk_libraries_html}
+<title>{{ block name="title" }}{{ $title }}{{ /block }}</title>
+{{ swisdk_libraries_html }}
 <style type="text/css">
-{literal}
 body { margin: 0; padding: 0; font-family: Helvetica, Arial, sans-serif; font-size: 12px; }
 #wrap { margin: 50px auto; padding: 0; width: 500px; background: #dfd8c7; border: 1px solid #cfc7b7; }
 #head, #foot { position: relative; height: 11px; }
@@ -18,7 +17,6 @@ input { float: left; border: 1px solid #cfc7b7; margin: 5px; padding: 3px; }
 input[type="submit"] { clear: left; margin: 5px 5px 5px 236px; padding: 2px 10px; }
 a { color: #000; text-decoration: none; }
 a:hover { text-decoration: underline; }
-{/literal}
 </style>
 </head>
 
@@ -34,11 +32,11 @@ a:hover { text-decoration: underline; }
 
 	<div id="body">
 
-		<h1>{block name="title"}{$title}{/block}</h1>
+		<h1>{{ block name="title" }}{{ $title }}{{ /block }}</h1>
 
-		{block name="content"}
-		{$content}
-		{/block}
+		{{ block name="content" }}
+		{{ $content }}
+		{{ /block }}
 
 		<br style="line-height:0;font-size:1px" />
 
@@ -46,15 +44,15 @@ a:hover { text-decoration: underline; }
 
 	<div id="foot">
 		<div id="date">
-			{$smarty.now|date_format:"%d. %B %Y"}
+			{{ $smarty.now|date_format:"%d. %B %Y" }}
 		</div>
 	</div>
 
 </div>
 
-{block name="messages"}
-{$messages}
-{/block}
+{{ block name="messages" }}
+{{ $messages }}
+{{ /block }}
 
 </body>
 </html>

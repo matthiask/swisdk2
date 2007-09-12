@@ -1,9 +1,6 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html>
-<head>
-<title>{$smarty.get.class} Picker</title>
-<link rel="stylesheet" type="text/css" href="/media/admin/admin.css" />
-{literal}
+{{ extends file="base.admin" }}
+
+{{ block name="head" }}
 <style type="text/css">
 #body .s-table tbody tr:hover {
 	background: #657ba8;
@@ -104,93 +101,82 @@
 }
 
 </style>
-<script type="text/javascript">
-//<![CDATA[
-function do_select(elem, val, str)
-{
-	opener.select_{/literal}{$element}{literal}(val, str);
-	this.close();
-}
-//]]>
-</script>
-{/literal}
-</head>
+{{ /block }}
 
-<body id="body">
-
+{{ block name="body" }}
 <div id="typechooser">
 	<h2>Act on:</h2>
 	<ul>
 		<li>
-			<a href="{$this_url}">
+			<a href="{{ $this_url }}">
 			All types
 			</a>
 		</li>
-		{foreach from=$types item=t}
+		{{ foreach from=$types item=t }}
 		<li>
-			<a href="{$this_url}?type={$t}">
-				<img src="{webroot key=data}/{$htdocs_data_dir}/{$images.$t}?{''|uniqid}" />
-				<span>{$t}</span>
+			<a href="{{ $this_url }}?type={{ $t }}">
+				<img src="{{ webroot key=data }}/{{ $htdocs_data_dir }}/{{ $images.$t }}?{{ ''|uniqid }}" />
+				<span>{{ $t }}</span>
 			</a>
 		</li>
-		{/foreach}
+		{{ /foreach }}
 	</ul>
 </div>
 
 
 <div id="editarea">
 	<div id="tools">
-		<a href="{$this_url_type}cmd=restart"
+		<a href="{{ $this_url_type }}cmd=restart"
 				title="Start over">
-			<img src="{webroot key=img}/icons/star.png" />
+			<img src="{{ webroot key=img }}/icons/star.png" />
 		</a>
-		<a href="{$this_url_type}cmd=rotate_clockwise"
+		<a href="{{ $this_url_type }}cmd=rotate_clockwise"
 				title="Rotate clockwise">
-			<img src="{webroot key=img}/icons/shape_rotate_clockwise.png" />
+			<img src="{{ webroot key=img }}/icons/shape_rotate_clockwise.png" />
 		</a>
-		<a href="{$this_url_type}cmd=rotate_anticlockwise"
+		<a href="{{ $this_url_type }}cmd=rotate_anticlockwise"
 				title="Rotate anti-clockwise">
-			<img src="{webroot key=img}/icons/shape_rotate_anticlockwise.png" />
+			<img src="{{ webroot key=img }}/icons/shape_rotate_anticlockwise.png" />
 		</a>
-		<a href="{$this_url_type}cmd=grayscale"
+		<a href="{{ $this_url_type }}cmd=grayscale"
 				title="Convert to grayscale">
-			<img src="{webroot key=img}/icons/contrast.png" />
+			<img src="{{ webroot key=img }}/icons/contrast.png" />
 		</a>
-		<a href="{$this_url_type}cmd=colorize-red"
+		<a href="{{ $this_url_type }}cmd=colorize-red"
 				title="Colorize image with red color">
 			colorize red
 		</a>
-		<a href="{$this_url_type}cmd=colorize-green"
+		<a href="{{ $this_url_type }}cmd=colorize-green"
 				title="Colorize image with green color">
 			colorize green
 		</a>
-		<a href="{$this_url_type}cmd=colorize-blue"
+		<a href="{{ $this_url_type }}cmd=colorize-blue"
 				title="Colorize image with blue color">
 			colorize blue
 		</a>
-		<a href="{$this_url_type}cmd=darken"
+		<a href="{{ $this_url_type }}cmd=darken"
 				title="Darken image">
-			<img src="{webroot key=img}/icons/contrast_decrease.png" />
+			<img src="{{ webroot key=img }}/icons/contrast_decrease.png" />
 		</a>
-		<a href="{$this_url_type}cmd=lighten"
+		<a href="{{ $this_url_type }}cmd=lighten"
 				title="Lighten image">
-			<img src="{webroot key=img}/icons/contrast_increase.png" />
+			<img src="{{ webroot key=img }}/icons/contrast_increase.png" />
 		</a>
-		<a href="{$this_url_type}cmd=crop"
+		<a href="{{ $this_url_type }}cmd=crop"
 				title="Crop image">
-			<img src="{webroot key=img}/icons/shape_handles.png" />
+			<img src="{{ webroot key=img }}/icons/shape_handles.png" />
 		</a>
 	</div>
 
 	<div id="imagearea">
 
-		{if $smarty.get.cmd=='crop'}
-<script type="text/javascript" src="{webroot key=js}/scriptaculous/prototype.js"></script>
-<script type="text/javascript" src="{webroot key=js}/scriptaculous/scriptaculous.js"></script>
-<script type="text/javascript" src="{webroot key=js}/cropper/cropper.js"></script>
+		{{ if $smarty.get.cmd=='crop' }}
+<script type="text/javascript" src="{{ webroot key=js }}/scriptaculous/prototype.js"></script>
+<script type="text/javascript" src="{{ webroot key=js }}/scriptaculous/scriptaculous.js"></script>
+<script type="text/javascript" src="{{ webroot key=js }}/cropper/cropper.js"></script>
 
 
-<form action="{$smarty.server.REQUEST_URI}" method="post">
+<form action="{{ $smarty.server.REQUEST_URI }}" method="post">
 	<input type="hidden" name="w" id="w" />
 	<input type="hidden" name="h" id="h" />
 	<input type="hidden" name="x" id="x" />
@@ -198,37 +184,33 @@ function do_select(elem, val, str)
 	<input type="submit" value="crop" />
 </form>
 
-<img src="{webroot key=data}/{$htdocs_data_dir}/{$images.crop}?{''|uniqid}" id="image" />
+<img src="{{ webroot key=data }}/{{ $htdocs_data_dir }}/{{ $images.crop }}?{{ ''|uniqid }}" id="image" />
 
 <script type="text/javascript">
 //<![CDATA[
-{literal}
-	Event.observe(window, 'load', function(){
-		new Cropper.Img('image', {onEndCrop: onEndCrop});
-	});
+Event.observe(window, 'load', function(){
+	new Cropper.Img('image', {onEndCrop: onEndCrop});
+});
 
-	function onEndCrop(coords, dimensions) {
-		$('w').value = dimensions.width;
-		$('h').value = dimensions.height;
-		$('x').value = coords.x1;
-		$('y').value = coords.y1;
-	}
-{/literal}
+function onEndCrop(coords, dimensions) {
+	$('w').value = dimensions.width;
+	$('h').value = dimensions.height;
+	$('x').value = coords.x1;
+	$('y').value = coords.y1;
+}
 //]]>
 </script>
 
 
-		{else}
+		{{ else }}
 		<table style="width:620px;height:620px;border:1px solid #aba;">
 			<tr><td style="text-align:center;vertical-align:middle">
-			<img src="{webroot key=data}/{$htdocs_data_dir}/{$images.$type}?{''|uniqid}" />
+			<img src="{{ webroot key=data }}/{{ $htdocs_data_dir }}/{{ $images.$type }}?{{ ''|uniqid }}" />
 			</td></tr>
 		</table>
-		{/if}
+		{{ /if }}
 	</div>
 </div>
 
 <br style="clear:both" />
-
-</body>
-</html>
+{{ /block }}

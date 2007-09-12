@@ -1,9 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
 <head>
-<title>{$smarty.get.class} Picker</title>
+<title>{{ $smarty.get.class }} Picker</title>
 <link rel="stylesheet" type="text/css" href="/media/admin/admin.css" />
-{literal}
 <style type="text/css">
 #body .s-table tbody tr:hover {
 	background: #657ba8;
@@ -33,16 +32,15 @@
 //<![CDATA[
 function do_select(elem, val, str)
 {
-	opener.select_{/literal}{$element}{literal}(val, str);
+	opener.select_{{ $element }}(val, str);
 	this.close();
 }
 //]]>
 </script>
-{/literal}
-{swisdk_libraries_html}
+{{ swisdk_libraries_html }}
 </head>
 
 <body id="body">
-{$content}
+{{ $content }}
 </body>
 </html>

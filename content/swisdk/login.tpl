@@ -1,15 +1,14 @@
-{extends template="swisdk.box"}
+{{ extends template="swisdk.box" }}
 
-{swisdk_needs_library name="jquery"}
-{assign var="title" value="Login"}
+{{ swisdk_needs_library name="jquery" }}
+{{ assign var="title" value="Login" }}
 
-{block name="title"}
-Login to {swisdk_runtime_value key="website.title"}
-{/block}
+{{ block name="title" }}
+Login to {{ swisdk_runtime_value key="website.title" }}
+{{ /block }}
 
-{block name="content"}
+{{ block name="content" }}
 <script type="text/javascript">
-{literal}
 //<![CDATA[
 $(function(){
 	var user = document.getElementById('login_username');
@@ -19,10 +18,9 @@ $(function(){
 		user.focus();
 });
 //]]>
-{/literal}
 </script>
 
-<form action="{swisdk_runtime_value key="controller.url"}" method="post">
+<form action="{{ swisdk_runtime_value key="controller.url" }}" method="post">
 	<fieldset>
 
 		<label for="login_username">Username</label>
@@ -37,4 +35,4 @@ $(function(){
 		<input type="submit" value="Login" />
 	</fieldset>
 </form>
-{/block}
+{{ /block }}

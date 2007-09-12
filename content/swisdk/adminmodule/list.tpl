@@ -1,5 +1,5 @@
-{extends template="base.admin"}
+{{ extends template="base.admin" }}
 
-{block name="content"}
-{$content}
-{/block}
+{{ block name="content" }}
+{{ $content }}
+{{ /block }}
