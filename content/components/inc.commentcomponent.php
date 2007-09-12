@@ -6,7 +6,6 @@
 	*/
 
 	require_once MODULE_ROOT.'inc.permission.php';
-	require_once MODULE_ROOT.'inc.component.php';
 	require_once MODULE_ROOT.'inc.smarty.php';
 	require_once MODULE_ROOT.'inc.form.php';
 

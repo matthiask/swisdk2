@@ -6,7 +6,6 @@
 	*	Read the entire license text here: http://www.gnu.org/licenses/gpl.html
 	*/
 
-	require_once MODULE_ROOT.'inc.component.php';
 	require_once MODULE_ROOT.'inc.permission.php';
 	require_once MODULE_ROOT.'inc.smarty.php';
 	require_once SWISDK_ROOT.'site/inc.site.php';
