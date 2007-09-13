@@ -97,8 +97,9 @@
 							redirect($v);
 						break;
 					case 'redirect':
-						$this->redirect = str_replace($page['url'], $v,
-							$this->input());
+						$this->redirect = preg_replace(
+							'/'.preg_quote($page['url'], '/').'/',
+							$v, $this->input(), 1);
 						break;
 					case 'rewrite-exact':
 						if(!count($this->tokens))
@@ -108,8 +109,9 @@
 						Swisdk::set_config_value('runtime.controller.url',
 							$page['url'].'/');
 					case 'rewrite-tree':
-						$this->rewroten = str_replace($page['url'], $v,
-							$this->input());
+						$this->rewroten = preg_replace(
+							'/'.preg_quote($page['url'], '/').'/',
+							$v, $this->input(), 1);
 						break;
 					case 'pages':
 					case 'parent_title':
