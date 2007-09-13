@@ -76,6 +76,7 @@
 						SwisdkError::handle(new FatalError(sprintf(
 							'Could not load sitemap xsl %s',
 							$xslfile)));
+					$xml->xinclude();
 					$prc->importStyleSheet($xsl);
 					file_put_contents($phpfile, $prc->transformToXML($xml));
 				}
