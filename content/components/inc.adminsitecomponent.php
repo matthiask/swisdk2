@@ -150,10 +150,11 @@ EOD;
 
 		private function generate_module_html_module($page)
 		{
+			$icon = s_get($page, 'adminsite.icon', 'actions/edit-copy.png');
 			return <<<EOD
 <li>
 	<a href="{$this->prepend}{$page['url']}">
-		<img src="/media/admin/edit-copy.png" alt="" />
+		<img src="/media/admin/icons/$icon" alt="" />
 		{$page['title']}
 	</a>
 </li>
