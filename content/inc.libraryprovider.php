@@ -154,14 +154,22 @@ EOD;
 			return $this->provide('jquery').<<<EOD
 <link rel="stylesheet" type="text/css" media="screen" href="{$this->js_prefix}/jquery/wymeditor/skins/default/screen.css" />
 <script type="text/javascript" src="{$this->js_prefix}/jquery/wymeditor/jquery.wymeditor.js"></script>
-<!--<script type="text/javascript" src="{$this->js_prefix}/jquery/wymeditor/plugins/hovertools/jquery.wymeditor.hovertools.js"></script>-->
+<script type="text/javascript" src="{$this->js_prefix}/jquery/wymeditor/plugins/hovertools/jquery.wymeditor.hovertools.js"></script>
+<script type="text/javascript" src="{$this->js_prefix}/jquery/wymeditor/plugins/tidy/jquery.wymeditor.tidy.js"></script>
 <script type="text/javascript">
 //<![CDATA[
 $(function(){
 	$('.sf-wymeditor').wymeditor({
-		stylesheet: '{$this->js_prefix}/jquery/wymeditor/styles.css'
+		stylesheet: '{$this->js_prefix}/jquery/wymeditor/styles.css',
+		postInit: function(wym){
+			var wymtidy = wym.tidy();
+			wymtidy.init();
+
+			wym.hovertools();
+		}
 	});
 	$('form').submit(function(){
+		// Workaround for a WymEditor bug
 		for(var i=0; i<window.WYM_INSTANCES.length; i++)
 			window.WYM_INSTANCES[i].update();
 
