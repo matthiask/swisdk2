@@ -139,7 +139,7 @@ EOD;
 					return $cmp;
 				case 'list':
 					$dboc = DBOContainer::create(
-						$this->create_dbobject($this->dbo_class));
+						$this->create_dbobject($this->dbo_class, 'list'));
 					$cmp = $this->create_list_component($dboc);
 					$cmp->run();
 
@@ -189,11 +189,14 @@ EOD;
 				return $this->$m($id);
 		}
 
-		protected function create_dbobject($class)
+		protected function create_dbobject($class, $cmd='dontcare')
 		{
-			if($this->multilanguage)
-				return DBObjectML::create($class, LANGUAGE_ALL);
-			else
+			if($this->multilanguage) {
+				if($cmd=='list')
+					return DBObjectML::create($class);
+				else
+					return DBObjectML::create($class, LANGUAGE_ALL);
+			} else
 				return DBObject::create($class);
 		}
 
