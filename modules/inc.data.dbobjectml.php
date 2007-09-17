@@ -169,7 +169,7 @@
 
 		public function store()
 		{
-			if(isset($this->data[$this->primary]) && $this->data[$this->primary])
+			if($this->id()>0)
 				return $this->update();
 			else
 				return $this->insert();
@@ -321,6 +321,7 @@
 
 		public function set($var, $value)
 		{
+			$this->dirty = true;
 			if($var==$this->primary)
 				return ($this->data[$this->primary] = $value);
 			$dbo = $this->dbobj();

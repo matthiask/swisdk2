@@ -314,9 +314,7 @@
 		{
 			if(!$this->dirty)
 				return true;
-			if(isset($this->data[$this->primary])
-					&& $this->data[$this->primary]
-					&& $this->data[$this->primary]>0)
+			if($this->id()>0)
 				return $this->update();
 			else
 				return $this->insert();
