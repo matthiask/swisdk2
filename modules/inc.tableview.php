@@ -90,8 +90,7 @@
 
 		public function set_feature_state($features, $state)
 		{
-			if(!is_array($features))
-				$features = explode(',', $features);
+			$features = s_array($features);
 			foreach($features as $f)
 				$this->features[$f] = $state;
 		}
@@ -187,7 +186,7 @@ EOD;
 
 		public function append_auto_c($fields)
 		{
-			return $this->append_auto(explode(',', $fields));
+			return $this->append_auto(s_array($fields));
 		}
 
 		/**

@@ -588,7 +588,7 @@
 			if($unlink_fields = Swisdk::config_value(
 					sprintf('content.%s.%s.delete.unlink_file',
 						$this->db_connection_id, $this->class))) {
-				$unlink_fields = array_map('trim', explode(',', $unlink_fields));
+				$unlink_fields = s_array($unlink_fields);
 				foreach($unlink_fields as $field)
 					@unlink(DATA_ROOT.'upload/'.$this->data[$field]);
 			}

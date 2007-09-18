@@ -356,7 +356,7 @@ EOD;
 
 		public function add_auto_c($fields)
 		{
-			return $this->add_auto(explode(',', $fields));
+			return $this->add_auto(s_array($fields));
 		}
 
 		/**

@@ -20,8 +20,7 @@
 			$this->action->bind($this->dbobj());
 
 			if($which || is_array($which)) {
-				if(!is_array($which))
-					$which = explode(',', $which);
+				$which = s_array($which);
 				foreach($which as $m)
 					if(method_exists($this, $m = 'setup_'.$m))
 						$this->$m();

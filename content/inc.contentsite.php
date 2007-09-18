@@ -1091,7 +1091,7 @@
 		protected function filter($which = null)
 		{
 			$methods = get_class_methods($this);
-			$which = explode(',', $which);
+			$which = s_array($which);
 			$include = array();
 			$exclude = array();
 			foreach($which as $m) {
@@ -1159,7 +1159,7 @@
 			if($order = $this->find_config_value('order', '#')) {
 				if($order=='#')
 					$order = $this->dbobj->dbobj()->name('start_dttm');
-				$columns = explode(',', $order);
+				$columns = s_array($order);
 				foreach($columns as $o) {
 					$tokens = explode(':', $o);
 					$this->dbobj->add_order_column($tokens[0],

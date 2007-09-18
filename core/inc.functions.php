@@ -42,6 +42,14 @@
 			unset($array[$var]);
 	}
 
+	function s_array($arg)
+	{
+		if(is_array($arg))
+			return $arg;
+
+		return array_map('trim', explode(',', $arg));
+	}
+
 	/**
 	* redirects the client browser to the new location
 	*/
@@ -252,7 +260,7 @@
 
 		if(!$timespans)
 			$timespans = array_combine(
-				explode(',', _T('years,months,weeks,days,hours,min,sec')),
+				s_array(_T('years,months,weeks,days,hours,min,sec')),
 				array(86400*365, 86400*365/12, 86400*7, 86400, 3600, 60, 1));
 
 		foreach($timespans as $type => $span)
