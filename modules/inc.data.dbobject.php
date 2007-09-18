@@ -288,6 +288,20 @@
 			}
 		}
 
+		public static function find_or_create($class, $params)
+		{
+			$find_params = array();
+			foreach($params as $k => $v)
+				$find_params[$k.'='] = $v;
+
+			$dbo = DBObject::find($class, $find_params);
+
+			if($dbo)
+				return $dbo;
+
+			return DBObject::create_with_data($class, $params);
+		}
+
 		/**
 		 * refresh (or load) data from database using the stored primary id
 		 */
