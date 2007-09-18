@@ -39,6 +39,7 @@ function do_select(elem, val, str)
 //]]>
 </script>
 {/literal}
+{swisdk_libraries_html}
 </head>
 
 <body id="body">
