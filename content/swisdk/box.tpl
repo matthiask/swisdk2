@@ -2,7 +2,6 @@
 <body>
 <head>
 <title>{block name="title"}{$title}{/block}</title>
-{swisdk_needs_library name="jquery"}
 {swisdk_libraries_html}
 <style type="text/css">
 {literal}
