@@ -110,6 +110,11 @@
 			return $container[$language_id];
 		}
 
+		public function translation_by_key($key)
+		{
+			return $this->translation(Swisdk::language($key));
+		}
+
 		protected function _setup_dbvars()
 		{
 			parent::_setup_dbvars();
