@@ -29,6 +29,12 @@
 		 */
 		protected $language;
 
+		public function __clone()
+		{
+			if($this->obj)
+				$this->obj = clone $this->obj;
+		}
+
 		public function language()
 		{
 			if($this->language == LANGUAGE_DEFAULT)
