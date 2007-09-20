@@ -18,13 +18,13 @@ usage() {
 
 case "$1" in
 	am|adminmodule)
-		create adminmodule $2 "`to_lower $2`_ctrl.php"
+		create adminmodule $2 "`to_lower $2`%ctrl.php"
 		;;
 	as|adminsite)
-		create adminsite $2 "`to_lower $2`_ctrl.php"
+		create adminsite $2 "`to_lower $2`%ctrl.php"
 		;;
 	cs|contentsite)
-		create contentsite $2 All_ctrl.php
+		create contentsite $2 All%ctrl.php
 		;;
 	*)
 		usage
