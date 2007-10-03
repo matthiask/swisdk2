@@ -387,7 +387,18 @@ EOD;
 
 		protected function render_head()
 		{
-			$html = "<table class=\"s-table\">\n<thead>\n<tr>\n";
+			$html = "<table class=\"s-table\">\n<thead>\n";
+
+			$html2 = $this->multi_foot().$this->paging_foot();
+
+			if($html2) {
+				$colcount = count($this->columns);
+				$html .= "<tr class=\"st-paging\">\n<td colspan=\"".$colcount.'">'.$html2
+					."</td>\n</tr>\n";
+			}
+
+			$html .= "<tr>\n";
+
 			if($t = $this->title())
 				$html .= "<th colspan=\"".count($this->columns)."\">"
 					."<big><strong>"
@@ -413,7 +424,9 @@ EOD;
 				foreach($this->columns as &$col)
 					$html .= '<th>'.$col->title()."</th>\n";
 			}
-			$html .= "</tr>\n</thead>\n";
+			$html .= "</tr>\n";
+
+			$html .= "</thead>\n";
 			return $html;
 		}
 
@@ -480,7 +493,7 @@ EOD;
 
 			if($html) {
 				$colcount = count($this->columns);
-				$html = "<tfoot>\n<tr>\n<td colspan=\"".$colcount.'">'.$html
+				$html = "<tfoot>\n<tr class=\"st-paging\">\n<td colspan=\"".$colcount.'">'.$html
 					."</td>\n</tr>\n</tfoot>\n";
 			}
 
