@@ -1019,7 +1019,7 @@ EOD;
 			parent::init_value();
 			$value = $this->value();
 			if(!is_array($value)) {
-				$_v = array_map('trim', explode(',', $value));
+				$_v = s_array($value);
 				$value = array();
 				foreach($_v as $v)
 					if($v)

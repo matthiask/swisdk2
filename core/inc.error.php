@@ -163,7 +163,7 @@
 				return;
 
 			// see config file, section [core] ignore_error_nrs
-			if(in_array($this->args[0], explode(',',
+			if(in_array($this->args[0], s_array(
 					Swisdk::config_value('error.ignore_error_nrs'))))
 				return;
 

@@ -10,7 +10,7 @@
 
 		public function run()
 		{
-			$modules = explode(',', Swisdk::website_config_value('modules'));
+			$modules = s_array(Swisdk::website_config_value('modules'));
 
 			$realm = Swisdk::config_value('runtime.realm', '#');
 			if($realm==='#')

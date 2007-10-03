@@ -71,7 +71,7 @@
 				$this->send_mail_text();
 		}
 
-		protected function send_mail_html($to, $sub, $msg, $cc, $bcc)
+		protected function send_mail_html()
 		{
 			require_once MODULE_ROOT.'inc.smarty.php';
 			require_once SWISDK_ROOT.'lib/contrib/htmlMimeMail5/htmlMimeMail5.php';
@@ -99,15 +99,19 @@
 			$mail->send(array($this->dbobj->recipient));
 		}
 
-		protected function send_mail_text($to, $sub, $msg, $cc, $bcc)
+		protected function send_mail_text()
 		{
-			$headers = implode("\r\n", array(
-					'From: '.$this->dbobj->from,
-					'Cc: '.$this->dbobj->recipient_cc,
-					'Bcc: '.$this->dbobj->recipient_bcc,
-					'Reply-To: '.$this->dbobj->reply_to,
-					'X-Mailer: SWISDK 2.0 http://spinlock.ch/projects/swisdk/'
-				));
+			$headers = array();
+			if($this->dbobj->from)
+				$headers[] = 'From: '.$this->dbobj->from;
+			if($this->dbobj->recipient_cc)
+				$headers[] = 'Cc: '.$this->dbobj->recipient_cc;
+			if($this->dbobj->recipient_bcc)
+				$headers[] = 'Bcc: '.$this->dbobj->recipient_bcc;
+			if($this->dbobj->reply_to)
+				$headers[] = 'Reply-to: '.$this->dbobj->reply_to;
+			$headers = implode("\r\n", $headers);
+
 			if(function_exists('mb_language') && function_exists('mb_send_mail')) {
 				mb_language('uni');
 				mb_send_mail($this->dbobj->recipient, $this->dbobj->subject,

@@ -288,6 +288,20 @@
 			}
 		}
 
+		public static function find_or_create($class, $params)
+		{
+			$find_params = array();
+			foreach($params as $k => $v)
+				$find_params[$k.'='] = $v;
+
+			$dbo = DBObject::find($class, $find_params);
+
+			if($dbo)
+				return $dbo;
+
+			return DBObject::create_with_data($class, $params);
+		}
+
 		/**
 		 * refresh (or load) data from database using the stored primary id
 		 */
@@ -588,7 +602,7 @@
 			if($unlink_fields = Swisdk::config_value(
 					sprintf('content.%s.%s.delete.unlink_file',
 						$this->db_connection_id, $this->class))) {
-				$unlink_fields = array_map('trim', explode(',', $unlink_fields));
+				$unlink_fields = s_array($unlink_fields);
 				foreach($unlink_fields as $field)
 					@unlink(DATA_ROOT.'upload/'.$this->data[$field]);
 			}

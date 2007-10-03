@@ -1,5 +1,6 @@
 {extends template="swisdk.box"}
 
+{swisdk_needs_library name="jquery"}
 {assign var="title" value="Login"}
 
 {block name="title"}

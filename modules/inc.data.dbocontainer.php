@@ -281,7 +281,7 @@
 		public function add_order_column($column, $dir=null, $prepend=false)
 		{
 			if(strpos($column, ',')!==false) {
-				$cols = explode(',', $column);
+				$cols = s_array($column);
 				foreach($cols as $col)
 					$this->add_order_column($col);
 				return;
