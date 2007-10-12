@@ -35,6 +35,16 @@
 
 	function dbo_slugify_title($dbo, $title='title', $name='name')
 	{
+		if($dbo instanceof DBObjectML) {
+			$dbo = $dbo->dbobj();
+			if($dbo instanceof DBOContainer) {
+				foreach($dbo as $o)
+					$o->$name = slugify($o->$title);
+
+				return;
+			}
+		}
+
 		$dbo->$name = slugify($dbo->$title);
 	}
 

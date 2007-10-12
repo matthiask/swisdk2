@@ -412,6 +412,9 @@
 
 			$primary = $this->dbobj->primary();
 			$this->dbobj = $this->dbobj->dbobj();
+			if($this->dbobj instanceof DBOContainer)
+				$this->dbobj = $this->dbobj->dbobj();
+
 			$fields = array_keys($this->dbobj->field_list());
 			$ninc_regex = '/^'.$this->dbobj->_prefix()
 				.'(id|password|language_id|'.$primary.')$/';

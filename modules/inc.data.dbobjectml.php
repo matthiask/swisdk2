@@ -29,6 +29,12 @@
 		 */
 		protected $language;
 
+		public function __clone()
+		{
+			if($this->obj)
+				$this->obj = clone $this->obj;
+		}
+
 		public function language()
 		{
 			if($this->language == LANGUAGE_DEFAULT)
@@ -102,6 +108,11 @@
 			}
 
 			return $container[$language_id];
+		}
+
+		public function translation_by_key($key)
+		{
+			return $this->translation(Swisdk::language($key));
 		}
 
 		protected function _setup_dbvars()
