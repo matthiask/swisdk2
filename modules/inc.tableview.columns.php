@@ -272,9 +272,12 @@ EOD;
 
 			$this->db_class = $this->args[0];
 
-			if($t = s_get($this->args, 2)) {
+			if(is_null($this->template))
+				$this->template = s_get($this->args, 2);
+
+			if($this->template) {
 				$matches = array();
-				preg_match_all('/\{([A-Za-z_0-9]+)}/', $t,
+				preg_match_all('/\{([A-Za-z_0-9]+)}/', $this->template,
 					$matches, PREG_PATTERN_ORDER);
 				$this->vars = s_get($matches, 1);
 				foreach($this->vars as $v)
@@ -288,6 +291,11 @@ EOD;
 			}
 		}
 
+		public function set_template($template)
+		{
+			$this->template = $template;
+		}
+
 		public function html(&$data)
 		{
 			if(!$this->initialized)
@@ -298,7 +306,7 @@ EOD;
 				foreach($this->vars as $v)
 					$vals[] = $record[$v];
 
-				return preg_replace($this->patterns, $vals, $this->args[2]);
+				return preg_replace($this->patterns, $vals, $this->template);
 			} else {
 				$val = $data[$this->column];
 				return s_get($this->db_data, $val, $this->no_data);
@@ -312,6 +320,8 @@ EOD;
 		}
 
 		protected $initialized = false;
+
+		protected $template = null;
 
 		protected $db_data = null;
 		protected $db_class = null;
@@ -381,7 +391,7 @@ EOD;
 					foreach($this->vars as $v)
 						$vals[] = $record->pretty_value($v);
 
-					$tokens[] = preg_replace($this->patterns, $vals, $this->args[2]);
+					$tokens[] = preg_replace($this->patterns, $vals, $this->template);
 				}
 			} else
 				$tokens =& $data;
@@ -448,7 +458,7 @@ EOD;
 						foreach($this->vars as $var)
 							$vals[] = $record[$var];
 
-						$tokens[] = preg_replace($this->patterns, $vals, $this->args[2]);
+						$tokens[] = preg_replace($this->patterns, $vals, $this->template);
 					} else
 						$tokens[] = $this->db_data[$v];
 				}
