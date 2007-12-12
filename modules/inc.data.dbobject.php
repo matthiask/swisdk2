@@ -1409,11 +1409,11 @@ EOD;
 					}
 
 					// determine field type
-					if(stripos($field, '_date')!==false) {
+					if(preg_match('/_date$/', $field)) {
 						$fl[$field] = DB_FIELD_DATE;
-					} else if(stripos($field, '_dttm')!==false) {
+					} else if(preg_match('/_dttm$/', $field)) {
 						$fl[$field] = DB_FIELD_DTTM;
-					} else if(stripos($field, '_time')!==false) {
+					} else if(preg_match('/_time$/', $field)) {
 						$fl[$field] = DB_FIELD_TIME;
 					} else if(stripos($type, 'text')!==false) {
 						$fl[$field] = DB_FIELD_LONGTEXT;
