@@ -1122,6 +1122,7 @@ EOD;
 	class DateInput extends FormItem {
 		protected $time = true;
 		protected $actions = array();
+		protected $properties = array();
 
 		public function __construct($name=null)
 		{
@@ -1166,6 +1167,17 @@ EOD;
 		public function actions()
 		{
 			return $this->actions;
+		}
+
+		public function set_property($prop, $value)
+		{
+			$this->properties[$prop] = $value;
+			return $this;
+		}
+
+		public function properties()
+		{
+			return $this->properties;
 		}
 	}
 

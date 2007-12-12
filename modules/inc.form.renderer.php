@@ -796,6 +796,12 @@ EOD;
 			if(isset($actions['select']))
 				$select_actions = $actions['select'];
 
+			$properties = $obj->properties();
+			$p = '';
+			foreach($properties as $k => $v) {
+				$p .= ",\n$k: $v";
+			}
+
 			$html.=<<<EOD
 <input class="date-picker" type="text" name="$name" id="$name" value="$display_value" />
 <script type="text/javascript">
@@ -804,7 +810,7 @@ Date.firstDayOfWeek = 1;
 Date.format = 'dd.mm.yyyy';
 $(function(){
 	$('#$name').datePicker({
-		startDate: '01/01/1970'
+		startDate: '01/01/1970'$p
 	});
 });
 //]]>
