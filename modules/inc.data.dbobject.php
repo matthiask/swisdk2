@@ -1023,6 +1023,7 @@ EOD;
 				if(mysqli_connect_errno())
 					SwisdkError::handle(new DBError('Connect failed: '
 						.mysqli_connect_error()));
+				mysqli_set_charset(DBObject::$dbhandle[$connection_id], 'utf8');
 				DBObject::$dbhandle[$connection_id]->query('SET NAMES \'UTF-8\'');
 			}
 
