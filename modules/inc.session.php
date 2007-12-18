@@ -77,7 +77,7 @@
 			if(isset($_COOKIE[session_name()]))
 				setcookie(session_name(), '', time()-42000, '/');
 			$_SESSION = array();
-			setcookie('login_cookie', '', time()-31536000);
+			setcookie('login_cookie', '##invalid##', time()-42000);
 			session_destroy();
 			redirect('/');
 		}
