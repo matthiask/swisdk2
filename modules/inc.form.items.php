@@ -802,25 +802,22 @@ EOD;
 
 			if($this->force_value!==null)
 				$this->dbobj->set($name, $this->force_value);
-
-			if(($value = $this->dbobj->get($name))>100000)
-				$this->dbobj->set($name, $value-86400-82800);
 		}
 
 		public function items()
 		{
-			$base = 86400+82800;
+			$base = 0;
 			$items = array();
 
 			if(count($this->ranges)) {
 				foreach($this->ranges as $range) {
 					list($a,$b,$c) = $range;
 					for($i=$a; $i<=$b; $i+=$c)
-						$items[$i] = strftime('%H:%M', $i);
+						$items[$i] = gmstrftime('%H:%M', $i);
 				}
 			} else {
 				for($i=$base; $i<$base+86400; $i+=900)
-					$items[$i] = strftime('%H:%M', $i);
+					$items[$i] = gmstrftime('%H:%M', $i);
 			}
 
 			return $items;

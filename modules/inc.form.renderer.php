@@ -478,7 +478,7 @@ EOD;
 
 		protected function visit_TimeInput($obj)
 		{
-			$this->dropdown_helper($obj, $obj->value()+86400+82800);
+			$this->dropdown_helper($obj, $obj->value());
 		}
 
 		protected function dropdown_helper($obj, $value)

@@ -165,7 +165,7 @@
 	class TimeTableViewColumn extends TableViewColumn {
 		public function html(&$data)
 		{
-			return strftime($this->fmt, $data[$this->column]+82800);
+			return gmstrftime($this->fmt, $data[$this->column]);
 		}
 
 		public function set_format($fmt)
