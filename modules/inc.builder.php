@@ -215,7 +215,7 @@
 			$dbobj = $form->dbobj();
 			$fields = array_keys($dbobj->field_list());
 			$ninc_regex = '/^'.$dbobj->_prefix()
-				.'(id|creation_dttm|creator_id|author_id)$/';
+				.'(id|update_dttm|creation_dttm|creator_id|author_id)$/';
 			foreach($fields as $fname)
 				if(!preg_match($ninc_regex, $fname))
 					$this->create_field($fname);
