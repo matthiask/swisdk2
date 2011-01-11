@@ -54,7 +54,7 @@
 			return $this->_html;
 		}
 
-		public function goto($tok=null)
+		public function go_to($tok=null)
 		{
 			redirect('http://'
 				.Swisdk::config_value('runtime.request.host')

@@ -59,14 +59,14 @@
 
 					SwisdkSitemap::set_page_raw($url, $attr);
 					SwisdkSitemap::store();
-					$this->goto();
+					$this->go_to();
 				}
 
 				break;
 			case 'delete':
 				SwisdkSitemap::delete_page_raw($url);
 				SwisdkSitemap::store();
-				$this->goto();
+				$this->go_to();
 				break;
 
 			case 'up':
@@ -82,7 +82,7 @@
 				$pos = array_search($child, $children);
 
 				if($offset==-1 && $pos==0 || $offset==1 && $pos==count($children)-1)
-					$this->goto();
+					$this->go_to();
 
 				$bak = $children[$pos];
 				$children[$pos] = $children[$pos+$offset];
@@ -90,7 +90,7 @@
 
 				SwisdkSitemap::reorder_children($base, $children);
 				SwisdkSitemap::store();
-				$this->goto();
+				$this->go_to();
 				break;
 			}
 

@@ -243,14 +243,14 @@
 		}
 
 		/**
-		 * goto - i can't get started without you!
+		 * go_to - i can't get started without you!
 		 *
 		 * Shortcut to redirect the user to another AdminComponent
 		 *
 		 * Usage:
-		 * $this->goto('_list');
+		 * $this->go_to('_list');
 		 */
-		public function goto($tok)
+		public function go_to($tok)
 		{
 			redirect($this->module_url.$tok);
 		}
@@ -301,7 +301,7 @@
 		public function run()
 		{
 			// default component is list view
-			$this->goto('_list');
+			$this->go_to('_list');
 		}
 	}
 
@@ -325,7 +325,7 @@
 				$server = new $server_class();
 				$server->handle_request();
 			} else
-				$this->goto('_index');
+				$this->go_to('_index');
 		}
 	}
 
@@ -483,15 +483,15 @@
 					$this->obj->active = 1;
 					$this->obj->store();
 					$this->listener_call('publish');
-					$this->goto('_index');
+					$this->go_to('_index');
 				} else if(getInput('sf_save_and_continue')) {
 					$this->obj->store();
 					if(!$this->editmode)
-						$this->goto('_edit/'.$this->obj->id());
+						$this->go_to('_edit/'.$this->obj->id());
 					$this->form->refresh_guard();
 				} else {
 					$this->obj->store();
-					$this->goto('_index');
+					$this->go_to('_index');
 				}
 			}
 
@@ -507,7 +507,7 @@
 		{
 			$this->init_dbobj();
 			if(!$this->obj)
-				$this->goto('_list');
+				$this->go_to('_list');
 			$this->init_form();
 			if(!$this->editmode) {
 				for($i=1; $i<=3; $i++) {
@@ -541,7 +541,7 @@
 		{
 			$this->init_dbobj();
 			if(!$this->obj)
-				$this->goto('_list');
+				$this->go_to('_list');
 			$this->init_form();
 			$this->form->bind($this->obj);
 			if($this->editmode)
@@ -684,7 +684,7 @@
 		{
 			$state = Swisdk::guard_token_state_f('guard');
 			if($state!=GUARD_VALID)
-				$this->goto('_index');
+				$this->go_to('_index');
 
 			$dbo = null;
 
@@ -696,12 +696,12 @@
 
 			$list = getInput($p);
 			if(!is_array($list) || !count($list))
-				$this->goto('_index');
+				$this->go_to('_index');
 			$dboc = DBOContainer::find($dbo, array(
 				$p.' IN {list}' => array('list' => $list)));
 
 			$dboc->delete();
-			$this->goto('_index');
+			$this->go_to('_index');
 		}
 
 		protected function delete_confirmation()
@@ -709,9 +709,9 @@
 			// has aready been on confirmation page?
 			if(getInput('delete_confirmation_page')
 					&& (!getInput('confirmation_command_delete')))
-				$this->goto('_index');
+				$this->go_to('_index');
 			if(getInput('confirmation_command_cancel'))
-				$this->goto('_index');
+				$this->go_to('_index');
 
 			// invalid guard token? show confirmation page
 			$state = Swisdk::guard_token_state_f('guard');
@@ -749,7 +749,7 @@
 					$this->dbo_class, intval($this->args[0]))));
 
 			$dbo->delete();
-			$this->goto('_index');
+			$this->go_to('_index');
 		}
 
 		protected function display_confirmation_page($message=null)

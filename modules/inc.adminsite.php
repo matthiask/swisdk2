@@ -117,10 +117,10 @@ EOD;
 					$cmp->run();
 
 					if($cmp->has_state(STATE_FINISHED))
-						$this->goto();
+						$this->go_to();
 					if($cmp->has_state(STATE_CONTINUE)) {
 						if($cmd!='edit')
-							$this->goto('edit/'.$dbo->id());
+							$this->go_to('edit/'.$dbo->id());
 						$cmp->form()->refresh_guard();
 					}
 
@@ -128,13 +128,13 @@ EOD;
 				case 'delete':
 					$dbo = $this->find_dbobject($this->dbo_class, $id);
 					if(!$dbo)
-						$this->goto();
+						$this->go_to();
 
 					$cmp = $this->create_delete_component($dbo);
 					$cmp->run();
 
 					if($cmp->has_state(STATE_FINISHED))
-						$this->goto();
+						$this->go_to();
 
 					return $cmp;
 				case 'list':
@@ -148,7 +148,7 @@ EOD;
 				case 'copy_multiple':
 					$container = $this->find_dbocontainer($this->dbo_class);
 					if(!$container)
-						$this->goto();
+						$this->go_to();
 				case 'new_multiple':
 					if(!isset($container) || !$container) {
 						$container = $this->create_dbocontainer(
@@ -163,19 +163,19 @@ EOD;
 					$cmp->run();
 
 					if($cmp->has_state(STATE_FINISHED))
-						$this->goto();
+						$this->go_to();
 
 					return $cmp;
 				case 'delete_multiple':
 					$container = $this->find_dbocontainer($this->dbo_class);
 					if(!$container)
-						$this->goto();
+						$this->go_to();
 
 					$cmp = $this->create_multi_delete_component($container);
 					$cmp->run();
 
 					if($cmp->has_state(STATE_FINISHED))
-						$this->goto();
+						$this->go_to();
 
 					return $cmp;
 				default:
