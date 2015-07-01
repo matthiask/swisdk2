@@ -18,7 +18,7 @@
 			return Swisdk::config_value('runtime.controller.url');
 		}
 
-		public function goto($frag=null)
+		public function go_to($frag=null)
 		{
 			redirect($this->url().$frag);
 		}
