@@ -11,7 +11,7 @@
 	class SwisdkSmarty extends Smarty {
 		public function __construct($assign=true)
 		{
-			$this->error_reporting = E_ALL^E_NOTICE;
+			// $this->error_reporting = E_ALL^E_NOTICE;
 			// make sure E_STRICT is turned off
 			$this->compile_dir = CACHE_ROOT.'smarty';
 			$this->template_dir = CONTENT_ROOT;
