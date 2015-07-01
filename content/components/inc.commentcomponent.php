@@ -71,7 +71,7 @@
 			$this->form->add('comment_pageview_dttm', new HiddenInput())
 				->set_default_value(time());
 
-			$user = SessionHandler::user();
+			$user = SwisdkSessionHandler::user();
 
 			$author = $this->form->add_auto('author');
 			$email = $this->form->add_auto('author_email');

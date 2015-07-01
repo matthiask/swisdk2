@@ -101,7 +101,7 @@ DBObject-conforming tables need to be created for 'News', 'NewsContent' and
         {
             PermissionManager::check_throw(ROLE_AUTHENTICATED);
 
-            $dbo = SessionHandler::user();
+            $dbo = SwisdkSessionHandler::user();
             $form = new Form();
             $form->set_title('My Account');
             $form->bind($dbo);

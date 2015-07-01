@@ -165,7 +165,7 @@
 		public function total_count()
 		{
 			$sql = call_user_func_array(array(&$this->obj, '_select_sql'),
-					$this->joins)
+					array($this->joins))
 				. $this->clause_sql . $this->_fulltext_clause()
 				. $this->_tag_clause()
 				. (count($this->order_columns)
@@ -191,6 +191,8 @@
 		public function add_clause($clause, $data=null, $binding = 'AND')
 		{
 			if($clause{0}==':') {
+                if (!is_array($data))
+                    $data = array($data);
 				switch($clause) {
 					case ':order':
 						call_user_func_array(array(

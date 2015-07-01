@@ -143,7 +143,7 @@ EOD;
 			Swisdk::$load_bases = array(CONTENT_ROOT, SWISDK_ROOT.'content/', SWISDK_ROOT);
 
 			require_once MODULE_ROOT.'inc.session.php';
-			SessionHandler::instance();
+			SwisdkSessionHandler::instance();
 
 			define('GUARD_UNKNOWN', 1);
 			define('GUARD_VALID', 2);
@@ -490,7 +490,7 @@ EOD;
 				return $val;
 
 			if(!$uid)
-				$uid = SessionHandler::user()->id();
+				$uid = SwisdkSessionHandler::user()->id();
 			if($dbo = DBObject::find('UserMeta', array(
 					'user_meta_user_id=' => $uid,
 					'user_meta_key=' => $key)))
