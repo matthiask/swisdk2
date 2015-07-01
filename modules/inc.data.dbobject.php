@@ -551,7 +551,7 @@
 					$this->set($field, time());
 				else if($new && preg_match($author_regex, $field)
 						&&!$this->get($field))
-					$this->set($field, SessionHandler::user()->id());
+					$this->set($field, SwisdkSessionHandler::user()->id());
 			}
 		}
 

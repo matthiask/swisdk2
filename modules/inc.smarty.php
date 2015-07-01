@@ -48,7 +48,7 @@
 			$this->register_function('formitem_label', '_smarty_swisdk_formitem_label');
 
 			if($assign) {
-				$this->assign('swisdk_user', SessionHandler::user()->data());
+				$this->assign('swisdk_user', SwisdkSessionHandler::user()->data());
 				$this->assign('swisdk_language', Swisdk::language_key());
 			}
 

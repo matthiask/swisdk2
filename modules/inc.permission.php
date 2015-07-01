@@ -32,7 +32,7 @@
 		public static function siteadmin_realms($uid=null)
 		{
 			if(!$uid=intval($uid))
-				$uid = SessionHandler::user()->id();
+				$uid = SwisdkSessionHandler::user()->id();
 
 			// <caching>
 			if(isset(Swisdk::$cache['permission']['siteadmin_realms']['user'.$uid]))
@@ -95,7 +95,7 @@
 			if(PermissionManager::check($role, $url))
 				return true;
 
-			if(SessionHandler::authenticated())
+			if(SwisdkSessionHandler::authenticated())
 				SwisdkError::handle(new AccessDeniedError());
 			PermissionManager::login_form();
 		}
@@ -144,7 +144,7 @@
 			$realm = intval($realm);
 			$role = intval($role);
 			if(is_null($uid))
-				$uid = SessionHandler::user()->id();
+				$uid = SwisdkSessionHandler::user()->id();
 
 			// <caching>
 			$token = $realm.'_'.$role.'_'.$uid;
@@ -233,7 +233,7 @@
 		public static function realms_for_role($role_id, $uid = null)
 		{
 			if($uid===null)
-				$uid = SessionHandler::user()->id();
+				$uid = SwisdkSessionHandler::user()->id();
 			$rid = intval($role_id);
 			$sql = 'SELECT realm_id, realm_title FROM tbl_realm '
 				.'LEFT JOIN tbl_user_to_realm '
@@ -255,7 +255,7 @@
 		public static function role_for_realm($realm, $uid = null)
 		{
 			if($uid===null)
-				$uid = SessionHandler::user()->id();
+				$uid = SwisdkSessionHandler::user()->id();
 			$rsql = '';
 			if(is_array($realm)) {
 				foreach($realm as $r)
@@ -394,7 +394,7 @@
 			if(PermissionManager::check_access($dbobj))
 				return true;
 
-			if(SessionHandler::authenticated())
+			if(SwisdkSessionHandler::authenticated())
 				SwisdkError::handle(new AccessDeniedError());
 			PermissionManager::login_form();
 		}
